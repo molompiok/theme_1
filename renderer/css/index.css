@@ -1,4 +1,147 @@
-@import './reset.css';
-@import './links.css';
-@import './code.css';
-@import './page-transition-loading-animation.css';
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+::root{
+  --swiper-navigation-color: '#0505050';
+  --swiper-pagination-color: '#000';
+  --swiper-navigation-size: '12px'
+}
+@font-face {
+    font-family: "SpaceGrotesk";
+    src: url("/assets/fonts/SpaceGrotesk-Light.ttf") format("truetype");
+    font-display: swap;
+    font-weight: 300;
+  }
+
+ @font-face {
+    font-family: "SpaceGrotesk";
+    src: url("/assets/fonts/SpaceGrotesk-Medium.ttf") format("truetype");
+    font-display: swap;
+    font-weight: 500;
+ }
+
+ @font-face {
+    font-family: "SpaceGrotesk";
+    src: url("/assets/fonts/SpaceGrotesk-Bold.ttf") format("truetype");
+    font-display: swap;
+    font-weight: 700;
+ }
+
+ @font-face {
+    font-family: "SpaceGrotesk";
+    src: url("/assets/fonts/SpaceGrotesk-SemiBold.ttf") format("truetype");
+    font-display: swap;
+    font-weight: 600;
+ }
+
+ @theme {
+    /* font */
+    --font-primary: "SpaceGrotesk", sans-serif;
+    --font-secondary: sans-serif ;
+
+
+  /* fontSie */
+  --text-clamp-xl: clamp(2rem, 5vw, 3.5rem); /* Gros titres (h1) */
+  --text-clamp-lg: clamp(1.5rem, 4vw, 2.5rem); /* Titres moyens (h2) */
+  --text-clamp-md: clamp(1.25rem, 3vw, 2rem); /* Petits titres (h3) */
+  --text-clamp-sm: clamp(1rem, 2.5vw, 1.5rem); /* Sous-titres (h4, h5) */
+  --text-clamp-base: clamp(0.875rem, 2vw, 1rem); /* Contenu (paragraphes) */
+  --text-clamp-xs: clamp(0.75rem, 1.5vw, 0.875rem); /*
+
+    /* mediaQuerie */
+   --breakpoint-list-product-breakpoint-1: 1450px; 
+   --breakpoint-list-product-breakpoint-2: 1200px;
+   --breakpoint-list-product-breakpoint-3: 775px;
+   --breakpoint-list-product-breakpoint-4: 530px;
+   --breakpoint-list-product-breakpoint-5: 275px;
+   --breakpoint-list-product-breakpoint-6: 300px; 
+
+   --breakpoint-button-cart-1: 410px;
+  }
+
+
+  .scrollbar-thin {
+    scrollbar-width: thin; /* Pour Firefox */
+    scrollbar-color: #000000 transparent; /* Couleur de la barre et de l'arrière-plan */
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: .5rem; /* Largeur pour la barre verticale */
+    height: .5rem; /* Hauteur pour la barre horizontale */
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #000000; /* Couleur de la barre */
+    border-radius: 99px; /* Bordures arrondies */
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: #000000; /* Couleur lors du survol */
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent; /* Arrière-plan de la piste */
+  }
+  
+
+  /* Link */
+  @keyframes underline-animation {
+    from {
+      width: 0;
+    }
+    to {
+      width: 100%;
+    }
+  }
+  
+  .underline-animation {
+    position: relative;
+    display: inline;
+  }
+  
+  .underline-animation::after {
+    content: '';
+    position: absolute;
+    bottom: 0px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: #000000;
+    border-radius: 80px;
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s ease-out;
+  }
+  
+  .underline-animation:hover::after,
+  .underline-animation-active::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+  }
+  /* header */
+@keyframes fade-out-header {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    display: none;
+  }
+}
+
+@keyframes fill-up {
+  0% {
+    height: 0;
+  }
+  100% {
+    height: 100%;
+  }
+}
+
+.animate-fill-up {
+  animation: fill-up 0.5s ease-out forwards;
+}
+
+.animate-fade-out {
+  animation: fade-out 2s forwards; 
+}

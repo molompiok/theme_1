@@ -18,7 +18,7 @@ const onRenderClient: OnRenderClientAsync = async (pageContext): ReturnType<OnRe
   if (!container) throw new Error('DOM element #root not found')
 
   const page = (
-    <Layout pageContext={pageContext}>
+    <Layout pageContext={pageContext} >
       <Page />
     </Layout>
   )

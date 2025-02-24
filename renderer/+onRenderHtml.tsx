@@ -32,6 +32,16 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRender
         <link rel="icon" href="${logoUrl}" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content="${desc}" />
+        <style>
+          html {
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: #000000 transparent;
+          }
+          html::-webkit-scrollbar {
+            width: 0px;
+          }
+        </style>
         <title>${title}</title>
       </head>
       <body>
