@@ -15,7 +15,8 @@
 import express from 'express'
 import compression from 'compression'
 import { renderPage, createDevMiddleware } from 'vike/server'
-import { root } from './root.js'
+import { localDir, root } from './root.js'
+import path from 'path'
 const isProduction = process.env.NODE_ENV === 'production'
 
 startServer()
@@ -42,6 +43,11 @@ async function startServer() {
 
   // Vike middleware. It should always be our last middleware (because it's a
   // catch-all middleware superseding any middleware placed after it).
+  const localDir = path.resolve();
+  app.use('/img', express.static(path.join(localDir, 'public/img')));
+  app.use('/fonts', express.static(path.join(localDir, 'public/fonts')));
+
+
   app.get('*', async (req, res) => {
     const pageContextInit = {
       urlOriginal: req.originalUrl,
@@ -58,6 +64,9 @@ async function startServer() {
     // For HTTP streams use pageContext.httpResponse.pipe() instead, see https://vike.dev/streaming
     res.send(httpResponse.body)
   })
+
+      
+
 
   const port = process.env.PORT || 3000
   app.listen(port)

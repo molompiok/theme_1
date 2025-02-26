@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { combine, createJSONStorage, persist } from "zustand/middleware";
-import { ProductType } from "../S1_data";
+import { groupFeatures, ProductType } from "../S1_data";
 export const usePanier = create(
   persist(
     combine(
@@ -20,7 +20,9 @@ export const usePanier = create(
             );
             const updatedPanier = [...state.panier];
 
-            if (updatedPanier[index]?.nbr >= product.stock) {
+
+
+            if (updatedPanier[index]?.nbr >= groupFeatures.stock) {
               return { panier: updatedPanier };
             }
             if (index !== -1) {

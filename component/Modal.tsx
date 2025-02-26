@@ -62,7 +62,7 @@ export default function Modal({
 			role="dialog"
 			aria-modal="true"
 			className={twMerge(
-				`fixed inset-0  flex bg-black/50 duration-700 ease-in-out`,
+				`fixed inset-0  flex bg-black/70 duration-700 ease-in-out`,
 				isOpen
 					? `opacity-100 pointer-events-auto select-none`
 					: 'opacity-0 pointer-events-none select-auto'

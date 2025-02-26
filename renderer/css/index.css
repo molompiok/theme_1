@@ -8,28 +8,28 @@
 }
 @font-face {
     font-family: "SpaceGrotesk";
-    src: url("/assets/fonts/SpaceGrotesk-Light.ttf") format("truetype");
+    src: url("/fonts/SpaceGrotesk-Light.ttf") format("truetype");
     font-display: swap;
     font-weight: 300;
   }
 
  @font-face {
     font-family: "SpaceGrotesk";
-    src: url("/assets/fonts/SpaceGrotesk-Medium.ttf") format("truetype");
+    src: url("/fonts/SpaceGrotesk-Medium.ttf") format("truetype");
     font-display: swap;
     font-weight: 500;
  }
 
  @font-face {
     font-family: "SpaceGrotesk";
-    src: url("/assets/fonts/SpaceGrotesk-Bold.ttf") format("truetype");
+    src: url("/fonts/SpaceGrotesk-Bold.ttf") format("truetype");
     font-display: swap;
     font-weight: 700;
  }
 
  @font-face {
     font-family: "SpaceGrotesk";
-    src: url("/assets/fonts/SpaceGrotesk-SemiBold.ttf") format("truetype");
+    src: url("fonts/SpaceGrotesk-SemiBold.ttf") format("truetype");
     font-display: swap;
     font-weight: 600;
  }
@@ -44,7 +44,7 @@
   --text-clamp-xl: clamp(2rem, 5vw, 3.5rem); /* Gros titres (h1) */
   --text-clamp-lg: clamp(1.5rem, 4vw, 2.5rem); /* Titres moyens (h2) */
   --text-clamp-md: clamp(1.25rem, 3vw, 2rem); /* Petits titres (h3) */
-  --text-clamp-sm: clamp(1rem, 2.5vw, 1.5rem); /* Sous-titres (h4, h5) */
+  --text-clamp-sm: clamp(.8rem, 3vw, 1.1rem); /* Sous-titres (h4, h5) */
   --text-clamp-base: clamp(0.875rem, 2vw, 1rem); /* Contenu (paragraphes) */
   --text-clamp-xs: clamp(0.75rem, 1.5vw, 0.875rem); /*
 
@@ -57,7 +57,16 @@
    --breakpoint-list-product-breakpoint-6: 300px; 
 
    --breakpoint-button-cart-1: 410px;
+
+   --breakpoint-img-pdetail-breakpoint-1 : 1250px;
+   --breakpoint-img-pdetail-breakpoint-2 : 880px;
+   --breakpoint-img-pdetail-breakpoint-3 : 730px;
+   --breakpoint-img-pdetail-breakpoint-4 : 530px;
+   --breakpoint-img-pdetail-breakpoint-5 : 420px;
+   --breakpoint-img-pdetail-breakpoint-6 : 362px;
+   --breakpoint-img-pdetail-breakpoint-7 : 300px;
   }
+
 
 
   .scrollbar-thin {
@@ -81,6 +90,17 @@
   
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent; /* Arrière-plan de la piste */
+  }
+  .Popover {
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 10, 20, 0.1);
+    border: 1px solid #ddd;
+    font-size: 90%;
+    padding: 4px 8px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    width: max-content;
+    max-width: calc(100vw - 10px);
   }
   
 

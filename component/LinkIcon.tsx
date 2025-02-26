@@ -1,28 +1,39 @@
-import React from 'react';
-import { usePageContext } from '../renderer/usePageContext';
+import React from "react";
+import { usePageContext } from "../renderer/usePageContext";
+import { navigate } from "vike/client/router";
 
-export {LinkIcon}
+export { LinkIcon };
 
-function LinkIcon(props: { href: string; className?: string; children: React.ReactNode}) {
-  const { href, children } = props;
+function LinkIcon(props: {
+  href: string;
+  className?: string;
+  isSimple?: boolean ;
+  children: React.ReactNode;
+}) {
+  const { href, children ,isSimple  } = props;
   const pageContext = usePageContext();
   const { urlPathname } = pageContext;
 
-  const isActive = href === '/' ? urlPathname === href : urlPathname.startsWith(href);
+  const isActive =  isSimple ?
+    href === "/" ? urlPathname === href : urlPathname.startsWith(href) : urlPathname === href
 
   const className = [
     props.className,
-    'underline-animation text-clamp-base font-spacegrotesk whitespace-nowrap',
-    isActive && 'underline-animation-active',
+    "underline-animation font-spacegrotesk whitespace-nowrap cursor-pointer",
+    isActive && "underline-animation-active",
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
   return (
-    <a href={href} className={className}>
-      {/* <span className="flex md:hidden">{Icon}</span> */}
-
-      <span className="hidden md:inline">{children}</span>
-    </a>
+    <button
+    
+      onClick={() => {
+        navigate(href);
+      }}
+      className={className}
+    >
+      <span className="inline">{children}</span>
+    </button>
   );
 }

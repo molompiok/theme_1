@@ -15,5 +15,6 @@ export default {
       env: { server: true }
     }
   },
+
   hydrationCanBeAborted: true
 } satisfies Config

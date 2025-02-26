@@ -1,22 +1,29 @@
-import img from "./public/assets/img/ImgP1.jpg";
-import img2 from "./public/assets/img/imgP2.png";
 export type ProductType = {
   id: string;
   store_id: string;
   category_id: string;
   name: string;
   description: string;
-  views: string[];
+  default_feature_id: string,
   price: number;
   barred_price: number;
   currency: string;
-  stock: number;
   createdAt: Date;
   updatedAt: Date;
 };
 function generateRandomId(): string {
   return Math.random().toString(36).substring(2, 15);
 }
+const images = [
+  "img/ImgP1.jpg",
+  "img/imgP2.png",
+  "img/imgP3.png",
+  "img/imgP4.png",
+  "img/imgP5.png",
+  "img/imgP6.png",
+  "img/imgP7.png",
+  "img/imgP8.jpg",
+];
 
 function getRandomNumber(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -36,16 +43,15 @@ function generateRandomProduct(): ProductType {
     id: generateRandomId(),
     store_id: generateRandomId(),
     category_id: generateRandomId(),
-    name: `Product ${getRandomNumber(1, 100)}`,
+    name: `Samsung galaxy s25`,
     description: `This is a sample product description for product ${getRandomNumber(
       1,
       100
     )}.`,
-    views: [img, img2],
     price: getRandomNumber(1500, 25500),
     barred_price: getRandomNumber(26000, 419000),
+    default_feature_id : 'id_5',
     currency: "CFA",
-    stock: getRandomNumber(0, 4),
     createdAt: getRandomDate(),
     updatedAt: getRandomDate(),
   };
@@ -67,11 +73,10 @@ const Product: ProductType = {
   category_id: generateRandomId(),
   name: `Men's tree runner go`,
   description: `This is a sample product description for product ${generateRandomId()}.`,
-  views: [],
   price: getRandomNumber(1500, 25500),
   barred_price: getRandomNumber(26000, 419000),
+  default_feature_id : 'id_5',
   currency: "CFA",
-  stock: getRandomNumber(0, 4),
   createdAt: getRandomDate(),
   updatedAt: getRandomDate(),
 };
@@ -80,6 +85,7 @@ export type ValuesType = {
   id: string;
   feature_id: string;
   product_id: string;
+  icon? : string;
   currency: string;
   views: string[];
   additional_price: number;
@@ -104,6 +110,15 @@ export type FeaturesType = {
   values: ValuesType[];
 };
 
+export const groupFeatures : {
+  id : string,
+  product_id: string,
+  stock : number
+} = {
+  id: "id_sdfsf",
+  product_id: 'id_5',
+  stock : 3
+}
 const features: FeaturesType[] = [
   {
     id: "id_5",
@@ -118,7 +133,7 @@ const features: FeaturesType[] = [
         feature_id: "id_5",
         product_id: "id_1",
         currency: "CFA",
-        views: [img2, img2, img, img],
+        views: [images[4], images[1], images[4], images[1]],
         additional_price: 650,
         text: "blue",
       },
@@ -127,7 +142,15 @@ const features: FeaturesType[] = [
         feature_id: "id_5",
         product_id: "id_1",
         currency: "CFA",
-        views: [img2, img2, img2, img, img2, img, img],
+        views: [
+          images[3],
+          images[2],
+          images[5],
+          images[1],
+          images[5],
+          images[6],
+          images[7],
+        ],
         additional_price: 580,
         text: "red",
       },
@@ -136,7 +159,7 @@ const features: FeaturesType[] = [
         feature_id: "id_5",
         product_id: "id_1",
         currency: "CFA",
-        views: [img, img2, img, img2],
+        views: [images[0], images[1], images[2], images[5]],
         additional_price: 650,
         text: "green",
       },
@@ -145,41 +168,42 @@ const features: FeaturesType[] = [
         feature_id: "id_5",
         product_id: "id_1",
         currency: "CFA",
-        views: [img, img, img, img2],
+        views: [images[1], images[4], images[5], images[2]],
         additional_price: 650,
         text: "yellow",
       },
     ],
   },
-
-  {
-    id: "id_7854",
-    product_id: "id_1",
-    name: "Stockage",
-    icon: [""],
-    type: "Text",
-    required: true,
-    values: [
-      {
-        id: "id_748",
-        feature_id: "id_4",
-        product_id: "id_1",
-        currency: "CFA",
-        views: [],
-        additional_price: 690,
-        text: "128",
-      },
-      {
-        id: "id_748",
-        feature_id: "id_4",
-        product_id: "id_1",
-        currency: "CFA",
-        views: [],
-        additional_price: 690,
-        text: "32",
-      },
-    ],
-  },
+  // {
+  //   id: "id_7854",
+  //   product_id: "id_1",
+  //   name: "Taille",
+  //   icon: [""],
+  //   type: "Text",
+  //   required: true,
+  //   values: [
+  //     {
+  //       id: "id_558",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 690,
+  //       text: "XL",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_74",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 690,
+  //       text: "32",
+  //       stock: 1,
+  //     },
+  //   ],
+  // },
   {
     id: "id_4",
     product_id: "id_1",
@@ -189,7 +213,7 @@ const features: FeaturesType[] = [
     required: true,
     values: [
       {
-        id: "id_748",
+        id: "id_48",
         feature_id: "id_4",
         product_id: "id_1",
         currency: "CFA",
@@ -226,38 +250,400 @@ const features: FeaturesType[] = [
       },
     ],
   },
+  // {
+  //   id: "id_4",
+  //   product_id: "id_1",
+  //   name: "Taille",
+  //   icon: [""],
+  //   type: "Text",
+  //   required: true,
+  //   values: [
+  //     {
+  //       id: "id_748",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 690,
+  //       text: "XL",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_58",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 540,
+  //       text: "XXL",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_81",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "L",
+  //       stock: 0,
+  //     },
+  //     {
+  //       id: "id_8144",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "M",
+  //       stock: 5,
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: "id_4",
+  //   product_id: "id_1",
+  //   name: "Taille",
+  //   icon: [""],
+  //   type: "Text",
+  //   required: true,
+  //   values: [
+  //     {
+  //       id: "id_748",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 690,
+  //       text: "XL",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_58",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 540,
+  //       text: "XXL",
+  //       stock: 0,
+  //     },
+  //     {
+  //       id: "id_81",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "L",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_8144",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "M",
+  //       stock: 5,
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: "id_4",
+  //   product_id: "id_1",
+  //   name: "Taille",
+  //   icon: [""],
+  //   type: "Text",
+  //   required: true,
+  //   values: [
+  //     {
+  //       id: "id_748",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 690,
+  //       text: "XL",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_58",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 540,
+  //       text: "XXL",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_81",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "L",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_8144",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "M",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_58",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 540,
+  //       text: "XXL",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_81",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "L",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_8144",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "M",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_58",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 540,
+  //       text: "XXL",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_81",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "L",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_8144",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "M",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_58",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 540,
+  //       text: "XXL",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_81",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "L",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_8144",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "M",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_58",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 540,
+  //       text: "XXL",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_81",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "L",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_8144",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "M",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_58",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 540,
+  //       stock: 5,
+  //       text: "XXL",
+  //     },
+  //     {
+  //       id: "id_81",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "L",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_8144",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "M",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_58",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 540,
+  //       text: "XXL",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_81",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "L",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_8144",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "M",
+
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_58",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 540,
+  //       text: "XXL",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_81",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "L",
+  //       stock: 5,
+  //     },
+  //     {
+  //       id: "id_8144",
+  //       feature_id: "id_4",
+  //       product_id: "id_1",
+  //       currency: "CFA",
+  //       views: [],
+  //       additional_price: 610,
+  //       text: "M",
+  //       stock: 5,
+  //     },
+  //   ],
+  // },
 ];
 
-// const [indexFeature, setIndexFeature] = useState(0);
-// const [indexValue, setIndexValue] = useState(0);
-// const pfeature = useproductFeatures((state) => state.productFeatures);
-// const indexValueViews = useMemo(() => {
-//   let obj;
-//   pfeature.get(Product.id)?.forEach((v, key) => {
-//     obj = { key, v };
-//   });
-//   return obj;
-// }, [pfeature]);
-
-// const indexes = useMemo(() => {
-//   let indexFeature = 0;
-//   let indexValue = 0;
-//   indexFeature = features.findIndex(
-//     (feature) => feature.name == indexValueViews?.["key"]
-//   );
-
-//   indexValue = features[indexFeature ?? 0]?.values?.findIndex(
-//     (value) => value.text == indexValueViews?.["v"]
-//   );
-//   if (
-//     features[indexFeature && indexFeature <= 0 ? 0 : indexFeature]?.values?.[
-//       !indexValue && indexValue <= 0 ? 0 : indexValue
-//     ]?.views?.length === 0
-//   ) {
-//     return { key: 0, value: 0 };
-//   }
-
-//   return { key: indexFeature, value: indexValue };
-// }, [indexValueViews]);
+export const CommentsProduct = [
+  {
+    id: generateRandomId(),
+    user: {
+      name: "albert camason",
+      photo: [],
+    },
+    product: {
+      name: "samsumg ia",
+      feature: "size : XL; color: red",
+    },
+    note: 5,
+    title: "Great Shoe for Travel",
+    description:
+      "I needed a new pair of Allbirds for an upcoming trip to Thailand. I wanted something that I could wear with dresses to temples (and slip on/off easily since you have to take your shoes off) or while I was walking from place to place. These are perfect! They are incredibly comfortable, lightweight and look great with either our casual dress or jeans.",
+  },
+  {
+    id: generateRandomId(),
+    user: {
+      name: "albert camason",
+      photo: [],
+    },
+    product: {
+      name: "iphone ia",
+      feature: "size : XL; color: red",
+    },
+    note: 5,
+    title: "Comfy, Breathable and made with natural materials 👍",
+    description:
+      "Lately, I’ve been all about comfort and a healthier lifestyle, and the Tree Gliders have been my go-to sneakers. I got them in my usual size 7. 5, and they fit true to size with a slightly wider toe box than my other sneakers. They’re super lightweight and breathable, keeping my feet cool whether I’m at yoga or out running errands. Plus, they’re made with sustainable materials like recycled polyester laces and a lyocell upper. If you’re looking for comfy, everyday sneakers that are also eco-friendly, these are definitely worth checking out!",
+  },
+];
 
 export { Product, features };
