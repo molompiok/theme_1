@@ -45,8 +45,6 @@ export default function Page() {
       (v) => v.text === value
     );
 
- 
-
     if (!features[featureIndex].values[valueIndex].views.length) return;
     if (valueIndex === -1) return;
     // setIndexFeature(featureIndex);
@@ -69,8 +67,9 @@ export default function Page() {
         </div>
         <div className="w-full flex justify-center img-pdetail-breakpoint-2:sticky img-pdetail-breakpoint-2:top-20 items-start  h-full">
           <div className="img-pdetail-breakpoint-2:flex  hidden flex-col justify-start  gap-y-3 overflow-y-scroll scrollbar-hide items-end max-h-[50dvh] w-full">
-            {features.find((f)=> f.id === Product.default_feature_id)?.values[indexValue]?.views.map(
-              (v, index) => {
+            {features
+              .find((f) => f.id === Product.default_feature_id)
+              ?.values[indexValue]?.views.map((v, index) => {
                 return (
                   <div
                     key={index}
@@ -88,8 +87,7 @@ export default function Page() {
                     />
                   </div>
                 );
-              }
-            )}
+              })}
           </div>
           <div className=" w-full md:min-w-lg relative">
             <Swiper
@@ -107,8 +105,9 @@ export default function Page() {
               onSwiper={setSwiperInstance}
               className="!w-full !h-full"
             >
-              {features.find((f)=> f.id === Product.default_feature_id)?.values[indexValue]?.views.map(
-                (v, index) => {
+              {features
+                .find((f) => f.id === Product.default_feature_id)
+                ?.values[indexValue]?.views.map((v, index) => {
                   return (
                     <SwiperSlide key={index} className="!w-full">
                       <div className="w-full h-full flex items-center justify-center">
@@ -122,8 +121,7 @@ export default function Page() {
                       <div className="swiper-lazy-preloader swiper-lazy-preloader-white" />
                     </SwiperSlide>
                   );
-                }
-              )}
+                })}
             </Swiper>
           </div>
         </div>
@@ -192,9 +190,12 @@ export default function Page() {
             </button>
           </div>
           <div className="flex flex-col  gap-6 divide-y px-7">
-            {CommentsProduct.map((c , i) => {
+            {CommentsProduct.map((c, i) => {
               return (
-                <div key={i} className="flex md:flex-row flex-col  items-stretch w-full py-5">
+                <div
+                  key={i}
+                  className="flex md:flex-row flex-col  items-stretch w-full py-5"
+                >
                   <div className="flex flex-col gap-4">
                     <div>
                       <ReviewsStars

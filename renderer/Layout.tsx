@@ -32,8 +32,19 @@ import { DisplayPriceDetail } from "../component/DisplayPrice";
 import TextComponent from "../component/FeatureDetailProduct/TextComponent";
 import ColorComponent from "../component/FeatureDetailProduct/ColorComponent";
 import { HiOutlineBackward } from "react-icons/hi2";
-import { BiArrowBack, BiArrowToBottom, BiUser } from "react-icons/bi";
-import { Popover, PopoverClose, PopoverContent, PopoverDescription, PopoverHeading, PopoverTrigger } from "../component/Popover";
+import { BiArrowBack, BiArrowToBottom, BiUser, BiX } from "react-icons/bi";
+import {
+  Popover,
+  PopoverClose,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeading,
+  PopoverTrigger,
+} from "../component/Popover";
+import { SlUser } from "react-icons/sl";
+import { FaUser } from "react-icons/fa6";
+import { FaUserAlt } from "react-icons/fa";
+import { PiXThin } from "react-icons/pi";
 function Layout({
   children,
   pageContext,
@@ -48,9 +59,6 @@ function Layout({
   const removeItem = usePanier((state) => state.remove);
   const totalItems = carts.reduce((acc, item) => acc + item.nbr, 0);
   const totalPrice = carts.reduce((acc, item) => acc + item.totalPrice, 0);
-  useEffect(() => {
-    console.log("Hydration debug:", document.getElementById("root")?.innerHTML);
-  }, []);
 
   console.log(carts);
 
@@ -86,7 +94,16 @@ function Layout({
   }, []);
 
   if (!isClient) {
-    return <div className="">Loading...</div>; // Render something generic on the server
+    return (
+      <div className="flex h-dvh w-dvw justify-center items-center animate-pulse">
+        <button className="flex items-center gap-1.5 transition-all duration-300">
+          <img src={logoUrl} className="size-28 object-contain" alt="logo" />
+          <h1 className="hidden xs:block text-sm sm:text-base md:text-lg lg:text-2xl text-black font-primary transition-all duration-300">
+            Marque
+          </h1>
+        </button>
+      </div>
+    ); // Render something generic on the server
   }
   return (
     <>
@@ -113,7 +130,7 @@ function Layout({
               />
               <div className="lg:flex lg:gap-5 lg:justify-center  hidden">
                 <LinkIcon href="/">Welcome</LinkIcon>
-                <LinkIcon href="/profile/commande">Mon compte</LinkIcon>
+                <LinkIcon href="/profile/commandes">Mon compte</LinkIcon>
               </div>
             </nav>
           </Header>
@@ -338,7 +355,7 @@ function Category({ categories }: { categories: string[] }) {
       >
         <div className="relative bg-white min-h-dvh w-sm pl-8 pr-28 pt-10">
           <div className="absolute top-8 left-2">
-            <BsX
+            <PiXThin
               size={50}
               className="cursor-pointer text-black"
               onClick={handleModalClose}
@@ -407,7 +424,7 @@ function Header({ children }: { children: React.ReactNode }) {
         </>
       ) : (
         <>
-          <header className="sticky inset-x-0 top-0 w-full font-primary z-90 px-5 flex items-center justify-between py-5 shadow-xl border-b border-slate-100">
+          <header className="sticky inset-x-0 top-0 w-full font-primary z-90 bg-white px-5 flex items-center justify-between py-5 shadow-xl border-b border-slate-100">
             <CiMenuBurger
               className="flex sm:hidden cursor-pointer"
               size={35}
@@ -427,21 +444,43 @@ function Header({ children }: { children: React.ReactNode }) {
                 Mes favoris
               </LinkIcon>
             </div>
-            <div >
-              <Popover>
-                <PopoverTrigger className="flex">
-                  <BiUser size={28} />
-                  <BiArrowToBottom size={28} />
-                </PopoverTrigger>
-                <PopoverContent className="bg-red-500 p-8 border-2">
-                  <PopoverHeading>My popover heading</PopoverHeading>
-                  <PopoverDescription>
-                    My popover description
-                  </PopoverDescription>
-                  <PopoverClose>Close</PopoverClose>
-                </PopoverContent>
-              </Popover>
-            </div>
+            <Popover>
+              <PopoverTrigger
+                asChild
+                className=" gap-2 justify-center items-center bg-white sm:flex hidden "
+              >
+                <FaUserAlt
+                  className="bg-gray-200 p-1 rounded-3xl text-gray-500"
+                  size={35}
+                />
+                <BsChevronDown className="text-xl" />
+              </PopoverTrigger>
+              <PopoverContent className="bg-transparent border border-black/20 z-[99]  rounded-2xl overflow-hidden">
+                <div className="font-primary bg-white p-4 text-clamp-base shadow-2xl rounded-2xl">
+                  <div className="flex items-center ">
+                    <FaUserAlt
+                      className="bg-gray-200 p-1 rounded-3xl text-gray-400"
+                      size={35}
+                    />
+                    <div className="text-clamp-xs mx-3 flex flex-col">
+                      <span>sijean619@gmail.com</span>
+                      <span className="font-light">+225 0759091098</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col text-clamp-base gap-y-2.5 mt-5">
+                    <LinkIcon href="/profile">Profile</LinkIcon>
+                    <LinkIcon href="/profile/commandes" className="">
+                      Parametre
+                    </LinkIcon>
+
+                    <button className="text-red-500 mt-4" onClick={() => {}}>
+                      Deconnexion
+                    </button>
+                  </div>
+                  {/* <PopoverClose>Close</PopoverClose> */}
+                </div>
+              </PopoverContent>
+            </Popover>
           </header>
           <Modal
             styleContainer="flex items-center select-none size-full justify-start"
@@ -451,9 +490,9 @@ function Header({ children }: { children: React.ReactNode }) {
             isOpen={isModalOpen}
             animationName="translateLeft"
           >
-            <div className="relative bg-white min-h-dvh w-sm pl-8 pr-28 pt-10">
+            <div className="relative font-primary bg-white min-h-dvh w-sm pl-8 pr-28 pt-10">
               <div className="absolute top-8 left-2">
-                <BsX
+                <PiXThin
                   size={50}
                   className="cursor-pointer text-black"
                   onClick={handleModalClose}
@@ -461,11 +500,23 @@ function Header({ children }: { children: React.ReactNode }) {
               </div>
               <div>
                 <div className="flex flex-col text-clamp-md gap-4 justify-center mt-16 items-start">
-                  <LinkIcon href="/profile">Mon profile</LinkIcon>
-                  <LinkIcon href="/profile/commandes">Mes commanes</LinkIcon>
-                  <LinkIcon isSimple={true} href="/profile/favoris">
-                    Mes favoris
-                  </LinkIcon>
+                  <div className="flex items-center">
+                    <FaUserAlt
+                      className="bg-gray-200 p-1 rounded-3xl text-gray-500"
+                      size={40}
+                    />
+                    <div className="text-clamp-sm mx-3 flex flex-col">
+                      <span>sijean619@gmail.com</span>
+                      <span className="font-light">+225 0759091098</span>
+                    </div>
+                  </div>
+                  <div className="text-clamp-md flex items-start gap-3.5 flex-col ">
+                    <LinkIcon href="/profile">Mon profile</LinkIcon>
+                    <LinkIcon href="/profile/commandes">Mes commanes</LinkIcon>
+                    <LinkIcon isSimple={true} href="/profile/favoris">
+                      Mes favoris
+                    </LinkIcon>
+                  </div>
                 </div>
                 <div className="flex flex-col text-clamp-md gap-y-2.5 justify-center items-start absolute bottom-8 ">
                   <LinkIcon href="/profile/commandes">Parametre</LinkIcon>

@@ -76,20 +76,21 @@ function ProductCard({ product }: { product: ProductType }) {
         }
         onMouseEnter={() => setCurrentImg(1)}
         onMouseLeave={() => setCurrentImg(0)}
-        className="w-full rounded-sm  object-cover cursor-pointer hover:scale-95 transition-all duration-500 ease-in-out"
+        className="w-full rounded-sm  object-cover aspect-square cursor-pointer hover:scale-95 transition-all duration-500 ease-in-out"
         alt={product.name}
         loading="lazy"
       />
       <div className="w-full items-stretch h-full justify-start gap-y-1 flex-col flex">
+      <DisplayPrice product={product} />
         <div className="flex flex-col items-start pl-2 max-w-[92%]">
           <h1 className=" text-clamp-sm  whitespace-nowrap line-clamp-1">
             {product.name}
           </h1>
-          <h1 className="text-clamp-xs font-light line-clamp-1 whitespace-nowrap max-w-[99%] ">
+          <h1 className="text-clamp-sm font-light line-clamp-1 whitespace-nowrap max-w-[99%] ">
             {product.description}
           </h1>
         </div>
-        <DisplayPrice product={product} />
+    
         <CartButton text="Ajouter au panier" product={product} />
       </div>
     </div>

@@ -4,7 +4,7 @@ export type ProductType = {
   category_id: string;
   name: string;
   description: string;
-  default_feature_id: string,
+  default_feature_id: string;
   price: number;
   barred_price: number;
   currency: string;
@@ -15,14 +15,15 @@ function generateRandomId(): string {
   return Math.random().toString(36).substring(2, 15);
 }
 const images = [
-  "img/ImgP1.jpg",
-  "img/imgP2.png",
-  "img/imgP3.png",
-  "img/imgP4.png",
-  "img/imgP5.png",
-  "img/imgP6.png",
-  "img/imgP7.png",
-  "img/imgP8.jpg",
+  "/img/ImgP1.jpg",
+  "/img/imgP2.png",
+  "/img/imgP3.png",
+  "/img/imgP4.png",
+  "/img/imgP5.png",
+  "/img/imgP6.png",
+  "/img/imgP7.png",
+  "/img/imgP8.jpg",
+  "/img/imgP9.jpg",
 ];
 
 function getRandomNumber(min: number, max: number): number {
@@ -43,14 +44,15 @@ function generateRandomProduct(): ProductType {
     id: generateRandomId(),
     store_id: generateRandomId(),
     category_id: generateRandomId(),
-    name: `Samsung galaxy s25`,
+    name: `Souris logitech pro super`,
+
     description: `This is a sample product description for product ${getRandomNumber(
       1,
       100
     )}.`,
     price: getRandomNumber(1500, 25500),
     barred_price: getRandomNumber(26000, 419000),
-    default_feature_id : 'id_5',
+    default_feature_id: "id_5",
     currency: "CFA",
     createdAt: getRandomDate(),
     updatedAt: getRandomDate(),
@@ -75,7 +77,7 @@ const Product: ProductType = {
   description: `This is a sample product description for product ${generateRandomId()}.`,
   price: getRandomNumber(1500, 25500),
   barred_price: getRandomNumber(26000, 419000),
-  default_feature_id : 'id_5',
+  default_feature_id: "id_5",
   currency: "CFA",
   createdAt: getRandomDate(),
   updatedAt: getRandomDate(),
@@ -85,7 +87,7 @@ export type ValuesType = {
   id: string;
   feature_id: string;
   product_id: string;
-  icon? : string;
+  icon?: string;
   currency: string;
   views: string[];
   additional_price: number;
@@ -110,15 +112,53 @@ export type FeaturesType = {
   values: ValuesType[];
 };
 
-export const groupFeatures : {
-  id : string,
-  product_id: string,
-  stock : number
+export const groupFeatures: {
+  id: string;
+  product_id: string;
+  stock: number;
 } = {
   id: "id_sdfsf",
-  product_id: 'id_5',
-  stock : 3
-}
+  product_id: "id_5",
+  stock: 3,
+};
+
+export const productCommands: {
+  id: string;
+  name: string;
+  description: string;
+  price_unit: number;
+  quantity: number;
+  currency: "CFA";
+  status : 'RETURN' | '';
+  views : Array<string>
+  features: Record<string, string>;
+
+}[] = [
+  {
+    id: "id_5656464",
+    name: "Souris logitech pro super",
+    description:
+      "Souris logitech pro super Souris logitech pro super  Souris logitech pro super",
+    price_unit: 56454,
+    quantity: 85,
+    currency: "CFA",
+    views : [images[1]],
+    features: { "color": "blue", "taille": "moyen" },
+    status: 'RETURN'
+  },
+  {
+    id: "id_5656464",
+    name: "Souris logitech pro super",
+    description:
+      "Souris logitech pro super Souris logitech pro super  Souris logitech pro super",
+    price_unit: 56454,
+    quantity: 85,
+    currency: "CFA",
+    views : [images[1]],
+    features: { color: "blue", taille: "moyen" },
+    status: ''
+  },
+];
 const features: FeaturesType[] = [
   {
     id: "id_5",
@@ -133,7 +173,7 @@ const features: FeaturesType[] = [
         feature_id: "id_5",
         product_id: "id_1",
         currency: "CFA",
-        views: [images[4], images[1], images[4], images[1]],
+        views: [images[5], images[1], images[4], images[1]],
         additional_price: 650,
         text: "blue",
       },
@@ -143,7 +183,7 @@ const features: FeaturesType[] = [
         product_id: "id_1",
         currency: "CFA",
         views: [
-          images[3],
+          images[8],
           images[2],
           images[5],
           images[1],
@@ -174,36 +214,6 @@ const features: FeaturesType[] = [
       },
     ],
   },
-  // {
-  //   id: "id_7854",
-  //   product_id: "id_1",
-  //   name: "Taille",
-  //   icon: [""],
-  //   type: "Text",
-  //   required: true,
-  //   values: [
-  //     {
-  //       id: "id_558",
-  //       feature_id: "id_4",
-  //       product_id: "id_1",
-  //       currency: "CFA",
-  //       views: [],
-  //       additional_price: 690,
-  //       text: "XL",
-  //       stock: 5,
-  //     },
-  //     {
-  //       id: "id_74",
-  //       feature_id: "id_4",
-  //       product_id: "id_1",
-  //       currency: "CFA",
-  //       views: [],
-  //       additional_price: 690,
-  //       text: "32",
-  //       stock: 1,
-  //     },
-  //   ],
-  // },
   {
     id: "id_4",
     product_id: "id_1",

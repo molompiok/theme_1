@@ -139,8 +139,7 @@ export const PopoverTrigger = React.forwardRef<
       children,
       context.getReferenceProps({
         ref,
-        ...props,
-        ...children.props,
+        ...props, ...children.props,
         "data-state": context.open ? "open" : "closed"
       })
     );
