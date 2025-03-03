@@ -1,18 +1,20 @@
 import React, { useMemo } from "react";
-import { groupFeatures, ProductType } from "../S1_data";
 import { usePanier } from "../store/cart";
 import clsx from "clsx";
+import { ProductClient } from "../pages/type";
 
 export default function AddRemoveItemCart({
   product,
+  stock
 }: {
-  product: ProductType | null;
+  product: ProductClient | null;
+  stock : number
 }) {
   const { add, substrat, panier } = usePanier();
   
   const itemInPanier = panier.find((item) => item.product.id === product?.id);
   const limit = useMemo(
-    () => itemInPanier?.nbr === groupFeatures.stock,
+    () => itemInPanier?.nbr === stock,
     [itemInPanier?.nbr]
   );
   return (
@@ -43,12 +45,12 @@ export default function AddRemoveItemCart({
           onClick={(e) => {
             e.stopPropagation();
             if (
-              groupFeatures.stock !== undefined &&
-              (itemInPanier?.nbr ?? 0) >= groupFeatures.stock
+              stock !== undefined &&
+              (itemInPanier?.nbr ?? 0) >= stock
             )
               return;
             if (product?.id) {
-              add(product);
+              add(product,stock);
             }
           }}
           disabled={limit}
@@ -75,7 +77,7 @@ export default function AddRemoveItemCart({
           </span>
         </button>
       </div>
-      <span className="text-xs">stock : {groupFeatures.stock}</span>
+      <span className="text-xs">stock : {stock}</span>
     </div>
   );
 }

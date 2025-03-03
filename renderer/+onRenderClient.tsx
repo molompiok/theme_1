@@ -6,6 +6,7 @@ import "./css/index.css";
 import { Layout } from './Layout'
 import { getPageTitle } from './getPageTitle'
 import type { OnRenderClientAsync } from 'vike/types'
+import { ReactQueryProvider } from './ReactQueryProvider';
 
 let root: ReactDOM.Root
 const onRenderClient: OnRenderClientAsync = async (pageContext): ReturnType<OnRenderClientAsync> => {
@@ -19,9 +20,12 @@ const onRenderClient: OnRenderClientAsync = async (pageContext): ReturnType<OnRe
   if (!container) throw new Error('DOM element #root not found')
 
   const page = (
+    <ReactQueryProvider > 
+
     <Layout pageContext={pageContext} >
       <Page />
     </Layout>
+    </ReactQueryProvider>
   )
   if (pageContext.isHydration) {
     root = ReactDOM.hydrateRoot(container, page)

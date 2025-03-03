@@ -1,7 +1,8 @@
+import { ProductClient } from "../../pages/type";
 import { ProductType } from "../../S1_data";
 import { usePanier } from "../../store/cart";
 
-export function DisplayPriceItemCart({ product }: { product: ProductType | null }) {
+export function DisplayPriceItemCart({ product }: { product: ProductClient | null }) {
   const carts = usePanier((state) => state.panier);
   const itemInPanier = carts.find((item) => item.product.id === product?.id);
   return (

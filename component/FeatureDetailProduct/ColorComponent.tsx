@@ -1,7 +1,7 @@
 import React from "react";
-import { FeaturesType, groupFeatures, ValuesType } from "../../S1_data";
 import { useproductFeatures } from "../../store/features";
 import clsx from "clsx";
+import { FeatureType } from "../../pages/type";
 
 const colorVariants = {
   blue: `bg-blue-600 `,
@@ -10,11 +10,17 @@ const colorVariants = {
   yellow: `bg-yellow-600 `,
 } as const;
 export default function ColorComponent({
-  feature,
+  features,
+  feature_name,
+  feature_required,
   productId,
+  stock
 }: {
-  feature: FeaturesType;
+  features: FeatureType[];
+  feature_name:string;
+  feature_required:boolean;
   productId: string;
+  stock : number
 }) {
   const add = useproductFeatures((state) => state.add);
   const pfeature = useproductFeatures((state) => state.productFeatures);
@@ -23,19 +29,19 @@ export default function ColorComponent({
     <div className=" p-0.5 ">
       <div>
         <h1 className="text-clamp-base  font-bold">
-          {feature.required ? "Selectionne " : ""}
-          {feature.name}:
+          {feature_required ? "Selectionne " : ""}
+          {feature_name}:
         </h1>
         <div className="flex items-center justify-start flex-wrap gap-2 scrollbar-thin max-w-full max-h-28">
-          {feature.values.map((v) => {
+          {features.map((v) => {
             return (
               <button
-                disabled={!Boolean(groupFeatures.stock)}
-                title={Boolean(groupFeatures.stock) ? "" : v.text + " est indisponible"}
+                disabled={!Boolean(stock)}
+                title={Boolean(stock) ? "" : v.text + " est indisponible"}
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
-                  if (groupFeatures.stock) add(productId, feature.name, v.text);
+                  if (stock) add(productId, feature_name, v.text);
                 }}
                 key={v.id}
                 className={clsx(`relative cursor-pointer sm:size-10 size-8`)}
@@ -52,10 +58,10 @@ export default function ColorComponent({
                     }`,
                     {
                       "scale-90":
-                        pfeature.get(productId)?.get(feature.name) === v.text,
+                        pfeature.get(productId)?.get(feature_name) === v.text,
                       "scale-105":
-                        pfeature.get(productId)?.get(feature.name) !== v.text,
-                      "opacity-40 cursor-not-allowed": !Boolean(groupFeatures.stock),
+                        pfeature.get(productId)?.get(feature_name) !== v.text,
+                      "opacity-40 cursor-not-allowed": !Boolean(stock),
                     }
                   )}
                 />

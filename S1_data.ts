@@ -1,4 +1,4 @@
-export type ProductType = {
+ type ProductType = {
   id: string;
   store_id: string;
   category_id: string;
@@ -16,14 +16,14 @@ function generateRandomId(): string {
 }
 const images = [
   "/img/ImgP1.jpg",
-  "/img/imgP2.png",
-  "/img/imgP3.png",
-  "/img/imgP4.png",
-  "/img/imgP5.png",
-  "/img/imgP6.png",
-  "/img/imgP7.png",
-  "/img/imgP8.jpg",
-  "/img/imgP9.jpg",
+  "/img/ImgP2.png",
+  "/img/ImgP3.png",
+  "/img/ImgP4.png",
+  "/img/ImgP5.png",
+  "/img/ImgP6.png",
+  "/img/ImgP7.png",
+  "/img/ImgP8.jpg",
+  "/img/ImgP9.jpg",
 ];
 
 function getRandomNumber(min: number, max: number): number {
@@ -59,7 +59,7 @@ function generateRandomProduct(): ProductType {
   };
 }
 
-export function generateRandomProducts(count: number): ProductType[] {
+ function generateRandomProducts(count: number): ProductType[] {
   const products: ProductType[] = [];
   for (let i = 0; i < count; i++) {
     products.push(generateRandomProduct());
@@ -83,7 +83,7 @@ const Product: ProductType = {
   updatedAt: getRandomDate(),
 };
 
-export type ValuesType = {
+ type ValuesType = {
   id: string;
   feature_id: string;
   product_id: string;
@@ -94,7 +94,7 @@ export type ValuesType = {
   text: string;
 };
 
-export type FeaturesType = {
+ type FeaturesType = {
   id: string;
   product_id: string;
   name: string;
@@ -112,7 +112,7 @@ export type FeaturesType = {
   values: ValuesType[];
 };
 
-export const groupFeatures: {
+ const groupFeatures: {
   id: string;
   product_id: string;
   stock: number;
@@ -122,7 +122,7 @@ export const groupFeatures: {
   stock: 3,
 };
 
-export const productCommands: {
+ const productCommands: {
   id: string;
   name: string;
   description: string;
@@ -173,7 +173,7 @@ const features: FeaturesType[] = [
         feature_id: "id_5",
         product_id: "id_1",
         currency: "CFA",
-        views: [images[5], images[1], images[4], images[1]],
+        views: [images[1], images[2], images[4], images[6]],
         additional_price: 650,
         text: "blue",
       },
@@ -623,7 +623,7 @@ const features: FeaturesType[] = [
   // },
 ];
 
-export const CommentsProduct = [
+ const CommentsProduct = [
   {
     id: generateRandomId(),
     user: {
@@ -656,4 +656,3 @@ export const CommentsProduct = [
   },
 ];
 
-export { Product, features };

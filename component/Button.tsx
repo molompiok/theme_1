@@ -1,31 +1,47 @@
 import { useMemo } from "react";
-import { features, FeaturesType, ProductType } from "../S1_data";
 import { useproductFeatures, useProductSelectFeature } from "../store/features";
 import clsx from "clsx";
 import { usePanier } from "../store/cart";
+import { FeatureType, ProductClient } from "../pages/type";
+import { useQuery } from "@tanstack/react-query";
+import { get_features_with_values } from "../api/products.api";
 
 export function CartButton({
   text,
   product,
+  stock
 }: {
   text: string;
-  product: ProductType;
+  product: ProductClient;
+  stock : number
 }) {
   const setFeatureModal = useProductSelectFeature(
     (state) => state.setFeatureModal
   );
+  const addProduct = usePanier((state) => state.add);
+
+  const toggleCart = usePanier((state) => state.toggleCart);
+  const { data: feature, status } = useQuery({ queryKey: ['get_features_with_values', product.default_feature_id], queryFn: () => get_features_with_values({ feature_id: product.default_feature_id }) })
+  
   return (
     <div className="px-2  w-full group relative overflow-hidden inline-block">
       <button
+        disabled={status !== 'success' || stock === 0}
         onClick={(e) => {
+          
           e.stopPropagation();
           document.body.style.overflow = "hidden";
-          setFeatureModal(true, product, features);
+          if (feature?.length ?? 0 <= 1) {
+            toggleCart(true)
+            addProduct(product,stock)
+          } else {
+            setFeatureModal(true, product);
+          }
         }}
         className="w-full border  py-1.5 border-gray-300 px-1 rounded-xl cursor-pointer relative z-10 bg-white overflow-hidden"
       >
-        <span className="relative whitespace-nowrap z-20 group-hover:underline font-light group-hover:text-white transition-all duration-500 text-clamp-sm -translate-y-1/2 group-hover:translate-y-0">
-          <span className="hidden button-cart-1:inline">{text}</span>
+        <span className="relative whitespace-nowrap z-20 font-light group-hover:text-white group-hover:font-bold  transition-all duration-500 text-clamp-sm -translate-y-1/2 group-hover:translate-y-0">
+          <span className="inline">{stock !== 0 ? text : 'indisponible'}</span>
         </span>
         <div className="absolute -top-1 left-0 w-full h-[calc(100%+.25rem)] bg-black z-10 transition-transform duration-500 transform -translate-y-full group-hover:translate-y-0"></div>
       </button>
@@ -57,7 +73,7 @@ export function CommandButton({
         className="w-full border border-gray-300 px-2 py-1.5 cursor-pointer relative z-10 bg-black/60 overflow-hidden rounded-sm"
       >
         <span className="relative whitespace-nowrap z-20 group-hover:underline text-white transition-all duration-500 text-clamp-base -translate-y-1/2 group-hover:translate-y-0">
-          <span className="hidden button-cart-1:inline">
+          <span className="inline">
             {totalItems === 0 ? "Ajouter un produit" : text}
           </span>
         </span>
@@ -73,8 +89,8 @@ export function ButtonValidCart({
   product,
   onClick
 }: {
-  features: FeaturesType[];
-  product: ProductType;
+  features: FeatureType[];
+  product: ProductClient;
   onClick: () => void
   // productId: string;
 }) {
@@ -82,10 +98,10 @@ export function ButtonValidCart({
 
   const ProductWhoRequired = useMemo(() => {
     let val = features.find((f) => {
-      const v = f.required;
+      const v = f.feature_required;
       let validIsFIll = false;
       if (v) {
-        validIsFIll = Boolean(pfeature.get(product?.id)?.get(f.name));
+        validIsFIll = Boolean(pfeature.get(product?.id)?.get(f.feature_name));
         return !validIsFIll;
       } else {
         return validIsFIll;
@@ -110,7 +126,7 @@ export function ButtonValidCart({
       )}
     >
       {Boolean(ProductWhoRequired?.id)
-        ? "selectionnez " + ProductWhoRequired?.name
+        ? "selectionnez " + ProductWhoRequired?.feature_name
         : "Ajouter au panier"}
     </button>
   );

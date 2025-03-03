@@ -7,3 +7,6 @@ export type MovieDetails = Movie & {
   director: string
   producer: string
 }
+
+
+

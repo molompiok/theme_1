@@ -1,10 +1,5 @@
 import React, { useMemo, useState } from "react";
-import {
-  features,
-  generateRandomProducts,
-  ProductType,
-} from "../../../S1_data";
-import { BsHeart, BsHeartFill } from "react-icons/bs";
+import { BsHeartFill } from "react-icons/bs";
 import clsx from "clsx";
 import {
   Popover,
@@ -14,7 +9,6 @@ import {
 import { DisplayPrice } from "../../../component/DisplayPrice";
 
 export default function Page() {
-  const products = useMemo(() => generateRandomProducts(5), []);
   return (
     <div className="bg-gray-200 px-3 font-primary">
       <div className="relative w-full min-h-dvh pt-10 max-w-[1200px] mx-auto ">
@@ -70,12 +64,12 @@ function ProductCard({ product }: { product: ProductType }) {
   const [isLiked, setIsLiked] = useState(true);
   return (
     <div className="relative overflow-hidden border  border-b-white font-primary border-black/15 rounded-2xl pb-4">
-      <BsHeart
+      <BsHeartFill
         className={clsx(
           "absolute top-3 right-4 z-10 cursor-pointer list-product-breakpoint-4:text-2xl text-lg ",
           isLiked
             ? "text-orange-600 font-extrabold"
-            : "text-gray-600 font-light"
+            : "text-gray-400 font-light"
         )}
         onClick={(e) => {
           e.stopPropagation();

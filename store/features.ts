@@ -1,6 +1,6 @@
-import { FeaturesType, ProductType } from "./../S1_data";
 import { create } from "zustand";
 import { combine, createJSONStorage, persist } from "zustand/middleware";
+import { ProductClient } from "../pages/type";
 export const useproductFeatures = create(
   combine(
     {
@@ -42,19 +42,17 @@ export const useProductSelectFeature = create(
   combine(
     {
       isVisible: false as boolean,
-      productSelected: null as ProductType | null,
-      features: [] as FeaturesType[],
+      productSelected: null as ProductClient | null,
+      // features: [] as FeaturesType[],
     },
     (set) => ({
       setFeatureModal: (
         val: boolean,
-        product?: ProductType,
-        features?: FeaturesType[]
+        product?: ProductClient,
+        // features?: FeaturesType[]
       ) => {
-        console.log(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;');
-        
         set(() => {
-          return { isVisible: val, productSelected: product, features };
+          return { isVisible: val, productSelected: product };
         });
       },
       hideModalFeature: (val: boolean) =>
@@ -62,7 +60,7 @@ export const useProductSelectFeature = create(
           return {
             isVisible: val,
             productSelected: null,
-            features: [],
+            // features: [],
           };
         }),
     })

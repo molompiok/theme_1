@@ -1,28 +1,25 @@
 import { create } from "zustand";
 import { combine, createJSONStorage, persist } from "zustand/middleware";
-import { groupFeatures, ProductType } from "../S1_data";
+import { ProductClient } from "../pages/type";
 export const usePanier = create(
   persist(
     combine(
       {
         panier: [] as {
-          product: ProductType;
+          product: ProductClient;
           nbr: number;
           totalPrice: number;
         }[],
         showCart: false as boolean,
       },
       (set) => ({
-        add: (product: ProductType) =>
+        add: (product: ProductClient , stock: number) =>
           set((state) => {
             const index = state.panier.findIndex(
               (item) => item.product.id === product.id
             );
             const updatedPanier = [...state.panier];
-
-
-
-            if (updatedPanier[index]?.nbr >= groupFeatures.stock) {
+            if (updatedPanier[index]?.nbr >= stock) {
               return { panier: updatedPanier };
             }
             if (index !== -1) {
@@ -74,8 +71,6 @@ export const usePanier = create(
         clear: () => set({ panier: [] }),
         toggleCart: (val: boolean) =>
           set(() => {
-            console.log(val);
-
             return { showCart: val };
           }),
       })
