@@ -1,6 +1,6 @@
 import { DisplayPriceDetail } from "../../component/DisplayPrice";
 
-import { CommentsProduct, Product, features } from "../../S1_data";
+// import { CommentsProduct, Product, features } from "../../S1_data";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Pagination } from "swiper/modules";
 
@@ -14,6 +14,7 @@ import ReviewsStars from "../../component/comment/ReviewsStars";
 import { ButtonValidCart } from "../../component/Button";
 import { usePanier } from "../../store/cart";
 import clsx from "clsx";
+import { ProductMedia } from "../../component/ProductMedia";
 
 export default function Page() {
   // const [indexFeature, setIndexFeature] = useState<number>(0);
@@ -78,13 +79,11 @@ export default function Page() {
                       "border-gray-300": imgIndex !== index,
                     })}
                   >
-                    <img
-                      loading="lazy"
-                      src={v}
-                      alt={v}
-                      className="img-pdetail-breakpoint-2:size-20 img-pdetail-breakpoint-2:min-w-20 img-pdetail-breakpoint-2:min-h-20 size-16 min-h-16 min-w-16 cursor-pointer"
+                    <ProductMedia
+                      mediaList={[v]}
+                      productName={v}
                       onClick={() => handleImageClick(index)}
-                    />
+                      className="img-pdetail-breakpoint-2:size-20 img-pdetail-breakpoint-2:min-w-20 img-pdetail-breakpoint-2:min-h-20 size-16 min-h-16 min-w-16 cursor-pointer" />
                   </div>
                 );
               })}

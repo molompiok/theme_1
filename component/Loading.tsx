@@ -1,9 +1,9 @@
-import React from 'react'
-import { CgSearchLoading } from 'react-icons/cg'
-import { LiaTruckLoadingSolid } from 'react-icons/lia'
 
 export default function Loading() {
   return (
-    <div className='flex aspect-square justify-center items-center w-full animate-spin'><LiaTruckLoadingSolid size={32}/></div>
+    <div className='flex aspect-square justify-center items-center w-full animate-spin'>
+      <div className='size-10 rounded-full border-2 border-t-transparent border-r-black animate-spin' />
+    </div>
+
   )
 }

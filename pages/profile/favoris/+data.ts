@@ -1,22 +1,18 @@
 export { data }
 export type Data = Awaited<ReturnType<typeof data>>
-import { dehydrate, QueryClient } from "@tanstack/react-query"
-import { get_products } from "../../api/products.api";
-import { createQueryClient } from "../../utils";
+import { dehydrate } from "@tanstack/react-query"
 import { PageContextServer } from "vike/types";
+import { createQueryClient } from "../../../utils";
+import { get_favorites } from "../../../api/products.api";
 
 
 
 const data = async (pageContext: PageContextServer) => {
   const queryClient = createQueryClient()
-
-  
-
-  await queryClient.prefetchQuery({ queryKey: ['gets_products'], queryFn: () => get_products({}) })
-
+  await queryClient.prefetchQuery({ queryKey: ['get_favorites'], queryFn: () => get_favorites({}) })
   return {
     dehydratedState : dehydrate(queryClient),
-    title : 'page produit'
+    title : 'Mes favoris'
     // The page's <title>
     // title: products.name
   }

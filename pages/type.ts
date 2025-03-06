@@ -12,6 +12,23 @@ export type ProductType = {
   updatedAt: Date;
 };
 
+export type ProductFavorite = {
+  id: string;
+  store_id: string;
+  category_id: string | null;
+  name: string;
+  default_feature_id: string;
+  description: string;
+  barred_price: number | null;
+  price: number;
+  currency: string;
+  created_at: string; // ou Date si vous convertissez en objet Date
+  updated_at: string; // ou Date si vous convertissez en objet Date
+  user_id: string;
+  label: string;
+  product_id: string;
+};
+
 type ProductPick = 'barred_price' | 'description' | 'name' | 'id' | 'price' | 'currency' | 'default_feature_id';
 
 

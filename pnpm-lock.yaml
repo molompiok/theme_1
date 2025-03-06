@@ -56,9 +56,6 @@ importers:
       gsap:
         specifier: ^3.12.7
         version: 3.12.7
-      lucide-react:
-        specifier: ^0.475.0
-        version: 0.475.0(react@19.0.0)
       node-fetch:
         specifier: ^3.3.2
         version: 3.3.2
@@ -80,9 +77,6 @@ importers:
       tailwind-merge:
         specifier: ^3.0.1
         version: 3.0.1
-      tailwind-scrollbar-hide:
-        specifier: ^2.0.0
-        version: 2.0.0(tailwindcss@4.0.6)
       tailwindcss:
         specifier: ^4.0.6
         version: 4.0.6
@@ -1100,11 +1094,6 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
-  lucide-react@0.475.0:
-    resolution: {integrity: sha512-NJzvVu1HwFVeZ+Gwq2q00KygM1aBhy/ZrhY9FsAgJtpB+E4R7uxRk9M2iKvHa6/vNxZydIB59htha4c2vvwvVg==}
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-
   make-error@1.3.6:
     resolution: {integrity: sha512-s8UhlNe7vPKomQhC1qFelMokr/Sc3AgNbso3n74mVPA5LTZwkB9NlXf4XPamLxJE8h0gh73rM94xvwRT2CVInw==}
 
@@ -1349,11 +1338,6 @@ packages:
 
   tailwind-merge@3.0.1:
     resolution: {integrity: sha512-AvzE8FmSoXC7nC+oU5GlQJbip2UO7tmOhOfQyOmPhrStOGXHU08j8mZEHZ4BmCqY5dWTCo4ClWkNyRNx1wpT0g==}
-
-  tailwind-scrollbar-hide@2.0.0:
-    resolution: {integrity: sha512-lqiIutHliEiODwBRHy4G2+Tcayo2U7+3+4frBmoMETD72qtah+XhOk5XcPzC1nJvXhXUdfl2ajlMhUc2qC6CIg==}
-    peerDependencies:
-      tailwindcss: '>=3.0.0 || >= 4.0.0 || >= 4.0.0-beta.8 || >= 4.0.0-alpha.20'
 
   tailwindcss@4.0.6:
     resolution: {integrity: sha512-mysewHYJKaXgNOW6pp5xon/emCsfAMnO8WMaGKZZ35fomnR/T5gYnRg2/yRTTrtXiEl1tiVkeRt0eMO6HxEZqw==}
@@ -2436,10 +2420,6 @@ snapshots:
     dependencies:
       yallist: 3.1.1
 
-  lucide-react@0.475.0(react@19.0.0):
-    dependencies:
-      react: 19.0.0
-
   make-error@1.3.6: {}
 
   math-intrinsics@1.1.0: {}
@@ -2674,10 +2654,6 @@ snapshots:
   tabbable@6.2.0: {}
 
   tailwind-merge@3.0.1: {}
-
-  tailwind-scrollbar-hide@2.0.0(tailwindcss@4.0.6):
-    dependencies:
-      tailwindcss: 4.0.6
 
   tailwindcss@4.0.6: {}
 

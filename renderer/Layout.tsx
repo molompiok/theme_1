@@ -73,6 +73,7 @@ function Layout({
                   onClick={() => {
                     navigate("/search");
                   }}
+                  
                 />
                 <BsHandbag
                   size={24}
