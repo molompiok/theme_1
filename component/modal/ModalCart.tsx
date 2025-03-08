@@ -1,14 +1,14 @@
 import { BsHandbag, BsX } from 'react-icons/bs';
-import { BASE_URL } from '../api';
-import { ProductClient } from '../pages/type';
-import { usePanier } from '../store/cart';
-import AddRemoveItemCart from './AddRemoveItemCart';
-import { CommandButton } from './Button';
+import { BASE_URL } from '../../api';
+import { ProductClient } from '../../pages/type';
+import { usePanier } from '../../store/cart';
+import AddRemoveItemCart from './../AddRemoveItemCart';
+import { CommandButton } from './../Button';
 import Modal from './Modal';
-import { get_features_with_values, get_group_features } from '../api/products.api';
+import { get_features_with_values, get_group_features } from '../../api/products.api';
 import { useQuery } from '@tanstack/react-query';
-import Loading from './Loading';
-import { DisplayPriceItemCart } from './DisplayPrice';
+import Loading from './../Loading';
+import { DisplayPriceItemCart } from './../DisplayPrice';
 
 interface CartItem {
   product: ProductClient;

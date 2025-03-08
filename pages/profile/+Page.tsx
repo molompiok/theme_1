@@ -1,8 +1,10 @@
-import React, { useState, useRef, FormEvent, ChangeEvent, JSX } from "react";
+import React, { useState, useRef, FormEvent, ChangeEvent, JSX, useEffect } from "react";
 import { BsTrash } from "react-icons/bs";
 import { FiEdit2 } from "react-icons/fi";
+import { useAuthStore } from "../../store/user";
+import { redirect } from 'vike/abort'
+import { useAuthRedirect } from "../../hook/authRedirect";
 
-// Définition des types
 type EditStateType = {
   type: "address" | "number" | null;
   index: number | null;
@@ -10,7 +12,7 @@ type EditStateType = {
 };
 
 export default function Page(): JSX.Element {
-  
+  useAuthRedirect();
   const [fullName, setFullName] = useState<string>("");
   const email: string = "sijean619@gmail.com";
   const [addresses, setAddresses] = useState<string[]>([
@@ -19,16 +21,14 @@ export default function Page(): JSX.Element {
   ]);
   const [numbers, setNumbers] = useState<string[]>(["+225 0759091098"]);
   const [editState, setEditState] = useState<EditStateType>({
-    type: null, // 'address' or 'number'
+    type: null,
     index: null,
     value: ""
   });
   
-  // Refs for the add item forms
   const addressInputRef = useRef<HTMLInputElement>(null);
   const numberInputRef = useRef<HTMLInputElement>(null);
   
-  // Form submission handlers
   const handleAddAddress = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (!addressInputRef.current) return;
@@ -51,7 +51,6 @@ export default function Page(): JSX.Element {
     }
   };
   
-  // Delete handlers
   const handleDeleteAddress = (index: number): void => {
     setAddresses(prev => prev.filter((_, i) => i !== index));
   };
@@ -60,7 +59,6 @@ export default function Page(): JSX.Element {
     setNumbers(prev => prev.filter((_, i) => i !== index));
   };
   
-  // Edit handlers
   const handleEditStart = (type: "address" | "number", index: number, value: string): void => {
     setEditState({
       type,
@@ -102,11 +100,12 @@ export default function Page(): JSX.Element {
       );
     }
     
-    // Reset edit state
     handleEditCancel();
   };
   
-  // Render section for addresses or numbers
+
+
+
   const renderSection = (title: string, data: string[], type: "address" | "number"): JSX.Element => {
     const isAddress = type === "address";
     const handleDelete = isAddress ? handleDeleteAddress : handleDeleteNumber;

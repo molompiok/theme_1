@@ -21,6 +21,7 @@ export default function GoogleAuthButton() {
       onSuccess={handleSuccess}
       onError={handleError}
       text="signin_with"
+      size="large"
       useOneTap={true}
       shape='pill'
       ux_mode='popup'

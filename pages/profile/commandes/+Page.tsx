@@ -7,8 +7,10 @@ import {
 // import { productCommands } from "../../../S1_data";
 import { features } from "process";
 import clsx from "clsx";
+import { useAuthRedirect } from "../../../hook/authRedirect";
 
 export default function Page() {
+  useAuthRedirect();
   return (
     <div className="bg-gray-200 px-3 font-primary relative w-full min-h-dvh pt-10 ">
       <div className="max-w-[1200px] mx-auto">

@@ -22,6 +22,7 @@ export const useAuthStore = create(
           try {
             const { data } = await api.get("/me");
             set({ user: data.user });
+            useModalAuth.getState().close();
           } catch (error) {
             set({ user: null });
           }
@@ -37,5 +38,15 @@ export const useAuthStore = create(
       name: "auth-storage",
       storage: createJSONStorage(() => localStorage),
     }
+  )
+);
+
+export const useModalAuth = create(
+  combine(
+    { isOpen: false, type: "login" as "login" | "register" },
+    (set) => ({
+      open: (type: "login" | "register") => set({ isOpen: true, type }),
+      close: () => set({ isOpen: false }),
+    })
   )
 );

@@ -5,24 +5,33 @@ import logoUrl from "./logo.svg";
 import { PageContextProvider, usePageContext } from "./usePageContext";
 import type { PageContext } from "vike/types";
 
-import Modal from "../component/Modal";
 import { LinkIcon } from "../component/LinkIcon";
 import { Link } from "../component/Link";
 
-import { BsChevronDown, BsHandbag, BsSearch, BsX } from "react-icons/bs";
+import {
+  BsChevronDown,
+  BsHandbag,
+  BsPeople,
+  BsPeopleFill,
+  BsPerson,
+  BsSearch,
+  BsX,
+} from "react-icons/bs";
 import { usePanier } from "../store/cart";
 import { CiMenuBurger } from "react-icons/ci";
 import { navigate } from "vike/client/router";
-import { BiArrowBack } from "react-icons/bi";
+import { BiArrowBack, BiSolidUser, BiUser } from "react-icons/bi";
 import { Popover, PopoverContent, PopoverTrigger } from "../component/Popover";
 import { FaUserAlt } from "react-icons/fa";
 import { PiXThin } from "react-icons/pi";
-import ModalCart from "../component/ModalCart";
-import ModalChooseFeature from "../component/ModalChooseFeature";
+
 import { useGoogleOneTapLogin } from "@react-oauth/google";
 import { api } from "../api";
-import { useAuthStore } from "../store/user";
-import GoogleAuthButton from "../component/Auth/GoogleAuthButton";
+import { useAuthStore, useModalAuth } from "../store/user";
+import ModalCart from "../component/modal/ModalCart";
+import ModalChooseFeature from "../component/modal/ModalChooseFeature";
+import Modal from "../component/modal/Modal";
+import ModalAuth from "../component/modal/ModalAuth";
 function Layout({
   children,
   pageContext,
@@ -32,7 +41,8 @@ function Layout({
 }) {
   /*******************************************/
   const toggleCart = usePanier((state) => state.toggleCart);
-
+    const openModalAuth  =  useModalAuth((state)=>state.open);
+  /*******************************************/
   const [isClient, setIsClient] = useState(false);
   const user = useAuthStore((state) => state.user);
   useEffect(() => {
@@ -60,6 +70,10 @@ function Layout({
             <Category categories={["Hommes", "Femmes", "Enfant"]} />
             <Logo />
             <nav className="flex items-center gap-5">
+              <div className="lg:flex lg:gap-5 lg:justify-center  hidden">
+                <LinkIcon href="/">Welcome</LinkIcon>
+                <LinkIcon href="/About">About</LinkIcon>
+              </div>
               <BsSearch
                 size={24}
                 className="cursor-pointer"
@@ -75,12 +89,18 @@ function Layout({
                   document.body.style.overflow = "hidden";
                 }}
               />
-              <div className="lg:flex lg:gap-5 lg:justify-center  hidden">
-                <LinkIcon href="/">Welcome</LinkIcon>
-                <LinkIcon href="/profile/commandes">
-                  {user ? "Bonjour" + user.full_name : <GoogleAuthButton />}{" "}
-                </LinkIcon>
-              </div>
+              <BsPerson
+                size={28}
+                className="cursor-pointer"
+                onClick={() => {
+                  if (user) {
+                    navigate("/profile/commandes");
+                  } else {
+                    openModalAuth("login");
+                    document.body.style.overflow = "hidden";
+                  }
+                }}
+              />
             </nav>
           </Header>
           {children}
@@ -88,6 +108,8 @@ function Layout({
           <ModalCart />
           {/***Modal feature***/}
           <ModalChooseFeature />
+          {/***Modal Auth***/}
+          <ModalAuth />
         </Frame>
       </PageContextProvider>
     </>
@@ -182,7 +204,8 @@ function Frame({ children }: { children: React.ReactNode }) {
     cancel_on_tap_outside: false,
     use_fedcm_for_prompt: true,
     auto_select: true,
-    disabled: Boolean(user),
+    disabled: true,
+    // disabled: Boolean(user),
     onSuccess: (response) => {
       api
         .post("/google_callback", { token: response.credential })

@@ -1,17 +1,17 @@
 import React from "react";
-import { ButtonValidCart } from "./Button";
-import TextComponent from "./FeatureDetailProduct/TextComponent";
-import ColorComponent from "./FeatureDetailProduct/ColorComponent";
-import { DisplayPriceDetail } from "./DisplayPrice";
+import { ButtonValidCart } from "./../Button";
+import TextComponent from "./../FeatureDetailProduct/TextComponent";
+import ColorComponent from "./../FeatureDetailProduct/ColorComponent";
+import { DisplayPriceDetail } from "./../DisplayPrice";
 import Modal from "./Modal";
 import { BsX } from "react-icons/bs";
-import { useProductSelectFeature } from "../store/features";
-import { usePanier } from "../store/cart";
+import { useProductSelectFeature } from "../../store/features";
+import { usePanier } from "../../store/cart";
 import { useQuery } from "@tanstack/react-query";
 import {
   get_features_with_values,
   get_group_features,
-} from "../api/products.api";
+} from "../../api/products.api";
 
 export default function ModalChooseFeature() {
   const toggleCart = usePanier((state) => state.toggleCart);

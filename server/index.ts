@@ -11,7 +11,7 @@
 //  - vite-node (https://github.com/antfu/vite-node)
 //  - HatTip (https://github.com/hattipjs/hattip)
 //    - You can use Bati (https://batijs.dev/) to scaffold a Vike + HatTip app. Note that Bati generates apps that use the V1 design (https://vike.dev/migration/v1-design) and Vike packages (https://vike.dev/vike-packages)
-
+import jwt from "jsonwebtoken";
 import express from "express";
 import compression from "compression";
 import { renderPage, createDevMiddleware } from "vike/server";
@@ -50,7 +50,20 @@ async function startServer() {
     const url = localDir + "/public" + req.originalUrl;
     return res.sendFile(url);
   });
+
   app.get("*", async (req, res) => {
+    // const cookies = req.headers.cookie || "";
+    // const authToken = getCookieValue(cookies, "adonis-session");
+    // console.log("🚀 ~ app.get ~ authToken:", authToken);
+    // let user = null;
+    // if (authToken) {
+    //   const payload = verifyToken(authToken); // Vérifier le token
+    //   console.log("🚀 ~ app.get ~ payload:", payload);
+    //   // if (payload) {
+    //   //   user = await db.user.findFirst({ where: { id: payload.userId } }) // Récupérer l'utilisateur
+    //   // }
+    // }
+
     const pageContextInit = {
       urlOriginal: req.originalUrl,
       headersOriginal: req.headers,
@@ -73,4 +86,18 @@ async function startServer() {
   const port = process.env.PORT || 3000;
   app.listen(port);
   console.log(`Server running at http://localhost:${port}`);
+}
+
+function getCookieValue(cookieHeader: string, cookieName: string) {
+  const cookies = cookieHeader.split("; ");
+  const cookie = cookies.find((c) => c.startsWith(cookieName + "="));
+  return cookie ? cookie.split("=")[1] : null;
+}
+
+export function verifyToken(token: string) {
+  try {
+    return jwt.verify(token, "");
+  } catch (error) {
+    return null;
+  }
 }
