@@ -49,7 +49,11 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRender
       </head>
       <body>
         <div id="root">${dangerouslySkipEscape(pageHtml)}</div>
+          <script>
+           window.__REACT_QUERY_STATE__ = ${dangerouslySkipEscape(JSON.stringify((pageContext as any).dehydratedState ?? null))}
+         </script>
       </body>
+
     </html>`
 
   return {

@@ -95,7 +95,7 @@ function ProductCard({ favorite }: { favorite: ProductFavorite }) {
 
   const { data: feature, status } = useQuery({ queryKey: ['get_features_with_values', favorite.default_feature_id], queryFn: () => get_features_with_values({ feature_id: favorite.default_feature_id }) })
 
-  const mediaList = feature?.[0]?.views || [];
+  const mediaList = feature?.[0]?.values[0].views || [];
   return (
     <div className="relative overflow-hidden border font-primary border-black/15 rounded-2xl pb-4">
       <FavoriteButton product_id={favorite.product_id} />

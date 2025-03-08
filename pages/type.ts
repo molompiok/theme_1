@@ -7,6 +7,7 @@ export type ProductType = {
   default_feature_id: string;
   price: number;
   barred_price: number;
+  slug : string;
   currency: string;
   createdAt: Date;
   updatedAt: Date;
@@ -22,38 +23,49 @@ export type ProductFavorite = {
   barred_price: number | null;
   price: number;
   currency: string;
-  created_at: string; // ou Date si vous convertissez en objet Date
-  updated_at: string; // ou Date si vous convertissez en objet Date
+  created_at: string; 
+  updated_at: string; 
   user_id: string;
   label: string;
   product_id: string;
 };
 
-type ProductPick = 'barred_price' | 'description' | 'name' | 'id' | 'price' | 'currency' | 'default_feature_id';
 
 
-export type FeatureType = {
-  "id": string,
-  "feature_id": string,
-  feature_name: string,
-  feature_type: string,
-  feature_icon: string,
-  feature_required: boolean,
-  "currency": string,
-  "views": Array<string>,
-  "icon": Array<string>,
-  "text": string,
-  "additional_price": number,
-  "min": number,
-  "max": number,
-  "min_size": number,
-  "max_size": number,
-  "is_double": boolean,
-  "multiple": number,
-  "created_at": string,
-  "updated_at": string
-}
+export type FeatureValue = {
+  id: string;
+  featureId: string;
+  currency: string;
+  views: string[]; 
+  icon: string | null; 
+  text: string | null; 
+  additionalPrice: number;
+  min: number | null; 
+  max: number | null;
+  minSize: number | null; 
+  maxSize: number | null; 
+  multiple: boolean;
+  isDouble: boolean;
+  createdAt: string | Date; 
+  updatedAt: string | Date; 
+};
 
+export type Feature = {
+  id: string;
+  productId: string;
+  name: string;
+  type: string | null; 
+  icon: string[];
+  required: boolean;
+  default: string | number | null; 
+  createdAt: string | Date; 
+  updatedAt: string | Date; 
+  values: FeatureValue[]; 
+};
+
+export type FeaturesResponse = {
+  features: Feature[]; // Tableau de Feature
+};
 export type GroupFeatureType = {
   id: string,
   product_id: string,
@@ -75,4 +87,6 @@ export type MetaPagination = {
   "nextPageUrl": null,
   "previousPageUrl": null
 }
+type ProductPick = 'barred_price' | 'description' | 'name' | 'id' | 'price' | 'currency' | 'default_feature_id' | 'slug';
+
 export type ProductClient = Pick<ProductType, ProductPick> 

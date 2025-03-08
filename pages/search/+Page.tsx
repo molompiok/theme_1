@@ -6,7 +6,7 @@ import { HydrationBoundary, useQuery } from "@tanstack/react-query";
 import { get_features_with_values, get_products } from "../../api/products.api";
 import { ProductClient } from "../type";
 import { usePageContext } from "../../renderer/usePageContext";
-import { reload } from "vike/client/router";
+import { navigate, reload } from "vike/client/router";
 import { DisplayPrice } from "../../component/DisplayPrice";
 import { ProductMedia } from "../../component/ProductMedia";
 import FavoriteButton from "../../component/FavoriteButton";
@@ -56,9 +56,8 @@ function ListProductSearchCard() {
   const { urlParsed } = usePageContext()
   console.log({ search: urlParsed.search });
 
-  const { data: products, isLoading, isFetching, isPending } = useQuery({ queryKey: ['gets_products', { name: urlParsed.search['name'] }], queryFn: () => get_products({ name: urlParsed.search['name'] }) });
+  const { data: products, isLoading, isFetching, isPending } = useQuery({ queryKey: ['gets_products', { name: urlParsed.search['name'] }], queryFn: () => get_products({ search: urlParsed.search['name'] }) });
 
-  console.log({ products });
 
   if (isLoading || isFetching || isPending) {
     <p>Chargement.......</p>
@@ -80,11 +79,14 @@ function ListProductSearchCard() {
 }
 
 function ProductCard({ product }: { product: ProductClient }) {
-
+  const handleGo = () => {
+    navigate(`/${product.name}`);
+  };
   const { data: feature, isLoading } = useQuery({ queryKey: ['get_features_with_values', product.default_feature_id], queryFn: () => get_features_with_values({ feature_id: product.default_feature_id }) })
-  const mediaList = feature?.[0]?.views || [];
+  const mediaList = (feature?.[0]?.values.length ?? 0 > 0 ? feature?.[0]?.values[0].views : [])!;
+
   return (
-    <div className="relative overflow-hidden border  border-b-white font-primary border-black/15 rounded-2xl pb-4">
+    <div onClick={handleGo} className="relative overflow-hidden border  border-b-white font-primary border-black/15 rounded-2xl pb-4">
       {isLoading ? <div className="flex justify-center items-center"> Loading ......</div> : (
         <ProductMedia
           mediaList={mediaList}

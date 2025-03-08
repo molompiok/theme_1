@@ -1,16 +1,16 @@
 import React from "react";
 import { useproductFeatures } from "../../store/features";
 import clsx from "clsx";
-import { FeatureType } from "../../pages/type";
+import { FeatureValue } from "../../pages/type";
 
 export default function TextComponent({
-  features,
+  values,
   feature_name,
   feature_required,
   productId,
   stock
 }: {
-  features: FeatureType[];
+  values: FeatureValue[];
   feature_name:string;
   feature_required:boolean;
   productId: string;
@@ -26,14 +26,16 @@ export default function TextComponent({
         {feature_name}:
       </h1>
       <div className="flex items-center flex-wrap justify-start max-w-full overflow-x-auto scrollbar-thin max-h-28 gap-3 ">
-        {features.map((v) => {
+        {values.map((v) => {
+           if (!v.text) return null;
+           const textValue = v.text;
           return (
             <button
-              title={Boolean(stock) ? "" : v.text + " est indisponible"}
+              title={Boolean(stock) ? "" : textValue + " est indisponible"}
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                if (stock) add(productId, feature_name, v.text);
+                if (stock) add(productId, feature_name, textValue);
               }}
               disabled={!Boolean(stock)}
               key={v.id}
@@ -41,14 +43,14 @@ export default function TextComponent({
                 `border cursor-pointer  text-clamp-xs flex justify-center items-center border-gray-300 px-3 sm:min-h-[40px]  min-h-[30px] rounded-md transition-all duration-500`,
                 {
                   "bg-black text-teal-50":
-                    pfeature.get(productId)?.get(feature_name) === v.text,
+                    pfeature.get(productId)?.get(feature_name) === textValue,
                   "bg-white text-black":
-                    pfeature.get(productId)?.get(feature_name) !== v.text,
+                    pfeature.get(productId)?.get(feature_name) !== textValue,
                   "opacity-40 cursor-not-allowed": !Boolean(stock),
                 }
               )}
             >
-              {v.text}
+              {textValue}
             </button>
           );
         })}

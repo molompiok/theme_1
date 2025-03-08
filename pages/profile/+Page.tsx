@@ -10,6 +10,7 @@ type EditStateType = {
 };
 
 export default function Page(): JSX.Element {
+  
   const [fullName, setFullName] = useState<string>("");
   const email: string = "sijean619@gmail.com";
   const [addresses, setAddresses] = useState<string[]>([

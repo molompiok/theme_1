@@ -10,11 +10,7 @@ import { PageContextServer } from "vike/types";
 
 const data = async (pageContext: PageContextServer) => {
   const queryClient = createQueryClient()
-
-  
-
   await queryClient.prefetchQuery({ queryKey: ['gets_products'], queryFn: () => get_products({}) })
-
   return {
     dehydratedState : dehydrate(queryClient),
     title : 'page produit'

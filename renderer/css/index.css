@@ -32,11 +32,18 @@
     font-display: swap;
     font-weight: 600;
  }
+ @font-face {
+  font-family: 'Manrope';
+  src: url('/fonts/Manrope-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 
  @theme {
     /* font */
     --font-primary: "SpaceGrotesk", sans-serif;
-    --font-secondary: sans-serif ;
+    --font-secondary: "Manrope", sans-serif;
 
 
   /* fontSie */

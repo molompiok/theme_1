@@ -40,7 +40,7 @@ function ItemCart({ product}: CartItem) {
       <div className="flex flex-col justify-center items-center h-full">
         <div className="flex items-stretch gap-2 p-2 h-full">
           <img
-            src={BASE_URL + feature?.[0]?.views[0]}
+            src={BASE_URL + feature?.[0]?.values[0].views[0]}
             alt={product.name}
             className="cart-breakpoint-1:size-28 size-20" 
           />

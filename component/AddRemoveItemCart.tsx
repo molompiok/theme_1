@@ -2,10 +2,12 @@ import React, { useMemo } from "react";
 import { usePanier } from "../store/cart";
 import clsx from "clsx";
 import { ProductClient } from "../pages/type";
+import { BsPlus } from "react-icons/bs";
+import { IoMdAdd, IoMdRemove } from "react-icons/io";
 
 const className = {
-  button : "flex flex-col bg-black px-0.5 rounded-md justify-center items-center w-8 h-6 gap-y-2 sm:gap-x-3",
-  span : "font-bold text-white text-center text-clamp-base px-2",
+  button : "flex flex-col border border-black px-0.5 justify-center items-center w-8 h-7 gap-y-2 sm:gap-x-3",
+  span : "font-bold text-black text-center text-clamp-base px-2",
 }
 export default function AddRemoveItemCart({
   product,
@@ -39,7 +41,10 @@ export default function AddRemoveItemCart({
         "cart-breakpoint-2:gap-y-1": inList,
       })}
     >
-      <div className="flex justify-center items-center w-full sm:w-auto">
+      <div className={clsx("flex items-center", {
+        "w-full ": inList,
+        "justify-start": !inList,
+      })}>
         <span className="text-[.68rem] mr-1 hidden cart-breakpoint-1:block">Quantité:</span>
         <div
           className={clsx("flex items-center w-full sm:w-auto", {
@@ -52,7 +57,8 @@ export default function AddRemoveItemCart({
             onClick={handleClick("remove")}
             className={className.button}
           >
-            <span className={className.span}>-</span>
+            {/* <span className={className.span}>-</span> */}
+            <IoMdRemove size={20} className=" p-0.5 text-black transition-all duration-500" />
           </button>
 
           <span className="px-2 rounded-md font-bold min-w-[30px] text-center text-clamp-base">
@@ -68,13 +74,14 @@ export default function AddRemoveItemCart({
               { "cursor-not-allowed opacity-50": limit }
             )}
           >
-            <span className={className.span}>+</span>
+            <IoMdAdd size={20} className=" p-0.5 text-black transition-all duration-500" />
+            {/* <span className={className.span}>+</span> */}
           </button>
         </div>
       </div>
-      <span className="text-clamp-xs/2 cart-breakpoint-2:my-0.5 mt-2 sm:mt-0 font-light underline self-center sm:self-auto">
+      {/* <span className="text-[.75rem] cart-breakpoint-2:my-0.5 mt-2 sm:mt-0 font-light  self-center sm:self-auto">
         stock : {stock}
-      </span>
+      </span> */}
     </div>
   );
 }

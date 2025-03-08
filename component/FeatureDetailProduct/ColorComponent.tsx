@@ -1,7 +1,8 @@
 import React from "react";
 import { useproductFeatures } from "../../store/features";
 import clsx from "clsx";
-import { FeatureType } from "../../pages/type";
+import { Feature, FeatureValue } from "../../pages/type";
+// import { FeatureType } from "../../pages/type";
 
 const colorVariants = {
   blue: `bg-blue-600 `,
@@ -10,13 +11,13 @@ const colorVariants = {
   yellow: `bg-yellow-600 `,
 } as const;
 export default function ColorComponent({
-  features,
+  values,
   feature_name,
   feature_required,
   productId,
   stock
 }: {
-  features: FeatureType[];
+  values: FeatureValue[];
   feature_name:string;
   feature_required:boolean;
   productId: string;
@@ -33,15 +34,17 @@ export default function ColorComponent({
           {feature_name}:
         </h1>
         <div className="flex items-center justify-start flex-wrap gap-2 scrollbar-thin max-w-full max-h-28">
-          {features.map((v) => {
+          {values.map((v) => {
+            if (!v.text) return null;
+            const textValue = v.text;
             return (
               <button
                 disabled={!Boolean(stock)}
-                title={Boolean(stock) ? "" : v.text + " est indisponible"}
+                title={Boolean(stock) ? "" : textValue + " est indisponible"}
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
-                  if (stock) add(productId, feature_name, v.text);
+                  if (stock) add(productId, feature_name, textValue);
                 }}
                 key={v.id}
                 className={clsx(`relative cursor-pointer sm:size-10 size-8`)}
@@ -54,13 +57,13 @@ export default function ColorComponent({
                 <div
                   className={clsx(
                     `absolute top-0 size-full border-[3px] border-white rounded-3xl duration-300 transition-all ${
-                      colorVariants[v.text as keyof typeof colorVariants]
+                      colorVariants[textValue as keyof typeof colorVariants]
                     }`,
                     {
                       "scale-90":
-                        pfeature.get(productId)?.get(feature_name) === v.text,
+                        pfeature.get(productId)?.get(feature_name) === textValue,
                       "scale-105":
-                        pfeature.get(productId)?.get(feature_name) !== v.text,
+                        pfeature.get(productId)?.get(feature_name) !== textValue,
                       "opacity-40 cursor-not-allowed": !Boolean(stock),
                     }
                   )}

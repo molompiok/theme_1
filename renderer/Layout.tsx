@@ -9,25 +9,20 @@ import Modal from "../component/Modal";
 import { LinkIcon } from "../component/LinkIcon";
 import { Link } from "../component/Link";
 
-import {
-  BsChevronDown,
-  BsHandbag,
-  BsSearch,
-  BsX,
-} from "react-icons/bs";
+import { BsChevronDown, BsHandbag, BsSearch, BsX } from "react-icons/bs";
 import { usePanier } from "../store/cart";
 import { CiMenuBurger } from "react-icons/ci";
 import { navigate } from "vike/client/router";
 import { BiArrowBack } from "react-icons/bi";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../component/Popover";
+import { Popover, PopoverContent, PopoverTrigger } from "../component/Popover";
 import { FaUserAlt } from "react-icons/fa";
 import { PiXThin } from "react-icons/pi";
 import ModalCart from "../component/ModalCart";
 import ModalChooseFeature from "../component/ModalChooseFeature";
+import { useGoogleOneTapLogin } from "@react-oauth/google";
+import { api } from "../api";
+import { useAuthStore } from "../store/user";
+import GoogleAuthButton from "../component/Auth/GoogleAuthButton";
 function Layout({
   children,
   pageContext,
@@ -35,12 +30,11 @@ function Layout({
   children: React.ReactNode;
   pageContext: PageContext;
 }) {
- 
-  /****************************************** */
+  /*******************************************/
   const toggleCart = usePanier((state) => state.toggleCart);
 
   const [isClient, setIsClient] = useState(false);
-
+  const user = useAuthStore((state) => state.user);
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -58,46 +52,44 @@ function Layout({
     );
   }
 
-
   return (
     <>
-        <PageContextProvider pageContext={pageContext}>
-          <Frame>
-            <Header>
-              <Category categories={["Hommes", "Femmes", "Enfant"]} />
-              <Logo />
-              <nav className="flex items-center gap-5">
-                <BsSearch
-                  size={24}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    navigate("/search");
-                  }}
-                  
-                />
-                <BsHandbag
-                  size={24}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    toggleCart(true);
-                    document.body.style.overflow = "hidden";
-                  }}
-                />
-                <div className="lg:flex lg:gap-5 lg:justify-center  hidden">
-                  <LinkIcon href="/">Welcome</LinkIcon>
-                  <LinkIcon href="/profile/commandes">Mon compte</LinkIcon>
-                </div>
-              </nav>
-            </Header>
-            {children}
-
-            {/* Modal cart */}
-            <ModalCart/>
-
-            {/***Modal feature */}
-          <ModalChooseFeature/>
-          </Frame>
-        </PageContextProvider>
+      <PageContextProvider pageContext={pageContext}>
+        <Frame>
+          <Header>
+            <Category categories={["Hommes", "Femmes", "Enfant"]} />
+            <Logo />
+            <nav className="flex items-center gap-5">
+              <BsSearch
+                size={24}
+                className="cursor-pointer"
+                onClick={() => {
+                  navigate("/search");
+                }}
+              />
+              <BsHandbag
+                size={24}
+                className="cursor-pointer"
+                onClick={() => {
+                  toggleCart(true);
+                  document.body.style.overflow = "hidden";
+                }}
+              />
+              <div className="lg:flex lg:gap-5 lg:justify-center  hidden">
+                <LinkIcon href="/">Welcome</LinkIcon>
+                <LinkIcon href="/profile/commandes">
+                  {user ? "Bonjour" + user.full_name : <GoogleAuthButton />}{" "}
+                </LinkIcon>
+              </div>
+            </nav>
+          </Header>
+          {children}
+          {/* Modal cart */}
+          <ModalCart />
+          {/***Modal feature***/}
+          <ModalChooseFeature />
+        </Frame>
+      </PageContextProvider>
     </>
   );
 }
@@ -115,7 +107,7 @@ function Category({ categories }: { categories: string[] }) {
   };
 
   const shouldShowModal = categories.length > 2;
-
+  const user = useAuthStore((state) => state.user);
   return (
     <>
       <ul className="gap-5 flex-wrap hidden lg:flex">
@@ -162,7 +154,9 @@ function Category({ categories }: { categories: string[] }) {
           <div className="flex flex-col gap-4 justify-center mt-16 items-start">
             <Logo />
             <Link href="/">Welcome</Link>
-            <Link href="/profile">Mon compte</Link>
+            <Link href="/profile">
+              {user ? "Bonjour" + user.full_name : "Connexion"}{" "}
+            </Link>
           </div>
 
           <div className="flex flex-col justify-center items-start mt-16 ">
@@ -183,6 +177,24 @@ function Category({ categories }: { categories: string[] }) {
   );
 }
 function Frame({ children }: { children: React.ReactNode }) {
+  const user = useAuthStore((state) => state.user);
+  useGoogleOneTapLogin({
+    cancel_on_tap_outside: false,
+    use_fedcm_for_prompt: true,
+    auto_select: true,
+    disabled: Boolean(user),
+    onSuccess: (response) => {
+      api
+        .post("/google_callback", { token: response.credential })
+        .then(() => {
+          useAuthStore.getState().fetchUser();
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    },
+  });
+
   return (
     <div className="relative h-full w-full scrollbar-thin">{children}</div>
   );
@@ -201,7 +213,6 @@ function Header({ children }: { children: React.ReactNode }) {
     setIsModalOpen(false);
     document.body.style.overflow = "auto";
   };
-  console.log({ urlPathname });
   return (
     <>
       {!urlPathname.startsWith("/profile") ? (
@@ -210,7 +221,7 @@ function Header({ children }: { children: React.ReactNode }) {
             onClick={() => {
               navigate("/dev/icons");
             }}
-            className="relative w-full top-0  z-40 bg-black text-white flex justify-center items-center"
+            className="relative w-full top-0  z-40 bg-yellow-600 text-black flex justify-center items-center"
           >
             <span className="text-clamp-base font-medium text-white py-2 font-primary">
               Livraison gratuite en Côte d'Ivoire
@@ -271,7 +282,12 @@ function Header({ children }: { children: React.ReactNode }) {
                       Parametre
                     </LinkIcon>
 
-                    <button className="text-red-500 mt-4" onClick={() => { }}>
+                    <button
+                      className="text-red-500 cursor-pointer mt-4"
+                      onClick={() => {
+                        useAuthStore.getState().logout();
+                      }}
+                    >
                       Deconnexion
                     </button>
                   </div>
@@ -318,7 +334,7 @@ function Header({ children }: { children: React.ReactNode }) {
                 </div>
                 <div className="flex flex-col text-clamp-md gap-y-2.5 justify-center items-start absolute bottom-8 ">
                   <LinkIcon href="/profile/commandes">Parametre</LinkIcon>
-                  <button onClick={() => { }}>Deconnexion</button>
+                  <button onClick={() => {}}>Deconnexion</button>
                 </div>
               </div>
             </div>

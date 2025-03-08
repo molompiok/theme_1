@@ -4,7 +4,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../../component/Popover";
-import { productCommands } from "../../../S1_data";
+// import { productCommands } from "../../../S1_data";
 import { features } from "process";
 import clsx from "clsx";
 
@@ -50,7 +50,7 @@ export default function Page() {
           </Popover>
         </div>
       </div>
-      <div className="flex flex-col items-center divide-y bg-white w-[80%] mx-auto gap-y-2">
+      {/* <div className="flex flex-col items-center divide-y bg-white w-[80%] mx-auto gap-y-2">
         {productCommands.map((pCommand, index) => {
           return (
             <div key={index} className="flex">
@@ -73,7 +73,6 @@ export default function Page() {
               <div className="w-[200ppx]">
                 <div className="flex gap-2 text-clamp-sm">
                   <div className="flex ">
-                    {/* <span className="font-light">Total : </span> */}
                     <div className="">
                       <span className="font-light ">
                         {pCommand.quantity} x {pCommand.price_unit}
@@ -100,7 +99,7 @@ export default function Page() {
             </div>
           );
         })}
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -1,17 +1,18 @@
 import axios from "axios";
-import { FeatureType, GroupFeatureType, MetaPagination, ProductFavorite, ProductType } from "../pages/type";
+import { Feature, FeaturesResponse, GroupFeatureType, MetaPagination, ProductClient, ProductFavorite, ProductType } from "../pages/type";
+import { api, BASE_URL } from ".";
 
-export const api = axios.create({ baseURL: "http://localhost:3333", timeout: 5000 });
 
-export const get_products = async ({ product_id, store_id, name, order_by, category_id, page = 1, limit = 10 }: {
-    product_id?: string, store_id?: string, name?: string,
+export const get_products = async ({ product_id, store_id, slug,search, order_by, category_id, page = 1, limit = 10 }: {
+    product_id?: string, store_id?: string, search?: string, slug?: string, 
     order_by?: 'date_asc' | 'date_desc' | 'price_asc' | 'price_desc',
     category_id?: string, page?: number, limit?: number
 }) => {
     const searchParams = new URLSearchParams()
     if (product_id) searchParams.set('product_id', product_id)
     if (store_id) searchParams.set('store_id', store_id)
-    if (name) searchParams.set('name', name)
+    if (slug) searchParams.set('slug', slug)
+    if (search) searchParams.set('search', search)
     if (order_by) searchParams.set('order_by', order_by)
     if (category_id) searchParams.set('category_id', category_id)
     if (page) searchParams.set('page', page.toString())
@@ -24,13 +25,11 @@ export const get_products = async ({ product_id, store_id, name, order_by, categ
 
         console.log({ products: products });
 
-        type ProductClient = 'barred_price' | 'description' | 'name' | 'id' | 'price' | 'currency' | 'default_feature_id';
 
-        function minimize(product: ProductType): Pick<ProductType, ProductClient> {
-            const { barred_price, description, name, id, price, currency, default_feature_id } = product;
-            return { barred_price, description, name, id, price, currency, default_feature_id };
+        function minimize(product: ProductType): ProductClient {
+            const { barred_price, description, name, id, price, currency, default_feature_id , slug } = product;
+            return { barred_price, description, name, id, price, currency, default_feature_id , slug };
         }
-
         return products.list.map(minimize);
     } catch (error) {
         console.error("Erreur lors de la récupération des produits :" + error);
@@ -44,13 +43,15 @@ export const get_features_with_values = async ({ product_id, feature_id }: { pro
     if (product_id) searchParams.set('product_id', product_id)
     if (feature_id) searchParams.set('feature_id', feature_id)
     try {
-        const { data: features } = await api.get<{ list: FeatureType[], meta: MetaPagination }>('/get_features_with_values?' + searchParams.toString());
-        return features.list
+        const { data } = await api.get<FeaturesResponse>('/get_features_with_values?' + searchParams.toString());
+        return data.features
     } catch (error) {
         console.error("Erreur lors de la récupération des features :", error);
-        return [];
+        throw new Error("Erreur lors de la récupération des features :" + error);
     }
 }
+
+
 
 
 export const get_group_features = async ({ product_id, group_feature_id }: { group_feature_id?: string, product_id?: string }) => {
@@ -70,7 +71,7 @@ function delay(ms: number): Promise<void> {
 }
 /**********favoris */
 export const create_favorite = async (data: { product_id: string, user_id?: string }) => {
-    data.user_id = "51fe76c5-0ab8-48c2-b579-a163b82ef86c"
+    data.user_id = "f61546c1-f345-4cc6-8213-cfe6d916b30d"
     const formData = new FormData();
     formData.append('user_id', data.user_id)
     formData.append('product_id', data.product_id)

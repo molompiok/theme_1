@@ -8,11 +8,11 @@ const formatPrice = (price?: string | number): string => {
 
 export function DisplayPrice({ price ,   currency , barred_price}: { price: string | number; currency: string; barred_price?: string | number }) {
   return (
-    <div className="pl-2 flex justify-start list-product-breakpoint-4:items-center gap-1  items-start list-product-breakpoint-4:flex-row ">
-      <h1 className=" whitespace-nowrap font-bold text-clamp-base text-red-500">
+    <div className="flex font-secondary justify-start list-product-breakpoint-4:items-center gap-1  items-start list-product-breakpoint-4:flex-row ">
+      <h1 className=" whitespace-nowrap font-bold text-clamp-xs text-gray-900">
         {formatPrice(price)} {currency}
       </h1>
-      {barred_price && <h1 className="line-through font-light text-clamp-xs text-black/80  whitespace-nowrap list-product-breakpoint-4:block">
+      {barred_price && <h1 className="line-through font-light text-[.8rem] text-black/80  whitespace-nowrap list-product-breakpoint-4:block">
         {formatPrice(barred_price)} <span className="">{currency}</span>
       </h1>}
     </div>
@@ -26,7 +26,7 @@ export function DisplayPriceDetail({ price ,   currency , barred_price}: { price
         {formatPrice(price)} {currency}
       </h1>
       <div className="size-1 block rounded-4xl bg-black/70" />
-      <h1 className="line-through   whitespace-nowrap text-black/70">
+      <h1 className="line-through  whitespace-nowrap text-black/70">
         {formatPrice(barred_price)} <span className="">{currency}</span>
       </h1>
     </div>
