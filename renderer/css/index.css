@@ -5,32 +5,12 @@
   --swiper-pagination-color: '#000';
   --swiper-navigation-size: '12px'
 }
-@font-face {
-    font-family: "SpaceGrotesk";
-    src: url("fonts/SpaceGrotesk-Light.ttf") format("truetype");
-    font-display: swap;
-    font-weight: 300;
-  }
 
  @font-face {
     font-family: "SpaceGrotesk";
-    src: url("fonts/SpaceGrotesk-Medium.ttf") format("truetype");
+    src: url("/fonts/SpaceGrotesk-VariableFont_wght.ttf") format("truetype");
+    font-weight: 100 900;
     font-display: swap;
-    font-weight: 500;
- }
-
- @font-face {
-    font-family: "SpaceGrotesk";
-    src: url("fonts/SpaceGrotesk-Bold.ttf") format("truetype");
-    font-display: swap;
-    font-weight: 700;
- }
-
- @font-face {
-    font-family: "SpaceGrotesk";
-    src: url("fonts/SpaceGrotesk-SemiBold.ttf") format("truetype");
-    font-display: swap;
-    font-weight: 600;
  }
  @font-face {
   font-family: 'Manrope';

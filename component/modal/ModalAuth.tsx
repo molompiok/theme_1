@@ -5,7 +5,7 @@ import GoogleAuthButton from "../Auth/GoogleAuthButton";
 import { twMerge } from "tailwind-merge";
 
 export default function ModalAuth() {
-  const { close, isOpen, open, type } = useModalAuth((state) => state);
+  const { close, isOpen, message, type } = useModalAuth((state) => state);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -27,25 +27,25 @@ export default function ModalAuth() {
       isOpen={isOpen}
       animationName="blur"
     >
-      <div className="font-primary relative min-h-[60dvh] aspect-square px-2 pt-10">
-        <div className={twMerge("flex items-center justify-center")}>
+      <div className="flex items-center bg-black justify-center font-primary relative  ">
           <div
             className={twMerge(
-              "flex justify-center flex-col items-center bg-white p-6 rounded-lg shadow-lg w-full max-w-md transition-transform",
-              isOpen ? "scale-100" : "scale-95"
+              "flex justify-center flex-col items-center bg-white p-7 rounded-lg shadow-lg transition-transform",
             )}
           >
-            <h2 className="text-xl font-semibold text-center mb-4">
+            <h2 className="text-clamp-lg/5 font-semibold text-center mb-2">
               {type === "login" ? "Connexion" : "Créer un compte"}
             </h2>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <h2 className="text-[.95rem]/6 mb-5 text-gray-900 text-center">
+              {message}
+            </h2>
+            <form onSubmit={handleSubmit} className="flex w-full justify-center flex-col items-center gap-y-4">
               <input
                 type="email"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-3 border rounded-md focus:ring focus:ring-indigo-300"
+                className="w-full pl-3 py-3 border rounded-md focus:ring focus:ring-indigo-300"
                 required
               />
               <input
@@ -53,7 +53,7 @@ export default function ModalAuth() {
                 placeholder="Mot de passe"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-3 border rounded-md focus:ring focus:ring-indigo-300"
+                className="w-full pl-3 py-3 border rounded-md focus:ring focus:ring-indigo-300"
                 required
               />
               {type === "register" && (
@@ -62,13 +62,13 @@ export default function ModalAuth() {
                   placeholder="Confirmation mot de passe"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border rounded-md focus:ring focus:ring-indigo-300"
+                  className="w-full pl-3 py-3 border rounded-md focus:ring focus:ring-indigo-300"
                   required
                 />
               )}
               <button
                 type="submit"
-                className="w-full p-3 bg-black/70 text-white rounded-md hover:bg-black cursor-pointer transition"
+                className=" w-[90%] pl-3 py-3 bg-black/70 text-white rounded-md hover:bg-black cursor-pointer transition-colors duration-300"
               >
                 {type === "login" ? "Se connecter" : "S'inscrire"}
               </button>
@@ -76,13 +76,13 @@ export default function ModalAuth() {
 
             {type === "login" && (
               <p className="text-center mt-3 text-sm">
-                <button className="text-black hover:underline">
+                <button className="text-black underline">
                   Mot de passe oublié ?
                 </button>
               </p>
             )}
 
-            <div className="relative flex items-center my-4">
+            <div className="relative flex items-center my-1.5">
               <span className="w-full border-t"></span>
               <span className="px-2 text-sm text-gray-500">OU</span>
               <span className="w-full border-t"></span>
@@ -104,7 +104,6 @@ export default function ModalAuth() {
               </button>
             </p>
           </div>
-        </div>
       </div>
     </Modal>
   );

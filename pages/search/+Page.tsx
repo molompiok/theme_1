@@ -10,41 +10,39 @@ import { navigate, reload } from "vike/client/router";
 import { DisplayPrice } from "../../component/DisplayPrice";
 import { ProductMedia } from "../../component/ProductMedia";
 import FavoriteButton from "../../component/FavoriteButton";
+import { formatSlug } from "../../utils";
 
 export default function Page() {
-  const { dehydratedState } = useData<Data>()
-  const [text, setText] = useState('')
-  const { urlPathname } = usePageContext()
+  const { dehydratedState } = useData<Data>();
+  const [text, setText] = useState("");
+  const { urlPathname } = usePageContext();
+  
   useEffect(() => {
     const launchSearch = async () => {
       if (text) {
-        window.history.replaceState(null, '', urlPathname + '?name=' + text)
-        await reload()
+        window.history.replaceState(null, "", urlPathname + "?name=" + text);
+        await reload();
       } else {
-        window.history.replaceState(null, '', urlPathname)
-
+        window.history.replaceState(null, "", urlPathname);
       }
-    }
-    launchSearch()
-  }, [text])
+    };
+    launchSearch();
+  }, [text]);
 
   return (
     <div className="relative bg-gray-100 min-h-dvh w-full">
-      <div className="font-primary list-product-breakpoint-2:mx-64 list-product-breakpoint-4:mx-11 mx-3 pt-10 ">
+      <div className="font-primary mx-2 min-[280px]:mx-4 sm:mx-6 md:mx-8 lg:mx-12 xl:mx-auto max-w-[1440px] pt-10">
         <h1 className="text-clamp-sm font-bold my-2">Recherche des produits</h1>
-
-        <div className="flex gap-2 items-center  bg-gray-200 w-full py-3 pl-5 mb-10 rounded-xl sticky top-0 ">
+        <div className="flex gap-2 items-center bg-gray-200 w-full py-3 pl-5 mb-10 rounded-xl sticky top-0">
           <BsSearch />
           <input
-            className="w-full focus:border-none focus:outline-none"
+            className="w-full focus:border-none focus:outline-none bg-transparent"
             placeholder="Entrez le nom du produit"
-            onChange={(e) => {
-              setText(e.target.value)
-            }}
+            onChange={(e) => setText(e.target.value)}
           />
         </div>
-        <HydrationBoundary state={dehydratedState}  >
-        <ListProductSearchCard />
+        <HydrationBoundary state={dehydratedState}>
+          <ListProductSearchCard />
         </HydrationBoundary>
       </div>
     </div>
@@ -52,62 +50,92 @@ export default function Page() {
 }
 
 function ListProductSearchCard() {
+  const { urlParsed } = usePageContext();
 
-  const { urlParsed } = usePageContext()
-  console.log({ search: urlParsed.search });
-
-  const { data: products, isLoading, isFetching, isPending } = useQuery({ queryKey: ['gets_products', { name: urlParsed.search['name'] }], queryFn: () => get_products({ search: urlParsed.search['name'] }) });
-
+  const {
+    data: products,
+    isLoading,
+    isFetching,
+    isPending,
+  } = useQuery({
+    queryKey: ["gets_products", { name: urlParsed.search["name"] }],
+    queryFn: () => get_products({ search: urlParsed.search["name"] }),
+  });
 
   if (isLoading || isFetching || isPending) {
-    <p>Chargement.......</p>
+    return <p className="text-center py-8">Chargement.......</p>;
   }
   if (!products || products?.length === 0) {
-    return <p>
-      Aucun produits
-    </p>
+    return <p className="text-center py-8">Aucun produit</p>;
   }
 
   return (
-    <div className="grid list-product-breakpoint-3:grid-cols-3 list-product-breakpoint-6:grid-cols-2 grid-cols-1 list-product-breakpoint-3:gap-3 gap-x-2">
-      {products.map((product) => {
-        return (
-          <ProductCard key={product.id} product={product} />
-        )
-      })}
-    </div>)
+    <div className="grid grid-cols-2 gap-2 
+      min-[280px]:gap-3 
+      sm:gap-4 
+      md:grid-cols-3 md:gap-6
+      lg:grid-cols-4 lg:gap-8
+      xl:grid-cols-5 xl:gap-8">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
 }
 
 function ProductCard({ product }: { product: ProductClient }) {
   const handleGo = () => {
-    navigate(`/${product.name}`);
+    navigate(`/${formatSlug(product.name)}`);
   };
-  const { data: feature, isLoading } = useQuery({ queryKey: ['get_features_with_values', product.default_feature_id], queryFn: () => get_features_with_values({ feature_id: product.default_feature_id }) })
-  const mediaList = (feature?.[0]?.values.length ?? 0 > 0 ? feature?.[0]?.values[0].views : [])!;
+  
+  const { data: feature, isLoading } = useQuery({
+    queryKey: ["get_features_with_values", product.default_feature_id],
+    queryFn: () =>
+      get_features_with_values({ feature_id: product.default_feature_id }),
+  });
+  
+  const mediaList = feature?.[0]?.values?.[0]?.views || [];
 
   return (
-    <div onClick={handleGo} className="relative overflow-hidden border  border-b-white font-primary border-black/15 rounded-2xl pb-4">
-      {isLoading ? <div className="flex justify-center items-center"> Loading ......</div> : (
+    <div
+      onClick={handleGo}
+      className="relative overflow-hidden border border-gray-200 
+        rounded-xl shadow-sm hover:shadow-md transition-all duration-300 
+        bg-white flex flex-col h-full font-primary group"
+    >
+      {isLoading ? (
+        <div className="flex items-center justify-center h-[120px] min-[280px]:h-[150px] sm:h-[200px]">
+          Loading...
+        </div>
+      ) : (
         <ProductMedia
           mediaList={mediaList}
           productName={product.name}
-          className="w-full rounded-sm  object-cover aspect-square cursor-pointer hover:scale-95 transition-all duration-500 ease-in-out" />
+          className="w-full h-[120px] min-[280px]:h-[150px] sm:h-[200px] object-cover 
+            rounded-t-xl group-hover:scale-[1.02] transition-transform duration-300"
+        />
       )}
-        <FavoriteButton product_id={product.id} />
-      <div className="w-full flex-col flex">
-        <div className="max-w-[90%] py-1">
-          <h1 className="px-2 text-clamp-base font-bold line-clamp-2">
+      <FavoriteButton 
+        product_id={product.id} 
+        // ="absolute top-1 right-1 min-[280px]:top-2 min-[280px]:right-2" 
+        
+      />
+      <div className="p-1 min-[280px]:p-2 sm:p-4 flex flex-col flex-1">
+        <div className="max-w-[90%] mb-1 min-[280px]:mb-2">
+          <h1 className="text-xs min-[280px]:text-sm sm:text-base font-bold line-clamp-2 mb-0.5 min-[280px]:mb-1">
             {product.name}
           </h1>
-          {/* <h1 className="px-2 text-clamp-base font-light  line-clamp-1 whitespace-nowrap ">
+          <h1 className="text-[10px] min-[280px]:text-xs sm:text-sm font-light line-clamp-2 text-gray-600">
             {product.description}
-          </h1> */}
+          </h1>
         </div>
-        <DisplayPrice 
-            currency={product.currency}  
-            price={product.price ?? 0} 
-            barred_price={product.barred_price ?? undefined}
+        <div className="mt-auto">
+          <DisplayPrice
+            currency={product.currency}
+            price={product.price ?? 0}
+            barred_price={product.barred_price}
           />
+        </div>
       </div>
     </div>
   );

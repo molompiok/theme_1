@@ -15,7 +15,6 @@ const GoogleOneTapLogin = ({ onSuccess }: { onSuccess: (token: string) => void }
     const handleGoogleCallback = (response: any) => {
       try {
         const decodedToken: any = jwtDecode(response.credential);
-        console.log("Google One Tap Success:", decodedToken);
         onSuccess(response.credential);
       } catch (error) {
         console.error("JWT Decode Error:", error);
@@ -23,9 +22,7 @@ const GoogleOneTapLogin = ({ onSuccess }: { onSuccess: (token: string) => void }
     };
 
     script.onload = () => {
-      console.log("accounts?.id One Tap Loaded" , (window as any).google?.accounts?.id);
-      console.log("accounts One Tap Loaded" , (window as any).google?.accounts);
-      console.log("Google One Tap Loaded" , (window as any).google);
+
       
       (window as any).google?.accounts?.id.initialize({
         client_id: GOOGLE_CLIENT_ID,

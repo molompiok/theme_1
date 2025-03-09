@@ -31,10 +31,10 @@ const onRenderClient: OnRenderClientAsync = async (
       <GoogleOAuthProvider
         clientId={GOOGLE_CLIENT_ID}
         onScriptLoadError={() => {
-          console.log("Error loading Google OAuth script");
+          console.info("Error loading Google OAuth script");
         }}
         onScriptLoadSuccess={() => {
-          console.log("Google OAuth script loaded");
+          console.info("Google OAuth script loaded");
         }}
       >
         <Layout pageContext={pageContext}>

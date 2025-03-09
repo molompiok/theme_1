@@ -27,7 +27,19 @@ export const useAuthStore = create(
             set({ user: null });
           }
         },
-
+        register_mdp: async (info: {
+          email: string;
+          password: string;
+          full_name: string;
+        }) => {
+          try {
+            const { data } = await api.post("/register", info);
+            set({ user: data.user });
+            useModalAuth.getState().close();
+          } catch (error) {
+            console.error("Error:", error);
+          }
+        },
         logout: async () => {
           await api.post("/logout");
           set({ user: null });
@@ -43,10 +55,19 @@ export const useAuthStore = create(
 
 export const useModalAuth = create(
   combine(
-    { isOpen: false, type: "login" as "login" | "register" },
+    {
+      isOpen: false,
+      type: "login" as "login" | "register",
+      message: null as string | null,
+    },
     (set) => ({
-      open: (type: "login" | "register") => set({ isOpen: true, type }),
-      close: () => set({ isOpen: false }),
+      open: (type: "login" | "register", message?: string) =>
+        set((state) => ({
+          isOpen: true,
+          type,
+          message: message ? message : state.message,
+        })),
+      close: () => set({ isOpen: false, message: null }),
     })
   )
 );

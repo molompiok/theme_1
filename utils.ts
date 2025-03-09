@@ -11,6 +11,7 @@ export function createQueryClient() {
         refetchOnMount: true,
         refetchOnWindowFocus: true,
         refetchOnReconnect: true,
+        // retry: 3,
       },
     },
   });

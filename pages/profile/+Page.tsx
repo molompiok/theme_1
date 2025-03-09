@@ -1,8 +1,6 @@
-import React, { useState, useRef, FormEvent, ChangeEvent, JSX, useEffect } from "react";
+import React, { useState, useRef, FormEvent, ChangeEvent, JSX } from "react";
 import { BsTrash } from "react-icons/bs";
 import { FiEdit2 } from "react-icons/fi";
-import { useAuthStore } from "../../store/user";
-import { redirect } from 'vike/abort'
 import { useAuthRedirect } from "../../hook/authRedirect";
 
 type EditStateType = {
@@ -13,8 +11,9 @@ type EditStateType = {
 
 export default function Page(): JSX.Element {
   useAuthRedirect();
+  
   const [fullName, setFullName] = useState<string>("");
-  const email: string = "sijean619@gmail.com";
+  const [email] = useState<string>("sijean619@gmail.com");
   const [addresses, setAddresses] = useState<string[]>([
     "Abidjan yopougon maroc anador",
     "Yamoussokro derriere la baselique",
@@ -23,179 +22,196 @@ export default function Page(): JSX.Element {
   const [editState, setEditState] = useState<EditStateType>({
     type: null,
     index: null,
-    value: ""
+    value: "",
   });
-  
+
   const addressInputRef = useRef<HTMLInputElement>(null);
   const numberInputRef = useRef<HTMLInputElement>(null);
-  
-  const handleAddAddress = (e: FormEvent<HTMLFormElement>): void => {
+
+  const handleAddItem = (
+    e: FormEvent<HTMLFormElement>,
+    ref: React.RefObject<HTMLInputElement | null>,
+    setter: React.Dispatch<React.SetStateAction<string[]>>
+  ): void => {
     e.preventDefault();
-    if (!addressInputRef.current) return;
-    
-    const newAddress = addressInputRef.current.value.trim();
-    if (newAddress) {
-      setAddresses(prev => [...prev, newAddress]);
-      addressInputRef.current.value = "";
+    const input = ref.current;
+    if (!input) return;
+
+    const newValue = input.value.trim();
+    if (newValue) {
+      setter((prev) => [...prev, newValue]);
+      input.value = "";
     }
   };
-  
-  const handleAddNumber = (e: FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-    if (!numberInputRef.current) return;
-    
-    const newNumber = numberInputRef.current.value.trim();
-    if (newNumber) {
-      setNumbers(prev => [...prev, newNumber]);
-      numberInputRef.current.value = "";
-    }
+
+  const handleDeleteItem = (
+    index: number,
+    setter: React.Dispatch<React.SetStateAction<string[]>>
+  ): void => {
+    setter((prev) => prev.filter((_, i) => i !== index));
   };
-  
-  const handleDeleteAddress = (index: number): void => {
-    setAddresses(prev => prev.filter((_, i) => i !== index));
+
+  const handleEditStart = (
+    type: "address" | "number",
+    index: number,
+    value: string
+  ): void => {
+    setEditState({ type, index, value });
   };
-  
-  const handleDeleteNumber = (index: number): void => {
-    setNumbers(prev => prev.filter((_, i) => i !== index));
-  };
-  
-  const handleEditStart = (type: "address" | "number", index: number, value: string): void => {
-    setEditState({
-      type,
-      index,
-      value
-    });
-  };
-  
+
   const handleEditCancel = (): void => {
-    setEditState({
-      type: null,
-      index: null,
-      value: ""
-    });
+    setEditState({ type: null, index: null, value: "" });
   };
-  
+
   const handleEditChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    setEditState(prev => ({
-      ...prev,
-      value: e.target.value
-    }));
+    setEditState((prev) => ({ ...prev, value: e.target.value }));
   };
-  
+
   const handleEditSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     const { type, index, value } = editState;
-    
-    if (value.trim() === "" || index === null) {
+
+    if (!value.trim() || index === null) {
+      handleEditCancel();
       return;
     }
-    
-    if (type === "address") {
-      setAddresses(prev => 
-        prev.map((item, i) => i === index ? value : item)
-      );
-    } else if (type === "number") {
-      setNumbers(prev => 
-        prev.map((item, i) => i === index ? value : item)
-      );
-    }
-    
+
+    const setter = type === "address" ? setAddresses : setNumbers;
+    setter((prev) => prev.map((item, i) => (i === index ? value : item)));
     handleEditCancel();
   };
-  
 
-
-
-  const renderSection = (title: string, data: string[], type: "address" | "number"): JSX.Element => {
+  const renderSection = (
+    title: string,
+    data: string[],
+    type: "address" | "number"
+  ): JSX.Element => {
     const isAddress = type === "address";
-    const handleDelete = isAddress ? handleDeleteAddress : handleDeleteNumber;
     const inputRef = isAddress ? addressInputRef : numberInputRef;
-    const handleAdd = isAddress ? handleAddAddress : handleAddNumber;
-    
+    const setter = isAddress ? setAddresses : setNumbers;
+
     return (
-      <div className="flex flex-col gap-7 bg-white w-[90%] p-5 mt-7 mx-auto rounded-lg">
-        <div className="flex justify-between items-center">
-          <h2 className="text-3xl">{title}</h2>
-          <form onSubmit={handleAdd} className="flex gap-2">
+      <section className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mt-6 w-full">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <h2 className="text-xl sm:text-2xl font-semibold text-black">
+            {title}
+          </h2>
+          <form
+            onSubmit={(e) => handleAddItem(e, inputRef, setter)}
+            className="flex w-full sm:w-auto gap-2"
+          >
             <input
               ref={inputRef}
               type="text"
-              className="border p-2 rounded"
+              className="flex-1 sm:flex-none w-full sm:w-64 px-3 py-2 border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               placeholder={`Nouveau ${title.toLowerCase()}`}
             />
-            <button type="submit" className="bg-blue-500 text-white px-3 py-2 rounded">
+            <button
+              type="submit"
+              className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-colors"
+            >
               Ajouter
             </button>
           </form>
         </div>
-        
-        {data.map((item, i) => (
-          <div key={i} className="flex flex-col gap-2">
-            <div className="flex justify-between items-center">
-              <h2 className="text-gray-700 font-light">{title} {i + 1}</h2>
-              <div className="flex gap-2">
-                <FiEdit2 
-                  className="text-lg text-gray-400 cursor-pointer" 
-                  onClick={() => handleEditStart(type, i, item)} 
-                />
-                <BsTrash 
-                  className="text-xl text-red-500 cursor-pointer" 
-                  onClick={() => handleDelete(i)} 
-                />
+
+        <div className="space-y-4">
+          {data.map((item, i) => (
+            <div
+              key={i}
+              className="border-b border-gray-200 pb-4 last:border-b-0"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex-1">
+                  <h3 className="text-black text-sm font-medium">
+                    {title} {i + 1}
+                  </h3>
+                  {editState.type === type && editState.index === i ? (
+                    <form
+                      onSubmit={handleEditSubmit}
+                      className="flex flex-col sm:flex-row gap-2 mt-2"
+                    >
+                      <input
+                        type="text"
+                        className="flex-1 px-3 py-2 border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                        value={editState.value}
+                        onChange={handleEditChange}
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-colors"
+                        >
+                          Sauvegarder
+                        </button>
+                        <button
+                          type="button"
+                          className="bg-white hover:bg-gray-100 text-black border border-black px-4 py-2 rounded-lg transition-colors"
+                          onClick={handleEditCancel}
+                        >
+                          Annuler
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <p className="text-black mt-1 break-words">{item}</p>
+                  )}
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleEditStart(type, i, item)}
+                    className="text-black hover:text-gray-600 p-1"
+                    aria-label="Edit"
+                  >
+                    <FiEdit2 size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteItem(i, setter)}
+                    className="text-black hover:text-gray-600 p-1"
+                    aria-label="Delete"
+                  >
+                    <BsTrash size={20} />
+                  </button>
+                </div>
               </div>
             </div>
-            
-            {editState.type === type && editState.index === i ? (
-              <form onSubmit={handleEditSubmit} className="flex gap-2">
-                <input
-                  type="text"
-                  className="border p-2 rounded w-full"
-                  value={editState.value}
-                  onChange={handleEditChange}
-                  autoFocus
-                />
-                <button type="submit" className="bg-green-500 text-white px-3 py-2 rounded">
-                  Sauvegarder
-                </button>
-                <button 
-                  type="button" 
-                  className="bg-gray-300 text-gray-700 px-3 py-2 rounded"
-                  onClick={handleEditCancel}
-                >
-                  Annuler
-                </button>
-              </form>
-            ) : (
-              <span className="sm:text-lg text-sm text-gray-900">{item}</span>
-            )}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </section>
     );
   };
-  
+
   return (
-    <div className="bg-gray-200 min-h-screen">
-      <div className="relative w-full max-w-[1200px] mx-auto font-primary pt-10">
-        <h1 className="text-3xl ml-12">Profile</h1>
-        
-        <div className="flex flex-col gap-7 bg-white w-[90%] mx-auto p-5 mt-7 rounded-lg">
-          <div>
-            <h2 className="text-gray-700 font-light">Nom complet</h2>
-            <input
-              type="text"
-              className="border p-2 rounded w-full"
-              value={fullName}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setFullName(e.target.value)}
-              placeholder="Votre nom complet"
-            />
+    <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-2xl sm:text-3xl font-bold text-black mb-6">
+          Profil
+        </h1>
+
+        <section className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
+          <div className="space-y-6">
+            <div>
+              <label className="text-black text-sm font-medium block mb-1">
+                Nom complet
+              </label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Votre nom complet"
+              />
+            </div>
+            <div>
+              <label className="text-black text-sm font-medium block mb-1">
+                Email
+              </label>
+              <p className="text-black">{email}</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-gray-700 font-light">Email</h2>
-            <span>{email}</span>
-          </div>
-        </div>
-        
+        </section>
+
         {renderSection("Adresses", addresses, "address")}
         {renderSection("Numéros", numbers, "number")}
       </div>

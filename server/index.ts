@@ -54,11 +54,9 @@ async function startServer() {
   app.get("*", async (req, res) => {
     // const cookies = req.headers.cookie || "";
     // const authToken = getCookieValue(cookies, "adonis-session");
-    // console.log("🚀 ~ app.get ~ authToken:", authToken);
     // let user = null;
     // if (authToken) {
     //   const payload = verifyToken(authToken); // Vérifier le token
-    //   console.log("🚀 ~ app.get ~ payload:", payload);
     //   // if (payload) {
     //   //   user = await db.user.findFirst({ where: { id: payload.userId } }) // Récupérer l'utilisateur
     //   // }

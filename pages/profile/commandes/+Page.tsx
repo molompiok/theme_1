@@ -4,104 +4,195 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../../component/Popover";
-// import { productCommands } from "../../../S1_data";
-import { features } from "process";
 import clsx from "clsx";
 import { useAuthRedirect } from "../../../hook/authRedirect";
 
+// Define the order type
+type Order = {
+  views: string[];
+  name: string;
+  features: { [key: string]: string };
+  description: string;
+  quantity: number;
+  price_unit: number;
+  currency: string;
+  status: "DELIVERED" | "RETURN";
+};
+
+// Generate fake orders
+const generateFakeOrders = (): Order[] => {
+  const products = [
+    {
+      name: "T-shirt Classique",
+      features: { size: "M", color: "Noir" } as { [key: string]: string },
+      description: "T-shirt en coton confortable pour un usage quotidien",
+      price: 1999,
+    },
+    {
+      name: "Jean Slim",
+      features: { size: "32", color: "Bleu Foncé" } as { [key: string]: string },
+      description: "Jean slim ajusté avec couture renforcée",
+      price: 49545,
+    },
+    {
+      name: "Chaussures de Sport",
+      features: { size: "42", color: "Blanc" } as { [key: string]: string },
+      description: "Chaussures légères pour course et fitness",
+      price: 7900,
+    },
+    {
+      name: "Sac à Dos",
+      features: { capacity: "20L", color: "Gris" } as { [key: string]: string },
+      description: "Sac à dos imperméable pour randonnée",
+      price: 3999000,
+    },
+    {
+      name: "Montre Analogique",
+      features: { material: "Acier", color: "Argent" } as { [key: string]: string },
+      description: "Montre élégante avec cadran minimaliste",
+      price: 914599,
+    },
+  ];
+
+  return Array.from({ length: 5 }, (_, index) => {
+    const product = products[index % products.length];
+    return {
+      views: ['/img/imgP1.jpg', '/img/imgP2.png', '/img/imgP3.png'],
+      name: `${product.name} #${index + 1}`,
+      features: { ...product.features },
+      description: product.description,
+      quantity: Math.floor(Math.random() * 3) + 1,
+      price_unit: product.price,
+      currency: "CFA",
+      status: Math.random() > 0.3 ? "DELIVERED" : "RETURN",
+    };
+  });
+};
+
 export default function Page() {
   useAuthRedirect();
+
+  const productCommands = generateFakeOrders();
+  const sortOptions = [
+    "Plus récent",
+    "Plus ancien",
+    "Mieux noté",
+    "Prix élevé",
+    "Prix bas",
+  ];
+
   return (
-    <div className="bg-gray-200 px-3 font-primary relative w-full min-h-dvh pt-10 ">
-      <div className="max-w-[1200px] mx-auto">
-        <div className="flex gap-2 items-center font-light">
-          <BsCartCheck className="text-5xl text-green-500/60" />
-          <h1 className="text-3xl">Mes commandes</h1>
-        </div>
-        <div className="flex justify-end mb-5 border-b border-b-black/70">
+    <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <BsCartCheck className="text-4xl sm:text-5xl text-black" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-black">
+              Mes commandes
+            </h1>
+          </div>
+
           <Popover>
-            <PopoverTrigger
-              asChild
-              className=" gap-2 justify-center items-center bg-white sm:flex hidden "
-            >
-              <button className="flex gap-1 mb-5 ">
-                <span className="font-light">Filtrez par</span>
-                <span className="cursor-pointer">Plus recents</span>
+            <PopoverTrigger asChild>
+              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-black rounded-lg hover:bg-gray-100 transition-colors">
+                <span className="text-sm font-medium text-black">
+                  Filtrer par
+                </span>
+                <span className="text-sm text-black">Plus récents</span>
               </button>
             </PopoverTrigger>
-            <PopoverContent className="z-20">
-              <div className="bg-white shadow-2xl  flex flex-col gap-y-3 px-6 rounded-2xl py-2">
-                {[
-                  "plus recent",
-                  "plus ancien",
-                  "mieux mote",
-                  "Prix eleve",
-                  "Prix bas",
-                ].map((sort, index) => {
-                  return (
-                    <div
-                      className="text-lg capitalize underline-animation cursor-pointer"
-                      key={index}
-                    >
-                      {sort}
-                    </div>
-                  );
-                })}
+            <PopoverContent className="z-20 w-48 p-0">
+              <div className="bg-white border border-black rounded-lg shadow-lg py-2">
+                {sortOptions.map((sort, index) => (
+                  <button
+                    key={index}
+                    className="w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-100 capitalize transition-colors"
+                  >
+                    {sort}
+                  </button>
+                ))}
               </div>
             </PopoverContent>
           </Popover>
         </div>
-      </div>
-      {/* <div className="flex flex-col items-center divide-y bg-white w-[80%] mx-auto gap-y-2">
-        {productCommands.map((pCommand, index) => {
-          return (
-            <div key={index} className="flex">
-              <img src={pCommand.views[0]} className="size-36" />
-              <div>
-                <h1 className="text-clamp-sm font-bold">{pCommand.name}</h1>
-                <div className="flex gap-1">
-                  {Object.keys(pCommand.features).map((k) => {
-                    return (
-                      <span className="font-light" key={k}>
-                        <span className="">{pCommand.features[k]}</span>
-                      </span>
-                    );
-                  })}
+
+        <div className="space-y-6">
+          {productCommands.map((pCommand, index) => (
+            <div
+              key={index}
+              className="bg-white border border-black/10 rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                <div className="flex-shrink-0">
+                  <img
+                    src={pCommand.views[0]}
+                    alt={pCommand.name}
+                    className="w-32 h-32 sm:w-36 sm:h-36 object-cover rounded-lg"
+                  />
                 </div>
-                <p className="font-light text-clamp-sm w-[90%] whitespace-pre-wrap">
-                  {pCommand.description}
-                </p>
-              </div>
-              <div className="w-[200ppx]">
-                <div className="flex gap-2 text-clamp-sm">
-                  <div className="flex ">
-                    <div className="">
-                      <span className="font-light ">
-                        {pCommand.quantity} x {pCommand.price_unit}
+
+                <div className="flex-1">
+                  <h2 className="text-lg sm:text-xl font-semibold text-black mb-2">
+                    {pCommand.name}
+                  </h2>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {Object.entries(pCommand.features).map(([key, value]) => (
+                      <span
+                        key={key}
+                        className="text-sm text-black bg-gray-100 px-2 py-1 rounded-full"
+                      >
+                        {value}
                       </span>
-                      <span className="font-light">{pCommand.currency}</span>
-                    </div>
+                    ))}
                   </div>
-                  = {pCommand.quantity * pCommand.price_unit}
+                  <p className="text-sm text-black/80 line-clamp-2">
+                    {pCommand.description}
+                  </p>
                 </div>
-                <div>
-                  <span>
-                    <span className="bg-gray-500 p-1 m-1 rounded-3xl text-white">status</span> 
-                    <span className={clsx({
-                      'text-red-500' : pCommand.status === "RETURN",
-                      'text-green-500' : pCommand.status !== "RETURN"
-                    })}>
-                      {pCommand.status === "RETURN"
-                        ? "Produit retourne"
-                        : "Produit livre"}
+
+                <div className="flex flex-col items-start sm:items-end gap-2 w-full sm:w-48">
+                  <div className="text-sm text-black">
+                    <span>
+                      {pCommand.quantity} x {pCommand.price_unit}
+                      {pCommand.currency}
                     </span>
-                  </span>
+                    <span className="font-semibold ml-2">
+                      = {(pCommand.quantity * pCommand.price_unit).toFixed(2)}
+                      {pCommand.currency}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={clsx(
+                        "px-2 py-1 rounded-full text-xs font-medium",
+                        {
+                          "bg-green-500 text-white":
+                            pCommand.status === "DELIVERED",
+                          "bg-red-500   text-white":
+                            pCommand.status === "RETURN",
+                        }
+                      )}
+                    >
+                      {pCommand.status === "RETURN"
+                        ? "Produit retourné"
+                        : "Produit livré"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          );
-        })}
-      </div> */}
+          ))}
+        </div>
+
+        {/* Empty State */}
+        {productCommands.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-black text-lg">
+              Aucune commande pour le moment
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

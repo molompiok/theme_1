@@ -13,7 +13,7 @@ export default function GoogleAuthButton() {
   };
 
   const handleError = () => {
-    console.log("Google Login Failed");
+    console.info("Google Login Failed");
   };
 
   return (

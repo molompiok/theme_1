@@ -1,8 +1,8 @@
 import React, { useState } from "react";
+import { BASE_URL } from "../../../api";
 
 export default function Page() {
 
-    const HostName = 'http://localhost:3333/';
 
     const [categories, setCategories] = useState()
     const [products, setProducts] = useState()
@@ -11,13 +11,12 @@ export default function Page() {
         const headers = new Headers()
         headers.set('type', 'application/json');
         headers.set('accept', '*');
-        const res = await fetch(HostName + 'create_category', {
+        const res = await fetch(BASE_URL + 'create_category', {
             body: formData,
             method: 'POST',
             headers
         })
         const data = await res.json()
-        console.log(data, 'creating..... categorie');
     }
 
     /*************
@@ -46,13 +45,12 @@ export default function Page() {
         const headers = new Headers()
         headers.set('type', 'application/json');
         headers.set('accept', '*');
-        const res = await fetch(HostName + 'create_product', {
+        const res = await fetch(BASE_URL + 'create_product', {
             body: formData,
             method: 'POST',
             headers
         })
         const data = await res.json()
-        console.log(data, 'creating..... create_product');
     }
     return (
         <div className="bg-gray-200 px-3 font-primary">
@@ -73,11 +71,11 @@ export default function Page() {
 
                 <div>
                     <button className="bg-gray-400 mx-auto w-[90%] m-2 text-white p-4" onClick={async () => {
-                        const res = await fetch(HostName + 'get_categories', {
-                            method: 'GET',
-                        })
-                        const data = await res.json()
-                        setCategories(data.list)
+                        // const res = await fetch(HostName + 'get_categories', {
+                        //     method: 'GET',
+                        // })
+                        // const data = await res.json()
+                        // setCategories(data.list)
                     }}>gets categoy</button>
                     <div>
                         {JSON.stringify(categories)}
@@ -106,13 +104,12 @@ export default function Page() {
 
                 <div>
                     <button className="bg-gray-400 mx-auto w-[90%] m-2 text-white p-4" onClick={async () => {
-                        const res = await fetch(HostName + 'get_products', {
-                            method: 'GET',
-                        })
-                        const data = await res.json()
-                         console.log({data});
+                        // const res = await fetch(HostName + 'get_products', {
+                        //     method: 'GET',
+                        // })
+                        // const data = await res.json()
                          
-                        setProducts(data.list)
+                        // setProducts(data.list)
                     }}>gets products</button>
                     <div>
                         {JSON.stringify(products)}

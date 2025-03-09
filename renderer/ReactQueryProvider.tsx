@@ -11,9 +11,9 @@ export function ReactQueryProvider({
 }: {
   children: React.ReactNode;
 }) {
-
+  const queryClient = createQueryClient();
   return (
-    <QueryClientProvider client={createQueryClient()}>
+    <QueryClientProvider client={queryClient}>
       {children}
       {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>

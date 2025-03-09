@@ -210,10 +210,10 @@ function ProductPageContent() {
               modules={[A11y, Pagination]}
               spaceBetween={5}
               lazyPreloadPrevNext={1}
-              // navigation
               pagination={{ clickable: true, dynamicBullets: true }}
               slidesPerView={1}
               autoHeight={true}
+
               mousewheel={true}
               onActiveIndexChange={(sw) => {
                 setImgIndex(sw.realIndex);
@@ -227,14 +227,14 @@ function ProductPageContent() {
                   return (
                     <SwiperSlide key={index} className=" !w-full">
                       <div className="w-full h-full flex items-center justify-center">
-                        <img
-                          loading="lazy"
-                          src={BASE_URL+v}
-                          alt={v}
-                          className="object-contain aspect-square"
-                        />
+                      <ProductMedia
+                      mediaList={[v]}
+                      productName={v}
+                      onClick={() => handleImageClick(index)}
+                      className="object-contain aspect-square"
+                    />
                       </div>
-                      <div className="swiper-lazy-preloader swiper-lazy-preloader-white" />
+                      {/* <div className="swiper-lazy-preloader swiper-lazy-preloader-white" /> */}
                     </SwiperSlide>
                   );
                 })}

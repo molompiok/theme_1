@@ -24,7 +24,6 @@ export const useproductFeatures = create(
             const val = oldState?.set(typeFeature, valueFeature)!;
 
             const newVal = newState.set(id, val);
-            console.log(newVal);
 
             return {
               ...state,

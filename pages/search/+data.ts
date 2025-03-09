@@ -12,16 +12,13 @@ const data = async (pageContext: PageContextServer) => {
 
   const search = pageContext.urlParsed.search
 
-  console.log(search, 'ONServer******************');
-
-  // const queryClient = createQueryClient()
+  const queryClient = createQueryClient()
 
 
-
-  // await queryClient.prefetchQuery({ queryKey: ['gets_products'], queryFn: () => get_products({ name: search['name'] }) })
+  await queryClient.prefetchQuery({ queryKey: ['gets_products'], queryFn: () => get_products({ search : search['name'] }) })
 
   return {
-    // dehydratedState: dehydrate(queryClient)
+    dehydratedState: dehydrate(queryClient)
     // The page's <title>
     // title: products.name
   }

@@ -46,7 +46,6 @@ export default function Page() {
     };
     initIcon();
   }, [vIcon]);
-  console.log("icon", vIcon, ListIcon);
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex flex-wrap  justify-center bg-gray-300 rounded-3xl gap-4 items-center p-2 p m-2">
@@ -93,7 +92,6 @@ export default function Page() {
               )}
               key={key}
               onClick={() => {
-                console.log("icon", icon);
 
                 setVicons(icon as any);
               }}

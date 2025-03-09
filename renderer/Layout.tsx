@@ -204,8 +204,8 @@ function Frame({ children }: { children: React.ReactNode }) {
     cancel_on_tap_outside: false,
     use_fedcm_for_prompt: true,
     auto_select: true,
-    disabled: true,
-    // disabled: Boolean(user),
+    // disabled: true,
+    disabled: Boolean(user),
     onSuccess: (response) => {
       api
         .post("/google_callback", { token: response.credential })
