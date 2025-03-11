@@ -19,48 +19,29 @@ import FavoriteButton from "../../../component/FavoriteButton";
 import { ProductMedia } from "../../../component/ProductMedia";
 import { ProductFavorite } from "../../type";
 import { useAuthRedirect } from "../../../hook/authRedirect";
+import FilterPopover from "../../../component/FilterPopover";
+
+const sortOptions = [
+  "Plus récent",
+  "Plus ancien",
+  "Mieux noté",
+  "Prix élevé",
+  "Prix bas",
+];
 
 export default function Page() {
   const { dehydratedState } = useData<Data>();
   useAuthRedirect();
 
   return (
-    <div className="bg-gray-50 px-3 font-primary">
-      <div className="relative w-full min-h-dvh pt-10 max-w-[1200px] mx-auto">
-        <div className="flex gap-2 items-center font-light">
-          <BsHeartFill className="text-4xl text-red-500/60" />
-          <h1 className="text-3xl font-semibold">Mes favoris</h1>
-        </div>
-        <div className="flex justify-end mb-5 border-b border-b-black/70">
-          <Popover>
-            <PopoverTrigger
-              asChild
-              className="gap-2 justify-center items-center bg-white sm:flex hidden"
-            >
-              <button className="flex gap-1 mb-5">
-                <span className="font-light">Filtrez par</span>
-                <span className="cursor-pointer">Plus récents</span>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="z-20">
-              <div className="bg-white shadow-2xl flex flex-col gap-y-3 px-6 rounded-2xl py-2">
-                {[
-                  "plus récent",
-                  "plus ancien",
-                  "mieux noté",
-                  "prix élevé",
-                  "prix bas",
-                ].map((sort, index) => (
-                  <div
-                    className="text-lg capitalize underline-animation cursor-pointer"
-                    key={index}
-                  >
-                    {sort}
-                  </div>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
+    <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen px-4 py-8 sm:py-12 font-primary">
+      <div className="max-w-5xl mx-auto w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-0">
+            <BsHeartFill className="text-2xl sm:text-4xl text-red-500 animate-pulse" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Mes Favoris</h1>
+          </div>
+          <FilterPopover options={sortOptions} />
         </div>
         <HydrationBoundary state={dehydratedState}>
           <ProductList />
@@ -71,7 +52,11 @@ export default function Page() {
 }
 
 function ProductList() {
-  const { data: favorites, status, error } = useQuery<ProductFavorite[], Error>({
+  const {
+    data: favorites,
+    status,
+    error,
+  } = useQuery<ProductFavorite[], Error>({
     queryKey: ["get_favorites"],
     queryFn: () => get_favorites({}),
   });
@@ -82,22 +67,24 @@ function ProductList() {
 
   if (status === "error") {
     return (
-      <p className="flex size-full text-clamp-md justify-center mt-20">
-        Erreur lors du chargement des favoris : {error.message}
-      </p>
+      <div className="text-center py-12 sm:py-16 bg-white rounded-lg shadow">
+        <p className="text-gray-600 text-base sm:text-lg">
+          Erreur : {error.message}
+        </p>
+      </div>
     );
   }
 
   if (!favorites || favorites.length === 0) {
     return (
-      <p className="flex size-full text-clamp-md justify-center mt-20">
-        Aucun produit en favoris
-      </p>
+      <div className="text-center py-12 sm:py-16 bg-white rounded-lg shadow">
+        <p className="text-gray-600 text-base sm:text-lg">Aucun favori pour le moment</p>
+      </div>
     );
   }
 
   return (
-    <div className="grid list-product-breakpoint-3:grid-cols-4 list-product-breakpoint-3:gap-3 list-product-breakpoint-6:grid-cols-2 grid-cols-1 gap-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
       {favorites.map((favorite) => (
         <ProductCard key={favorite.id} favorite={favorite} />
       ))}
@@ -106,6 +93,7 @@ function ProductList() {
 }
 
 function ProductCard({ favorite }: { favorite: ProductFavorite }) {
+  console.log("🚀 ~ ProductCard ~ favorite:", favorite)
   const { data: feature, status } = useQuery({
     queryKey: ["get_features_with_values", favorite.default_feature_id],
     queryFn: () =>
@@ -116,32 +104,38 @@ function ProductCard({ favorite }: { favorite: ProductFavorite }) {
   const mediaList = feature?.[0]?.values[0].views || [];
 
   return (
-    <div className="relative overflow-hidden border font-primary border-black/15 rounded-2xl pb-4">
-      <FavoriteButton product_id={favorite.product_id} />
-      {status === "pending" ? (
-        <Loading />
-      ) : (
-        <ProductMedia
-          mediaList={mediaList}
-          productName={favorite.name}
-          className="w-full rounded-sm pb-1 object-cover aspect-square cursor-pointer transition-all duration-500 ease-in-out"
+    <div className="group relative bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 w-full">
+      <div className="relative aspect-square">
+        <FavoriteButton 
+          product_id={favorite.product_id}
         />
-      )}
-      <div className="w-full flex-col flex">
-        <div className="max-w-full py-1">
+        {status === "pending" ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+            <Loading />
+          </div>
+        ) : (
+          <ProductMedia
+            mediaList={mediaList}
+            productName={favorite.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        )}
+      </div>
+      
+      <div className="p-2 sm:p-3">
+        <h1 className="text-base/5 sm:text-lg/5 font-semibold text-gray-800 line-clamp-2 mb-1 sm:mb-2 hover:text-blue-600 transition-colors">
+          {favorite.name}
+        </h1>
+        <p className="text-xs/5 sm:text-sm/5 text-gray-600 line-clamp-2 mb-2 sm:mb-3">
+          {favorite.description}
+        </p>
+        <div className="flex items-center justify-between">
           <DisplayPrice
             currency={favorite.currency}
             price={favorite.price ?? 0}
             barred_price={favorite.barred_price ?? undefined}
           />
-          <div className="flex flex-col items-start pl-2 max-w-[99%]">
-            <h1 className="px-2 text-clamp-base font-bold line-clamp-2">
-              {favorite.name}
-            </h1>
-            <h1 className="px-2 text-clamp-base font-light line-clamp-3">
-              {favorite.description}
-            </h1>
-          </div>
+          <div className="h-5 w-5 sm:h-6 sm:w-6" />
         </div>
       </div>
     </div>

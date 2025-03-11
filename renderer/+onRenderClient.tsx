@@ -3,7 +3,7 @@ export { onRenderClient };
 
 import ReactDOM from "react-dom/client";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import "./css/index.css";
+import "./index.css";
 import { Layout } from "./Layout";
 import { getPageTitle } from "./getPageTitle";
 import type { OnRenderClientAsync } from "vike/types";

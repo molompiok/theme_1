@@ -6,8 +6,8 @@ import { BsPlus } from "react-icons/bs";
 import { IoMdAdd, IoMdRemove } from "react-icons/io";
 
 const className = {
-  button : "flex flex-col border border-black px-0.5 justify-center items-center w-8 h-7 gap-y-2 sm:gap-x-3",
-  span : "font-bold text-black text-center text-clamp-base px-2",
+  button : "flex flex-col border border-gray-900  rounded-sm px-0.5 justify-center items-center w-8 h-7 gap-y-2 sm:gap-x-3",
+  span : "font-bold border-gray-300 text-center text-clamp-base px-2",
 }
 export default function AddRemoveItemCart({
   product,
@@ -57,7 +57,6 @@ export default function AddRemoveItemCart({
             onClick={handleClick("remove")}
             className={className.button}
           >
-            {/* <span className={className.span}>-</span> */}
             <IoMdRemove size={20} className=" p-0.5 text-black transition-all duration-500" />
           </button>
 
@@ -71,15 +70,14 @@ export default function AddRemoveItemCart({
             disabled={limit}
             className={clsx(
               className.button,
-              { "cursor-not-allowed opacity-50": limit }
+              { "cursor-not-allowed opacity-20": limit }
             )}
           >
             <IoMdAdd size={20} className=" p-0.5 text-black transition-all duration-500" />
-            {/* <span className={className.span}>+</span> */}
           </button>
         </div>
       </div>
-      {/* <span className="text-[.75rem] cart-breakpoint-2:my-0.5 mt-2 sm:mt-0 font-light  self-center sm:self-auto">
+      {/* <span className="text-[.75rem]  font-light">
         stock : {stock}
       </span> */}
     </div>

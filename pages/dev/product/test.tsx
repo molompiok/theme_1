@@ -2,7 +2,6 @@ import React, { useState, useRef, FormEvent, ChangeEvent, JSX } from "react";
 import { BsPerson, BsTrash } from "react-icons/bs";
 import { FiEdit2 } from "react-icons/fi";
 import { useAuthRedirect } from "../../hook/authRedirect";
-import axios from "axios";
 
 type EditStateType = {
   type: "address" | "number" | null;
@@ -13,10 +12,11 @@ type EditStateType = {
 export default function Page(): JSX.Element {
   useAuthRedirect();
 
-  const [fullName, setFullName] = useState<string>("Messah Simeon");
+  const [fullName, setFullName] = useState<string>("");
   const [email] = useState<string>("sijean619@gmail.com");
   const [addresses, setAddresses] = useState<string[]>([
     "Abidjan yopougon maroc anador",
+    "Yamoussokro derriere la baselique",
   ]);
   const [numbers, setNumbers] = useState<string[]>(["+225 0759091098"]);
   const [editState, setEditState] = useState<EditStateType>({
@@ -28,49 +28,19 @@ export default function Page(): JSX.Element {
   const addressInputRef = useRef<HTMLInputElement>(null);
   const numberInputRef = useRef<HTMLInputElement>(null);
 
-  const saveToBackend = async () => {
-    try {
-      const data = {
-        fullName,
-        email,
-        addresses,
-        phoneNumbers: numbers,
-      };
-
-      const response = await axios.post(
-        "http://votre-api-adonisjs/api/user/profile",
-        data,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      console.log("Données sauvegardées:", response.data);
-    } catch (error) {
-      console.error("Erreur lors de la sauvegarde:", error);
-    }
-  };
-
   const handleAddItem = (
     e: FormEvent<HTMLFormElement>,
     ref: React.RefObject<HTMLInputElement | null>,
-    setter: React.Dispatch<React.SetStateAction<string[]>>,
-    currentItems: string[],
-    maxItems: number = 2
+    setter: React.Dispatch<React.SetStateAction<string[]>>
   ): void => {
     e.preventDefault();
     const input = ref.current;
     if (!input) return;
 
     const newValue = input.value.trim();
-    if (newValue && currentItems.length < maxItems) {
+    if (newValue) {
       setter((prev) => [...prev, newValue]);
       input.value = "";
-      saveToBackend(); 
-    } else if (currentItems.length >= maxItems) {
-      alert(`Vous ne pouvez pas ajouter plus de ${maxItems} éléments`);
     }
   };
 
@@ -79,7 +49,6 @@ export default function Page(): JSX.Element {
     setter: React.Dispatch<React.SetStateAction<string[]>>
   ): void => {
     setter((prev) => prev.filter((_, i) => i !== index));
-    setTimeout(saveToBackend, 0);
   };
 
   const handleEditStart = (
@@ -110,12 +79,6 @@ export default function Page(): JSX.Element {
     const setter = type === "address" ? setAddresses : setNumbers;
     setter((prev) => prev.map((item, i) => (i === index ? value : item)));
     handleEditCancel();
-    setTimeout(saveToBackend, 0);
-  };
-
-  const handleNameChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    setFullName(e.target.value);
-    setTimeout(saveToBackend, 500);
   };
 
   const renderSection = (
@@ -126,17 +89,16 @@ export default function Page(): JSX.Element {
     const isAddress = type === "address";
     const inputRef = isAddress ? addressInputRef : numberInputRef;
     const setter = isAddress ? setAddresses : setNumbers;
-    const currentItems = isAddress ? addresses : numbers;
 
     return (
       <section className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mt-6 w-full">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h2 className="text-xl sm:text-2xl font-semibold text-black">
-            {title} ({data.length}/2)
+            {title}
           </h2>
 
           <form
-            onSubmit={(e) => handleAddItem(e, inputRef, setter, currentItems)}
+            onSubmit={(e) => handleAddItem(e, inputRef, setter)}
             className="flex w-full sm:w-auto gap-2"
           >
             <input
@@ -144,12 +106,10 @@ export default function Page(): JSX.Element {
               type="text"
               className="flex-1 sm:flex-none w-full sm:w-64 px-3 py-2 border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               placeholder={`Nouveau ${title.toLowerCase()}`}
-              disabled={data.length >= 2}
             />
             <button
               type="submit"
-              className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-colors disabled:bg-gray-400"
-              disabled={data.length >= 2}
+              className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-colors"
             >
               Ajouter
             </button>
@@ -242,7 +202,7 @@ export default function Page(): JSX.Element {
                 type="text"
                 className="w-full px-3 py-2 border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                 value={fullName}
-                onChange={handleNameChange}
+                onChange={(e) => setFullName(e.target.value)}
                 placeholder="Votre nom complet"
               />
             </div>

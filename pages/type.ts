@@ -76,6 +76,20 @@ export type GroupFeatureType = {
 }
 
 
+export interface Category {
+  id: string;
+  name: string;
+  slug: string,
+  description: string;
+  parent_category_id: string;
+  store_id: string;
+  view: string[];
+  icon: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+
 export type MetaPagination = {
   "total": number,
   "perPage": number,

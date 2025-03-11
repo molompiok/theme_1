@@ -622,6 +622,217 @@
 //   //   ],
 //   // },
 // ];
+interface CategoryType {
+  id: string;
+  store_id: string;
+  parent_category_id: string | null;
+  name: string;
+  description: string | null;
+  view: any[];
+  icon: any[];
+}
+const categoriesData: CategoryType[] = [
+  // Électronique
+  {
+    id: "1",
+    store_id: "store-1",
+    parent_category_id: null,
+    name: "Électronique",
+    description: "Appareils électroniques et accessoires",
+    view: [],
+    icon: ["📱", "💻", "🎧"],
+  },
+  {
+    id: "2",
+    store_id: "store-1",
+    parent_category_id: "1",
+    name: "Smartphones",
+    description: "Téléphones intelligents de toutes marques",
+    view: [],
+    icon: ["📱"],
+  },
+  {
+    id: "3",
+    store_id: "store-1",
+    parent_category_id: "1",
+    name: "Ordinateurs & Accessoires",
+    description: "PC portables, de bureau et accessoires informatiques",
+    view: [],
+    icon: ["💻"],
+  },
+  {
+    id: "4",
+    store_id: "store-1",
+    parent_category_id: "1",
+    name: "Audio & Casques",
+    description: "Casques, écouteurs et enceintes Bluetooth",
+    view: [],
+    icon: ["🎧"],
+  },
+
+  // Mode & Vêtements
+  {
+    id: "5",
+    store_id: "store-1",
+    parent_category_id: null,
+    name: "Mode",
+    description: "Vêtements, chaussures et accessoires",
+    view: [],
+    icon: ["👗", "👞"],
+  },
+  {
+    id: "85",
+    store_id: "store-1",
+    parent_category_id: "6",
+    name: "Modine",
+    description: "Vêtements, chaussures et accessoires",
+    view: [],
+    icon: ["👗", "👞"],
+  },
+  {
+    id: "6",
+    store_id: "store-1",
+    parent_category_id: "5",
+    name: "Vêtements Homme",
+    description: "T-shirts, pantalons, vestes et plus",
+    view: [],
+    icon: ["👕"],
+  },
+  {
+    id: "7",
+    store_id: "store-1",
+    parent_category_id: "5",
+    name: "Vêtements Femme",
+    description: "Robes, tops, pantalons et accessoires",
+    view: [],
+    icon: ["👗"],
+  },
+  {
+    id: "8",
+    store_id: "store-1",
+    parent_category_id: "5",
+    name: "Chaussures",
+    description: "Baskets, sandales, bottes pour toutes occasions",
+    view: [],
+    icon: ["👞", "👠"],
+  },
+
+  // Maison & Cuisine
+  {
+    id: "9",
+    store_id: "store-1",
+    parent_category_id: null,
+    name: "Maison & Cuisine",
+    description: "Équipements pour la maison, cuisine et décoration",
+    view: [],
+    icon: ["🏡", "🍽️"],
+  },
+  {
+    id: "10",
+    store_id: "store-1",
+    parent_category_id: "9",
+    name: "Électroménager",
+    description: "Réfrigérateurs, machines à laver, micro-ondes et plus",
+    view: [],
+    icon: ["⚡", "🍳"],
+  },
+  {
+    id: "11",
+    store_id: "store-1",
+    parent_category_id: "9",
+    name: "Meubles",
+    description: "Canapés, tables, chaises et rangements",
+    view: [],
+    icon: ["🛋️"],
+  },
+
+  // Sport & Loisirs
+  {
+    id: "12",
+    store_id: "store-1",
+    parent_category_id: null,
+    name: "Sport & Loisirs",
+    description: "Équipements de sport, jeux et loisirs extérieurs",
+    view: [],
+    icon: ["⚽", "🏋️"],
+  },
+  {
+    id: "13",
+    store_id: "store-1",
+    parent_category_id: "12",
+    name: "Fitness & Musculation",
+    description: "Tapis de yoga, haltères, équipements de gym",
+    view: [],
+    icon: ["🏋️"],
+  },
+  {
+    id: "14",
+    store_id: "store-1",
+    parent_category_id: "12",
+    name: "Camping & Randonnée",
+    description: "Tentes, sacs de couchage, lampes torches et plus",
+    view: [],
+    icon: ["🏕️"],
+  },
+
+  // Beauté & Santé
+  {
+    id: "15",
+    store_id: "store-1",
+    parent_category_id: null,
+    name: "Beauté & Santé",
+    description: "Produits de soin, cosmétiques et santé",
+    view: [],
+    icon: ["💄", "🧴"],
+  },
+  {
+    id: "16",
+    store_id: "store-1",
+    parent_category_id: "15",
+    name: "Maquillage",
+    description: "Rouges à lèvres, fonds de teint, mascaras et plus",
+    view: [],
+    icon: ["💄"],
+  },
+  {
+    id: "17",
+    store_id: "store-1",
+    parent_category_id: "15",
+    name: "Soins de la peau",
+    description: "Crèmes hydratantes, masques et soins anti-âge",
+    view: [],
+    icon: ["🧴"],
+  },
+
+  // Bébé & Enfants
+  {
+    id: "18",
+    store_id: "store-1",
+    parent_category_id: null,
+    name: "Bébé & Enfants",
+    description: "Jouets, vêtements et accessoires pour bébés et enfants",
+    view: [],
+    icon: ["🍼", "🧸"],
+  },
+  {
+    id: "19",
+    store_id: "store-1",
+    parent_category_id: "18",
+    name: "Jouets",
+    description: "Jeux éducatifs, peluches, LEGO et plus",
+    view: [],
+    icon: ["🧸"],
+  },
+  {
+    id: "20",
+    store_id: "store-1",
+    parent_category_id: "18",
+    name: "Vêtements pour bébés",
+    description: "Pyjamas, ensembles, chaussons et plus",
+    view: [],
+    icon: ["👶"],
+  },
+];
 
  export const CommentsProduct = [
   {

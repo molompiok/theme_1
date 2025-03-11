@@ -1,4 +1,4 @@
-import { BsHandbag, BsX } from "react-icons/bs";
+import { BsCartX, BsHandbag, BsTrash, BsX } from "react-icons/bs";
 import { BASE_URL } from "../../api";
 import { ProductClient } from "../../pages/type";
 import { usePanier } from "../../store/cart";
@@ -22,18 +22,19 @@ interface CartItem {
 
 function ItemCart({ product }: CartItem) {
   const removeItem = usePanier((state) => state.remove);
+  const isOpen = usePanier((state) => state.showCart);
 
   const { data: feature, status } = useQuery({
     queryKey: ["get_features_with_values", product.default_feature_id],
     queryFn: () =>
       get_features_with_values({ feature_id: product.default_feature_id }),
-    enabled: !!product.default_feature_id,
+    enabled: !!product.default_feature_id || isOpen,
   });
 
   const { data: group_features } = useQuery({
     queryKey: ["get_group_features", product.id],
     queryFn: () => get_group_features({ product_id: product.id }),
-    enabled: !!product.id,
+    enabled: !!product.id || isOpen,
   });
 
   if (status === "pending") {
@@ -42,40 +43,35 @@ function ItemCart({ product }: CartItem) {
   const mediaList = feature?.[0]?.values?.[0]?.views || [];
 
   return (
-    <div className=" flex items-center justify-between py-2 overflow-y-auto">
-      <div className="flex flex-col justify-center items-center h-full">
-        <div className="flex items-stretch gap-2 p-2 h-full">
-          <ProductMedia
-            mediaList={mediaList}
-            productName={product.name}
-            className="aspect-square cart-breakpoint-1:size-[130px]"
+    <div className="flex flex-col items-center p-2">
+      <div className="flex jus">
+        <ProductMedia
+          mediaList={mediaList}
+          productName={product.name}
+          className="aspect-square size-[80px] md:size-[100px]"
+        />
+        <div className=" relative flex-1">
+          <BsTrash
+            className="text-lg absolute top-0 -right-4 text-gray-400 hover:text-gray-600"
+            onClick={() => removeItem(product.id)}
+            size={20}
           />
-          <div className="flex flex-col gap-1 items-stretch justify-between h-full">
-            <h1 className="text-clamp-md font-bold cart-breakpoint-1:line-clamp-2 line-clamp-1 overflow-hidden text-ellipsis">
-              {product.name}
-            </h1>
-            <p className="text-clamp-base font-light line-clamp-2">
-              {product.description}
-            </p>
-          </div>
+          <h1 className="text-base md:text-lg mt-1 mr-2.5 font-bold line-clamp-1">
+            {product.name}
+          </h1>
+          <p className="text-sm/5 md:text-base/5 font-light line-clamp-2">
+            {product.description}
+          </p>
         </div>
-        <div className="w-full flex justify-between">
-          <AddRemoveItemCart
-            product={product}
-            stock={group_features?.[0]?.stock ?? 0}
-            inList={false}
-          />
-          <div className="flex flex-col justify-between items-center gap-y-3 h-full">
-            <button
-              onClick={() => removeItem(product.id)}
-              className="px-2 cursor-pointer whitespace-nowrap text-clamp-xs underline text-gray-400"
-            >
-              supprimer
-            </button>
-            <div>
-              <DisplayPriceItemCart product={product} />
-            </div>
-          </div>
+      </div>
+      <div className="w-full flex justify-between gap-2">
+        <AddRemoveItemCart
+          product={product}
+          stock={group_features?.[0]?.stock ?? 0}
+          inList={false}
+        />
+        <div>
+          <DisplayPriceItemCart product={product} />
         </div>
       </div>
     </div>
@@ -84,7 +80,7 @@ function ItemCart({ product }: CartItem) {
 
 function ListItemCart({ carts }: { carts: CartItem[] }) {
   return (
-    <div className="flex flex-col gap-2 divide-y-2 divide-blue-100 max-h-[65vh] overflow-y-auto scroll-smooth scrollbar-thin">
+    <div className="flex flex-col divide-y-2 divide-blue-100 max-h-[70vh] overflow-y-auto scroll-smooth scrollbar-thin pr-2">
       {carts?.map((cart) => (
         <ItemCart key={cart.product.id} {...cart} />
       ))}
@@ -114,42 +110,52 @@ export default function ModalCart() {
       isOpen={showCart}
       animationName="translateRight"
     >
-      <div className="font-primary relative bg-white min-h-dvh md:w-[550px] w-full px-2 pt-10">
-        <div className="absolute top-0 right-2">
+      <div className="font-primary relative bg-white min-h-dvh w-full overflow-auto sm:w-[400px] md:w-[450px] lg:w-[550px] p-4 pt-12">
+        <div className="absolute top-2 right-2">
           <BsX
-            size={50}
-            className="cursor-pointer text-black"
+            size={40}
+            className="cursor-pointer text-black z-50"
             onClick={handleModalCartClose}
+            aria-label="Fermer le panier"
           />
         </div>
 
-        <div className="flex flex-col gap-4 justify-center items-start">
-          <div className="flex justify-center items-center gap-0.5 w-full">
-            <BsHandbag size={20} className="text-black" />
-            <span className="text-clamp-base whitespace-nowrap underline underline-offset-2 decoration-black/70">
+        <div className=" flex flex-col justify-around overflow-auto">
+          <div className="absolute text-black top-0 pt-5 pb-1 pl-4 border-b border-b-gray-300 flex items-center gap-2">
+            <BsHandbag size={20}/>
+            <span className="text-lg md:text-xl font-semibold">
               Mon panier
             </span>
             <span className="text-sm">({totalItems} articles)</span>
           </div>
 
           <ListItemCart carts={carts} />
-
-          <div className="flex w-full flex-col gap-3">
-            <div className="flex justify-between w-full">
-              <span className="font-bold">Sous-total</span>
-              <span className="font-light">
-                {totalPrice} {carts[0]?.product?.currency}
-              </span>
+          {carts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-4 mt-10">
+              <BsCartX size={70} className="text-gray-400 animate-pulse" />
+              <p className="text-lg font-medium text-gray-600">
+                Votre panier est vide
+              </p>
             </div>
-            <div className="flex justify-between w-full">
-              <span className="font-bold">Livraison</span>
-              <span className="font-light">
-                0 {carts[0]?.product?.currency}
-              </span>
+          ) : (
+            <div className="flex flex-col gap-2 mt-2 overflow-auto">
+              <div className="flex justify-between">
+                <span className="font-bold">Sous-total</span>
+                <span>
+                  {totalPrice} {carts[0]?.product?.currency}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-bold">Livraison</span>
+                <span>0 {carts[0]?.product?.currency}</span>
+              </div>
             </div>
-          </div>
+          )}
 
-          <CommandButton text="PROCEDER AU PAIEMENT" />
+          <CommandButton
+            text="PROCEDER AU PAIEMENT"
+            // className="w-full py-3 bg-black text-white rounded-md hover:bg-gray-800"
+          />
         </div>
       </div>
     </Modal>

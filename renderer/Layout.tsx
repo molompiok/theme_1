@@ -1,18 +1,19 @@
 export { Layout };
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import logoUrl from "./logo.svg";
 import { PageContextProvider, usePageContext } from "./usePageContext";
 import type { PageContext } from "vike/types";
-
+import { Toaster } from "react-hot-toast";
 import { LinkIcon } from "../component/LinkIcon";
 import { Link } from "../component/Link";
+import { gsap } from "gsap";
 
 import {
   BsChevronDown,
+  BsChevronLeft,
+  BsChevronRight,
   BsHandbag,
-  BsPeople,
-  BsPeopleFill,
   BsPerson,
   BsSearch,
   BsX,
@@ -32,6 +33,10 @@ import ModalCart from "../component/modal/ModalCart";
 import ModalChooseFeature from "../component/modal/ModalChooseFeature";
 import Modal from "../component/modal/Modal";
 import ModalAuth from "../component/modal/ModalAuth";
+import { IoMdLink } from "react-icons/io";
+import { useQuery } from "@tanstack/react-query";
+import { get_categories } from "../api/categories.api";
+import SideBarCategories from "../component/modal/SideBarCategories";
 function Layout({
   children,
   pageContext,
@@ -41,7 +46,7 @@ function Layout({
 }) {
   /*******************************************/
   const toggleCart = usePanier((state) => state.toggleCart);
-    const openModalAuth  =  useModalAuth((state)=>state.open);
+  const openModalAuth = useModalAuth((state) => state.open);
   /*******************************************/
   const [isClient, setIsClient] = useState(false);
   const user = useAuthStore((state) => state.user);
@@ -67,7 +72,7 @@ function Layout({
       <PageContextProvider pageContext={pageContext}>
         <Frame>
           <Header>
-            <Category categories={["Hommes", "Femmes", "Enfant"]} />
+            <SideBarCategories />
             <Logo />
             <nav className="flex items-center gap-5">
               <div className="lg:flex lg:gap-5 lg:justify-center  hidden">
@@ -115,96 +120,13 @@ function Layout({
     </>
   );
 }
-function Category({ categories }: { categories: string[] }) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleModalOpen = () => {
-    setIsModalOpen(true);
-    document.body.style.overflow = "hidden";
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    document.body.style.overflow = "auto";
-  };
-
-  const shouldShowModal = categories.length > 2;
-  const user = useAuthStore((state) => state.user);
-  return (
-    <>
-      <ul className="gap-5 flex-wrap hidden lg:flex">
-        {categories
-          .slice(0, shouldShowModal ? 2 : categories.length)
-          .map((category) => (
-            <li key={category}>
-              <Link href={`/category/${category}`}>{category}</Link>
-            </li>
-          ))}
-        {shouldShowModal && (
-          <li className="hidden lg:block">
-            <button
-              onClick={handleModalOpen}
-              className="text-blue-500 underline"
-            >
-              <BsChevronDown strokeLinecap="round" size={24} color="black" />
-            </button>
-          </li>
-        )}
-      </ul>
-      <CiMenuBurger
-        className="flex lg:hidden cursor-pointer"
-        size={35}
-        color="black"
-        onClick={handleModalOpen}
-      />
-      <Modal
-        styleContainer="flex items-center select-none size-full justify-start"
-        position="start"
-        zIndex={100}
-        setHide={handleModalClose}
-        isOpen={isModalOpen}
-        animationName="translateLeft"
-      >
-        <div className="relative bg-white min-h-dvh w-sm pl-8 pr-28 pt-10">
-          <div className="absolute top-8 left-2">
-            <PiXThin
-              size={50}
-              className="cursor-pointer text-black"
-              onClick={handleModalClose}
-            />
-          </div>
-          <div className="flex flex-col gap-4 justify-center mt-16 items-start">
-            <Logo />
-            <Link href="/">Welcome</Link>
-            <Link href="/profile">
-              {user ? "Bonjour" + user.full_name : "Connexion"}{" "}
-            </Link>
-          </div>
-
-          <div className="flex flex-col justify-center items-start mt-16 ">
-            <h1 className="text-clamp-md decoration-2 underline underline-offset-2">
-              Catalogue
-            </h1>
-            <ul className="flex flex-col gap-y-2">
-              {categories.map((category) => (
-                <li key={category} className="text-clamp-sm">
-                  <Link href={`/category/${category}`}>{category}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </Modal>
-    </>
-  );
-}
 function Frame({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((state) => state.user);
   useGoogleOneTapLogin({
     cancel_on_tap_outside: false,
     use_fedcm_for_prompt: true,
-    auto_select: true,
-    // disabled: true,
+    auto_select: false,
     disabled: Boolean(user),
     onSuccess: (response) => {
       api
@@ -219,7 +141,35 @@ function Frame({ children }: { children: React.ReactNode }) {
   });
 
   return (
-    <div className="relative h-full w-full scrollbar-thin">{children}</div>
+    <>
+      <div className="relative h-full w-full scrollbar-thin">{children}</div>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 5000,
+          success: {
+            icon: "✅",
+            style: {
+              background: "#D1FAE5",
+              color: "#065F46",
+              borderLeft: "4px solid #10B981",
+              padding: "12px",
+              borderRadius: "8px",
+              fontWeight: "bold",
+            },
+          },
+          error: {
+            icon: "❌",
+            style: {
+              background: "#FEE2E2",
+              color: "#991B1B",
+              borderLeft: "4px solid #EF4444",
+            },
+          },
+        }}
+      />
+      ; ;
+    </>
   );
 }
 
@@ -368,7 +318,7 @@ function Header({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Logo() {
+export function Logo() {
   return (
     <button
       onClick={() => {

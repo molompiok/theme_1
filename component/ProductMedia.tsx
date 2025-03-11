@@ -15,7 +15,7 @@ export function ProductMedia({
   productName, 
   className = '', 
   onClick,
-  fallbackImage = 'img/default_img.gif'
+  fallbackImage = '/img/default_img.gif'
 }: ProductMediaProps) {
   const [currentMedia, setCurrentMedia] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,12 +73,11 @@ export function ProductMedia({
   }
 
   return (
-    <div className={`product-media-container ${className}`}>
-      
+    <div className={`rounded-md ${className} overflow-hidden`}>
       {isVideo ? (
         <video
           src={currentSrc}
-          className={`p-1 ${className}`}
+          className={`p-1 rounded-md ${className}`}
           autoPlay
           muted
           loop

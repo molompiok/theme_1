@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { PropsWithChildren } from "react";
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { twMerge } from "tailwind-merge";
 
 const animation = {
@@ -33,37 +32,84 @@ export default function Modal({
   position?: "start" | "end" | "center";
   zIndex?: number;
 }>) {
+  const modalRef = useRef<HTMLDivElement>(null);
   const hasPushedState = useRef(false);
 
-  const handlePopState = useCallback((event: any) => {
-    if (event.state?.modalOpen) {
-      setHide();
-      window.history.back();
-    }
-  }, [setHide]);
-
+  // Gestion de la fermeture via popstate
   useEffect(() => {
-    if (isOpen) {
-      if (!hasPushedState.current) {
-        window.history.pushState({ modalOpen: true }, "");
-        hasPushedState.current = true;
+    if (!isOpen || typeof setHide !== "function") return;
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state?.modalOpen) {
+        setHide();
       }
-      window.addEventListener("popstate", handlePopState);
+    };
+
+    if (!hasPushedState.current) {
+      window.history.pushState({ modalOpen: true }, "", window.location.href);
+      hasPushedState.current = true;
     }
+    window.addEventListener("popstate", handlePopState);
 
     return () => {
       window.removeEventListener("popstate", handlePopState);
+      if (hasPushedState.current && !isOpen) {
+        window.history.back();
+      }
       hasPushedState.current = false;
     };
-  }, [isOpen, handlePopState]);
+  }, [isOpen, setHide]);
+
+  // Piégeage du focus et gestion de la touche Escape
+  useEffect(() => {
+    if (!isOpen || !modalRef.current) return;
+
+    const focusableElements = modalRef.current.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstElement = focusableElements[0] as HTMLElement;
+    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Tab") {
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      } else if (e.key === "Escape") {
+        setHide();
+      }
+    };
+
+    firstElement?.focus();
+    window.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [isOpen, setHide]);
 
   return (
     <div
       role="dialog"
       aria-modal="true"
+      aria-labelledby="modal-title"
+      ref={modalRef}
       className={twMerge(
-        "fixed inset-0 flex bg-black/70 duration-700 ease-in-out",
-        isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        "fixed inset-0 flex bg-black/20 backdrop-blur-[.15rem] transition-opacity duration-500 ease-in-out",
+        position === "start"
+          ? "justify-start"
+          : position === "end"
+          ? "justify-end"
+          : "items-center justify-center",
+        isOpen
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
       )}
       style={{
         zIndex,
@@ -76,16 +122,11 @@ export default function Modal({
       }}
     >
       <div
-        data-outside="outside"
+      data-outside="outside"
         className={twMerge(
-          "relative transition-all duration-500 ease-in-out",
-          position === "start"
-            ? "justify-start"
-            : position === "end"
-            ? "justify-end"
-            : "justify-center",
-          styleContainer,
-          isOpen ? animation[animationName][0] : animation[animationName][1]
+          "relative transform transition-all duration-500 ease-in-out",
+          isOpen ? animation[animationName][0] : animation[animationName][1],
+          styleContainer
         )}
       >
         {children}

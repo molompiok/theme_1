@@ -20,10 +20,10 @@ export default function Page() {
   useEffect(() => {
     const launchSearch = async () => {
       if (text) {
-        window.history.replaceState(null, "", urlPathname + "?name=" + text);
+        window.history?.replaceState(null, "", urlPathname + "?name=" + text);
         await reload();
       } else {
-        window.history.replaceState(null, "", urlPathname);
+        window.history?.replaceState(null, "", urlPathname);
       }
     };
     launchSearch();
@@ -58,7 +58,7 @@ function ListProductSearchCard() {
     isFetching,
     isPending,
   } = useQuery({
-    queryKey: ["gets_products", { name: urlParsed.search["name"] }],
+    queryKey: ["get_products", { name: urlParsed.search["name"] }],
     queryFn: () => get_products({ search: urlParsed.search["name"] }),
   });
 
@@ -117,15 +117,13 @@ function ProductCard({ product }: { product: ProductClient }) {
       )}
       <FavoriteButton 
         product_id={product.id} 
-        // ="absolute top-1 right-1 min-[280px]:top-2 min-[280px]:right-2" 
-        
       />
       <div className="p-1 min-[280px]:p-2 sm:p-4 flex flex-col flex-1">
         <div className="max-w-[90%] mb-1 min-[280px]:mb-2">
-          <h1 className="text-xs min-[280px]:text-sm sm:text-base font-bold line-clamp-2 mb-0.5 min-[280px]:mb-1">
+          <h1 className="text-xs min-[280px]:text-sm/4 sm:text-base/4 font-bold line-clamp-2 mb-0.5 min-[280px]:mb-1">
             {product.name}
           </h1>
-          <h1 className="text-[10px] min-[280px]:text-xs sm:text-sm font-light line-clamp-2 text-gray-600">
+          <h1 className="text-[10px] min-[280px]:text-xs/4 sm:text-sm/4 font-light line-clamp-2 text-gray-600">
             {product.description}
           </h1>
         </div>

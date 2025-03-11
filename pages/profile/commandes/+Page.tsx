@@ -6,6 +6,8 @@ import {
 } from "../../../component/Popover";
 import clsx from "clsx";
 import { useAuthRedirect } from "../../../hook/authRedirect";
+import FilterPopover from "../../../component/FilterPopover";
+import { formatPrice } from "../../../utils";
 
 // Define the order type
 type Order = {
@@ -87,42 +89,25 @@ export default function Page() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
             <BsCartCheck className="text-4xl sm:text-5xl text-black" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-black">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
               Mes commandes
             </h1>
           </div>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-black rounded-lg hover:bg-gray-100 transition-colors">
-                <span className="text-sm font-medium text-black">
-                  Filtrer par
-                </span>
-                <span className="text-sm text-black">Plus récents</span>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="z-20 w-48 p-0">
-              <div className="bg-white border border-black rounded-lg shadow-lg py-2">
-                {sortOptions.map((sort, index) => (
-                  <button
-                    key={index}
-                    className="w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-100 capitalize transition-colors"
-                  >
-                    {sort}
-                  </button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
+          <FilterPopover options={sortOptions}  />
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 h-full">
           {productCommands.map((pCommand, index) => (
             <div
               key={index}
-              className="bg-white border border-black/10 rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow"
+              className={clsx("bg-white border border-black/10 h-full rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow",
+                {
+                 'opacity-80' :pCommand.status === 'RETURN',
+                 'opacity-100' : pCommand.status !== 'RETURN'
+                }
+              )}
             >
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+              <div className=" flex flex-col justify-between items-stretch sm:flex-row gap-4 sm:gap-6">
                 <div className="flex-shrink-0">
                   <img
                     src={pCommand.views[0]}
@@ -139,7 +124,7 @@ export default function Page() {
                     {Object.entries(pCommand.features).map(([key, value]) => (
                       <span
                         key={key}
-                        className="text-sm text-black bg-gray-100 px-2 py-1 rounded-full"
+                        className="text-sm text-black bg-gray-200 px-2 py-1 rounded-full"
                       >
                         {value}
                       </span>
@@ -150,21 +135,21 @@ export default function Page() {
                   </p>
                 </div>
 
-                <div className="flex flex-col items-start sm:items-end gap-2 w-full sm:w-48">
-                  <div className="text-sm text-black">
-                    <span>
-                      {pCommand.quantity} x {pCommand.price_unit}
-                      {pCommand.currency}
+                <div className="flex flex-col items-center min-h-full justify-between sm:items-end gap-2 w-full sm:w-48">
+                  <div className="flex min-[300px]:whitespace-nowrap text-sm text-black">
+                    <span className="text-xs">
+                     <span className="font-semibold text-lg">{pCommand.quantity}</span>  x {formatPrice(pCommand.price_unit)}
+                    {' '}{pCommand.currency}
                     </span>
-                    <span className="font-semibold ml-2">
-                      = {(pCommand.quantity * pCommand.price_unit).toFixed(2)}
-                      {pCommand.currency}
+                    <span className="font-bold ml-2">
+                      ({(formatPrice(pCommand.quantity *  pCommand.price_unit))} 
+                      {' '}{pCommand.currency})
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span
                       className={clsx(
-                        "px-2 py-1 rounded-full text-xs font-medium",
+                        "px-2 py-1 rounded-md text-sm font-medium",
                         {
                           "bg-green-500 text-white":
                             pCommand.status === "DELIVERED",
@@ -184,7 +169,6 @@ export default function Page() {
           ))}
         </div>
 
-        {/* Empty State */}
         {productCommands.length === 0 && (
           <div className="text-center py-12">
             <p className="text-black text-lg">

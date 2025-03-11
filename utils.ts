@@ -20,3 +20,7 @@ export function createQueryClient() {
 
 export const formatSlug = (name: string) =>  limax(name, { maintainCase: true });
  
+export const formatPrice = (price?: string | number): string => {
+  if (!price) return "0";
+  return price.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+};

@@ -20,6 +20,7 @@ export default function GoogleAuthButton() {
     <GoogleLogin
       onSuccess={handleSuccess}
       onError={handleError}
+      cancel_on_tap_outside={false}
       text="signin_with"
       size="large"
       useOneTap={true}

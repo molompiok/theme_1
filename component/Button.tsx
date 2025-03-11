@@ -53,7 +53,7 @@ export function CartButton({
     //     <div className="absolute -top-1 left-0 w-full h-[calc(100%+.25rem)] bg-black z-10 transition-transform duration-500 transform -translate-y-full group-hover:translate-y-0"></div>
     //   </button> : <AddRemoveItemCart product={product} stock={stock} inList={true}/>}
     // </div>
-    <div className="w-full font-secondary group relative overflow-hidden inline-block">
+    <div className="w-full font-secondary group relative mt-auto overflow-hidden inline-block">
       {!itemInPanier || itemInPanier.nbr === 0 ? (
         <button
           disabled={status !== "success" || stock === 0}
@@ -122,7 +122,7 @@ export function ButtonValidCart({
   product,
   onClick,
 }: {
-  features: Feature[];
+  features: Feature[] | undefined;
   product: ProductClient;
   onClick: () => void;
   // productId: string;
@@ -130,7 +130,7 @@ export function ButtonValidCart({
   const pfeature = useproductFeatures((state) => state.productFeatures);
 
   const ProductWhoRequired = useMemo(() => {
-    let val = features.find((f) => {
+    let val = features?.find((f) => {
       const v = f.required;
       let validIsFIll = false;
       if (v) {
@@ -150,7 +150,7 @@ export function ButtonValidCart({
         onClick?.();
       }}
       className={clsx(
-        `mx-auto cursor-pointer text-center text-clamp-base uppercase text-cyan-50 w-[90%] py-2 px-4 mt-7`,
+        `mx-auto cursor-pointer text-center text-clamp-base uppercase text-gray-50 w-full py-3 px-4 mt-7`,
         {
           "bg-black/45": Boolean(ProductWhoRequired?.id),
           "bg-black": Boolean(!ProductWhoRequired?.id),

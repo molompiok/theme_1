@@ -42,14 +42,15 @@ async function startServer() {
 
   // Vike middleware. It should always be our last middleware (because it's a
   // catch-all middleware superseding any middleware placed after it).
-  app.get("/img/*", async (req, res) => {
-    const url = localDir + "/public" + req.originalUrl;
-    return res.sendFile(url);
-  });
-  app.get("/fonts/*", async (req, res) => {
-    const url = localDir + "/public" + req.originalUrl;
-    return res.sendFile(url);
-  });
+  app.use(express.static(localDir + "/public"));
+  // app.get("/img/*", async (req, res) => {
+  //   const url = localDir + "/public" + req.originalUrl;
+  //   return res.sendFile(url);
+  // });
+  // app.get("/fonts/*", async (req, res) => {
+  //   const url = localDir + "/public" + req.originalUrl;
+  //   return res.sendFile(url);
+  // });
 
   app.get("*", async (req, res) => {
     // const cookies = req.headers.cookie || "";
