@@ -1,78 +1,106 @@
 import { create } from "zustand";
 import { combine, createJSONStorage, persist } from "zustand/middleware";
-import { ProductClient } from "../pages/type";
-export const usePanier = create(
+import { GroupProductType, ProductClient } from "../pages/type";
+
+// Define the cart item interface for better type safety
+interface CartItem {
+  product: ProductClient;
+  group_product: GroupProductType;
+  nbr: number;
+  totalPrice: number;
+}
+
+// Define the state interface
+interface PanierState {
+  panier: CartItem[];
+  showCart: boolean;
+  add: (product: ProductClient, group_product: GroupProductType) => void;
+  subtract: (group_product: GroupProductType, productPrice: number) => void;
+  remove: (groupId: string) => void;
+  clear: () => void;
+  toggleCart: (val: boolean) => void;
+}
+
+export const usePanier = create<PanierState>()(
   persist(
     combine(
       {
-        panier: [] as {
-          product: ProductClient;
-          nbr: number;
-          totalPrice: number;
-        }[],
-        showCart: false as boolean,
+        panier: [] as CartItem[],
+        showCart: false,
       },
       (set) => ({
-        add: (product: ProductClient , stock: number) =>
+        add: (product: ProductClient, group_product: GroupProductType) =>
           set((state) => {
             const index = state.panier.findIndex(
-              (item) => item.product.id === product.id
+              (item) => item.group_product.id === group_product.id
             );
+            
             const updatedPanier = [...state.panier];
-            if (updatedPanier[index]?.nbr >= stock) {
+            
+            if (index !== -1 && updatedPanier[index].nbr >= group_product.stock) {
               return { panier: updatedPanier };
             }
+
+            const itemPrice = product.price + group_product.additional_price;
+
             if (index !== -1) {
+              const newQuantity = updatedPanier[index].nbr + 1;
               updatedPanier[index] = {
                 ...updatedPanier[index],
-                nbr: updatedPanier[index].nbr + 1,
-                totalPrice: (updatedPanier[index].nbr + 1) * product.price,
+                nbr: newQuantity,
+                totalPrice: newQuantity * itemPrice,
               };
-              return { panier: updatedPanier };
             } else {
-              return {
-                panier: [
-                  ...state.panier,
-                  { product, nbr: 1, totalPrice: product.price },
-                ],
-              };
+              updatedPanier.push({
+                product,
+                group_product,
+                nbr: 1,
+                totalPrice: itemPrice,
+              });
             }
+            
+            return { panier: updatedPanier };
           }),
-        substrat: (productId: string, price: number) =>
+
+        subtract: (group_product: GroupProductType, productPrice: number) =>
           set((state) => {
             const index = state.panier.findIndex(
-              (item) => item.product.id === productId
+              (item) => item.group_product.id === group_product.id
             );
-            if (index !== -1) {
-              const updatedPanier = [...state.panier];
-              if (updatedPanier[index].nbr === 1) {
-                return {
-                  panier: updatedPanier.filter(
-                    (item) => item.product.id !== productId
-                  ),
-                };
-              }
-              updatedPanier[index] = {
-                ...updatedPanier[index],
-                nbr: updatedPanier[index].nbr - 1,
-                totalPrice: (updatedPanier[index].nbr - 1) * price,
+
+            if (index === -1) return state;
+
+            const updatedPanier = [...state.panier];
+            const itemPrice = productPrice + group_product.additional_price;
+
+            if (updatedPanier[index].nbr === 1) {
+              return {
+                panier: updatedPanier.filter(
+                  (item) => item.group_product.id !== group_product.id
+                ),
               };
-              return { panier: updatedPanier };
-            } else {
-              return state;
             }
+
+            const newQuantity = updatedPanier[index].nbr - 1;
+            updatedPanier[index] = {
+              ...updatedPanier[index],
+              nbr: newQuantity,
+              totalPrice: newQuantity * itemPrice,
+            };
+
+            return { panier: updatedPanier };
           }),
-        remove: (productId: string) =>
+
+        remove: (groupId: string) =>
           set((state) => ({
             panier: state.panier.filter(
-              (item) => item.product.id !== productId
+              (item) => item.group_product.id !== groupId
             ),
           })),
+
         clear: () => set({ panier: [] }),
-        toggleCart: (val: boolean) =>
-          set(() => {
-            return { showCart: val };
-          }),
+
+        toggleCart: (val: boolean) => set({ showCart: val }),
       })
     ),
     {

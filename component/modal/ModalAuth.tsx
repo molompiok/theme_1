@@ -47,7 +47,7 @@ export default function ModalAuth() {
       isOpen={isOpen}
       animationName="zoom"
     >
-      <div className="relative w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
+      <div className="relative w-full max-w-md p-6 bg-white rounded-lg shadow-lg max-h-[80dvh] md:max-w-[600px] overflow-auto">
         <button
           onClick={handleModalClose}
           className="absolute top-2 right-2 p-1 text-gray-600 hover:text-gray-800"

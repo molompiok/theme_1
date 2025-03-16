@@ -1,5 +1,3 @@
-import { formatSlug } from "../../../utils";
-// https://vike.dev/data
 export { data };
 export type Data = Awaited<ReturnType<typeof data>>;
 import { dehydrate } from "@tanstack/react-query";

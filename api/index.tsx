@@ -12,6 +12,18 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+
+export function build_search_params(params: Record<string, string | number | undefined>): URLSearchParams {
+  const searchParams = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined) {
+      searchParams.set(key, value.toString());
+    }
+  });
+  return searchParams;
+}
+
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {

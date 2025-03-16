@@ -112,7 +112,7 @@ function Layout({
           {/* Modal cart */}
           <ModalCart />
           {/***Modal feature***/}
-          <ModalChooseFeature />
+          <ModalChooseFeature  />
           {/***Modal Auth***/}
           <ModalAuth />
         </Frame>
@@ -168,7 +168,6 @@ function Frame({ children }: { children: React.ReactNode }) {
           },
         }}
       />
-      ; ;
     </>
   );
 }

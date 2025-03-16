@@ -25,13 +25,9 @@ function Link(props: { href: string; className?: string; children: React.ReactNo
 }
 
 function LinkSideBar(props: {  className?: string; children: React.ReactNode ; onClick? : () => void }) {
-  const pageContext = usePageContext()
-  const { urlPathname } = pageContext
-  // const isActive = href === '/' ? urlPathname === href : urlPathname.startsWith(href ?? '*/-')
   const className = [
     props.className,
-    'underline-animation font-spacegrotesk whitespace-nowrap cursor-pointer',
-    // isActive && 'underline-animation-active'
+    'font-spacegrotesk whitespace-nowrap cursor-pointer',
   ].filter(Boolean).join(' ');
   return   <button
     

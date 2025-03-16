@@ -5,7 +5,7 @@ import { toast } from "react-hot-toast";
 import { BsCheckCircle, BsXCircle } from "react-icons/bs";
 import { BiLogOut } from "react-icons/bi";
 
-// Typage explicite de l'erreur Axios
+
 interface AxiosError extends Error {
   response?: {
     status: number;
@@ -20,7 +20,6 @@ type User = {
   photo: string[];
 } | null;
 
-// Typage pour le state du store
 interface AuthState {
   user: User;
   wasLoggedIn: boolean;
@@ -33,7 +32,7 @@ interface AuthState {
   logout: () => Promise<void>;
 }
 
-// Vérification de l'existence de useModalAuth avant utilisation
+
 const getModalAuth = () => {
   if (typeof useModalAuth === "undefined") {
     console.warn("useModalAuth is not initialized");
@@ -42,7 +41,7 @@ const getModalAuth = () => {
   return useModalAuth;
 };
 
-// Configuration commune pour les toasts
+
 const toastOptions = {
   duration: 4000,
   style: {
@@ -50,7 +49,6 @@ const toastOptions = {
   },
 };
 
-// Création du store d'authentification
 export const useAuthStore = create<AuthState>()(
   persist(
     combine(
@@ -75,7 +73,7 @@ export const useAuthStore = create<AuthState>()(
                 (t) => (
                   <div
                     className={`flex items-center gap-3 p-4 bg-white border-l-4 border-green-500 rounded-lg shadow-lg transition-all duration-500 ease-in-out ${
-                      t.visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                      t.visible ? "opacity-100 scale-100 animate-bounce" : "opacity-0 scale-95"
                     }`}
                   >
                     <BsCheckCircle className="w-6 h-6 text-green-600" />
@@ -100,7 +98,7 @@ export const useAuthStore = create<AuthState>()(
 
             toast.custom(
               (t) => (
-                <div className="flex items-center gap-3 p-4 bg-red-100 border-l-4 border-red-500 rounded-lg shadow-lg">
+                <div className="flex items-center animate-bounce gap-3 p-4 bg-red-100 border-l-4 border-red-500 rounded-lg shadow-lg">
                   <BsXCircle className="w-6 h-6 text-red-600" />
                   <p className="text-red-800 font-medium">{message}</p>
                 </div>
@@ -128,7 +126,7 @@ export const useAuthStore = create<AuthState>()(
 
             toast.custom(
               (t) => (
-                <div className="flex items-center gap-3 p-4 bg-blue-100 border-l-4 border-blue-500 rounded-lg shadow-lg">
+                <div className="flex items-center animate-bounce gap-3 p-4 bg-blue-100 border-l-4 border-blue-500 rounded-lg shadow-lg">
                   <BsCheckCircle className="w-6 h-6 text-blue-600" />
                   <p className="text-blue-800 font-medium">
                     Inscription réussie 🎉 Bienvenue {data.user.full_name} !
@@ -145,7 +143,7 @@ export const useAuthStore = create<AuthState>()(
 
             toast.custom(
               (t) => (
-                <div className="flex items-center gap-3 p-4 bg-red-100 border-l-4 border-red-500 rounded-lg shadow-lg">
+                <div className="flex items-center gap-3 p-4 animate-bounce bg-red-100 border-l-4 border-red-500 rounded-lg shadow-lg">
                   <BsXCircle className="w-6 h-6 text-red-600" />
                   <p className="text-red-800 font-medium">{message}</p>
                 </div>
@@ -164,7 +162,7 @@ export const useAuthStore = create<AuthState>()(
             if (!localStorage.getItem("hasShownLogout")) {
               toast.custom(
                 (t) => (
-                  <div className="flex items-center gap-3 p-4 bg-gray-100 border-l-4 border-gray-500 rounded-lg shadow-lg">
+                  <div className="flex items-center gap-3 p-4 animate-bounce bg-gray-100 border-l-4 border-gray-500 rounded-lg shadow-lg">
                     <BiLogOut className="w-6 h-6 text-gray-600" />
                     <p className="text-gray-800 font-medium">
                       Déconnexion réussie. À bientôt ! 👋
@@ -179,7 +177,7 @@ export const useAuthStore = create<AuthState>()(
             const err = error as AxiosError;
             toast.custom(
               (t) => (
-                <div className="flex items-center gap-3 p-4 bg-red-100 border-l-4 border-red-500 rounded-lg shadow-lg">
+                <div className="flex items-center gap-3 p-4 animate-bounce bg-red-100 border-l-4 border-red-500 rounded-lg shadow-lg">
                   <BsXCircle className="w-6 h-6 text-red-600" />
                   <p className="text-red-800 font-medium">
                     Erreur lors de la déconnexion ❌
@@ -208,12 +206,11 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         wasLoggedIn: state.wasLoggedIn,
-      }), // Persiste uniquement les champs nécessaires
+      }),
     }
   )
 );
 
-// Typage pour le store modal
 interface ModalAuthState {
   isOpen: boolean;
   type: "login" | "register";
@@ -222,7 +219,6 @@ interface ModalAuthState {
   close: () => void;
 }
 
-// Création du store modal avec gestion SSR
 export const useModalAuth = create<ModalAuthState>()(
   combine(
     {

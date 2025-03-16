@@ -1,78 +1,93 @@
 import { BsCartX, BsHandbag, BsTrash, BsX } from "react-icons/bs";
 import { BASE_URL } from "../../api";
-import { ProductClient } from "../../pages/type";
+import { GroupProductType, ProductClient } from "../../pages/type";
 import { usePanier } from "../../store/cart";
 import AddRemoveItemCart from "./../AddRemoveItemCart";
 import { CommandButton } from "./../Button";
 import Modal from "./Modal";
 import {
   get_features_with_values,
-  get_group_features,
 } from "../../api/products.api";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "./../Loading";
 import { DisplayPriceItemCart } from "./../DisplayPrice";
 import { ProductMedia } from "../ProductMedia";
+import { useproductFeatures } from "../../store/features";
 
 interface CartItem {
   product: ProductClient;
-  nbr: number;
-  totalPrice: number;
+  group_product: GroupProductType;
+
 }
 
-function ItemCart({ product }: CartItem) {
+function ItemCart({ product ,group_product }: CartItem) {
   const removeItem = usePanier((state) => state.remove);
   const isOpen = usePanier((state) => state.showCart);
+  const pFeature = useproductFeatures((state) => state.productFeatures);
 
   const { data: feature, status } = useQuery({
     queryKey: ["get_features_with_values", product.default_feature_id],
     queryFn: () =>
-      get_features_with_values({ feature_id: product.default_feature_id }),
-    enabled: !!product.default_feature_id || isOpen,
+      product.default_feature_id 
+        ? get_features_with_values({ feature_id: product.default_feature_id })
+        : Promise.resolve(null), 
+    enabled: !!product.default_feature_id && isOpen, 
   });
 
-  const { data: group_features } = useQuery({
-    queryKey: ["get_group_features", product.id],
-    queryFn: () => get_group_features({ product_id: product.id }),
-    enabled: !!product.id || isOpen,
-  });
+  const featureV = pFeature.get(group_product?.id);
 
   if (status === "pending") {
     return <Loading />;
   }
-  const mediaList = feature?.[0]?.values?.[0]?.views || [];
+
+  const mediaList = feature?.[0]?.values?.[0]?.views ?? [];
 
   return (
     <div className="flex flex-col items-center p-2">
-      <div className="flex jus">
+      <div className="flex justify-center w-full">
         <ProductMedia
           mediaList={mediaList}
           productName={product.name}
           className="aspect-square size-[80px] md:size-[100px]"
         />
-        <div className=" relative flex-1">
+        <div className="relative flex-1">
           <BsTrash
-            className="text-lg absolute top-0 -right-4 text-gray-400 hover:text-gray-600"
-            onClick={() => removeItem(product.id)}
+            className="text-lg absolute top-0 -right-4 text-gray-400 hover:text-gray-600 cursor-pointer"
+            onClick={() => removeItem(group_product.id)}
             size={20}
           />
-          <h1 className="text-base md:text-lg mt-1 mr-2.5 font-bold line-clamp-1">
+          <h1 className="text-base md:text-lg mr-2.5 font-bold line-clamp-1">
             {product.name}
           </h1>
-          <p className="text-sm/5 md:text-base/5 font-light line-clamp-2">
-            {product.description}
+
+          <div className="flex flex-wrap items-center mb-1 gap-1">
+            {featureV ? 
+              Array.from(featureV.entries()).map(([key, value], i) => (
+                <span
+                  key={`${key}-${i}`}
+                  className="text-[.68rem] rotating-border text-gray-100 border border-gray-300 px-2 py-0.5 rounded-[5px]"
+                >
+                  {value.valueFeature ?? 'N/A'}
+                </span>
+              ))
+              : null
+            }
+          </div>
+          <p className="text-xs/4 md:text-sm/4 mb-2 font-light line-clamp-2">
+            {product.description || 'Aucune description'}
           </p>
         </div>
       </div>
       <div className="w-full flex justify-between gap-2">
-        <AddRemoveItemCart
+      <AddRemoveItemCart
           product={product}
-          stock={group_features?.[0]?.stock ?? 0}
+          group_product={group_product}
           inList={false}
         />
-        <div>
-          <DisplayPriceItemCart product={product} />
-        </div>
+          <DisplayPriceItemCart 
+            product={product}
+            group_product={group_product} 
+          />
       </div>
     </div>
   );
@@ -82,7 +97,7 @@ function ListItemCart({ carts }: { carts: CartItem[] }) {
   return (
     <div className="flex flex-col divide-y-2 divide-blue-100 max-h-[70vh] overflow-y-auto scroll-smooth scrollbar-thin pr-2">
       {carts?.map((cart) => (
-        <ItemCart key={cart.product.id} {...cart} />
+        <ItemCart key={cart.group_product.id} {...cart} />
       ))}
     </div>
   );
@@ -122,10 +137,8 @@ export default function ModalCart() {
 
         <div className=" flex flex-col justify-around overflow-auto">
           <div className="absolute text-black top-0 pt-5 pb-1 pl-4 border-b border-b-gray-300 flex items-center gap-2">
-            <BsHandbag size={20}/>
-            <span className="text-lg md:text-xl font-semibold">
-              Mon panier
-            </span>
+            <BsHandbag size={20} />
+            <span className="text-lg md:text-xl font-semibold">Mon panier</span>
             <span className="text-sm">({totalItems} articles)</span>
           </div>
 

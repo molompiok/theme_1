@@ -5,25 +5,25 @@ import { usePageContext } from "../../renderer/usePageContext";
 import { get_products, get_products_by_category } from "../../api/products.api";
 import Loading from "../Loading";
 
-
 interface ListProductCardProps {
-    slug?: string;
-    queryKey: string;
-  }
+  slug?: string;
+  queryKey: string;
+}
 
 function ListProductCard({ slug, queryKey }: ListProductCardProps) {
   const pageContext = usePageContext();
   const categorySlug = slug || pageContext.routeParams?.slug;
 
   const { data, isPending, error } = useQuery<
-    ProductClient[] | {
+    | ProductClient[]
+    | {
         products: ProductType[];
         category: {
-            id: string;
-            name: string;
-            description: string;
+          id: string;
+          name: string;
+          description: string;
         };
-    },
+      },
     Error
   >({
     queryKey: [queryKey, categorySlug].filter(Boolean),
@@ -32,7 +32,7 @@ function ListProductCard({ slug, queryKey }: ListProductCardProps) {
         ? get_products_by_category({ slug: categorySlug })
         : get_products({}),
     // staleTime: 24 * 60 * 60 * 1000, // 24 heures
-    // retry: 2,
+    retry: 2,
   });
 
   if (isPending) {

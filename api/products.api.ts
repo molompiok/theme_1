@@ -1,161 +1,100 @@
+import { api, build_search_params } from "./";
 import {
   Feature,
   FeaturesResponse,
-  GroupFeatureType,
+  GroupProductType,
   MetaPagination,
   ProductClient,
   ProductFavorite,
   ProductType,
 } from "../pages/type";
-import { api } from ".";
 
-export const get_products = async ({
-  product_id,
-  store_id,
-  slug,
-  search,
-  order_by,
-  category_id,
-  page = 1,
-  limit = 10,
-}: {
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function minimize_product(product: ProductType): ProductClient {
+  const { barred_price, description, name, id, price, currency, default_feature_id, slug } = product;
+  return { barred_price, description, name, id, price, currency, default_feature_id, slug };
+}
+
+export const get_products = async (params: {
   product_id?: string;
   store_id?: string;
-  search?: string;
   slug?: string;
+  search?: string;
   order_by?: "date_asc" | "date_desc" | "price_asc" | "price_desc";
   category_id?: string;
   page?: number;
   limit?: number;
 }) => {
-  const searchParams = new URLSearchParams();
-  if (product_id) searchParams.set("product_id", product_id);
-  if (store_id) searchParams.set("store_id", store_id);
-  if (slug) searchParams.set("slug", slug);
-  if (order_by) searchParams.set("order_by", order_by);
-  if (search) searchParams.set("search", search);
-  if (category_id) searchParams.set("category_id", category_id);
-  if (page) searchParams.set("page", page.toString());
-  if (limit) searchParams.set("limit", limit.toString());
+  const searchParams = build_search_params(params);
 
   try {
-    const { data: products } = await api.get<{
-      list: ProductType[];
-      meta: MetaPagination;
-    }>("/get_products?" + searchParams.toString());
-
-    function minimize(product: ProductType): ProductClient {
-      const {
-        barred_price,
-        description,
-        name,
-        id,
-        price,
-        currency,
-        default_feature_id,
-        slug,
-      } = product;
-      return {
-        barred_price,
-        description,
-        name,
-        id,
-        price,
-        currency,
-        default_feature_id,
-        slug,
-      };
-    }
-    return products.list.map(minimize);
+    const { data: products } = await api.get<{ list: ProductType[]; meta: MetaPagination }>(
+      "/get_products?" + searchParams.toString()
+    );
+    return products.list.map(minimize_product);
   } catch (error) {
-    console.error("Erreur lors de la récupération des produits :" + error);
+    console.error("Erreur lors de la récupération des produits :", error);
     return [];
   }
 };
 
-export const get_features_with_values = async ({
-  product_id,
-  feature_id,
-}: {
-  product_id?: string;
-  feature_id?: string;
-}) => {
-  const searchParams = new URLSearchParams();
-  if (product_id) searchParams.set("product_id", product_id);
-  if (feature_id) searchParams.set("feature_id", feature_id);
-
+// Récupérer les features avec leurs valeurs
+export const get_features_with_values = async (params: { product_id?: string; feature_id?: string }) => {
+  const searchParams = build_search_params(params);
   try {
-    const { data } = await api.get<FeaturesResponse>(
-      "/get_features_with_values?" + searchParams.toString()
-    );
+    const { data } = await api.get<FeaturesResponse>("/get_features_with_values?" + searchParams.toString());
     return data.features;
   } catch (error) {
-    // console.error("Erreur lors de la récupération des features :", error);
     throw new Error("Erreur lors de la récupération des features :" + error);
   }
 };
 
-export const get_products_by_category = async ({
-  order_by,
-  slug,
-  page = 1,
-  limit = 10,
-}: {
+export const get_products_by_category = async (params: {
   order_by?: string;
   slug: string;
   page?: number;
   limit?: number;
 }) => {
-  const searchParams = new URLSearchParams();
-  if (page) searchParams.set("page", page.toString());
-  if (limit) searchParams.set("limit", limit.toString());
-  if (slug) searchParams.set("slug", slug);
-  if (order_by) searchParams.set("order_by", order_by);
+  const searchParams = build_search_params(params);
+
   try {
     const { data } = await api.get<{
-      list: {
-        products: ProductType[];
-        category: { id: string; name: string; description: string };
-      };
+      list: { products: ProductType[]; category: { id: string; name: string; description: string } };
       meta: MetaPagination;
     }>("/get_products_by_category?" + searchParams.toString());
     return data.list;
   } catch (error) {
-    console.error("Erreur lors de la récupération des products :", error);
-    throw new Error("Erreur lors de la récupération des products :" + error);
+    console.error("Erreur lors de la récupération des produits :", error);
+    throw new Error("Erreur lors de la récupération des produits :" + error);
   }
 };
 
-export const get_group_features = async ({
-  product_id,
-  group_feature_id,
-}: {
-  group_feature_id?: string;
-  product_id?: string;
-}) => {
-  const searchParams = new URLSearchParams();
-  if (product_id) searchParams.set("product_id", product_id);
-  if (group_feature_id) searchParams.set("feature_id", group_feature_id);
-  try {
-    const { data: features } = await api.get<{
-      list: GroupFeatureType[];
-      meta: MetaPagination;
-    }>("/get_group_features?" + searchParams.toString());
-    return features.list;
-  } catch (error) {
-    console.error("Erreur lors de la récupération des features :", error);
-    return [];
-  }
-};
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-/**********favoris */
+// Récupérer les groupes de produits
+// export const get_group_product = async (params: { group_product_id?: string; product_id?: string }) => {
+//   const searchParams = build_search_params(params);
+
+//   try {
+//     const { data: features } = await api.get<{ list: GroupProductType[]; meta: MetaPagination }>(
+//       "/get_group_products?" + searchParams.toString()
+//     );
+//     return features.list;
+//   } catch (error) {
+//     console.error("Erreur lors de la récupération des features :", error);
+//     return [];
+//   }
+// };
+
+// Gestion des favoris
 export const create_favorite = async (data: { product_id: string }) => {
   const formData = new FormData();
   formData.append("product_id", data.product_id);
+
   try {
-    const { data: favorite } = await api.post<{ favorite_id: string , product_name : string }>(
+    const { data: favorite } = await api.post<{ favorite_id: string; product_name: string }>(
       "/create_favorite",
       formData
     );
@@ -163,35 +102,22 @@ export const create_favorite = async (data: { product_id: string }) => {
     return favorite;
   } catch (error) {
     console.error("Erreur lors de l'ajout de favoris :", error);
-    return {} as { favorite_id: string , product_name : string };
+    return {} as { favorite_id: string; product_name: string };
   }
 };
 
 export const delete_favorite = async (id: string) => {
-  // data.user_id = "85565855-91d0-4c20-ae01-7b2b7ab0e175"
-  // const formData = new FormData();
-  // formData.append('user',data.user_id)
-  // formData.append('product_id',data.product_id)
   try {
-    const { data: favorite } = await api.delete<{ isDeleted: boolean }>(
-      "/delete_favorite/" + id
-    );
+    const { data: favorite } = await api.delete<{ isDeleted: boolean }>("/delete_favorite/" + id);
     await delay(1000);
     return favorite.isDeleted;
   } catch (error) {
     console.error("Erreur lors du retrait du favoris :", error);
-    return [];
+    return false;
   }
 };
 
-export const get_favorites = async ({
-  user_id,
-  label,
-  product_id,
-  order_by,
-  page,
-  limit,
-}: {
+export const get_favorites = async (params: {
   user_id?: string;
   label?: string;
   product_id?: string;
@@ -199,25 +125,31 @@ export const get_favorites = async ({
   page?: number;
   limit?: number;
 }) => {
-  const searchParams = new URLSearchParams();
-  if (user_id) searchParams.set("user_id", user_id);
-  if (product_id) searchParams.set("product_id", product_id);
-  if (label) searchParams.set("label", label);
-  if (order_by) searchParams.set("order_by", order_by);
-  if (page) searchParams.set("page", page.toString());
-  if (limit) searchParams.set("limit", limit.toString());
-
-  const queryString = searchParams.toString();
-  console.log("🚀 ~ searchParams:", queryString);
+  const searchParams = build_search_params(params);
 
   try {
-    const { data: favorites } = await api.get<{ list: ProductFavorite[] }>(
-      `/get_favorites?${queryString}`
-    );
+    const { data: favorites } = await api.get<{ list: ProductFavorite[] }>(`/get_favorites?${searchParams.toString()}`);
     await delay(3000);
     return favorites.list;
   } catch (error) {
-    console.error("Erreur lors de la récupération des favoris :");
+    console.error("Erreur lors de la récupération des favoris :", error);
+    throw error;
+  }
+};
+
+export const get_group_by_feature = async (params: {
+  product_id: string;
+  feature_key?: string;
+  feature_value?: string;
+}) => {
+
+  const searchParams = build_search_params(params);
+
+  try {
+    const response = await api.get<GroupProductType[]>("/get_group_by_feature?" + searchParams.toString());
+      return response.data;
+  } catch (error) {
+    console.error("Error fetching feature details:", error);
     throw error;
   }
 };

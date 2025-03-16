@@ -14,6 +14,7 @@ import Modal from "./Modal";
 import { Logo } from "../../renderer/Layout";
 import { IoMdLink } from "react-icons/io";
 import gsap from "gsap";
+import { navigate } from "vike/client/router";
 
 export default function SideBarCategories() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -259,7 +260,7 @@ export default function SideBarCategories() {
             }
           />
           <div className="mt-8">
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-4 mb-2">
               {history.length > 0 && (
                 <button
                   ref={backButtonRef}
@@ -273,24 +274,23 @@ export default function SideBarCategories() {
                   }
                 >
                   <BsChevronLeft size={24} />
-                  {/* <span className="hidden text-xs sm:inline">Retour</span> */}
+                  <span className="hidden cursor-pointer text-xs sm:inline">Retour</span>
                 </button>
               )}
-              <h1 className="sm:text-xl underline underline-offset-4">
-                {currentCategoryId ? currentCategory?.name : "Les Categories"}
-              </h1>
             </div>
 
             <ul ref={listRef} className="flex flex-col gap-4">
               {currentCategory ? (
-                <Link
-                  href={`/categorie/${currentCategory?.slug}`}
-                  onClick={handleModalClose}
-                  className="flex text-base sm:text-lg py-1.5 decoration-blue-500 hover:text-blue-500 transition-colors"
+                <LinkSideBar
+                  onClick={()=>{
+                    navigate(`/categorie/${currentCategory?.slug}`)
+                    handleModalClose();
+                  }}
+                  className="flex underline-animation text-left  font-semibold sm:text-lg mt-4 transition-colors"
                 >
                   Tout {currentCategory?.name}
-                  <IoMdLink size={20} className="ml-1 text-gray-700 inline" />
-                </Link>
+                  <IoMdLink size={20} className="ml-2 text-gray-700 inline" />
+                </LinkSideBar>
               ) : null}
 
               {getCurrentCategories().map((category) => (
@@ -298,10 +298,10 @@ export default function SideBarCategories() {
                   key={category.id}
                   className="border-b border-b-black/40 pb-3"
                   onMouseEnter={(e) =>
-                    gsap.to(e.currentTarget, { x: 1, duration: 0.2 })
+                    gsap.to(e.currentTarget, { x: 3, duration: 0.4 })
                   }
                   onMouseLeave={(e) =>
-                    gsap.to(e.currentTarget, { x: 0, duration: 0.2 })
+                    gsap.to(e.currentTarget, { x: 0, duration: 0.4 })
                   }
                 >
                   <div
@@ -313,11 +313,15 @@ export default function SideBarCategories() {
                     className="flex cursor-pointer items-center justify-between"
                   >
                     <LinkSideBar
-                      // href={`/categorie/${category.slug}`}
                       onClick={() => {
-                        handleModalClose();
+                        if(!hasSubCategories(category.id)){
+                          navigate(`/categorie/${category.slug}`)
+                          handleModalClose();
+                        } else {
+                          handleForward(category.id)
+                        }
                       }}
-                      className="flex text-base sm:text-lg decoration-blue-500 hover:text-blue-500 transition-colors"
+                      className="flex text-base sm:text-lg  transition-colors"
                     >
                       {category.name}
                       <IoMdLink

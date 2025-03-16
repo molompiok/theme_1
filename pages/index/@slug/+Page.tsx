@@ -4,8 +4,8 @@ import { A11y, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import { useEffect, useMemo, useRef, useState } from "react";
-import ColorComponent from "../../../component/FeatureDetailProduct/ColorComponent";
-import TextComponent from "../../../component/FeatureDetailProduct/TextComponent";
+import { ColorComponent } from "../../../component/FeatureDetailProduct/ColorComponent";
+import { TextComponent } from "../../../component/FeatureDetailProduct/TextComponent";
 import { useproductFeatures } from "../../../store/features";
 import ReviewsStars from "../../../component/comment/ReviewsStars";
 import { ButtonValidCart } from "../../../component/Button";
@@ -16,16 +16,12 @@ import { Helmet } from "react-helmet";
 import { BASE_URL } from "../../../api";
 import { HydrationBoundary, useQuery } from "@tanstack/react-query";
 import { useData } from "../../../renderer/useData";
-import {
-  get_features_with_values,
-  get_group_features,
-  get_products,
-} from "../../../api/products.api";
+import { get_features_with_values, get_products } from "../../../api/products.api";
 import Loading from "../../../component/Loading";
 import { CommentsProduct } from "../../../S1_data";
 import FavoriteButton from "../../../component/FavoriteButton";
 import type { Data } from "./+data";
-import { Feature, GroupFeatureType, ProductClient } from "../../type";
+import { Feature, ProductClient } from "../../type";
 import gsap from "gsap";
 
 export default function Page() {
@@ -45,20 +41,11 @@ export default function Page() {
 }
 
 function ProductPageContent() {
-  const [indexValue, setIndexValue] = useState<number>(0);
-  const [swiperInstance, setSwiperInstance] = useState<any>(null);
   const [imgIndex, setImgIndex] = useState<number>(0);
+  const [swiperInstance, setSwiperInstance] = useState<any>(null);
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
 
   const { slug } = useData<Data>();
-  const lstType = useproductFeatures((state) => state.lastType);
-  const pfeature = useproductFeatures((state) => state.productFeatures);
-  const { toggleCart, add: addProduct } = usePanier();
-
-  const handleImageClick = (index: number) => {
-    swiperInstance?.slideTo(index);
-    setImgIndex(index);
-  };
 
   const {
     data: products,
@@ -71,45 +58,20 @@ function ProductPageContent() {
 
   const product = useMemo(() => products?.[0] ?? null, [products]);
 
-  const handleAddToCart = () => {
-    toggleCart(true);
-    document.body.style.overflow = "hidden";
-    if (product) addProduct(product, group_features?.[0]?.stock ?? 0);
-  };
   const { data: features, isPending: isPendingFeatures } = useQuery({
     queryKey: ["get_features_with_values", product?.id],
     queryFn: () => get_features_with_values({ product_id: product?.id }),
     enabled: !!product?.id,
   });
 
-  const { data: group_features } = useQuery({
-    queryKey: ["get_group_features", product?.id],
-    queryFn: () => get_group_features({ product_id: product?.id }),
-    enabled: !!product?.id,
-  });
-
-  useEffect(() => {
-    if (!features || !product?.id || !features.length) return;
-    const value = pfeature.get(product.id)?.get(lstType);
-    const featureIndex = features.findIndex((f) => f.name === lstType);
-    if (featureIndex === -1) return;
-    const valueIndex = features[featureIndex].values.findIndex(
-      (v) => v.text === value
-    );
-    if (
-      valueIndex !== -1 &&
-      features[featureIndex].values[valueIndex].views.length
-    ) {
-      setIndexValue(valueIndex);
-    }
-  }, [pfeature, lstType, features, product]);
+  const handleImageClick = (index: number) => {
+    swiperInstance?.slideTo(index);
+    setImgIndex(index);
+  };
 
   if (isPending || isPendingFeatures) {
     return (
-      <div
-        className="flex items-center justify-center min-h-[50vh]"
-        aria-live="polite"
-      >
+      <div className="flex items-center justify-center min-h-[50vh]" aria-live="polite">
         <Loading />
       </div>
     );
@@ -136,16 +98,14 @@ function ProductPageContent() {
         <meta property="og:description" content={product.description} />
         <meta
           property="og:image"
-          content={BASE_URL + features?.[0]?.values[0]?.views[0]}
+          content={BASE_URL + (features?.[0]?.values[0]?.views[0])}
         />
       </Helmet>
-
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="container font-primary mx-auto px-4 sm:px-6 lg:px-8">
         <section className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-12">
           <ProductGallery
             features={features}
             product={product}
-            indexValue={indexValue}
             imgIndex={imgIndex}
             setImgIndex={setImgIndex}
             setSwiperInstance={setSwiperInstance}
@@ -154,8 +114,6 @@ function ProductPageContent() {
           <ProductDetails
             product={product}
             features={features}
-            group_features={group_features}
-            handleAddToCart={handleAddToCart}
           />
         </section>
         <FAQSection expandedFAQ={expandedFAQ} setExpandedFAQ={setExpandedFAQ} />
@@ -168,7 +126,6 @@ function ProductPageContent() {
 interface ProductGalleryProps {
   features: Feature[] | undefined;
   product: ProductClient;
-  indexValue: number;
   imgIndex: number;
   setSwiperInstance: (instance: any) => void;
   handleImageClick: (index: number) => void;
@@ -178,20 +135,24 @@ interface ProductGalleryProps {
 function ProductGallery({
   features,
   product,
-  indexValue,
   imgIndex,
   setSwiperInstance,
   handleImageClick,
   setImgIndex,
 }: ProductGalleryProps) {
-  const mediaViews =
-    features?.find((f) => f.id === product.default_feature_id)?.values[
-      indexValue
-    ]?.views || [];
+  const selectedFeatures = useproductFeatures((state) => state.selectedFeatures);
+
+  const mediaViews = useMemo(() => {
+    if (!features || !features.length) return ["/img/default_img.gif"]; 
+
+    const colorFeature = features.find((f) => f.type === "color") || features[0];
+    const selectedValue = selectedFeatures.get(colorFeature.name);
+    const value = colorFeature.values.find((v) => v.text === selectedValue) || colorFeature.values[0];
+    return value?.views.length ? value.views : [ ""];
+  }, [features, selectedFeatures, product]);
 
   return (
     <div className="relative space-y-1">
-    
       <div className="relative">
         <FavoriteButton product_id={product.id} />
         <Swiper
@@ -239,16 +200,9 @@ function ProductGallery({
 interface ProductDetailsProps {
   product: ProductClient;
   features: Feature[] | undefined;
-  group_features: GroupFeatureType[] | undefined;
-  handleAddToCart: () => void;
 }
 
-function ProductDetails({
-  product,
-  features,
-  group_features,
-  handleAddToCart,
-}: ProductDetailsProps) {
+function ProductDetails({ product, features }: ProductDetailsProps) {
   return (
     <div className="space-y-3">
       <div>
@@ -260,35 +214,27 @@ function ProductDetails({
         <span className="text-sm text-gray-600">(280 avis)</span>
       </div>
       <DisplayPriceDetail currency={product.currency} price={product.price} />
-      <div className="space-y-4 max-h-[50vh] overflow-y-auto scrollbar-thin">
+      <div className="space-y-3 max-h-[50dvh] overflow-y-auto scrollbar-thin">
         {features?.map((feature) => (
           <div key={feature.id}>
             {feature.type === "color" && (
               <ColorComponent
                 values={feature.values}
                 feature_name={feature.name}
-                feature_required={feature.required}
-                productId={product.id}
-                stock={group_features?.[0]?.stock ?? 0}
+                product_id={product.id}
               />
             )}
             {feature.type === "text" && (
               <TextComponent
                 values={feature.values}
                 feature_name={feature.name}
-                feature_required={feature.required}
-                productId={product.id}
-                stock={group_features?.[0]?.stock ?? 0}
+                product_id={product.id}
               />
             )}
           </div>
         ))}
       </div>
-      <ButtonValidCart
-        features={features}
-        product={product}
-        onClick={handleAddToCart}
-      />
+      <ButtonValidCart features={features} product={product} />
     </div>
   );
 }
@@ -314,16 +260,9 @@ function ReviewsSection({ product }: { product: ProductClient }) {
       </div>
       <div className="space-y-6 divide-y">
         {CommentsProduct.map((comment, index) => (
-          <article
-            key={index}
-            className="pt-6 grid md:grid-cols-[2fr_1fr] gap-6"
-          >
+          <article key={index} className="pt-6 grid md:grid-cols-[2fr_1fr] gap-6">
             <div className="space-y-2">
-              <ReviewsStars
-                note={comment.note}
-                size={18}
-                style="text-orange-500"
-              />
+              <ReviewsStars note={comment.note} size={18} style="text-orange-500" />
               <h3 className="font-semibold">{comment.title}</h3>
               <p className="text-gray-600">{comment.description}</p>
             </div>
@@ -340,7 +279,6 @@ function ReviewsSection({ product }: { product: ProductClient }) {
     </section>
   );
 }
-
 
 type FAQSectionProps = {
   expandedFAQ: number | null;
@@ -368,7 +306,6 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
   useEffect(() => {
     faqRefs.current.forEach((el, index) => {
       if (!el) return;
-
       const isExpanded = expandedFAQ === index;
       gsap.to(el, {
         height: isExpanded ? "auto" : 0,
@@ -386,34 +323,31 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
 
   return (
     <section className="py-12 border-t">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-center mb-10 text-gray-800">
+      <div className="container mx-auto">
+        <h2 className="min-[400px]:text-3xl text-xl font-bold text-center mb-5 text-gray-800">
           Questions Fréquentes
         </h2>
-        <div className="space-y-3 max-w-4xl mx-auto">
+        <div className="space-y-0 divide-y-1 max-w-4xl mx-auto">
           {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className="border border-gray-200 rounded-lg bg-white overflow-hidden"
-            >
+            <div key={index} className="rounded-2xl bg-white overflow-hidden">
               <button
                 className={clsx(
                   "w-full text-left p-2 flex justify-between items-center transition-colors",
                   {
-                    "bg-gray-100": expandedFAQ === index,
-                    "hover:bg-gray-50": expandedFAQ !== index,
+                    "bg-gray-200": expandedFAQ === index,
+                    "hover:bg-gray-100": expandedFAQ !== index,
                   }
                 )}
                 onClick={() => handleToggle(index)}
                 aria-expanded={expandedFAQ === index}
                 aria-controls={`faq-answer-${index}`}
               >
-                <span className="text-lg font-semibold text-gray-800 pr-4">
+                <span className="min-[470px]:text-[1.07rem] text-sm font-semibold text-gray-600 pr-4">
                   {faq.question}
                 </span>
                 <span
                   className={clsx(
-                    "text-xl font-light transition-transform duration-300",
+                    "text-4xl font-light text-black/60 transition-transform duration-300",
                     {
                       "rotate-45": expandedFAQ === index,
                     }
@@ -421,14 +355,16 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
                 >
                   +
                 </span>
-              </button> 
+              </button>
               <div
-                ref={(el) => { faqRefs.current[index] = el }}
+                ref={(el) => { faqRefs.current[index] = el; }}
                 id={`faq-answer-${index}`}
-                className="px-5 p-2 text-gray-600 overflow-hidden"
+                className="text-gray-600 overflow-hidden"
                 style={{ height: 0, opacity: 0 }}
               >
-                <p className="text-lg leading-relaxed">{faq.answer}</p>
+                <p className="min-[470px]:text-lg text-base/5 pt-1 pb-4 pl-4">
+                  {faq.answer}
+                </p>
               </div>
             </div>
           ))}

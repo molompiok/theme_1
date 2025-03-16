@@ -866,4 +866,21 @@ const categoriesData: CategoryType[] = [
       "Lately, I’ve been all about comfort and a healthier lifestyle, and the Tree Gliders have been my go-to sneakers. I got them in my usual size 7. 5, and they fit true to size with a slightly wider toe box than my other sneakers. They’re super lightweight and breathable, keeping my feet cool whether I’m at yoga or out running errands. Plus, they’re made with sustainable materials like recycled polyester laces and a lyocell upper. If you’re looking for comfy, everyday sneakers that are also eco-friendly, these are definitely worth checking out!",
   },
 ];
+/*********
+ * 1- refait le group * 
+ * 2- terminer page profile
+ * 3- page paymemt
+ * 4-Db for countries
+ * 5- filter
+ * 6- About
+ * 7- parametre
+ * 
+ */
 
+
+    // const strikethroughStyles = clsx(
+    //   "absolute inset-0 flex items-center justify-center overflow-hidden",
+    //   {
+    //     "after:content-[''] after:absolute after:w-[150%] after:h-[1px] after:bg-gray-400 after:transform after:-rotate-16": isDisabled,
+    //   }
+    // );

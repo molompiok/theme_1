@@ -118,6 +118,10 @@
     transform: scaleX(1);
     transform-origin: bottom left;
   }
+
+  
+
+
   /* header */
 @keyframes fade-out-header {
   0% {
@@ -193,7 +197,29 @@ body.page-is-transitioning {
   transform: translateY(-10px);
 }
 
-/* Une classe simple pour faire apparaître la page */
 .fade-in-page {
   animation: fadeIn 0.6s ease-out forwards;
 }
+
+@keyframes rotate-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.rotating-border {
+  position: relative;
+  border: 1px solid transparent;
+  background: linear-gradient(90deg, #000000, #575656, #000000);
+  background-size: 200% 100%;
+  background-clip: padding-box;
+  -webkit-background-clip: padding-box;
+  animation: rotate-border 4s linear infinite;
+}
+
