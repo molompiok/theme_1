@@ -23,6 +23,18 @@ export function build_search_params(params: Record<string, string | number | und
   return searchParams;
 }
 
+export function build_form_data(params: Record<string, string | number | undefined>): FormData {
+  const formData = new FormData();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  return formData;
+}
+
 
 api.interceptors.response.use(
   (response) => response,

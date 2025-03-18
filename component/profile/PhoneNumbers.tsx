@@ -1,7 +1,29 @@
-import React, { useState, useRef, FormEvent, ChangeEvent } from "react";
+import React, {
+  useState,
+  FormEvent,
+  ChangeEvent,
+  useCallback,
+  useRef,
+} from "react";
 import { IMaskInput } from "react-imask";
 import { FiEdit2, FiCheck, FiX } from "react-icons/fi";
 import { BsTrash } from "react-icons/bs";
+import { useMutation } from "@tanstack/react-query";
+import {
+  create_user_phone,
+  delete_user_phone,
+  update_user_phone,
+} from "../../api/user.api";
+import { useAuthStore } from "../../store/user";
+
+const getFlagEmoji = (isoCode: string): string => {
+  console.log("🚀 ~ getFlagEmoji ~ isoCode:", isoCode)
+  return isoCode
+    .toUpperCase()
+    .split("")
+    .map((char) => String.fromCodePoint(char.charCodeAt(0) + 127397))
+    .join("");
+};
 
 interface Country {
   name: string;
@@ -10,125 +32,305 @@ interface Country {
   mask: string;
 }
 
+interface UserPhone {
+  id: string;
+  phone_number: string;
+  country_code?: string;
+  format?: string;
+}
+
+const countries: Country[] = [
+  {
+    name: "Côte d'Ivoire",
+    code: "ci_225",
+    length: 10,
+    mask: "+225 00 00 000 000",
+  },
+  { name: "France", code: "fr_33", length: 9, mask: "+33 0 00 00 00 00" },
+  { name: "États-Unis", code: "us_1", length: 10, mask: "+1 000 000 0000" },
+];
+
 interface PhoneNumbersProps {
-  initialNumbers: string[];
-  countries: Country[];
   maxItems?: number;
-  onSave: (numbers: string[]) => void;
+  initialNumbers?: UserPhone[];
 }
 
 export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
-  initialNumbers,
-  countries,
   maxItems = 2,
-  onSave,
+  initialNumbers = [],
 }) => {
-  const [numbers, setNumbers] = useState<string[]>(initialNumbers);
-  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+  const user = useAuthStore((state) => state.user);
+  const fetchUser = useAuthStore((state) => state.fetchUser);
+
+  const formRef = useRef<HTMLFormElement>(null);
+  const [numbers, setNumbers] = useState<UserPhone[]>(
+    user?.phone_numbers?.map((pn) => ({
+      id: pn.id,
+      phone_number: `+${pn.phone_number}`,
+      country_code: pn.country_code,
+      format: pn.format,
+    })) || initialNumbers
+  );
+  const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [editState, setEditState] = useState<{
     index: number | null;
     value: string;
-  }>({ index: null, value: "" });
-  const numberInputRef = useRef<HTMLInputElement>(null);
+  }>({
+    index: null,
+    value: "",
+  });
 
-  const isValidPhone = (phone: string): boolean => {
-    const cleaned = phone.replace(/\s/g, "");
-    const country = countries.find((c) => cleaned.startsWith(c.code));
-    if (!country) return false;
-    const numberPart = cleaned.slice(country.code.length);
-    return numberPart.length === country.length && /^\d+$/.test(numberPart);
-  };
-
-  const normalizePhoneNumber = (phone: string): string => {
-    const cleaned = phone.replace(/\s/g, "");
-    const country = countries.find(
-      (c) => cleaned.startsWith(c.code) || cleaned.startsWith("0")
-    );
-    if (!country) return cleaned;
-    return cleaned.startsWith("0") ? country.code + cleaned.slice(1) : cleaned;
-  };
-
-  const handleAddItem = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const input = numberInputRef.current;
-    if (!input || !input.value.trim()) {
-      setPhoneError("Veuillez entrer un numéro.");
-      return;
-    }
-    const newValue = input.value.trim();
-    if (!isValidPhone(newValue)) {
-      setPhoneError(`Format invalide. Exemple : ${selectedCountry.mask}`);
-      return;
-    }
-    const normalizedNumber = normalizePhoneNumber(newValue);
-    if (numbers.includes(normalizedNumber)) {
-      setPhoneError("Ce numéro existe déjà.");
-      return;
-    }
-    if (numbers.length < maxItems) {
-      setNumbers((prev) => [...prev, normalizedNumber]);
-      onSave([...numbers, normalizedNumber]);
-      input.value = "";
+  const createUserPhoneMutation = useMutation({
+    mutationFn: create_user_phone,
+    onSuccess: () => {
+      fetchUser();
       setPhoneError(null);
-    }
-  };
+    },
+    onError: (error) => {
+      setPhoneError("Erreur lors de l'ajout du numéro. Veuillez réessayer.");
+      console.error("Erreur lors de l'ajout du numero :", error);
+    },
+  });
 
-  const handleDeleteItem = (index: number) => {
-    const newNumbers = numbers.filter((_, i) => i !== index);
-    setNumbers(newNumbers);
-    onSave(newNumbers);
-  };
+  const updateUserPhoneMutation = useMutation({
+    mutationFn: update_user_phone,
+    onSuccess: () => {
+      fetchUser();
+      setPhoneError(null);
+    },
+    onError: (error) => {
+      setPhoneError(
+        "Erreur lors de la mise à jour du numéro. Veuillez réessayer."
+      );
+      console.error("Erreur lors de la mise à jour du numero :", error);
+    },
+  });
 
-  const handleEditStart = (index: number, value: string) => {
+  const deleteUserPhoneMutation = useMutation({
+    mutationFn: delete_user_phone,
+    onSuccess: () => {
+      fetchUser();
+      setPhoneError(null);
+    },
+    onError: (error) => {
+      setPhoneError(
+        "Erreur lors de la suppression du numéro. Veuillez réessayer."
+      );
+      console.error("Erreur lors de la suppression du numero :", error);
+    },
+  });
+
+  const isValidPhone = useCallback(
+    (phone: string, country: Country): boolean => {
+      const cleaned = phone.replace(/\s/g, "");
+      const countryCode = country.code.split("_")[1];
+      if (!cleaned.startsWith("+" + countryCode)) return false;
+      const numberPart = cleaned.slice(countryCode.length + 1);
+      return numberPart.length === country.length && /^\d+$/.test(numberPart);
+    },
+    []
+  );
+
+  const normalizePhoneNumber = useCallback(
+    (phone: string, country: Country): string => {
+      const cleaned = phone.replace(/\s/g, "");
+      const countryCode = country.code.split("_")[1];
+      if (cleaned.startsWith("0")) {
+        return "+" + countryCode + cleaned.slice(1);
+      }
+      return cleaned.startsWith("+" + countryCode)
+        ? cleaned
+        : "+" + countryCode + cleaned;
+    },
+    []
+  );
+
+  const handleAddItem = useCallback(
+    async (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const input = formData.get("number") as string;
+      const countryCode = formData.get("country") as string;
+
+      if (!input || !input.trim()) {
+        setPhoneError("Veuillez entrer un numéro.");
+        return;
+      }
+
+      const selectedCountryFromForm = countries.find(
+        (c) => c.code === countryCode
+      );
+      if (!selectedCountryFromForm) {
+        setPhoneError("Pays non valide.");
+        return;
+      }
+
+      const newValue = input.trim();
+      if (!isValidPhone(newValue, selectedCountryFromForm)) {
+        setPhoneError(
+          `Format invalide. Exemple : ${selectedCountryFromForm.mask}`
+        );
+        return;
+      }
+
+      const normalizedNumber = normalizePhoneNumber(
+        newValue,
+        selectedCountryFromForm
+      );
+      if (numbers.some((n) => n.phone_number === normalizedNumber)) {
+        setPhoneError("Ce numéro existe déjà.");
+        return;
+      }
+
+      if (numbers.length < maxItems) {
+        createUserPhoneMutation.mutate(
+          {
+            phone_number: normalizedNumber.replace(/^\+/, ""),
+            country_code: selectedCountryFromForm.code,
+            format: selectedCountryFromForm.mask,
+          },
+          {
+            onSuccess: (data) => {
+              if (data) {
+                setNumbers((prev) => [
+                  ...prev,
+                  {
+                    id: data.id,
+                    phone_number: normalizedNumber,
+                    country_code: selectedCountryFromForm.code,
+                    format: selectedCountryFromForm.mask,
+                  },
+                ]);
+              }
+              if (formRef.current) {
+                formRef.current.reset();
+              }
+              setPhoneError(null);
+            },
+          }
+        );
+      }
+    },
+    [numbers, maxItems, createUserPhoneMutation]
+  );
+
+  const handleDeleteItem = useCallback(
+    (index: number) => {
+      const phoneToDelete = numbers[index];
+      if (phoneToDelete.id) {
+        deleteUserPhoneMutation.mutate(
+          { id: phoneToDelete.id },
+          {
+            onSuccess: () => {
+              setNumbers((prev) => prev.filter((_, i) => i !== index));
+            },
+          }
+        );
+      } else {
+      }
+    },
+    [numbers, deleteUserPhoneMutation]
+  );
+
+  const handleEditStart = useCallback((index: number, value: string) => {
     setEditState({ index, value });
     setPhoneError(null);
-  };
+  }, []);
 
-  const handleEditCancel = () => {
+  const handleEditCancel = useCallback(() => {
     setEditState({ index: null, value: "" });
     setPhoneError(null);
-  };
+  }, []);
 
-  const handleEditChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setEditState((prev) => ({ ...prev, value: newValue }));
-    if (newValue.trim() && !isValidPhone(newValue)) {
-      setPhoneError(`Format invalide. Exemple : ${selectedCountry.mask}`);
-    } else {
-      setPhoneError(null);
-    }
-  };
+  const handleEditChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      setEditState((prev) => ({ ...prev, value: newValue }));
+      if (newValue.trim() && !isValidPhone(newValue, selectedCountry)) {
+        setPhoneError(`Format invalide. Exemple : ${selectedCountry.mask}`);
+      } else {
+        setPhoneError(null);
+      }
+    },
+    [selectedCountry]
+  );
 
-  const handleEditSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const { index, value } = editState;
-    if (!value.trim()) {
-      setPhoneError("Le numéro ne peut pas être vide.");
-      return;
-    }
-    if (!isValidPhone(value)) {
-      setPhoneError(`Format invalide. Exemple : ${selectedCountry.mask}`);
-      return;
-    }
-    const normalizedNumber = normalizePhoneNumber(value);
-    if (numbers.includes(normalizedNumber) && numbers[index!] !== normalizedNumber) {
-      setPhoneError("Ce numéro existe déjà.");
-      return;
-    }
-    if (index !== null) {
-      const newNumbers = numbers.map((item, i) =>
-        i === index ? normalizedNumber : item
-      );
-      setNumbers(newNumbers);
-      onSave(newNumbers);
-      handleEditCancel();
-    }
-  };
+  const handleEditSubmit = useCallback(
+    (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const { index, value } = editState;
+      if (!value.trim()) {
+        setPhoneError("Le numéro ne peut pas être vide.");
+        return;
+      }
+
+      if (!isValidPhone(value, selectedCountry)) {
+        setPhoneError(`Format invalide. Exemple : ${selectedCountry.mask}`);
+        return;
+      }
+
+      const normalizedNumber = normalizePhoneNumber(value, selectedCountry);
+      if (
+        numbers.some(
+          (n) =>
+            n.phone_number === normalizedNumber &&
+            n.phone_number !== numbers[index!].phone_number
+        )
+      ) {
+        setPhoneError("Ce numéro existe déjà.");
+        return;
+      }
+
+      if (index !== null) {
+        const phoneToUpdate = numbers[index];
+        if (phoneToUpdate.id) {
+          updateUserPhoneMutation.mutate(
+            {
+              id: phoneToUpdate.id,
+              phone_number: normalizedNumber.replace(/^\+/, ""),
+              country_code: selectedCountry.code,
+              format: selectedCountry.mask,
+            },
+            {
+              onSuccess: (data) => {
+                const newNumbers = numbers.map((item, i) =>
+                  i === index
+                    ? {
+                        id: phoneToUpdate.id,
+                        phone_number: normalizedNumber,
+                        country_code: selectedCountry.code,
+                        format: selectedCountry.mask,
+                      }
+                    : item
+                );
+                setNumbers(newNumbers);
+                handleEditCancel();
+              },
+            }
+          );
+        } else {
+          // const newNumbers = numbers.map((item, i) =>
+          //   i === index
+          //     ? { ...item, phone_number: normalizedNumber }
+          //     : item
+          // );
+          // setNumbers(newNumbers);
+          handleEditCancel();
+        }
+      }
+    },
+    [
+      editState,
+      numbers,
+      selectedCountry,
+      updateUserPhoneMutation,
+      handleEditCancel,
+    ]
+  );
 
   return (
     <section className="w-full p-4 bg-gray-50 rounded-lg shadow-sm">
-      {/* Header */}
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-gray-900">
           Numéros de téléphone ({numbers.length}/{maxItems})
@@ -138,17 +340,18 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
         </p>
       </div>
 
-      {/* Form d'ajout */}
       <form
+        ref={formRef}
         onSubmit={handleAddItem}
-        className="flex flex-col gap-3 mb-6 md:flex-row md:items-start"
+        className="flex flex-col gap-3 md:flex-row md:items-end mb-5"
       >
         <div className="flex flex-col gap-1 w-full md:w-auto">
-          <label htmlFor="country-select" className="sr-only">
+          <label htmlFor="country" className="text-sm text-gray-700">
             Pays
           </label>
           <select
-            id="country-select"
+            id="country"
+            name="country"
             value={selectedCountry.code}
             onChange={(e) =>
               setSelectedCountry(
@@ -159,23 +362,32 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
           >
             {countries.map((country) => (
               <option key={country.code} value={country.code}>
-                {country.name} ({country.code})
+                {getFlagEmoji(country.code.split("_")[0].toUpperCase())} +
+                {country.code.split("_")[1]} 
               </option>
             ))}
           </select>
         </div>
         <div className="flex flex-col gap-1 w-full">
-          <label htmlFor="phone-input" className="sr-only">
+          <label htmlFor="number" className="text-sm text-gray-700">
             Numéro de téléphone
           </label>
           <IMaskInput
-            id="phone-input"
+            id="number"
+            name="number"
             mask={selectedCountry.mask}
-            inputRef={numberInputRef as React.RefObject<HTMLInputElement>}
-            disabled={numbers.length >= maxItems}
+            disabled={
+              numbers.length >= maxItems ||
+              createUserPhoneMutation.isPending ||
+              updateUserPhoneMutation.isPending ||
+              deleteUserPhoneMutation.isPending
+            }
             placeholder={`Ex: ${selectedCountry.mask}`}
             className={`w-full p-2 text-sm border rounded-md focus:ring-2 focus:outline-none ${
-              numbers.length >= maxItems
+              numbers.length >= maxItems ||
+              createUserPhoneMutation.isPending ||
+              updateUserPhoneMutation.isPending ||
+              deleteUserPhoneMutation.isPending
                 ? "bg-gray-200 border-gray-300 cursor-not-allowed"
                 : "border-gray-300 focus:ring-gray-500"
             }`}
@@ -183,21 +395,29 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
           {phoneError && (
             <p className="text-xs text-red-600 mt-1">{phoneError}</p>
           )}
+          {(createUserPhoneMutation.isPending ||
+            updateUserPhoneMutation.isPending ||
+            deleteUserPhoneMutation.isPending) && (
+            <p className="text-xs text-gray-600 mt-1">Traitement en cours...</p>
+          )}
         </div>
         <button
           type="submit"
-          disabled={numbers.length >= maxItems}
+          disabled={
+            numbers.length >= maxItems ||
+            createUserPhoneMutation.isPending ||
+            updateUserPhoneMutation.isPending ||
+            deleteUserPhoneMutation.isPending
+          }
           className="w-full md:w-auto px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
         >
           Ajouter
         </button>
       </form>
-
-      {/* Liste des numéros */}
       <ul className="space-y-4">
         {numbers.map((item, i) => (
           <li
-            key={i}
+            key={item.id || i}
             className="flex flex-col gap-3 p-3 bg-white rounded-md shadow-sm"
           >
             {editState.index === i ? (
@@ -222,7 +442,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
                   <button
                     type="submit"
                     className="p-2 text-green-600 hover:text-green-800"
-                    aria-label="Sauvegarder"
+                    aria-label="Sauvegarder les modifications"
                   >
                     <FiCheck size={20} />
                   </button>
@@ -230,7 +450,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
                     type="button"
                     onClick={handleEditCancel}
                     className="p-2 text-red-600 hover:text-red-800"
-                    aria-label="Annuler"
+                    aria-label="Annuler les modifications"
                   >
                     <FiX size={20} />
                   </button>
@@ -243,13 +463,13 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
                     Numéro {i + 1} :
                   </span>
                   <span className="ml-1 text-sm text-gray-700 break-all">
-                    {item}
+                    {item.phone_number}
                   </span>
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleEditStart(i, item)}
-                    className="p-2 text-gray-600 hover:text-gray-600"
+                    onClick={() => handleEditStart(i, item.phone_number)}
+                    className="p-2 text-gray-600 hover:text-gray-800"
                     aria-label={`Modifier le numéro ${i + 1}`}
                   >
                     <FiEdit2 size={18} />

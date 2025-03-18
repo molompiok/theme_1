@@ -1,5 +1,8 @@
 import React, { useState, FormEvent, ChangeEvent } from "react";
 import { FiEdit2, FiCheck, FiX } from "react-icons/fi";
+import { useAuthStore } from "../../store/user";
+import { update_user } from "../../api/user.api";
+import { useMutation } from "@tanstack/react-query";
 
 interface PersonalInfoProps {
   fullName: string;
@@ -7,15 +10,30 @@ interface PersonalInfoProps {
   onSave: (fullName: string) => void;
 }
 
-export const PersonalInfo: React.FC<PersonalInfoProps> = ({
-  fullName: initialFullName,
-  email,
-  onSave,
+export const PersonalInfo = ({
+
 }) => {
-  const [fullName, setFullName] = useState(initialFullName);
+    const user = useAuthStore((state) => state.user);
+    const fetchUser = useAuthStore((state) => state.fetchUser);
+  const [fullName, setFullName] = useState(user?.full_name || '');
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(fullName);
   const [error, setError] = useState<string | null>(null);
+
+  const updateUserMutation = useMutation({
+    mutationFn: update_user,
+    onSuccess: () => {
+      fetchUser();
+      setError(null);
+    },
+    onError: (error) => {
+      setError(
+        "Erreur lors de la mise à jour du numéro. Veuillez réessayer."
+      );
+      console.error("Erreur lors de la mise à jour du numero :", error);
+    },
+  });
+
 
   const handleEditStart = () => {
     setIsEditing(true);
@@ -51,8 +69,11 @@ export const PersonalInfo: React.FC<PersonalInfoProps> = ({
       setError("Le nom ne peut pas dépasser 50 caractères.");
       return;
     }
-    setFullName(editValue);
-    onSave(editValue);
+    updateUserMutation.mutate({full_name : editValue}, {
+      onSuccess : (data) =>{
+        setFullName(editValue);
+      }
+    })
     setIsEditing(false);
     setError(null);
   };
@@ -63,9 +84,7 @@ export const PersonalInfo: React.FC<PersonalInfoProps> = ({
         <h2 className="text-lg font-semibold text-gray-900">
           Informations personnelles
         </h2>
-        <p className="text-sm text-gray-600">
-          Vos informations de base sont affichées ci-dessous.
-        </p>
+       
       </div>
 
       <div className="space-y-6">
@@ -135,7 +154,7 @@ export const PersonalInfo: React.FC<PersonalInfoProps> = ({
             Email
           </label>
           <p id="email" className="text-sm text-gray-700 break-all">
-            {email}
+            {user?.email}
           </p>
         </div>
       </div>

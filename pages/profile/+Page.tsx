@@ -30,16 +30,7 @@ const Map = React.lazy(() =>
 const Placemark = React.lazy(() =>
   import("@pbe/react-yandex-maps").then((mod) => ({ default: mod.Placemark }))
 );
-const countries = [
-  {
-    name: "Côte d'Ivoire",
-    code: "+225",
-    length: 10,
-    mask: "+225 00 00 000 000",
-  },
-  { name: "France", code: "+33", length: 9, mask: "+33 0 00 00 00 00" },
-  { name: "États-Unis", code: "+1", length: 10, mask: "+1 000 000 0000" },
-];
+
 // Composant de chargement générique
 const LoadingSpinner = ({ text = "Chargement..." }: { text?: string }) => (
   <div className="flex items-center justify-center gap-2 p-2 text-gray-600">
@@ -89,41 +80,6 @@ export default function Page(): JSX.Element {
     console.log("Address updated:", address);
   };
 
-  const [fullName, setFullName] = useState<string>("Messah Simeon");
-  const [email] = useState<string>("sijean619@gmail.com");
-  const [numbers, setNumbers] = useState<string[]>(["+2250759091098"]);
-
-
-  const saveToBackend = async (data: any) => {
-    try {
-      const response = await axios.post(
-        "http://votre-api-adonisjs/api/user/profile",
-        data,
-        { headers: { "Content-Type": "application/json" } }
-      );
-      console.log("Données sauvegardées:", response.data);
-    } catch (error) {
-      console.error("Erreur lors de la sauvegarde:", error);
-    }
-  };
-
-  const handlePersonalInfoSave = (newFullName: string) => {
-    setFullName(newFullName);
-    saveToBackend({
-      fullName: newFullName,
-      email,
-      phoneNumbers: numbers,
-    });
-  };
-
-  const handlePhoneNumbersSave = (newNumbers: string[]) => {
-    setNumbers(newNumbers);
-    saveToBackend({
-      fullName,
-      email,
-      phoneNumbers: newNumbers,
-    });
-  };
   return (
     <div className="conatiner min-h-screen font-primary bg-gray-100 px-2 pb-[100px]">
       <div className="max-w-4xl mx-auto">
@@ -133,18 +89,9 @@ export default function Page(): JSX.Element {
             Informations de livraison
           </h1>
         </div>
-        <PersonalInfo
-          fullName={fullName}
-          email={email}
-          onSave={handlePersonalInfoSave}
-        />
         <div className="flex flex-col gap-7">
-          <PhoneNumbers
-            initialNumbers={numbers}
-            countries={countries}
-            maxItems={2}
-            onSave={handlePhoneNumbersSave}
-          />
+          <PersonalInfo />
+          <PhoneNumbers maxItems={2} />
           <AddressSelector
             apiKey={YANDEX_API_KEY}
             geocoderApiKey={YANDEX_API_GEOCODER}

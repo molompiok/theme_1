@@ -34,7 +34,6 @@ export default function FavoriteButton({ product_id }: { product_id: string }) {
   const addFavoriteMutation = useMutation({
     mutationFn: () => create_favorite({ product_id }),
     onSuccess: (data, _, ctx) => {
-      console.log("🚀 ~ FavoriteButton ~ data:", data)
       queryClient.invalidateQueries({
         queryKey: ["get_favorites", product_id],
       });

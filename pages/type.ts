@@ -109,3 +109,23 @@ type ProductPick =
   | "slug";
 
 export type ProductClient = Pick<ProductType, ProductPick>;
+
+
+
+export interface PhoneNumber {
+  id: string,
+  phone_number: string,
+  format: string,
+  country_code: string,
+  created_at: string,
+  updated_at: string
+}
+
+export interface Adresse {
+  id: string,
+  name: string,
+  longitude: string,
+  latitude: string,
+  created_at: string,
+  updated_at:string
+}

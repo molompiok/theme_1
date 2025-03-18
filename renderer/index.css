@@ -223,3 +223,39 @@ body.page-is-transitioning {
   animation: rotate-border 4s linear infinite;
 }
 
+
+
+
+.react-select__control {
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  border-radius: 0.375rem; /* rounded-md */
+  padding: 0.25rem; /* ajustement du padding */
+  min-height: 38px; /* alignement avec IMaskInput */
+}
+
+.react-select__control--is-focused {
+  border-color: #6b7280; /* focus:ring-gray-500 */
+  box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.5);
+  outline: none;
+}
+
+.react-select__value-container {
+  padding: 0 8px;
+}
+
+.react-select__single-value {
+  font-size: 0.875rem; /* text-sm */
+}
+
+.react-select__menu {
+  z-index: 10; /* pour s'assurer qu'il s'affiche au-dessus des autres éléments */
+}
+
+.react-select__option {
+  display: flex;
+  align-items: center;
+}
+
+.react-select__option--is-focused {
+  background-color: #f3f4f6; /* hover:bg-gray-100 */
+}
