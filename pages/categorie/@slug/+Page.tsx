@@ -6,9 +6,10 @@ export { Page };
 
 function Page() {
   const { dehydratedState, description, title } = useData<Data>();
+  console.log("🚀 ~ Page ~  description, title:",  description, title)
 
   return (
-    <div className="min-h-screen bg-gray-50 antialiased">
+    <div className="min-h-dvh  antialiased">
       <header className="relative h-80 md:h-96 bg-gray-950 overflow-hidden">
         <picture>
           <source
@@ -34,9 +35,8 @@ function Page() {
       </header>
       <LayoutProduct
         dehydratedState={dehydratedState}
-        queryKey={"get_products_by_category"}
+        queryKey={"get_products"}
       />
     </div>
   );
 }
-

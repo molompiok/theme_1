@@ -868,7 +868,7 @@ const categoriesData: CategoryType[] = [
 ];
 /*********
  * 1- refait le group * 
- * 2- terminer page profile
+ * 2- terminer page profile *
  * 3- page paymemt
  * 4-Db for countries
  * 5- filter

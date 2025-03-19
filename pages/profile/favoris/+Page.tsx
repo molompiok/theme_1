@@ -34,7 +34,7 @@ export default function Page() {
   useAuthRedirect();
 
   return (
-    <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen px-4 py-8 sm:py-12 font-primary">
+    <div className="bg-gradient-to-b from-gray-50 to-white min-h-dvh px-4 py-8 sm:py-12 font-primary">
       <div className="max-w-5xl mx-auto w-full">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
           <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-0">

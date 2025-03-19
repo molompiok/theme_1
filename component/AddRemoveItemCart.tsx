@@ -4,10 +4,9 @@ import clsx from "clsx";
 import { GroupProductType, ProductClient } from "../pages/type";
 import { IoMdAdd, IoMdRemove } from "react-icons/io";
 
-
 const className = {
   button:
-    "flex flex-col border border-gray-900  rounded-sm px-0.5 justify-center items-center w-8 h-7 gap-y-2 sm:gap-x-3",
+    "flex flex-col border border-gray-400 hover:bg-gray-50 cursor-pointer rounded-md px-0.5 justify-center items-center w-7 h-6 gap-y-2 sm:gap-x-3",
   span: "font-bold border-gray-300 text-center text-clamp-base px-2",
 };
 export default function AddRemoveItemCart({
@@ -20,40 +19,9 @@ export default function AddRemoveItemCart({
   inList: boolean;
 }) {
   const { add, subtract, panier } = usePanier();
-  const itemInPanier = panier.find((item) => item.group_product.id === group_product?.id);
-
-  //  const pF =  useproductFeatures(state=>state.productFeatures)
-  //  const product_id = product?.id! 
-  
-  //  const feature_key = pF.get(product_id)?.keys().next().value!
-  //  const feature_value = pF.get(product_id)?.get(feature_key)!
-
-  //  const {
-  //   data: group_products,
-  //   isPending,
-  //   isLoading,
-  //   isError : is_error_group
-  // } = useQuery({
-  //   queryKey: [
-  //     "get_group_by_feature",
-  //     { product_id, feature_value, feature_key },
-  //   ],  
-  //   queryFn: () =>
-  //     get_group_by_feature({
-  //       product_id,
-  //       feature_value,
-  //       feature_key,
-  //     }),
-  //   enabled: !!product_id,
-  // });
-
-  //   if (isLoading || isPending) {
-  //     return <Loading/>
-  //   }
-
-  // if (!group_products || is_error_group) {
-  //   return <div> error </div>;
-  // }
+  const itemInPanier = panier.find(
+    (item) => item.group_product.id === group_product?.id
+  );
 
   const limit = useMemo(
     () => itemInPanier?.nbr === group_product.stock,
@@ -128,7 +96,7 @@ export default function AddRemoveItemCart({
         </div>
       </div>
       <span className="text-[.7rem] font-light">
-        stock : {group_product.stock}
+        disponible {group_product.stock}
       </span>
     </div>
   );

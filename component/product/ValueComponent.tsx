@@ -83,7 +83,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
     );
 
     const buttonStyles = clsx(
-        "relative transition-all duration-300 ease-out focus:outline-none focus:ring-1 focus:ring-blue-200 focus:ring-offset-1",
+        "relative transition-all border-gray-300 duration-300 ease-out focus:outline-none shadow-lg focus:ring-1 focus:ring-blue-200 focus:ring-offset-1",
         isColor
           ? "sm:size-10 size-8 rounded-full before:absolute before:inset-0 before:rounded-full before:transition-all before:duration-300 before:ease-out"
           : "border text-clamp-xs flex justify-center items-center px-3 py-1 rounded-md",

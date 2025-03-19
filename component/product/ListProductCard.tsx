@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"; // Assurez-vous que c'est le b
 import ProductCard from "./ProductCard"; // Ajustez le chemin
 import { ProductClient, ProductType } from "../../pages/type";
 import { usePageContext } from "../../renderer/usePageContext";
-import { get_products, get_products_by_category } from "../../api/products.api";
+import { get_products } from "../../api/products.api";
 import Loading from "../Loading";
 
 interface ListProductCardProps {
@@ -15,22 +15,20 @@ function ListProductCard({ slug, queryKey }: ListProductCardProps) {
   const categorySlug = slug || pageContext.routeParams?.slug;
 
   const { data, isPending, error } = useQuery<
-    | ProductClient[]
-    | {
-        products: ProductType[];
+    // | ProductClient[]
+     {
+        products: ProductClient[];
         category: {
           id: string;
           name: string;
           description: string;
-        };
+        } | undefined | null;
       },
     Error
   >({
-    queryKey: [queryKey, categorySlug].filter(Boolean),
+    queryKey: [queryKey, { slug_cat: categorySlug }].filter(Boolean),
     queryFn: () =>
-      categorySlug
-        ? get_products_by_category({ slug: categorySlug })
-        : get_products({}),
+      categorySlug ? get_products({ slug_cat: categorySlug }) : get_products({}),
     // staleTime: 24 * 60 * 60 * 1000, // 24 heures
     retry: 2,
   });

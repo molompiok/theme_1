@@ -8,6 +8,7 @@ export type ProductType = {
   price: number;
   barred_price: number;
   slug: string;
+  
   currency: string;
   createdAt: Date;
   updatedAt: Date;
@@ -112,6 +113,20 @@ export type ProductClient = Pick<ProductType, ProductPick>;
 
 
 
+export enum FeaturType {
+  COLOR = "color",
+  TEXT = "text",
+  ICON = "icon",
+  ICON_TEXT = "icon_text",
+}
+
+// Définir les types
+export interface Filter {
+  id: string;
+  name: string;
+  values: string[];
+  type?: FeaturType; // Type optionnel, par défaut TEXT si non spécifié
+}
 export interface PhoneNumber {
   id: string,
   phone_number: string,

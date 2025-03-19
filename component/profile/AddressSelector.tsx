@@ -16,7 +16,7 @@ import { useGeolocationWithIP } from "../../hook/useGeolocationWithIP";
 import Loading from "../Loading";
 import { useAuthStore } from "../../store/user";
 import { create_user_address, delete_user_address, update_user_address } from "../../api/user.api";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 interface Address {
   id?: string;
@@ -44,32 +44,9 @@ interface AddressSelectorProps {
   mapHeight?: string;
 }
 
-interface Adresse {
-  id: string;
-  name: string;
-  longitude: string;
-  latitude: string;
-  created_at: string;
-  updated_at: string;
-}
 
-interface PhoneNumber {
-  id: string;
-  phone_number: string;
-  format: string;
-  country_code: string;
-  created_at: string;
-  updated_at: string;
-}
 
-type User = {
-  id: string;
-  email: string;
-  full_name: string;
-  photo: string[];
-  addresses: Adresse;
-  phone_numbers: PhoneNumber[];
-} | null;
+
 
 const debounce = <T extends (...args: any[]) => void>(
   func: T,
@@ -115,7 +92,7 @@ const getCoordinates = async (
     }
     return null;
   } catch (error) {
-    console.error("Geocoding error:", error);
+    console.error("Erreur de géocodage :", error);
     return null;
   }
 };
@@ -144,7 +121,7 @@ const reverseGeocode = async (
     }
     return null;
   } catch (error) {
-    console.error("Reverse geocoding error:", error);
+    console.error("Erreur de géocodage inverse :", error);
     return null;
   }
 };
@@ -176,7 +153,7 @@ const getSuggestions = async (
       })) || []
     );
   } catch (error) {
-    console.error("Suggestions error:", error);
+    console.error("Erreur lors de la récupération des suggestions :", error);
     return [];
   }
 };
@@ -209,22 +186,19 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
   apiKey,
   geocoderApiKey,
   bbox,
-  initialAddress = null,
   onAddressChange,
-  saveEndpoint,
-  language = "en_US",
+  language = "fr_FR",
   mapHeight = "300px",
 }) => {
   const user = useAuthStore((state) => state.user);
-  console.log("🚀 ~ user:", user)
   const fetchUser = useAuthStore((state) => state.fetchUser);
 
   const [address, setAddress] = useState<Address>(() => {
     const userAddress = user?.addresses[0];
     return {
       id: userAddress?.id,
-      text: userAddress?.name?.split("/")[0] ?? userAddress?.name ?? '',
-      subtitle: userAddress?.name?.split("/")[1] ?? '',
+      text: userAddress?.name?.split("/")[0] ?? userAddress?.name ?? "",
+      subtitle: userAddress?.name?.split("/")[1] ?? "",
       lat: userAddress?.latitude ? parseFloat(userAddress.latitude) : null,
       lng: userAddress?.longitude ? parseFloat(userAddress.longitude) : null,
     };
@@ -245,14 +219,13 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
   const createUserAddressMutation = useMutation({
     mutationFn: create_user_address,
     onSuccess: (newAddress) => {
-      console.log("🚀 ~ newAddress:", newAddress)
       fetchUser();
       setAddress({ ...address, id: newAddress?.id });
-      setMessage({ type: "success", text: "Address created successfully!" });
+      setMessage({ type: "success", text: "Adresse créée avec succès !" });
     },
     onError: (error) => {
-      setMessage({ type: "error", text: "Error creating address." });
-      console.error("Error creating address:", error);
+      setMessage({ type: "error", text: "Erreur lors de la création de l'adresse." });
+      console.error("Erreur lors de la création de l'adresse :", error);
     },
   });
 
@@ -260,11 +233,11 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
     mutationFn: update_user_address,
     onSuccess: () => {
       fetchUser();
-      setMessage({ type: "success", text: "Address updated successfully!" });
+      setMessage({ type: "success", text: "Adresse mise à jour avec succès !" });
     },
     onError: (error) => {
-      setMessage({ type: "error", text: "Error updating address." });
-      console.error("Error updating address:", error);
+      setMessage({ type: "error", text: "Erreur lors de la mise à jour de l'adresse." });
+      console.error("Erreur lors de la mise à jour de l'adresse :", error);
     },
   });
 
@@ -273,11 +246,11 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
     onSuccess: () => {
       fetchUser();
       setAddress({ text: "", subtitle: "", lat: null, lng: null });
-      setMessage({ type: "success", text: "Address deleted successfully!" });
+      setMessage({ type: "success", text: "Adresse supprimée avec succès !" });
     },
     onError: (error) => {
-      setMessage({ type: "error", text: "Error deleting address." });
-      console.error("Error deleting address:", error);
+      setMessage({ type: "error", text: "Erreur lors de la suppression de l'adresse." });
+      console.error("Erreur lors de la suppression de l'adresse :", error);
     },
   });
 
@@ -321,7 +294,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
 
     const addressData = {
       name: `${newAddress.text}/${newAddress.subtitle}`,
-      id : newAddress.id,
+      id: newAddress.id,
       longitude: newAddress.lng?.toString() || "",
       latitude: newAddress.lat?.toString() || "",
       ...(address?.id && { id: address.id }),
@@ -332,7 +305,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
         name: addressData.name,
         longitude: addressData.longitude,
         latitude: addressData.latitude,
-        id: address.id
+        id: address.id,
       };
       updateUserAddressMutation.mutate(updatedAddressData);
     } else {
@@ -347,7 +320,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
     if (!searchInput.trim()) {
-      setMessage({ type: "error", text: "Please enter an address." });
+      setMessage({ type: "error", text: "Veuillez entrer une adresse." });
       return;
     }
     setIsGeocoding(true);
@@ -364,7 +337,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
       setSuggestions([]);
       setIsSuggestionOpen(false);
     } else {
-      setMessage({ type: "error", text: "Address not found." });
+      setMessage({ type: "error", text: "Adresse introuvable." });
     }
     setIsGeocoding(false);
   };
@@ -418,7 +391,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
       } else {
         setMessage({
           type: "error",
-          text: "Unable to locate this position.",
+          text: "Impossible de localiser cette position.",
         });
       }
       setIsGeocoding(false);
@@ -651,6 +624,5 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
     </section>
   );
 };
-
 
 export default AddressSelector;

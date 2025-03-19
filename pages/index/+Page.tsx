@@ -7,7 +7,7 @@ export { Page };
 function Page() {
   const { dehydratedState } = useData<Data>();
   return (
-    <div className="min-h-screen bg-gray-50 font-primary">
+    <div className="min-h-dvh font-primary">
       <LayoutProduct dehydratedState={dehydratedState} queryKey={'get_products'}/>
     </div>
   );

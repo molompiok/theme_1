@@ -28,7 +28,7 @@ export default function Page() {
   const { dehydratedState } = useData<Data>();
 
   return (
-    <div className="bg-white min-h-screen pt-10 max-w-[1500px] mx-auto font-sans antialiased">
+    <div className="bg-white min-h-dvh pt-10 max-w-[1500px] mx-auto font-sans antialiased">
       <Helmet>
         <title>Page Produit</title>
         <meta name="robots" content="index, follow" />
@@ -53,7 +53,10 @@ function ProductPageContent() {
     error,
   } = useQuery({
     queryKey: ["get_products", slug],
-    queryFn: () => get_products({ slug }),
+    queryFn: () => get_products({ slug_product : slug }),
+    select(data) {
+      return data.products
+    },
   });
 
   const product = useMemo(() => products?.[0] ?? null, [products]);

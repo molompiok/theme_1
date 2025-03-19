@@ -35,7 +35,7 @@ export default function ProductCard({ product  }: { product: ProductClient }) {
   return (
     <div
       onClick={handleGo}
-      className="group bg-white border border-gray-200 rounded-lg shadow-xs
+      className="group bg-white border border-gray-50 hover:border-gray-100  rounded-md
             transition-all duration-300 flex flex-col h-full cursor-pointer overflow-hidden max-w-md"
     >
       <div className="relative w-full aspect-square overflow-hidden">
@@ -47,14 +47,14 @@ export default function ProductCard({ product  }: { product: ProductClient }) {
           <ProductMedia
             mediaList={mediaList}
             productName={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-[1.02]  transition-transform duration-300"
           />
         )}
         <FavoriteButton key={product.id} product_id={product.id} />
       </div>
       <div className="p-3 sm:p-4 flex flex-col flex-1">
         <div className="mb-2">
-          <h1 className="text-sm sm:text-base/5 font-semibold line-clamp-2 mb-1">
+          <h1 className="text-sm group-hover:text-gray-950  text-gray-800  sm:text-base/5 font-semibold line-clamp-2 mb-1">
             {product.name}
           </h1>
           <div className="flex items-center gap-1">

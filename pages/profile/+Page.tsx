@@ -81,7 +81,7 @@ export default function Page(): JSX.Element {
   };
 
   return (
-    <div className="conatiner min-h-screen font-primary bg-gray-100 px-2 pb-[100px]">
+    <div className="conatiner min-h-dvh font-primary bg-gray-100 px-2 pb-[100px]">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-2 sm:gap-3 mb-4">
           <BsPerson className="text-2xl sm:text-4xl text-gray-800" />

@@ -109,17 +109,16 @@ export default function ModalChooseFeature() {
               ))}
             </Swiper>
           </div>
-          {/* <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-2 scrollbar-thin">
+          <div className="flex gap-1 sm:gap-2 overflow-x-auto scrollbar-thin">
             {mediaViews.map((view, index) => (
               <button
                 key={index}
                 className={clsx(
-                  "p-1 border-2 rounded-md flex-shrink-0 transition-all  duration-300 ease-out",
-                  "size-14",
+                  "border-1 rounded-md flex-shrink-0 transition-all  duration-300 ease-out",
+                  "size-8",
                   {
-                    // "hover:border-gray-400 hover:scale-105": imgIndex !== index,
-                    "border-gray-800": imgIndex === index,
-                    "border-gray-200 hover:border-gray-400": imgIndex !== index,
+                    "border-gray-600": imgIndex === index,
+                    "border-gray-100 hover:border-gray-400": imgIndex !== index,
                   }
                 )}
                 onClick={() => handleImageClick(index)}
@@ -131,9 +130,8 @@ export default function ModalChooseFeature() {
                 />
               </button>
             ))}
-          </div> */}
+          </div>
         </div>
-
         <div className="flex-1 flex flex-col gap-1 p-2 sm:p-0">
           <button
             onClick={handleCloseModal}
@@ -164,13 +162,13 @@ export default function ModalChooseFeature() {
           ) : (
             <div className="flex flex-col gap-1 overflow-auto max-h-[50dvh] sm:max-h-[60dvh]">
               <div className="space-y-0 sm:space-y-2">
-                <h1 className="sm:text-base text-sm md:text-2xl font-bold text-gray-800 leading-tight">
+                <h1 className="sm:text-lg text-base md:text-2xl font-bold text-gray-800 leading-tight">
                   {product.name}
                 </h1>
                 {/* <p className="text-gray-600 text-xs/4 sm:text-sm/4 sm:inline hidden md:text-base line-clamp-1">
                   {product.description}
                 </p> */}
-                <DisplayPriceDetail currency={product.currency} price={product.price} />
+                <DisplayPriceDetail currency={product.currency} price={product.price} barred_price={product.barred_price} />
               </div>
               <div className="flex-1 overflow-y-auto max-h-[35vh] sm:max-h-[40vh] md:max-h-[50vh] space-y-2 pr-2 scrollbar-thin">
                 <button
@@ -204,7 +202,7 @@ export default function ModalChooseFeature() {
                   onClick={handleCloseModal}
                   className="text-gray-600 text-xs sm:text-sm hover:text-gray-800 underline w-full text-center transition-colors"
                 >
-                  Continuer mes achats
+                   Retourner à la boutique
                 </button>
               </div>
             </div>

@@ -175,6 +175,7 @@ function Frame({ children }: { children: React.ReactNode }) {
 function Header({ children }: { children: React.ReactNode }) {
   const { urlPathname } = usePageContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const  user = useAuthStore(state =>state.user)
 
   const handleModalOpen = () => {
     setIsModalOpen(true);
@@ -244,8 +245,8 @@ function Header({ children }: { children: React.ReactNode }) {
                       size={35}
                     />
                     <div className="text-clamp-xs mx-3 flex flex-col">
-                      <span>sijean619@gmail.com</span>
-                      <span className="font-light">+225 0759091098</span>
+                      <span>{user?.full_name}</span>
+                      <span className="font-light">+{user?.phone_numbers?.[0]?.phone_number}</span>
                     </div>
                   </div>
                   <div className="flex flex-col text-clamp-base gap-y-2.5 mt-5">
@@ -292,8 +293,8 @@ function Header({ children }: { children: React.ReactNode }) {
                       size={40}
                     />
                     <div className="text-clamp-sm mx-3 flex flex-col">
-                      <span>sijean619@gmail.com</span>
-                      <span className="font-light">+225 0759091098</span>
+                    <span>{user?.full_name}</span>
+                    <span className="font-light">+{user?.phone_numbers?.[0]?.phone_number}</span>
                     </div>
                   </div>
                   <div className="text-clamp-md flex items-start gap-3.5 flex-col ">

@@ -14,13 +14,16 @@ const data = async (pageContext: PageContextServer) => {
 
   await queryClient.prefetchQuery({
     queryKey: ["get_products"],
-    queryFn: () => get_products({ slug }),
+    queryFn: () => get_products({ slug_product : slug }),
   });
 
-  const product = await queryClient.ensureQueryData({
+  const productData = await queryClient.ensureQueryData({
     queryKey: ["get_products", slug],
-    queryFn: () => get_products({ slug }),
+    queryFn: () => get_products({ slug_product : slug }),
+    
   });
+  console.log("🚀 ~ data ~ product:", productData)
+  const product = productData.products
 
   // const features = await queryClient.ensureQueryData({
   //   queryKey: ["get_features_with_values", product?.[0].default_feature_id],

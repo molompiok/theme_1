@@ -213,7 +213,7 @@ export default function SideBarCategories() {
         isOpen={isModalOpen}
         animationName="translateBottom"
       >
-        <div className="relative bg-white h-screen w-full sm:w-80 md:w-96 p-6 overflow-y-auto">
+        <div className="relative bg-white h-dvh w-full sm:w-80 md:w-96 p-6 overflow-y-auto">
           <div className="w-full flex text-base flex-col items-center sm:text-lg font-light gap-4 justify-center">
             <Logo />
             <div className="flex gap-5 justify-center flex-wrap text-sm">
@@ -243,7 +243,7 @@ export default function SideBarCategories() {
           <BsX
             size={37}
             onClick={handleModalClose}
-            className="absolute top-2 right-2 cursor-pointer"
+            className="absolute top-3 right-4 cursor-pointer"
             onMouseEnter={(e) =>
               gsap.to(e.currentTarget, {
                 rotate: 0,

@@ -67,9 +67,8 @@ export const DisplayPriceDetail: React.FC<DisplayPriceProps> = React.memo(
 
     const { productFeatures, selectedFeatures, lastGroupProductId } = useproductFeatures();
 
-    // Récupérer la dernière priceValue ajoutée
     const getLatestPriceValue = () => {
-      const lastFeatureType = Array.from(selectedFeatures.keys()).pop(); // Dernière clé ajoutée dans selectedFeatures
+      const lastFeatureType = Array.from(selectedFeatures.keys()).pop(); 
       if (lastFeatureType && productFeatures.has(lastGroupProductId)) {
         const features = productFeatures.get(lastGroupProductId);
         return features?.get(lastFeatureType)?.priceValue || null;
@@ -77,7 +76,6 @@ export const DisplayPriceDetail: React.FC<DisplayPriceProps> = React.memo(
       return null;
     };
   
-    // const latestPriceValue = getLatestPriceValue();
     const totalPrice = useMemo(() => {
       const basePrice = safeParsePrice(price);
       const featurePrice = safeParsePrice(
@@ -86,11 +84,17 @@ export const DisplayPriceDetail: React.FC<DisplayPriceProps> = React.memo(
       return basePrice + featurePrice;
     }, [price, productFeatures, lastGroupProductId]);
 
-    const barredPrice = safeParsePrice(barred_price);
+    const barredPrice = useMemo(() => {
+      const basePrice = safeParsePrice(barred_price);
+      const featurePrice = safeParsePrice(
+        getLatestPriceValue()
+      );
+      return basePrice + featurePrice;
+    }, [price, productFeatures, lastGroupProductId]);
+
 
     return (
       <PriceWrapper label={`Prix détaillé en ${currency}`}>
-        <></>
        <span
           className="whitespace-nowrap text-black font-medium"
           aria-label={`Prix total: ${formatPrice(totalPrice)} ${currency}`}
