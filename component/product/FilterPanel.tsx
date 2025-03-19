@@ -2,74 +2,88 @@ import { useQuery } from "@tanstack/react-query";
 import { CiSliderHorizontal } from "react-icons/ci";
 import { get_filters } from "../../api/products.api";
 import { usePageContext } from "../../renderer/usePageContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FeaturType, Filter } from "../../pages/type";
 import clsx from "clsx";
+import { useSelectedFiltersStore } from "../../store/filter";
 
 type SelectedFilters = Record<string, string[]>;
 
 export default function FilterPanel() {
   const pageContext = usePageContext();
   const categorySlug = pageContext.routeParams?.slug;
+  const { urlPathname } = pageContext;
   const {
     data: filters,
     isLoading,
     isError,
   } = useQuery<Filter[]>({
-    queryKey: [
-      "get_filters",
-      { slug: categorySlug ? categorySlug : undefined },
-    ],
+    queryKey: ["get_filters", { slug: categorySlug ? categorySlug : undefined }],
     queryFn: () =>
       get_filters({ slug: categorySlug ? categorySlug : undefined }),
   });
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({});
-  console.log("🚀 ~ FilterPanel ~ selectedFilters:", selectedFilters);
+  const {selectedFilters , setSelectedFilters ,clearFilter , toggleFilter} = useSelectedFiltersStore()
 
-  if (isLoading)
-    return <div className="text-gray-500 text-center py-4">Chargement...</div>;
-  if (isError || !filters)
-    return <div className="text-red-500 text-center py-4">Erreur</div>;
+  const filterIdToName = filters?.reduce((acc, filter) => {
+    acc[filter.id] = filter.name.toLowerCase();
+    return acc;
+  }, {} as Record<string, string>) || {};
 
-  if (!Array.isArray(filters)) {
-    console.error("Filters is not an array:", filters);
-    return (
-      <div className="text-red-500 text-center py-4">Données invalides</div>
-    );
-  }
+  const filterNameToId = filters?.reduce((acc, filter) => {
+    acc[filter.name.toLowerCase()] = filter.id;
+    return acc;
+  }, {} as Record<string, string>) || {};
 
-  const toggleFilter = (filterId: string, value: string) => {
-    setSelectedFilters((prev) => {
-      const currentValues = prev[filterId] || [];
-      if (currentValues.includes(value)) {
-        return {
-          ...prev,
-          [filterId]: currentValues.filter((v) => v !== value),
-        };
-      } else {
-        return {
-          ...prev,
-          [filterId]: [...currentValues, value],
-        };
+  useEffect(() => {
+    if (!filters) return;
+
+    const currentSearchParams = new URLSearchParams(window.location.search);
+    const urlFilters: SelectedFilters = {};
+
+    currentSearchParams.forEach((value, name) => {
+      const filterId = filterNameToId[name];
+      if (filterId) {
+        urlFilters[filterId] = urlFilters[filterId] || [];
+        if (!urlFilters[filterId].includes(value)) {
+          urlFilters[filterId].push(value);
+        }
       }
     });
-  };
 
-  const removeFilter = (filterId: string, value: string) => {
-    setSelectedFilters((prev) => {
-      const currentValues = prev[filterId] || [];
-      return {
-        ...prev,
-        [filterId]: currentValues.filter((v) => v !== value),
-      };
+    const urlFiltersString = JSON.stringify(urlFilters);
+    const selectedFiltersString = JSON.stringify(selectedFilters);
+
+    if (urlFiltersString !== selectedFiltersString) {
+      setSelectedFilters(urlFilters);
+    }
+  }, [filters, urlPathname]);
+
+  useEffect(() => {
+    if (!filters) return;
+
+    const newSearchParams = new URLSearchParams();
+    Object.entries(selectedFilters).forEach(([filterId, values]) => {
+      const filterName = filterIdToName[filterId];
+      if (filterName && values.length > 0) {
+        values.forEach((value) => {
+          newSearchParams.append(filterName, value);
+        });
+      }
     });
-  };
 
-  const resetFilters = () => {
-    setSelectedFilters({});
-  };
+    const queryString = newSearchParams.toString();
+    const newUrl = queryString ? `${urlPathname}?${queryString}` : urlPathname;
+
+    if (
+      window.location.search !== `?${queryString}` &&
+      window.location.search !== queryString
+    ) {
+      window.history.replaceState(null, "", newUrl);
+    }
+  }, [selectedFilters, filters, urlPathname]);
+
 
   const activeFilters = Object.entries(selectedFilters).flatMap(
     ([filterId, values]) => values.map((value) => ({ filterId, value }))
@@ -89,10 +103,14 @@ export default function FilterPanel() {
           <div
             key={value}
             className={baseClass}
-            onClick={() => toggleFilter(filter.id, value)}
+            onClick={(e) => {
+              e.stopPropagation();
+              
+              toggleFilter(filter.id, value);
+            }}
           >
             <div
-              className={`size-6 rounded-full border-2 transition-all duration-200 ${
+              className={`size-7 rounded-md border transition-all duration-200 ${
                 isSelected
                   ? "border-black scale-110"
                   : "border-gray-300 group-hover:border-gray-500"
@@ -108,7 +126,11 @@ export default function FilterPanel() {
           <div
             key={value}
             className={baseClass}
-            onClick={() => toggleFilter(filter.id, value)}
+            onClick={(e) => {
+              e.stopPropagation();
+              
+              toggleFilter(filter.id, value);
+            }}
           >
             <div
               className={`size-5 flex items-center justify-center rounded border-2 transition-all duration-200 ${
@@ -142,7 +164,11 @@ export default function FilterPanel() {
           <div
             key={value}
             className={baseClass}
-            onClick={() => toggleFilter(filter.id, value)}
+            onClick={(e) => {
+              e.stopPropagation();
+              
+              toggleFilter(filter.id, value);
+            }}
           >
             <div
               className={`size-5 flex items-center justify-center rounded-full border-2 transition-all duration-200 ${
@@ -191,21 +217,27 @@ export default function FilterPanel() {
           <div
             key={value}
             className={baseClass}
-            onClick={() => toggleFilter(filter.id, value)}
+            onClick={(e) => {
+              e.stopPropagation();
+              
+              toggleFilter(filter.id, value);
+            }}
           >
             <div
-              className={`group size-5 flex  items-center justify-center  rounded border-2 transition-all duration-500 ${
+              className={`group size-5 flex items-center justify-center rounded-xl border-2 transition-all duration-500 ${
                 isSelected
                   ? "border-black bg-black"
                   : "border-gray-300 group-hover:bg-black/50 group-hover:border-gray-500"
               }`}
             >
               <svg
-                className={clsx("w-3 h-3 transition-all duration-300 text-white ", {
-                  "inline ": isSelected,
-                  "hidden group-hover:inline group-hover:opacity-45":
-                    !isSelected,
-                })}
+                className={clsx(
+                  "w-3 h-3 transition-all duration-300 text-white",
+                  {
+                    "inline": isSelected,
+                    "hidden group-hover:inline group-hover:opacity-45": !isSelected,
+                  }
+                )}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -224,19 +256,34 @@ export default function FilterPanel() {
     }
   };
 
+  if (isLoading)
+    return <div className="text-gray-500 text-center py-4">Chargement...</div>;
+  if (isError || !filters)
+    return <div className="text-red-500 text-center py-4">Erreur</div>;
+  if (!Array.isArray(filters)) {
+    
+    return <div className="text-red-500 text-center py-4">Données invalides</div>;
+  }
+
+  
+
   return (
     <div className="bg-white rounded-lg w-full max-w-xs md:max-w-sm">
       <div
         className={clsx(
-          "p-4 border-b h-[100px] duration-300 overflow-auto ease-in-out transform border-gray-200",
+          "p-4 border-b duration-300 overflow-auto ease-in-out transform border-gray-200",
           {
             "max-h-[100px] scale-y-100": activeFilters.length > 0,
-            "h-0 scale-y-0": activeFilters.length === 0,
+            "max-h-0 scale-y-0": activeFilters.length === 0,
           }
         )}
       >
         <button
-          onClick={resetFilters}
+          onClick={(e) => {
+            e.stopPropagation();
+            
+            clearFilter();
+          }}
           className="text-sm text-gray-700 mb-2 hover:text-black underline transition-colors"
         >
           Réinitialiser tous les filtres
@@ -249,7 +296,11 @@ export default function FilterPanel() {
             >
               <span>{value}</span>
               <button
-                onClick={() => removeFilter(filterId, value)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  
+                  toggleFilter(filterId, value);
+                }}
                 className="text-black transition-colors"
                 aria-label={`Supprimer ${value}`}
               >
@@ -273,14 +324,20 @@ export default function FilterPanel() {
 
       <div
         className="flex items-center justify-between p-2 border-b border-gray-200 cursor-pointer"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
       >
         <h2 className="text-lg font-semibold text-black">Filtres</h2>
-        <CiSliderHorizontal size={20} />
         <button
           className="lg:hidden p-1 text-black hover:bg-gray-100 rounded-full transition-transform duration-300"
           style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}
           aria-label={isOpen ? "Fermer les filtres" : "Ouvrir les filtres"}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
         >
           <CiSliderHorizontal size={20} />
         </button>
@@ -293,17 +350,15 @@ export default function FilterPanel() {
       >
         <div className="p-4 space-y-6">
           {filters.map((filter) => (
-            <div key={filter.id} className="space-y-3">
+            <div key={filter.id} className="space-y-2">
               <h3 className="text-sm font-medium text-gray-900 uppercase tracking-wide flex items-center gap-2">
                 {filter.name}
                 <span className="text-xs text-gray-500">
                   ({filter.values.length})
                 </span>
               </h3>
-              <div className="gap-4 flex justify-start items-center">
-                {filter.values.map((value) =>
-                  renderFilterOption(filter, value)
-                )}
+              <div className="flex gap-4 items-center">
+                {filter.values.map((value) => renderFilterOption(filter, value))}
               </div>
             </div>
           ))}

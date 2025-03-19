@@ -55,7 +55,7 @@ function ProductPageContent() {
     queryKey: ["get_products", slug],
     queryFn: () => get_products({ slug_product : slug }),
     select(data) {
-      return data.products
+      return data.list
     },
   });
 

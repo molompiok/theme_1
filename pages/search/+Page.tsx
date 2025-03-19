@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { BsSearch } from "react-icons/bs";
 import { useData } from "../../renderer/useData";
-import { Data } from "../index/+data";
 import { HydrationBoundary, useQuery } from "@tanstack/react-query";
 import { get_features_with_values, get_products } from "../../api/products.api";
 import { ProductClient } from "../type";
@@ -11,6 +10,7 @@ import { DisplayPrice } from "../../component/DisplayPrice";
 import { ProductMedia } from "../../component/ProductMedia";
 import FavoriteButton from "../../component/FavoriteButton";
 import { formatSlug } from "../../utils";
+import { Data } from "./+data";
 
 export default function Page() {
   const { dehydratedState } = useData<Data>();
@@ -53,19 +53,23 @@ function ListProductSearchCard() {
   const { urlParsed } = usePageContext();
 
   const {
-    data: products,
+    data : products,
     isLoading,
     isFetching,
     isPending,
+    isError
   } = useQuery({
-    queryKey: ["get_products", { name: urlParsed.search["name"] }],
+    queryKey: ["get_products", { search: urlParsed.search["name"] }],
     queryFn: () => get_products({ search: urlParsed.search["name"] }),
+    select(data) {
+      return data.list
+    },
   });
 
   if (isLoading || isFetching || isPending) {
     return <p className="text-center py-8">Chargement.......</p>;
   }
-  if (!products || products?.length === 0) {
+  if (!products || products?.length === 0 && isError) {
     return <p className="text-center py-8">Aucun produit</p>;
   }
 

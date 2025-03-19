@@ -8,8 +8,9 @@ import { get_filters, get_products } from "../../../api/products.api";
 const data = async (pageContext: PageContextServer) => {
   const queryClient = createQueryClient();
   const slug = pageContext.routeParams!.slug;
+  // const search = pageContext.urlParsed.searchAll;
   await queryClient.prefetchQuery({
-    queryKey: ["get_products", { slug_cat : slug }],
+    queryKey: ["get_products", { slug_cat : slug ,  }],
     queryFn: () => get_products({ slug_cat : slug }),
   });
 

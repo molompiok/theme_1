@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useAuthStore } from "../store/user";
-import toast from "react-hot-toast";
-import { BsXCircle } from "react-icons/bs";
+
 
 export const BASE_URL = import.meta.env.VITE_BASE_URL;
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -12,18 +11,35 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-
-export function build_search_params(params: Record<string, string | number | undefined>): URLSearchParams {
+export function build_search_params(params: {
+  [key: string]: string | number | string[] | Record<string, string[]> | undefined;
+}): URLSearchParams {
   const searchParams = new URLSearchParams();
+
   Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined) {
+    if (value === undefined) return;
+
+    if (key === "filters" && typeof value === "object" && !Array.isArray(value)) {
+      Object.entries(value).forEach(([filterKey, filterValues]) => {
+        filterValues.forEach((filterValue) => {
+          searchParams.append(`filters[${filterKey}][]`, filterValue);
+        });
+      });
+    } else if (Array.isArray(value)) {
+      value.forEach((item) => {
+        searchParams.append(key, item);
+      });
+    } else {
       searchParams.set(key, value.toString());
     }
   });
+
   return searchParams;
 }
 
-export function build_form_data(params: Record<string, string | number | undefined>): FormData {
+export function build_form_data(
+  params: Record<string, string | number | undefined>
+): FormData {
   const formData = new FormData();
 
   Object.entries(params).forEach(([key, value]) => {
@@ -34,7 +50,6 @@ export function build_form_data(params: Record<string, string | number | undefin
 
   return formData;
 }
-
 
 api.interceptors.response.use(
   (response) => response,
@@ -50,7 +65,7 @@ api.interceptors.response.use(
         //     <div className="flex items-center gap-3 p-4 bg-red-100 border-l-4 border-red-500 rounded-lg shadow-lg">
         //       <BsXCircle className="w-6 h-6 text-red-600" />
         //       <p className="text-red-800 font-medium">
-        //         Deconexion reussie 
+        //         Deconexion reussie
         //       </p>
         //     </div>
         //   ));

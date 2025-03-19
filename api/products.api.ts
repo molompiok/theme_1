@@ -47,29 +47,29 @@ export const get_products = async (params: {
   category_id?: string;
   page?: number;
   limit?: number;
-  // filters?: Record<string, string[]>
+  filters?: Record<string, string[]>;
 }) => {
   const searchParams = build_search_params(params);
-
+  if (Object.keys(params?.filters ?? {}).length) await delay(3000);
   try {
-    const { data: products } = await api.get<{
-      list: { products : ProductType[], category?: { id: string; name: string; description: string };
-      meta: MetaPagination }}>("/get_products?" + searchParams.toString());
-      console.log("🚀 ~ products:", products)
+    const { data } = await api.get<{
+      list: ProductType[];
+      category?: { id: string; name: string; description: string };
+      meta: MetaPagination;
+    }>("/get_products?" + searchParams.toString());
     return {
-      products: products.list.products.map(minimize_product),
-      category: products.list.category,
+      list: data.list.map(minimize_product),
+      category: data.category,
     };
   } catch (error) {
     console.error("Erreur lors de la récupération des produits :", error);
     return {
-      products:[],
+      list: [],
       category: null,
     };
   }
 };
 
-// Récupérer les features avec leurs valeurs
 export const get_features_with_values = async (params: {
   product_id?: string;
   feature_id?: string;
@@ -193,10 +193,7 @@ export const get_group_by_feature = async (params: {
   }
 };
 
-
-export const get_filters = async (params: {
-  slug?: string;
-}) => {
+export const get_filters = async (params: { slug?: string }) => {
   const searchParams = build_search_params(params);
 
   try {
@@ -209,4 +206,3 @@ export const get_filters = async (params: {
     throw error;
   }
 };
-

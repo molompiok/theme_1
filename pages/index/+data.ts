@@ -10,6 +10,7 @@ import { get_categories } from "../../api/categories.api";
 
 
 const data = async (pageContext: PageContextServer) => {
+  // const search = pageContext.urlParsed.searchAll;
   const queryClient = createQueryClient()
   await queryClient.prefetchQuery({
       queryKey: ["get_filters"],

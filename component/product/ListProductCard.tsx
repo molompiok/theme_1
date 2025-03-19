@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query"; // Assurez-vous que c'est le bon import selon votre setup
-import ProductCard from "./ProductCard"; // Ajustez le chemin
-import { ProductClient, ProductType } from "../../pages/type";
+import { useQuery } from "@tanstack/react-query";
+import ProductCard from "./ProductCard";
+import { Filter, ProductClient, ProductType } from "../../pages/type";
 import { usePageContext } from "../../renderer/usePageContext";
-import { get_products } from "../../api/products.api";
-import Loading from "../Loading";
+import { get_filters, get_products } from "../../api/products.api";
+import Skeleton from "../Skeleton";
+import { useSelectedFiltersStore } from "../../store/filter";
 
 interface ListProductCardProps {
   slug?: string;
@@ -13,23 +14,20 @@ interface ListProductCardProps {
 function ListProductCard({ slug, queryKey }: ListProductCardProps) {
   const pageContext = usePageContext();
   const categorySlug = slug || pageContext.routeParams?.slug;
+  const {selectedFilters } = useSelectedFiltersStore()
 
-  const { data, isPending, error } = useQuery<
-    // | ProductClient[]
-     {
-        products: ProductClient[];
-        category: {
-          id: string;
-          name: string;
-          description: string;
-        } | undefined | null;
-      },
-    Error
-  >({
-    queryKey: [queryKey, { slug_cat: categorySlug }].filter(Boolean),
-    queryFn: () =>
-      categorySlug ? get_products({ slug_cat: categorySlug }) : get_products({}),
-    // staleTime: 24 * 60 * 60 * 1000, // 24 heures
+  const {
+    data: products,
+    isPending,
+    error,
+  } = useQuery({
+    queryKey: [queryKey, categorySlug, selectedFilters],
+    queryFn: () => {
+      return categorySlug
+        ? get_products({ slug_cat: categorySlug, filters: selectedFilters })
+        : get_products({ filters: selectedFilters });
+    },
+    select: (data) => data.list,
     retry: 2,
   });
 
@@ -39,7 +37,7 @@ function ListProductCard({ slug, queryKey }: ListProductCardProps) {
         className="flex justify-center items-center min-h-[50vh]"
         aria-live="polite"
       >
-        <Loading />
+        <Skeleton type="product-list" count={8} />
       </div>
     );
   }
@@ -52,11 +50,7 @@ function ListProductCard({ slug, queryKey }: ListProductCardProps) {
     );
   }
 
-  const products: ProductClient[] = Array.isArray(data)
-    ? data
-    : data?.products || [];
-
-  if (!products.length) {
+  if (!products?.length) {
     return (
       <p className="text-center text-gray-500 py-20 text-lg">
         {categorySlug
