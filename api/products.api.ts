@@ -36,19 +36,20 @@ function minimize_product(product: ProductType): ProductClient {
     slug,
   };
 }
-
+export  type OrderByType = "date_asc" | "date_desc" | "price_asc" | "price_desc";
 export const get_products = async (params: {
   product_id?: string;
   store_id?: string;
   slug_product?: string;
   slug_cat?: string;
   search?: string;
-  order_by?: "date_asc" | "date_desc" | "price_asc" | "price_desc";
+  order_by?: OrderByType;
   category_id?: string;
   page?: number;
   limit?: number;
   filters?: Record<string, string[]>;
 }) => {
+  console.log("🚀 ~ params:", params)
   const searchParams = build_search_params(params);
   if (Object.keys(params?.filters ?? {}).length) await delay(3000);
   try {

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import ProductCard from "./ProductCard";
-import { Filter, ProductClient, ProductType } from "../../pages/type";
+import { Filter, filterOptions, ProductClient, ProductType } from "../../pages/type";
 import { usePageContext } from "../../renderer/usePageContext";
-import { get_filters, get_products } from "../../api/products.api";
+import { get_filters, get_products, OrderByType } from "../../api/products.api";
 import Skeleton from "../Skeleton";
 import { useSelectedFiltersStore } from "../../store/filter";
 
@@ -14,8 +14,11 @@ interface ListProductCardProps {
 function ListProductCard({ slug, queryKey }: ListProductCardProps) {
   const pageContext = usePageContext();
   const categorySlug = slug || pageContext.routeParams?.slug;
-  const {selectedFilters } = useSelectedFiltersStore()
-
+  const { selectedFilters } = useSelectedFiltersStore()
+  const filterNameToId = filterOptions.reduce((acc, filter) => {
+    acc[filter.name.toLowerCase()] = filter.id;
+    return acc;
+  }, {} as Record<string, string>);
   const {
     data: products,
     isPending,
@@ -23,9 +26,12 @@ function ListProductCard({ slug, queryKey }: ListProductCardProps) {
   } = useQuery({
     queryKey: [queryKey, categorySlug, selectedFilters],
     queryFn: () => {
+      const order = filterNameToId?.[selectedFilters?.order_by?.[0]] as OrderByType || 'date_desc'
+      const { order_by, ...restFilters } = selectedFilters;
       return categorySlug
-        ? get_products({ slug_cat: categorySlug, filters: selectedFilters })
-        : get_products({ filters: selectedFilters });
+        ? get_products({ slug_cat: categorySlug, filters: restFilters , order_by : order  })
+        : get_products({ filters: restFilters, order_by : order });
+        
     },
     select: (data) => data.list,
     retry: 2,

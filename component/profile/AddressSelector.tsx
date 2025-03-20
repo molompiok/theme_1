@@ -194,7 +194,7 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
   const fetchUser = useAuthStore((state) => state.fetchUser);
 
   const [address, setAddress] = useState<Address>(() => {
-    const userAddress = user?.addresses[0];
+    const userAddress = user?.addresses?.[0];
     return {
       id: userAddress?.id,
       text: userAddress?.name?.split("/")[0] ?? userAddress?.name ?? "",

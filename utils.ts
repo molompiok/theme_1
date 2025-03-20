@@ -24,3 +24,14 @@ export const formatPrice = (price?: string | number): string => {
   if (!price) return "0";
   return price.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 };
+
+export const filterIdToName = (filters : Array<{id : string , name : string}>) => filters.reduce((acc, filter) => {
+  console.log("🚀 ~ filterIdToName ~ filters:", filters)
+  acc[filter.id] = filter.name.toLowerCase();
+  return acc;
+}, {} as Record<string, string>);
+
+export const filterNameToId = (filters : Array<{id : string , name : string}>) => filters.reduce((acc, filter) => {
+  acc[filter.name.toLowerCase()] = filter.id;
+  return acc;
+}, {} as Record<string, string>);

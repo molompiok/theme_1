@@ -1,43 +1,41 @@
-import React, { useState } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from './Popover';
+import { useEffect } from 'react';
+import { Popover, PopoverTrigger, PopoverContent } from './Popover';
+import { useSelectedFiltersStore } from '../store/filter';
 
-const FilterPopover = ({ 
-  options = [], 
-  defaultLabel = 'Plus récents', 
-  triggerLabel = 'Filtrer par', 
-  onOptionClick = (option : string) => {}, 
-  className = '' 
-} : {
-    options?: string[];
-    defaultLabel?: string;
-    triggerLabel?: string;
-    onOptionClick?: (option: string) => void;
-    className?: string;
-}) => {
-  const [selectedOption, setSelectedOption] = useState(defaultLabel);
+const defaultOptions = ['plus recent', 'moins recent', 'prix eleve', 'prix bas'] as const;
+type OptionType = typeof defaultOptions[number];
 
-const handleClick = (option: string): void => {
-    setSelectedOption(option);
-    onOptionClick(option);
-};
+interface FilterPopoverProps {
+  className?: string;
+}
+
+const FilterPopover = ({ className = '' }: FilterPopoverProps) => {
+  const setFilter = useSelectedFiltersStore(state => state.setFilter);
+  const selectedFilters = useSelectedFiltersStore(state => state.selectedFilters);
+
+
+  const handleClick = (option: OptionType) => {
+    setFilter('order_by', [option]);
+   
+  };
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className={`flex items-center gap-2 px-4 py-2 bg-white border border-black rounded-lg hover:bg-gray-100 transition-colors ${className}`}>
-          <span className="text-sm font-medium text-black">
-            {triggerLabel}
-          </span>
-          <span className="text-sm text-black">{selectedOption}</span>
+        <button 
+          className={`flex items-center gap-2  px-2 text-sm lg:text-base border-gray-300 bg-white/90 border rounded-lg ${className}`}
+        >
+          <span className='text-gray-500'>Filtrer par</span>
+          <span className='text-gray-900'>{selectedFilters['order_by']}</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent className="z-20 w-48 p-0">
-        <div className="bg-white border border-black rounded-lg shadow-lg py-2">
-          {options.map((option, index) => (
+      <PopoverContent className="z-50 w-48 p-0">
+        <div className="bg-white border border-gray-100 rounded-lg py-2">
+          {defaultOptions.map((option) => (
             <button
-              key={index}
+              key={option}
               onClick={() => handleClick(option)}
-              className="w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-100 capitalize transition-colors"
+              className="w-full text-sm text-left px-4 py-2 hover:bg-gray-100"
             >
               {option}
             </button>

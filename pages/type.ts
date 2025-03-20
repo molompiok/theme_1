@@ -111,7 +111,12 @@ type ProductPick =
 
 export type ProductClient = Pick<ProductType, ProductPick>;
 
-
+export const filterOptions = [
+  { id: 'date_asc', name: 'plus recent' },
+  { id: 'date_desc', name: 'moins recent' },
+  { id: 'price_desc', name: 'prix eleve' },
+  { id: 'price_asc', name: 'prix bas' },
+] as  const;
 
 export enum FeaturType {
   COLOR = "color",

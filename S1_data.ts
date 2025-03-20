@@ -874,8 +874,5 @@ const categoriesData: CategoryType[] = [
  * 5- filter
  * 6- About
  * 7- parametre
- * 
  */
-
-
    // adresse - name - numero telephone

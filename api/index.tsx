@@ -12,7 +12,7 @@ export const api = axios.create({
 });
 
 export function build_search_params(params: {
-  [key: string]: string | number | string[] | Record<string, string[]> | undefined;
+  [key: string]: string | number | string[] | Record<string, string[] | string> | undefined;
 }): URLSearchParams {
   const searchParams = new URLSearchParams();
 
@@ -21,9 +21,13 @@ export function build_search_params(params: {
 
     if (key === "filters" && typeof value === "object" && !Array.isArray(value)) {
       Object.entries(value).forEach(([filterKey, filterValues]) => {
-        filterValues.forEach((filterValue) => {
-          searchParams.append(`filters[${filterKey}][]`, filterValue);
-        });
+        if (Array.isArray(filterValues)) {
+          filterValues.forEach((filterValue) => {
+            searchParams.append(`filters[${filterKey}][]`, filterValue);
+          });
+        } else {
+          searchParams.append(`filters[${filterKey}]`, filterValues);
+        }
       });
     } else if (Array.isArray(value)) {
       value.forEach((item) => {

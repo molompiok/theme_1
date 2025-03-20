@@ -45,7 +45,6 @@ export default function ModalAuth() {
       zIndex={100}
       setHide={handleModalClose}
       isOpen={isOpen}
-      animationName="zoom"
     >
       <div className="relative w-full max-w-md p-6 bg-white rounded-lg shadow-lg max-h-[80dvh] md:max-w-[600px] overflow-auto">
         <button

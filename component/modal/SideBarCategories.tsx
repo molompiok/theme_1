@@ -15,6 +15,7 @@ import { Logo } from "../../renderer/Layout";
 import { IoMdLink } from "react-icons/io";
 import gsap from "gsap";
 import { navigate } from "vike/client/router";
+import { MdCategory } from "react-icons/md";
 
 export default function SideBarCategories() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -76,7 +77,7 @@ export default function SideBarCategories() {
   }
 
   if (isError || !categories) {
-    return null;
+    return <></>;
   }
 
   const handleModalOpen = () => {
@@ -168,7 +169,7 @@ export default function SideBarCategories() {
               </Link>
             </li>
           ))}
-        {shouldShowModal && (
+        {shouldShowModal ? (
           <li
             className="hidden lg:block"
             onMouseEnter={(e) =>
@@ -186,7 +187,7 @@ export default function SideBarCategories() {
               <BsChevronDown size={24} color="black" className="-rotate-90" />
             </button>
           </li>
-        )}
+        ) : null}
       </ul>
       <div
         className="lg:hidden p-4"
@@ -213,7 +214,7 @@ export default function SideBarCategories() {
         isOpen={isModalOpen}
         animationName="translateBottom"
       >
-        <div className="relative bg-white h-dvh w-full sm:w-80 md:w-96 p-6 overflow-y-auto">
+        <div className="relative font-primary bg-white h-dvh w-full sm:w-80 md:w-96 p-6 overflow-y-auto">
           <div className="w-full flex text-base flex-col items-center sm:text-lg font-light gap-4 justify-center">
             <Logo />
             <div className="flex gap-5 justify-center flex-wrap text-sm">
@@ -321,13 +322,15 @@ export default function SideBarCategories() {
                           handleForward(category.id)
                         }
                       }}
-                      className="flex text-base sm:text-lg  transition-colors"
+                      className="flex items-center text-base sm:text-lg  transition-colors"
                     >
+                      {/* <MdCategory size={28} className="mr-2 text-gray-600"/>
+                       */}
+                       <img src="https://media.croma.com/image/upload/v1711971142/Croma%20Assets/Communication/Mobiles/Images/305869_0_hgbjgw.png" 
+                       alt=""  className="mr-2 size-10 rounded-md text-gray-600"/>
+                      <span className="hidden sm:inline"> 
                       {category.name}
-                      <IoMdLink
-                        size={20}
-                        className="ml-1 text-gray-700 inline"
-                      />
+                      </span>
                     </LinkSideBar>
                     {hasSubCategories(category.id) && (
                       <button
