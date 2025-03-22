@@ -15,7 +15,7 @@ import { Logo } from "../../renderer/Layout";
 import { IoMdLink } from "react-icons/io";
 import gsap from "gsap";
 import { navigate } from "vike/client/router";
-import { MdCategory } from "react-icons/md";
+import { BASE_URL } from "../../api";
 
 export default function SideBarCategories() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -145,7 +145,7 @@ export default function SideBarCategories() {
   const shouldShowModal = parentCategories?.length ?? 0 > 2;
   return (
     <>
-      <ul className="hidden lg:flex flex-wrap gap-4 px-4">
+      <ul className="hidden lg:flex flex-wrap gap-1 px-4">
         {parentCategories
           ?.slice(0, shouldShowModal ? 2 : parentCategories?.length)
           .map((category) => (
@@ -160,12 +160,18 @@ export default function SideBarCategories() {
             >
               <Link
                 href={`/categorie/${category.slug}`}
-                className="flex items-center px-3 py-2 hover:font-semibold transition-colors"
+                className=" px-3 py-2 font-semibold transition-colors"
               >
-                {category.name}
-                {category.icon?.length > 0 && (
-                  <span className="ml-2">{category.icon[0]}</span>
-                )}
+                <div className="flex gap-2 items-center">
+                  {category.icon?.length > 0 && (
+                    <img
+                      src={BASE_URL + category.icon[0]}
+                      className="size-7 rounded-md"
+                      alt={category.name}
+                    />
+                  )}
+                  <div>{category.name}</div>
+                </div>
               </Link>
             </li>
           ))}
@@ -174,23 +180,24 @@ export default function SideBarCategories() {
             className="hidden lg:block"
             onMouseEnter={(e) =>
               gsap.to(e.currentTarget, {
-                scale: 1.2,
-                rotate: 90,
+                scale: 1.1,
+                y : 8,
+                // rotate: 90,
                 duration: 0.4,
               })
             }
             onMouseLeave={(e) =>
-              gsap.to(e.currentTarget, { scale: 1, rotate: 0, duration: 0.4 })
+              gsap.to(e.currentTarget, { scale: 1, y : 0 , duration: 0.4})
             }
           >
-            <button onClick={handleModalOpen} className="p-2 cursor-pointer">
-              <BsChevronDown size={24} color="black" className="-rotate-90" />
+            <button onClick={handleModalOpen} className="px-2 pt-2 cursor-pointer">
+              <BsChevronDown size={24} color="black" className="" />
             </button>
           </li>
         ) : null}
       </ul>
       <div
-        className="lg:hidden p-4"
+        className="lg:hidden px-4"
         onMouseEnter={(e) =>
           gsap.to(e.currentTarget, { scale: 1.1, duration: 0.2 })
         }
@@ -214,8 +221,8 @@ export default function SideBarCategories() {
         isOpen={isModalOpen}
         animationName="translateBottom"
       >
-        <div className="relative font-primary bg-white h-dvh w-full sm:w-80 md:w-96 p-6 overflow-y-auto">
-          <div className="w-full flex text-base flex-col items-center sm:text-lg font-light gap-4 justify-center">
+        <div className="font-primary relative bg-white min-h-dvh w-full overflow-auto sm:w-[400px] md:w-[450px] p-4 pt-12">
+          <div className="w-full flex text-base flex-col items-center sm:text-lg gap-4 justify-center">
             <Logo />
             <div className="flex gap-5 justify-center flex-wrap text-sm">
               <Link
@@ -223,7 +230,7 @@ export default function SideBarCategories() {
                 href="/"
                 className="hover:font-semibold"
               >
-                Welcome
+                Boutique
               </Link>
               <Link
                 onClick={handleModalClose}
@@ -275,7 +282,9 @@ export default function SideBarCategories() {
                   }
                 >
                   <BsChevronLeft size={24} />
-                  <span className="hidden cursor-pointer text-xs sm:inline">Retour</span>
+                  <span className="hidden cursor-pointer text-xs sm:inline">
+                    Retour
+                  </span>
                 </button>
               )}
             </div>
@@ -283,8 +292,8 @@ export default function SideBarCategories() {
             <ul ref={listRef} className="flex flex-col gap-4">
               {currentCategory ? (
                 <LinkSideBar
-                  onClick={()=>{
-                    navigate(`/categorie/${currentCategory?.slug}`)
+                  onClick={() => {
+                    navigate(`/categorie/${currentCategory?.slug}`);
                     handleModalClose();
                   }}
                   className="flex underline-animation text-left  font-semibold sm:text-lg mt-4 transition-colors"
@@ -315,22 +324,23 @@ export default function SideBarCategories() {
                   >
                     <LinkSideBar
                       onClick={() => {
-                        if(!hasSubCategories(category.id)){
-                          navigate(`/categorie/${category.slug}`)
+                        if (!hasSubCategories(category.id)) {
+                          navigate(`/categorie/${category.slug}`);
                           handleModalClose();
                         } else {
-                          handleForward(category.id)
+                          handleForward(category.id);
                         }
                       }}
                       className="flex items-center text-base sm:text-lg  transition-colors"
                     >
-                      {/* <MdCategory size={28} className="mr-2 text-gray-600"/>
-                       */}
-                       <img src="https://media.croma.com/image/upload/v1711971142/Croma%20Assets/Communication/Mobiles/Images/305869_0_hgbjgw.png" 
-                       alt=""  className="mr-2 size-10 rounded-md text-gray-600"/>
-                      <span className="hidden sm:inline"> 
-                      {category.name}
-                      </span>
+                      {category.icon?.length > 0 && (
+                        <img
+                          src={BASE_URL + category.icon[0]}
+                          alt=""
+                          className="mr-2 size-8 rounded-md text-gray-600"
+                        />
+                      )}
+                      <span className="text-[.95rem] ">{category.name}</span>
                     </LinkSideBar>
                     {hasSubCategories(category.id) && (
                       <button

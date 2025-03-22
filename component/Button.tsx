@@ -10,7 +10,6 @@ import {
 } from "../api/products.api";
 import AddRemoveItemCart from "./AddRemoveItemCart";
 import Loading from "./Loading";
-
 export function CartButton({
   text,
   product,
@@ -21,10 +20,7 @@ export function CartButton({
   const setFeatureModal = useProductSelectFeature(
     (state) => state.setFeatureModal
   );
-  const addProduct = usePanier((state) => state.add);
-  const carts = usePanier((state) => state.panier);
-  const toggleCart = usePanier((state) => state.toggleCart);
-  const pF = useproductFeatures((state) => state.productFeatures);
+  const { add: addProduct, panier: carts, toggleCart } = usePanier();
   const product_id = product?.id;
 
   const {
@@ -33,42 +29,69 @@ export function CartButton({
     isLoading,
   } = useQuery({
     queryKey: ["get_group_by_feature", { product_id }],
-    queryFn: () =>
-      get_group_by_feature({
-        product_id,
-      }),
+    queryFn: () => get_group_by_feature({ product_id }),
     enabled: !!product_id,
   });
+
   const { data: features, status } = useQuery({
-    queryKey: ["get_features_with_values", product?.id],
+    queryKey: ["get_features_with_values", product_id],
     queryFn: () =>
-      product?.id ? get_features_with_values({ product_id: product.id }) : null,
-    enabled: !!product?.id,
+      product_id ? get_features_with_values({ product_id }) : null,
+    enabled: !!product_id,
   });
+
   if (isLoading || isPending) {
     return <Loading />;
   }
+
   if (!group_products) {
     return <div>⛔</div>;
   }
 
   const stock = group_products.reduce((sum, group) => sum + group.stock, 0);
+  const itemInPanier = carts.find((item) => item.product.id === product_id);
 
-  const itemInPanier = carts.find((item) => item.product.id === product?.id);
+  const handleFeatureModalClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    document.body.style.overflow = "hidden";
+    setFeatureModal(true, product);
+  };
+
+  const handleAddToCartClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    document.body.style.overflow = "hidden";
+    if ((features?.length ?? 0) <= 1) {
+      toggleCart(true);
+      const groupProduct = group_products.find(
+        (p) => p.product_id === product_id
+      );
+      if (groupProduct) addProduct(product, groupProduct);
+    } else {
+      setFeatureModal(true, product);
+    }
+  };
+
+  const buttonClasses = `
+    flex justify-center items-center w-full border py-1 
+    border-gray-500 rounded-xs cursor-pointer relative z-10 
+    bg-white overflow-hidden
+  `;
+
+  const textClasses = `
+    whitespace-nowrap z-20 group-hover:text-black 
+    group-hover:font-bold transition-all duration-500 
+    text-clamp-base group-hover:translate-y-0
+  `;
 
   return (
     <div className="w-full font-secondary group relative mt-auto overflow-hidden inline-block">
       {(group_products?.length ?? 0) > 1 ? (
         <button
           disabled={status !== "success" || stock === 0}
-          onClick={(e) => {
-            e.stopPropagation();
-            document.body.style.overflow = "hidden";
-            setFeatureModal(true, product);
-          }}
-          className="flex justify-center items-center w-full border py-1 border-gray-500 rounded-xs cursor-pointer relative z-10 bg-white overflow-hidden"
+          onClick={handleFeatureModalClick}
+          className={buttonClasses}
         >
-          <div className="whitespace-nowrap z-20 group-hover:text-black group-hover:font-bold transition-all duration-500 text-clamp-base group-hover:translate-y-0">
+          <div className={textClasses}>
             <span className="inline">
               {stock !== 0 ? "Voir plus" : "Indisponible"}
             </span>
@@ -76,24 +99,15 @@ export function CartButton({
         </button>
       ) : (
         <>
-          {itemInPanier?.nbr === 0 ? (
+          {itemInPanier?.nbr === 0 || !itemInPanier ? (
             <button
               disabled={status !== "success" || stock === 0}
-              onClick={(e) => {
-                e.stopPropagation();
-                document.body.style.overflow = "hidden";
-                if ((features?.length ?? 0) <= 1) {
-                  toggleCart(true);
-                  addProduct(product, group_products[0]);
-                } else {
-                  setFeatureModal(true, product);
-                }
-              }}
-              className="flex justify-center items-center w-full border py-1 border-gray-500 rounded-xs cursor-pointer relative z-10 bg-white overflow-hidden"
+              onClick={handleAddToCartClick}
+              className={buttonClasses}
             >
-              <div className="whitespace-nowrap z-20 group-hover:text-black group-hover:font-bold transition-all duration-500 text-clamp-base group-hover:translate-y-0">
+              <div className={textClasses}>
                 <span className="inline">
-                  {stock !== 0 ? text : "Indisponible"}
+                  {stock !== 0 ? text : "Indisponibles"}
                 </span>
               </div>
             </button>
@@ -134,7 +148,7 @@ export function CommandButton({
           if (totalItems === 0) return handleModalCartClose();
           callBack?.();
         }}
-        className="w-full border border-gray-300 px-2 py-1.5 cursor-pointer relative z-10 bg-black/60 overflow-hidden rounded-sm"
+        className="w-full border border-gray-300 px-2 py-2.5 cursor-pointer relative z-10 bg-black/60 overflow-hidden rounded-sm"
       >
         <span className="relative whitespace-nowrap z-20 group-hover:underline text-white transition-all duration-500 text-clamp-base -translate-y-1/2 group-hover:translate-y-0">
           <span className="inline">
@@ -154,8 +168,11 @@ interface ButtonValidCartProps {
 export function ButtonValidCart({ features, product }: ButtonValidCartProps) {
   const toggleCart = usePanier((st) => st.toggleCart);
   const addProduct = usePanier((st) => st.add);
-  const { selectedFeatures, groupProducts, lastGroupProductId } = useproductFeatures();
-  const setFeatureModal = useProductSelectFeature((state) => state.setFeatureModal);
+  const { selectedFeatures, groupProducts, lastGroupProductId } =
+    useproductFeatures();
+  const setFeatureModal = useProductSelectFeature(
+    (state) => state.setFeatureModal
+  );
 
   const matchingGroup = useMemo(() => {
     const groups = groupProducts.get(lastGroupProductId) || [];
@@ -185,7 +202,7 @@ export function ButtonValidCart({ features, product }: ButtonValidCartProps) {
 
   if (!groupProducts.size || !matchingGroup) {
     return (
-      <div className="min-h-[48px] mx-auto text-center text-clamp-base uppercase text-gray-50 w-full py-3 px-4 mt-7 bg-black/45">
+      <div className="min-h-[48px] mx-auto text-center text-clamp-base uppercase text-gray-50 w-full py-3 px-4 mt-1 bg-black/45">
         Sélectionnez une variante
       </div>
     );
@@ -196,7 +213,7 @@ export function ButtonValidCart({ features, product }: ButtonValidCartProps) {
       disabled={!!productWhoRequired}
       onClick={handleAddToCart}
       className={clsx(
-        "mx-auto cursor-pointer text-center text-clamp-base uppercase text-gray-50 w-full py-3 px-4 mt-7 min-h-[48px]",
+        "mx-auto cursor-pointer sm:w-auto text-center text-clamp-base uppercase text-gray-50 w-full py-3 px-4 mt-7 min-h-[48px]",
         {
           "bg-black/45": !!productWhoRequired,
           "bg-black hover:bg-gray-900": !productWhoRequired,

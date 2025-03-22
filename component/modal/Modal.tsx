@@ -14,6 +14,7 @@ const animation = {
   skew: ["skew-y-0", "skew-y-12"],
   flip: ["rotate-x-0", "rotate-x-180"],
   blur: ["blur-0", "blur-md"],
+  backdropScale: ["scale-100", "scale-90"],
 } as const;
 
 export default function Modal({
@@ -21,6 +22,7 @@ export default function Modal({
   children,
   styleContainer,
   animationName = "zoom",
+  backdropAnimation = "backdropScale",
   setHide,
   position = "center",
   zIndex = 50,
@@ -28,6 +30,7 @@ export default function Modal({
   isOpen: boolean;
   styleContainer?: string;
   animationName?: keyof typeof animation;
+  backdropAnimation?: keyof typeof animation;
   setHide: () => void;
   position?: "start" | "end" | "center";
   zIndex?: number;
@@ -101,15 +104,16 @@ export default function Modal({
       aria-labelledby="modal-title"
       ref={modalRef}
       className={twMerge(
-        "fixed inset-0 flex bg-black/20 backdrop-blur-[.15rem] transition-opacity duration-500 ease-in-out",
+        "fixed inset-0 flex bg-black/20 backdrop-blur-[.15rem] transition-all duration-500 ease-in-out",
         position === "start"
           ? "justify-start"
           : position === "end"
           ? "justify-end"
           : "items-center justify-center",
         isOpen
-          ? "opacity-100 pointer-events-auto"
-          : "opacity-0 pointer-events-none"
+          ? animation[backdropAnimation][0]
+          : animation[backdropAnimation][1],
+        isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       )}
       style={{
         zIndex,
@@ -122,7 +126,7 @@ export default function Modal({
       }}
     >
       <div
-      data-outside="outside"
+        data-outside="outside"
         className={twMerge(
           "relative transform transition-all duration-500 ease-in-out",
           isOpen ? animation[animationName][0] : animation[animationName][1],

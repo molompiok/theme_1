@@ -41,10 +41,11 @@ export default function ModalAuth() {
 
   return (
     <Modal
-      styleContainer="flex items-center justify-center select-none size-full"
+      styleContainer="flex items-end min-[500px]:items-center justify-center select-none size-full"
       zIndex={100}
       setHide={handleModalClose}
       isOpen={isOpen}
+      animationName="translateBottom"
     >
       <div className="relative w-full max-w-md p-6 bg-white rounded-lg shadow-lg max-h-[80dvh] md:max-w-[600px] overflow-auto">
         <button
@@ -59,7 +60,6 @@ export default function ModalAuth() {
           {type === "login" ? "Connexion" : "Créer un compte"}
         </h2>
         <p className="text-sm text-gray-600 text-center mb-5">{message}</p>
-
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <label htmlFor="email" className="text-sm font-medium">

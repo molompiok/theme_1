@@ -19,7 +19,7 @@ function LinkIcon(props: {
 
   const className = [
     props.className,
-    "underline-animation font-spacegrotesk whitespace-nowrap cursor-pointer",
+    "underline-animation text-[.95rem] font-primary whitespace-nowrap uppercase cursor-pointer",
     isActive && "underline-animation-active",
   ]
     .filter(Boolean)
@@ -27,13 +27,12 @@ function LinkIcon(props: {
 
   return (
     <button
-    
       onClick={() => {
         navigate(href);
       }}
-      className={className}
+     
     >
-      <span className="inline">{children}</span>
+      <span  className={className}>{children}</span>
     </button>
   );
 }

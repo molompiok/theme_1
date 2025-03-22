@@ -16,13 +16,17 @@ import { Helmet } from "react-helmet";
 import { BASE_URL } from "../../../api";
 import { HydrationBoundary, useQuery } from "@tanstack/react-query";
 import { useData } from "../../../renderer/useData";
-import { get_features_with_values, get_products } from "../../../api/products.api";
+import {
+  get_features_with_values,
+  get_products,
+} from "../../../api/products.api";
 import Loading from "../../../component/Loading";
 import { CommentsProduct } from "../../../S1_data";
 import FavoriteButton from "../../../component/FavoriteButton";
 import type { Data } from "./+data";
 import { Feature, ProductClient } from "../../type";
 import gsap from "gsap";
+import { RenderFeatureComponent } from "../../../component/product/renderFeatureComponent";
 
 export default function Page() {
   const { dehydratedState } = useData<Data>();
@@ -53,9 +57,9 @@ function ProductPageContent() {
     error,
   } = useQuery({
     queryKey: ["get_products", slug],
-    queryFn: () => get_products({ slug_product : slug }),
+    queryFn: () => get_products({ slug_product: slug }),
     select(data) {
-      return data.list
+      return data.list;
     },
   });
 
@@ -74,7 +78,10 @@ function ProductPageContent() {
 
   if (isPending || isPendingFeatures) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]" aria-live="polite">
+      <div
+        className="flex items-center justify-center min-h-[50vh]"
+        aria-live="polite"
+      >
         <Loading />
       </div>
     );
@@ -101,7 +108,7 @@ function ProductPageContent() {
         <meta property="og:description" content={product.description} />
         <meta
           property="og:image"
-          content={BASE_URL + (features?.[0]?.values[0]?.views[0])}
+          content={BASE_URL + features?.[0]?.values[0]?.views[0]}
         />
       </Helmet>
       <main className="container font-primary mx-auto px-4 sm:px-6 lg:px-8">
@@ -114,10 +121,7 @@ function ProductPageContent() {
             setSwiperInstance={setSwiperInstance}
             handleImageClick={handleImageClick}
           />
-          <ProductDetails
-            product={product}
-            features={features}
-          />
+          <ProductDetails product={product} features={features} />
         </section>
         <FAQSection expandedFAQ={expandedFAQ} setExpandedFAQ={setExpandedFAQ} />
         <ReviewsSection product={product} />
@@ -143,20 +147,43 @@ function ProductGallery({
   handleImageClick,
   setImgIndex,
 }: ProductGalleryProps) {
-  const selectedFeatures = useproductFeatures((state) => state.selectedFeatures);
+  const selectedFeatures = useproductFeatures(
+    (state) => state.selectedFeatures
+  );
 
   const mediaViews = useMemo(() => {
-    if (!features || !features.length) return ["/img/default_img.gif"]; 
+    if (!features || !features.length) return ["/img/default_img.gif"];
 
-    const colorFeature = features.find((f) => f.type === "color") || features[0];
+    const colorFeature =
+      features.find((f) => f.type === "color") || features[0];
     const selectedValue = selectedFeatures.get(colorFeature.name);
-    const value = colorFeature.values.find((v) => v.text === selectedValue) || colorFeature.values[0];
-    return value?.views.length ? value.views : [ ""];
+    const value =
+      colorFeature.values.find((v) => v.text === selectedValue) ||
+      colorFeature.values[0];
+    return value?.views.length ? value.views : [""];
   }, [features, selectedFeatures, product]);
 
   return (
-    <div className="relative space-y-1">
-      <div className="relative">
+    <div className="relative flex">
+      <div className=" min-[600px]:flex hidden flex-col gap-2 overflow-x-auto pb-2 scrollbar-thin">
+        {mediaViews.map((view, index) => (
+          <button
+            key={index}
+            className={clsx("p-1 border-2 rounded-md flex-shrink-0", {
+              "border-gray-800": imgIndex === index,
+              "border-gray-200": imgIndex !== index,
+            })}
+            onClick={() => handleImageClick(index)}
+          >
+            <ProductMedia
+              mediaList={[view]}
+              productName={product.name}
+              className="size-11 md:size-14 object-cover"
+            />
+          </button>
+        ))}
+      </div>
+      <div className=" min-[600px]:size-[80%] size-full relative">
         <FavoriteButton product_id={product.id} />
         <Swiper
           modules={[A11y, Pagination]}
@@ -178,24 +205,6 @@ function ProductGallery({
           ))}
         </Swiper>
       </div>
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
-        {mediaViews.map((view, index) => (
-          <button
-            key={index}
-            className={clsx("p-1 border-2 rounded-md flex-shrink-0", {
-              "border-gray-800": imgIndex === index,
-              "border-gray-200": imgIndex !== index,
-            })}
-            onClick={() => handleImageClick(index)}
-          >
-            <ProductMedia
-              mediaList={[view]}
-              productName={product.name}
-              className="w-14 h-14 md:w-16 md:h-16 object-cover"
-            />
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
@@ -210,7 +219,7 @@ function ProductDetails({ product, features }: ProductDetailsProps) {
     <div className="space-y-3">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold">{product.name}</h1>
-        <p className="text-gray-600 mt-2">{product.description}</p>
+        <p className="text-gray-600 text-base/5 mt-2">{product.description}</p>
       </div>
       <div className="flex items-center gap-2">
         <ReviewsStars note={4.6} size={20} style="text-orange-500" />
@@ -219,21 +228,16 @@ function ProductDetails({ product, features }: ProductDetailsProps) {
       <DisplayPriceDetail currency={product.currency} price={product.price} />
       <div className="space-y-3 max-h-[50dvh] overflow-y-auto scrollbar-thin">
         {features?.map((feature) => (
-          <div key={feature.id}>
-            {feature.type === "color" && (
-              <ColorComponent
-                values={feature.values}
-                feature_name={feature.name}
-                product_id={product.id}
-              />
-            )}
-            {feature.type === "text" && (
-              <TextComponent
-                values={feature.values}
-                feature_name={feature.name}
-                product_id={product.id}
-              />
-            )}
+          <div key={feature.id || feature.name} className="space-y-0">
+            <h3 className="capitalize font-semibold text-gray-700 text-xs sm:text-sm md:text-base flex items-center">
+              {feature.name}
+              {feature.required && (
+                <span className="text-red-500 ml-1 text-[10px] sm:text-xs md:text-sm">
+                  *
+                </span>
+              )}
+            </h3>
+            <RenderFeatureComponent feature={feature} product_id={product.id} />
           </div>
         ))}
       </div>
@@ -245,7 +249,7 @@ function ProductDetails({ product, features }: ProductDetailsProps) {
 function ReviewsSection({ product }: { product: ProductClient }) {
   return (
     <section className="py-12 border-t">
-      <h2 className="text-2xl font-semibold text-center mb-6">
+      <h2 className="text-4xl font-semibold text-center mb-6">
         Avis sur{" "}
         <span className="underline underline-offset-4">{product.name}</span>
       </h2>
@@ -263,9 +267,16 @@ function ReviewsSection({ product }: { product: ProductClient }) {
       </div>
       <div className="space-y-6 divide-y">
         {CommentsProduct.map((comment, index) => (
-          <article key={index} className="pt-6 grid md:grid-cols-[2fr_1fr] gap-6">
+          <article
+            key={index}
+            className="pt-6 grid md:grid-cols-[2fr_1fr] gap-6"
+          >
             <div className="space-y-2">
-              <ReviewsStars note={comment.note} size={18} style="text-orange-500" />
+              <ReviewsStars
+                note={comment.note}
+                size={18}
+                style="text-orange-500"
+              />
               <h3 className="font-semibold">{comment.title}</h3>
               <p className="text-gray-600">{comment.description}</p>
             </div>
@@ -296,11 +307,13 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
     },
     {
       question: "Puis-je retourner un produit ?",
-      answer: "Oui, vous avez 30 jours pour retourner un produit non utilisé dans son emballage d'origine.",
+      answer:
+        "Oui, vous avez 30 jours pour retourner un produit non utilisé dans son emballage d'origine.",
     },
     {
       question: "Les produits sont-ils garantis ?",
-      answer: "Oui, tous nos produits bénéficient d'une garantie de 1 an contre les défauts de fabrication.",
+      answer:
+        "Oui, tous nos produits bénéficient d'une garantie de 1 an contre les défauts de fabrication.",
     },
   ];
 
@@ -360,7 +373,9 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
                 </span>
               </button>
               <div
-                ref={(el) => { faqRefs.current[index] = el; }}
+                ref={(el) => {
+                  faqRefs.current[index] = el;
+                }}
                 id={`faq-answer-${index}`}
                 className="text-gray-600 overflow-hidden"
                 style={{ height: 0, opacity: 0 }}

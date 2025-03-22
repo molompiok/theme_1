@@ -6,7 +6,7 @@ import { IoMdAdd, IoMdRemove } from "react-icons/io";
 
 const className = {
   button:
-    "flex flex-col border border-gray-400 hover:bg-gray-50 cursor-pointer rounded-md px-0.5 justify-center items-center w-7 h-6 gap-y-2 sm:gap-x-3",
+    "flex flex-col hover:bg-gray-100 cursor-pointer rounded-md justify-center items-center py-1 px-2 gap-y-2 sm:gap-x-3",
   span: "font-bold border-gray-300 text-center text-clamp-base px-2",
 };
 export default function AddRemoveItemCart({
@@ -44,21 +44,19 @@ export default function AddRemoveItemCart({
   return (
     <div
       className={clsx(
-        "flex flex-col justify-center items-start gap-y-2 sm:gap-x-3 w-full",
+        "w-full flex flex-col justify-start items-start sm:gap-x-3",
         {
-          "cart-breakpoint-2:gap-y-1": inList,
+          "cart-breakpoint-2:gap-y-1 items-center": inList,
+          "items-start": !inList,
         }
       )}
     >
       <div
         className={clsx("flex items-center", {
-          "w-full ": inList,
-          "justify-start": !inList,
+          "w-fit justify-start border border-gray-300": inList,
+          "justify-start border-2 border-gray-300": !inList,
         })}
       >
-        <span className="text-[.68rem] mr-1 hidden cart-breakpoint-1:block">
-          Quantité:
-        </span>
         <div
           className={clsx("flex items-center w-full sm:w-auto", {
             "justify-between": inList,
@@ -72,7 +70,7 @@ export default function AddRemoveItemCart({
           >
             <IoMdRemove
               size={20}
-              className=" p-0.5 text-black transition-all duration-500"
+              className="p-0.5 text-black transition-all duration-500"
             />
           </button>
 
@@ -90,12 +88,15 @@ export default function AddRemoveItemCart({
           >
             <IoMdAdd
               size={20}
-              className=" p-0.5 text-black transition-all duration-500"
+              className="p-0.5 text-black transition-all duration-500"
             />
           </button>
         </div>
       </div>
-      <span className="text-[.7rem] font-light">
+      <span className={clsx("text-[.75rem]/4 mt-0.5 font-light", {
+            "hidden": inList,
+            "block": !inList,
+          })}>
         disponible {group_product.stock}
       </span>
     </div>

@@ -5,6 +5,7 @@ import {
   Filter,
   GroupProductType,
   MetaPagination,
+  OrderByType,
   ProductClient,
   ProductFavorite,
   ProductType,
@@ -36,7 +37,7 @@ function minimize_product(product: ProductType): ProductClient {
     slug,
   };
 }
-export  type OrderByType = "date_asc" | "date_desc" | "price_asc" | "price_desc";
+
 export const get_products = async (params: {
   product_id?: string;
   store_id?: string;

@@ -28,7 +28,9 @@ export default function ModalChooseFeature() {
     setFeatureModal,
   } = useProductSelectFeature();
   const clear = useproductFeatures((state) => state.clearSelections);
-  const selectedFeatures = useproductFeatures((state) => state.selectedFeatures);
+  const selectedFeatures = useproductFeatures(
+    (state) => state.selectedFeatures
+  );
 
   const [imgIndex, setImgIndex] = useState(0);
   const [swiperInstance, setSwiperInstance] = useState<any>(null);
@@ -36,11 +38,6 @@ export default function ModalChooseFeature() {
   const handleCloseModal = () => {
     setFeatureModal(false);
     document.body.style.overflow = "auto";
-  };
-
-  const handleImageClick = (index: number) => {
-    swiperInstance?.slideTo(index);
-    setImgIndex(index);
   };
 
   const {
@@ -56,157 +53,151 @@ export default function ModalChooseFeature() {
   });
 
   const mediaViews = useMemo(() => {
-    if (!features || !features.length) return ["/img/default_img.gif"]; 
-
-    const colorFeature = features.find((f) => f.type === "color") || features[0];
+    if (!features?.length) return ["/img/default_img.gif"];
+    const colorFeature =
+      features.find((f) => f.type === "color") || features[0];
     const selectedValue = selectedFeatures.get(colorFeature.name);
-    const value = colorFeature.values.find((v) => v.text === selectedValue) || colorFeature.values[0];
-    return value?.views.length ? value.views : [ ""];
-  }, [features, selectedFeatures, product]);
+    const value =
+      colorFeature.values.find((v) => v.text === selectedValue) ||
+      colorFeature.values[0];
+    return value?.views.length ? value.views : ["/img/default_img.gif"];
+  }, [features, selectedFeatures]);
 
-  if (!product || !isVisible) {
-    console.log("🚀 ~ ModalChooseFeature ~ isVisible:", isVisible);
-    return null;
-  }
+  if (!product || !isVisible) return null;
 
   return (
     <Modal
-      styleContainer="flex items-center justify-center select-none size-full p-2 sm:p-4"
-      position="start"
+      styleContainer="fixed inset-0 flex items-center justify-center p-2 sm:p-1 bg-black/50"
       zIndex={100}
       setHide={handleCloseModal}
       isOpen={isVisible}
-      animationName="flip"
       aria-label={`Sélectionner les options pour ${product.name}`}
     >
       <div
         className={clsx(
-          "font-primary relative bg-white rounded-2xl shadow-lg  w-full",
-          "max-w-[90vw] sm:max-w-[600px] md:max-w-[800px] flex flex-col",
-          "md:flex-row md:gap-4 p-3 sm:p-4 md:p-6"
+          "bg-white rounded-lg overflow-hidden shadow-xl w-full max-w-[95vw] sm:max-w-2xl",
+          "flex flex-col sm:flex-row max-h-[70dvh] min-h-[50dvh]"
         )}
       >
-        <div className=" flex-shrink-0 w-[70%] mx-auto md:w-1/2">
-          <div className="relative">
-            <Swiper
-              modules={[A11y, Pagination]}
-              spaceBetween={10}
-              slidesPerView={1}
-              autoHeight={true}
-              pagination={{ clickable: true, dynamicBullets: true }}
-              onSwiper={setSwiperInstance}
-              onSlideChange={(swiper) => setImgIndex(swiper.realIndex)}
-              className="rounded-md overflow-hidden"
-            >
-              {mediaViews.map((view, index) => (
-                <SwiperSlide key={index}>
-                  <ProductMedia
-                    mediaList={[view]}
-                    productName={product.name}
-                    className="sm:w-full  mx-auto aspect-square object-contain"
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
-          <div className="flex gap-1 sm:gap-2 overflow-x-auto scrollbar-thin">
+        <div className="w-full sm:w-7/13 shrink-0 bg-gray-50 p-2 sm:p-4 relative">
+          <Swiper
+            modules={[A11y, Pagination]}
+            spaceBetween={5}
+            slidesPerView={1}
+            pagination={{ clickable: true, dynamicBullets: true }}
+            onSwiper={setSwiperInstance}
+            onSlideChange={(swiper) => setImgIndex(swiper.realIndex)}
+            className="rounded-md overflow-hidden"
+          >
+            {mediaViews.map((view, index) => (
+              <SwiperSlide key={index}>
+                <ProductMedia
+                  mediaList={[view]}
+                  productName={product.name}
+                  className="w-full aspect-[7/5] min-[500px]:aspect-[8/3] sm:aspect-square object-contain bg-white"
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+          <div className="hidden gap-1 sm:flex  justify-center mt-1 overflow-x-auto scrollbar-hidden">
             {mediaViews.map((view, index) => (
               <button
                 key={index}
                 className={clsx(
-                  "border-1 rounded-md flex-shrink-0 transition-all  duration-300 ease-out",
-                  "size-8",
-                  {
-                    "border-gray-600": imgIndex === index,
-                    "border-gray-100 hover:border-gray-400": imgIndex !== index,
-                  }
+                  "flex-shrink-0 rounded-md border transition-all duration-200",
+                  "w-6 h-6 sm:w-10 sm:h-10",
+                  imgIndex === index
+                    ? "border-blue-500 border-2"
+                    : "border-gray-200 hover:border-gray-400"
                 )}
-                onClick={() => handleImageClick(index)}
+                onClick={() => swiperInstance?.slideTo(index)}
               >
                 <ProductMedia
                   mediaList={[view]}
                   productName={product.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-md"
                 />
               </button>
             ))}
           </div>
         </div>
-        <div className="flex-1 flex flex-col gap-1 p-2 sm:p-0">
-          <button
-            onClick={handleCloseModal}
-            className="absolute top-2 right-2 sm:top-3 sm:right-3 p-1 rounded-full hover:bg-gray-100 transition-colors z-10 md:top-4 md:right-4"
-            aria-label="Fermer la modale"
-          >
-            <BsX size={24} className="text-gray-600 size-9" />
-          </button>
 
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-8 sm:py-12">
-              <Loading size="medium" aria-label="Chargement des options" />
-              <p className="mt-2 text-gray-600">Chargement des options...</p>
+        <div className="flex-1 flex flex-col sm:max-h-[90vh] overflow-hidden">
+          <div className="flex items-center justify-between p-2 border-b border-gray-200 shrink-0">
+            <div>
+              <h1 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-1">
+                {product.name}
+              </h1>
+              <DisplayPriceDetail
+                currency={product.currency}
+                price={product.price}
+                barred_price={product.barred_price}
+              />
             </div>
-          ) : isError || !features.length ? (
-            <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
-              <h1 className="text-lg sm:text-xl text-gray-700">Options indisponibles</h1>
-              <p className="text-gray-500 mt-2 text-sm sm:text-base">
-                Désolé, nous n'avons pas pu charger les options.
-              </p>
-              <button
-                onClick={handleCloseModal}
-                className="mt-4 text-blue-600 hover:text-blue-800 underline text-sm sm:text-base"
-              >
-                Retourner à la boutique
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-1 overflow-auto max-h-[50dvh] sm:max-h-[60dvh]">
-              <div className="space-y-0 sm:space-y-2">
-                <h1 className="sm:text-lg text-base md:text-2xl font-bold text-gray-800 leading-tight">
-                  {product.name}
-                </h1>
-                {/* <p className="text-gray-600 text-xs/4 sm:text-sm/4 sm:inline hidden md:text-base line-clamp-1">
-                  {product.description}
-                </p> */}
-                <DisplayPriceDetail currency={product.currency} price={product.price} barred_price={product.barred_price} />
+            <button
+              onClick={handleCloseModal}
+              className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Fermer la modale"
+            >
+              <BsX size={25} className="text-gray-600" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto scrollbar-thin p-2">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <Loading size="medium" aria-label="Chargement des options" />
               </div>
-              <div className="flex-1 overflow-y-auto max-h-[35vh] sm:max-h-[40vh] md:max-h-[50vh] space-y-2 pr-2 scrollbar-thin">
+            ) : isError || !features.length ? (
+              <div className="flex flex-col items-center justify-center text-center gap-3 py-6">
+                <h2 className="text-sm font-medium text-gray-700">
+                  Options indisponibles
+                </h2>
                 <button
-                  onClick={clear}
-                  className={clsx(
-                    "flex cursor-pointer transition-opacity duration-300",
-                    {
-                      "opacity-0 pointer-events-none": selectedFeatures.size === 0,
-                      "opacity-100": selectedFeatures.size !== 0,
-                    }
-                  )}
+                  onClick={handleCloseModal}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                 >
-                  <span className="text-xs/3 cursor-pointer text-gray-500">Remettre à zéro</span>
-                  <RxReset className="text-gray-500"/>
+                  Retourner à la boutique
                 </button>
+              </div>
+            ) : (
+              <div className="space-y-1">
                 {features.map((feature) => (
-                  <div key={feature.id || feature.name} className="space-y-0">
-                    <h3 className="capitalize font-semibold text-gray-700 text-xs sm:text-sm md:text-base flex items-center">
+                  <div key={feature.id || feature.name} className="space-y-1">
+                    <h3 className="text-sm font-medium text-gray-700 flex items-center gap-1">
                       {feature.name}
                       {feature.required && (
-                        <span className="text-red-500 ml-1 text-[10px] sm:text-xs md:text-sm">*</span>
+                        <span className="text-red-500">*</span>
                       )}
                     </h3>
                     {renderFeatureComponent(feature, product.id)}
                   </div>
                 ))}
               </div>
-              <div className="space-y-2 sm:space-y-3">
-                <ButtonValidCart features={features} product={product} />
-                <button
-                  onClick={handleCloseModal}
-                  className="text-gray-600 text-xs sm:text-sm hover:text-gray-800 underline w-full text-center transition-colors"
-                >
-                   Retourner à la boutique
-                </button>
-              </div>
+            )}
+          </div>
+
+          <div className="p-2 border-t border-gray-200 shrink-0 bg-gray-50">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <ButtonValidCart features={features} product={product} />
+              {/* <button
+                onClick={clear}
+                className={clsx(
+                  "flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800 transition-colors",
+                  selectedFeatures.size === 0 && "opacity-50 pointer-events-none"
+                )}
+              >
+                <RxReset size={16} />
+                Réinitialiser
+              </button> */}
             </div>
-          )}
+            <button
+              onClick={handleCloseModal}
+              className="w-full text-sm text-gray-600 hover:text-gray-800 underline mt-2 text-center transition-colors"
+            >
+              Continuer les achats
+            </button>
+          </div>
         </div>
       </div>
     </Modal>
@@ -228,7 +219,7 @@ const renderFeatureComponent = (feature: Feature, product_id: string) => {
       return <TextComponent {...componentProps} />;
     default:
       return (
-        <p className="text-gray-500 text-sm italic">
+        <p className="text-sm text-gray-500 italic">
           Type de caractéristique non pris en charge
         </p>
       );

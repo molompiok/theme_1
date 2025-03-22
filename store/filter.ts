@@ -47,16 +47,16 @@ export const useSelectedFiltersStore = create(
 
 
 const defaultOptions = ['plus recent', 'moins recent', 'prix eleve', 'prix bas'] as const;
-type OptionType = typeof defaultOptions[number];
+  type OptionType = typeof defaultOptions[number];
 
-// export const useFilterStore = create(
-//   combine(
-//     {
-//       selectedOption: 'plus recent' as OptionType,
-//     },
-//     (set) => ({
-//       setSelectedOption: (option: OptionType) => set({ selectedOption: option }),
-//       resetFilter: () => set({ selectedOption: 'plus recent' as OptionType }),
-//     })
-//   )
-// );
+  // export const useFilterStore = create(
+  //   combine(
+  //     {
+  //       selectedOption: 'plus recent' as OptionType,
+  //     },
+  //     (set) => ({
+  //       setSelectedOption: (option: OptionType) => set({ selectedOption: option }),
+  //       resetFilter: () => set({ selectedOption: 'plus recent' as OptionType }),
+  //     })
+  //   )
+  // );

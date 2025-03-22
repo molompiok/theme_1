@@ -8,7 +8,7 @@ export type ProductType = {
   price: number;
   barred_price: number;
   slug: string;
-  
+
   currency: string;
   createdAt: Date;
   updatedAt: Date;
@@ -61,7 +61,6 @@ export type Feature = {
   values: FeatureValue[];
 };
 
-
 export type FeaturesResponse = {
   features: Feature[]; // Tableau de Feature
 };
@@ -111,12 +110,27 @@ type ProductPick =
 
 export type ProductClient = Pick<ProductType, ProductPick>;
 
-export const filterOptions = [
-  { id: 'date_asc', name: 'plus recent' },
-  { id: 'date_desc', name: 'moins recent' },
-  { id: 'price_desc', name: 'prix eleve' },
-  { id: 'price_asc', name: 'prix bas' },
-] as  const;
+
+
+export const defaultOptions = [
+  "plus recent",
+  "moins recent",
+  "prix eleve",
+  "prix bas",
+] as const;
+export type OrderByType = "date_asc" | "date_desc" | "price_asc" | "price_desc";
+export type OptionType = (typeof defaultOptions)[number]
+
+
+export const filterOptions: {
+  id: OrderByType;
+  name: OptionType;
+}[] = [
+  { id: "date_desc", name: "plus recent" },
+  { id: "date_asc", name: "moins recent" },
+  { id: "price_desc", name: "prix eleve" },
+  { id: "price_asc", name: "prix bas" },
+];
 
 export enum FeaturType {
   COLOR = "color",
@@ -125,27 +139,26 @@ export enum FeaturType {
   ICON_TEXT = "icon_text",
 }
 
-// Définir les types
 export interface Filter {
   id: string;
   name: string;
   values: string[];
-  type?: FeaturType; // Type optionnel, par défaut TEXT si non spécifié
+  type?: FeaturType;
 }
 export interface PhoneNumber {
-  id: string,
-  phone_number: string,
-  format: string,
-  country_code: string,
-  created_at: string,
-  updated_at: string
+  id: string;
+  phone_number: string;
+  format: string;
+  country_code: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Adresse {
-  id: string,
-  name: string,
-  longitude: string,
-  latitude: string,
-  created_at: string,
-  updated_at:string
+  id: string;
+  name: string;
+  longitude: string;
+  latitude: string;
+  created_at: string;
+  updated_at: string;
 }

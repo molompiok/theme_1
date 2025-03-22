@@ -17,7 +17,6 @@ import {
 import { useAuthStore } from "../../store/user";
 
 const getFlagEmoji = (isoCode: string): string => {
-  console.log("🚀 ~ getFlagEmoji ~ isoCode:", isoCode)
   return isoCode
     .toUpperCase()
     .split("")

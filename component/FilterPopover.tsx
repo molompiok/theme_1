@@ -1,9 +1,6 @@
-import { useEffect } from 'react';
 import { Popover, PopoverTrigger, PopoverContent } from './Popover';
 import { useSelectedFiltersStore } from '../store/filter';
-
-const defaultOptions = ['plus recent', 'moins recent', 'prix eleve', 'prix bas'] as const;
-type OptionType = typeof defaultOptions[number];
+import { defaultOptions, OptionType } from '../pages/type';
 
 interface FilterPopoverProps {
   className?: string;
@@ -15,6 +12,7 @@ const FilterPopover = ({ className = '' }: FilterPopoverProps) => {
 
 
   const handleClick = (option: OptionType) => {
+    console.log("🚀 ~ handleClick ~ option:", option)
     setFilter('order_by', [option]);
    
   };
@@ -23,14 +21,14 @@ const FilterPopover = ({ className = '' }: FilterPopoverProps) => {
     <Popover>
       <PopoverTrigger asChild>
         <button 
-          className={`flex items-center gap-2  px-2 text-sm lg:text-base border-gray-300 bg-white/90 border rounded-lg ${className}`}
+          className={`flex items-center gap-2  px-2 py-1 text-sm lg:text-base border-gray-500 bg-white/90 border rounded-sm ${className}`}
         >
-          <span className='text-gray-500'>Filtrer par</span>
+          <span className='text-gray-500'>Trier par</span>
           <span className='text-gray-900'>{selectedFilters['order_by']}</span>
         </button>
       </PopoverTrigger>
       <PopoverContent className="z-50 w-48 p-0">
-        <div className="bg-white border border-gray-100 rounded-lg py-2">
+        <div className="bg-white border border-gray-300 rounded-sm py-2">
           {defaultOptions.map((option) => (
             <button
               key={option}

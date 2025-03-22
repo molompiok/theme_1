@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import ProductCard from "./ProductCard";
-import { Filter, filterOptions, ProductClient, ProductType } from "../../pages/type";
+import { Filter, filterOptions, OrderByType, ProductClient, ProductType } from "../../pages/type";
 import { usePageContext } from "../../renderer/usePageContext";
-import { get_filters, get_products, OrderByType } from "../../api/products.api";
+import { get_filters, get_products } from "../../api/products.api";
 import Skeleton from "../Skeleton";
 import { useSelectedFiltersStore } from "../../store/filter";
 

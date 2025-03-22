@@ -5,22 +5,21 @@ import { usePanier } from "../../store/cart";
 import AddRemoveItemCart from "./../AddRemoveItemCart";
 import { CommandButton } from "./../Button";
 import Modal from "./Modal";
-import {
-  get_features_with_values,
-} from "../../api/products.api";
+import { get_features_with_values } from "../../api/products.api";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "./../Loading";
 import { DisplayPriceItemCart } from "./../DisplayPrice";
 import { ProductMedia } from "../ProductMedia";
 import { useproductFeatures } from "../../store/features";
+import { navigate } from "vike/client/router";
+import { formatPrice } from "../../utils";
 
 interface CartItem {
   product: ProductClient;
   group_product: GroupProductType;
-
 }
 
-function ItemCart({ product ,group_product }: CartItem) {
+function ItemCart({ product, group_product }: CartItem) {
   const removeItem = usePanier((state) => state.remove);
   const isOpen = usePanier((state) => state.showCart);
   const pFeature = useproductFeatures((state) => state.productFeatures);
@@ -28,10 +27,10 @@ function ItemCart({ product ,group_product }: CartItem) {
   const { data: feature, status } = useQuery({
     queryKey: ["get_features_with_values", product.default_feature_id],
     queryFn: () =>
-      product.default_feature_id 
+      product.default_feature_id
         ? get_features_with_values({ feature_id: product.default_feature_id })
-        : Promise.resolve(null), 
-    enabled: !!product.default_feature_id && isOpen, 
+        : Promise.resolve(null),
+    enabled: !!product.default_feature_id && isOpen,
   });
 
   const featureV = pFeature.get(group_product?.id);
@@ -61,33 +60,29 @@ function ItemCart({ product ,group_product }: CartItem) {
           </h1>
 
           <div className="flex flex-wrap items-center mb-1 gap-1">
-            {featureV ? 
-              Array.from(featureV.entries()).map(([key, value], i) => (
-                <span
-                  key={`${key}-${i}`}
-                  className="text-[.68rem] rotating-border text-gray-100 border border-gray-300 px-2 py-0.5 rounded-[5px]"
-                >
-                  {value.valueFeature ?? 'N/A'}
-                </span>
-              ))
-              : null
-            }
+            {featureV
+              ? Array.from(featureV.entries()).map(([key, value], i) => (
+                  <span
+                    key={`${key}-${i}`}
+                    className="text-[.68rem] rotating-border text-gray-100 border border-gray-300 px-2 py-0.5 rounded-[5px]"
+                  >
+                    {value.valueFeature ?? "N/A"}
+                  </span>
+                ))
+              : null}
           </div>
           <p className="text-xs/4 md:text-sm/4 mb-2 font-light line-clamp-2">
-            {product.description || 'Aucune description'}
+            {product.description || "Aucune description"}
           </p>
         </div>
       </div>
       <div className="w-full flex justify-between gap-2">
-      <AddRemoveItemCart
+        <AddRemoveItemCart
           product={product}
           group_product={group_product}
           inList={false}
         />
-          <DisplayPriceItemCart 
-            product={product}
-            group_product={group_product} 
-          />
+        <DisplayPriceItemCart product={product} group_product={group_product} />
       </div>
     </div>
   );
@@ -95,7 +90,7 @@ function ItemCart({ product ,group_product }: CartItem) {
 
 function ListItemCart({ carts }: { carts: CartItem[] }) {
   return (
-    <div className="flex flex-col divide-y-2 divide-blue-100 max-h-[70vh] overflow-y-auto scroll-smooth scrollbar-thin pr-2">
+    <div className="flex flex-col divide-y-2 divide-blue-100 max-h-[60vh] overflow-y-auto scroll-smooth scrollbar-thin pr-2">
       {carts?.map((cart) => (
         <ItemCart key={cart.group_product.id} {...cart} />
       ))}
@@ -136,10 +131,10 @@ export default function ModalCart() {
         </div>
 
         <div className=" flex flex-col justify-around overflow-auto">
-          <div className="absolute text-black top-0 pt-5 pb-1 pl-4 border-b border-b-gray-300 flex items-center gap-2">
+          <div className="absolute text-black top-0 pt-5 pb-0 pl-4 border-b border-b-gray-300 flex items-center gap-2">
             <BsHandbag size={20} />
             <span className="text-lg md:text-xl font-semibold">Mon panier</span>
-            <span className="text-sm">({totalItems} articles)</span>
+            {/* <span className="text-sm">({totalItems} articles)</span> */}
           </div>
 
           <ListItemCart carts={carts} />
@@ -151,22 +146,29 @@ export default function ModalCart() {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-2 mt-2 overflow-auto">
+            <div className="flex flex-col gap-2 my-5 overflow-auto">
               <div className="flex justify-between">
-                <span className="font-bold">Sous-total</span>
-                <span>
-                  {totalPrice} {carts[0]?.product?.currency}
+                <span className="font-light">
+                  Sous-total ({totalItems} articles)
+                </span>
+                <span className="font-light">
+                  {formatPrice(totalPrice)} {carts[0]?.product?.currency}
                 </span>
               </div>
-              <div className="flex justify-between">
+              {/* <div className="flex justify-between">
                 <span className="font-bold">Livraison</span>
                 <span>0 {carts[0]?.product?.currency}</span>
-              </div>
+              </div> */}
+        <span className="text-sm text-gray-600">Cout de livraison sera appliquer a la prochaine etape </span>
             </div>
           )}
 
           <CommandButton
             text="PROCEDER AU PAIEMENT"
+            callBack={() => {
+              handleModalCartClose();
+              navigate("/confirmation");
+            }}
             // className="w-full py-3 bg-black text-white rounded-md hover:bg-gray-800"
           />
         </div>

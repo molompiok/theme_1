@@ -22,26 +22,36 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
   isColor = false,
 }) => {
   const text = value.text!;
-  const { add ,remove} = useproductFeatures();
-  const selectedFeatures = useproductFeatures((state) => state.selectedFeatures);
+  const { add, remove } = useproductFeatures();
+  const selectedFeatures = useproductFeatures(
+    (state) => state.selectedFeatures
+  );
 
   const {
     data: group_products = [],
     isPending,
     isError,
   } = useQuery<GroupProductType[], Error>({
-    queryKey: ["get_group_by_feature", { product_id, feature_value: text, feature_key: feature_name }],
-    queryFn: () => get_group_by_feature({ product_id, feature_value: text, feature_key: feature_name }),
+    queryKey: [
+      "get_group_by_feature",
+      { product_id, feature_value: text, feature_key: feature_name },
+    ],
+    queryFn: () =>
+      get_group_by_feature({
+        product_id,
+        feature_value: text,
+        feature_key: feature_name,
+      }),
     staleTime: 5 * 60 * 1000,
-    placeholderData: keepPreviousData
-    // keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 
   const { totalStock, mainGroupProduct } = useMemo(() => {
     const validGroups = group_products.filter((gp) => {
       const matchesCurrent = gp.bind[feature_name] === text;
       const matchesOthers = Array.from(selectedFeatures.entries()).every(
-        ([key, val]) => key === feature_name || !gp.bind[key] || gp.bind[key] === val
+        ([key, val]) =>
+          key === feature_name || !gp.bind[key] || gp.bind[key] === val
       );
       return matchesCurrent && matchesOthers;
     });
@@ -65,42 +75,66 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       if (isSelected) {
         remove(feature_name);
       } else {
-        const validGroups = group_products.filter((gp) => gp.bind[feature_name] === text);
-        const groupId = mainGroupProduct?.id || validGroups[0]?.id || `${product_id}-${text}`;
-        add(groupId, feature_name, text, mainGroupProduct?.additional_price || 0, totalStock, validGroups);
+        const validGroups = group_products.filter(
+          (gp) => gp.bind[feature_name] === text
+        );
+        const groupId =
+          mainGroupProduct?.id || validGroups[0]?.id || `${product_id}-${text}`;
+        add(
+          groupId,
+          feature_name,
+          text,
+          mainGroupProduct?.additional_price || 0,
+          totalStock,
+          validGroups
+        );
       }
     },
-    [add, remove, feature_name, group_products, isDisabled, isSelected, mainGroupProduct, product_id, text, totalStock]
+    [
+      add,
+      remove,
+      feature_name,
+      group_products,
+      isDisabled,
+      isSelected,
+      mainGroupProduct,
+      product_id,
+      text,
+      totalStock,
+    ]
   );
 
-//   
+  //
 
-    const strikethroughStyles = clsx(
-      "absolute inset-0 flex items-center justify-center overflow-hidden",
-      {
-        "after:content-[''] after:absolute after:w-[99%] after:h-[1px] after:bg-gray-400 after:transform after:-rotate-16": isDisabled,
-      }
-    );
+  const strikethroughStyles = clsx(
+    "absolute inset-0 flex items-center justify-center overflow-hidden",
+    {
+      "after:content-[''] after:absolute after:w-[99%] after:h-[1px] after:bg-gray-400 after:transform after:-rotate-16":
+        isDisabled,
+    }
+  );
 
-    const buttonStyles = clsx(
-        "relative transition-all border-gray-300 duration-300 ease-out focus:outline-none shadow-lg focus:ring-1 focus:ring-blue-200 focus:ring-offset-1",
-        isColor
-          ? "sm:size-10 size-8 rounded-full before:absolute before:inset-0 before:rounded-full before:transition-all before:duration-300 before:ease-out"
-          : "border text-clamp-xs flex justify-center items-center px-3 py-1 rounded-md",
-        {
-          // Boutons texte
-          "bg-black text-white border-black shadow-sm": isSelected && !isDisabled && !isColor,
-          "bg-white text-gray-800  hover:bg-gray-100": !isSelected && !isDisabled && !isColor,
+  const buttonStyles = clsx(
+    "relative transition-all border-gray-300 duration-300 ease-out focus:outline-none shadow-lg focus:ring-1 focus:ring-blue-200 focus:ring-offset-1",
+    isColor
+      ? "sm:size-10 size-8 rounded-full before:absolute before:inset-0 before:rounded-full before:transition-all before:duration-300 before:ease-out"
+      : "border text-clamp-xs flex justify-center items-center px-3 py-1 rounded-md",
+    {
+      "bg-black text-white border-black shadow-sm":
+        isSelected && !isDisabled && !isColor,
+      "bg-white text-gray-800  hover:bg-gray-100":
+        !isSelected && !isDisabled && !isColor,
 
-          // Boutons couleur
-          "border-1 border-blue-400 scale-105 shadow-sm before:border-3 before:border-white before:scale-95": isSelected && !isDisabled && isColor,
-          "hover:scale-105": !isSelected && !isDisabled && isColor,
-          "opacity-50 cursor-not-allowed border-gray-300": isDisabled,
-        },
-        isColor && (["blue", "red", "green", "yellow"].includes(text.toLowerCase())
-          ? `bg-${text.toLowerCase()}-600`
-          : "bg-gray-400")
-      );
+      "border-1 border-blue-400 scale-105 shadow-sm before:border-3 before:border-white before:scale-95":
+        isSelected && !isDisabled && isColor,
+      "hover:scale-105": !isSelected && !isDisabled && isColor,
+      "opacity-50 cursor-not-allowed border-gray-300": isDisabled,
+    },
+    isColor &&
+      (["blue", "red", "green", "yellow"].includes(text.toLowerCase())
+        ? `bg-${text.toLowerCase()}-600`
+        : "bg-gray-400")
+  );
 
   const stockIndicatorStyles = clsx(
     isColor
@@ -116,7 +150,14 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
 
   if (isPending) {
     return (
-      <div className={clsx("flex items-center justify-center", isColor ? "sm:size-10 size-8 min-h-[32px] sm:min-h-[40px]" : "min-w-[60px] min-h-[30px] py-1")}>
+      <div
+        className={clsx(
+          "flex items-center justify-center",
+          isColor
+            ? "sm:size-10 size-8 min-h-[32px] sm:min-h-[40px]"
+            : "min-w-[60px] min-h-[30px] py-1"
+        )}
+      >
         <Skeleton
           width={isColor ? "100%" : 60}
           height={isColor ? "100%" : 30}
@@ -131,7 +172,11 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
 
   if (isError || !group_products.length) {
     return (
-      <span className="text-red-500 text-sm italic" role="alert" aria-label={`${text} indisponible`}>
+      <span
+        className="text-red-500 text-sm italic"
+        role="alert"
+        aria-label={`${text} indisponible`}
+      >
         Indisponible
       </span>
     );
@@ -146,9 +191,13 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       aria-selected={isSelected}
       aria-label={`Sélectionner ${text}${isDisabled ? " (indisponible)" : ""}`}
       aria-disabled={isDisabled}
-      title={isDisabled ? `${text} est indisponible (restant: ${totalStock})` : `${feature_name} ${text} : ${totalStock} restant`}
+      title={
+        isDisabled
+          ? `${text} est indisponible (restant: ${totalStock})`
+          : `${feature_name} ${text} : ${totalStock} restant`
+      }
     >
-        <div className={strikethroughStyles}/>
+      <div className={strikethroughStyles} />
       {!isColor && text}
       {totalStock <= 5 && (
         <span className={stockIndicatorStyles} aria-hidden="true">
