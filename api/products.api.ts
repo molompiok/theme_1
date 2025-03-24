@@ -1,7 +1,6 @@
 import { api, build_search_params } from "./";
 import {
   Feature,
-  FeaturesResponse,
   Filter,
   GroupProductType,
   MetaPagination,
@@ -10,10 +9,8 @@ import {
   ProductFavorite,
   ProductType,
 } from "../pages/type";
+import { delay } from "../utils";
 
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 function minimize_product(product: ProductType): ProductClient {
   const {
@@ -45,20 +42,20 @@ export const get_products = async (params: {
   slug_cat?: string;
   search?: string;
   order_by?: OrderByType;
-  category_id?: string;
+  categories_id?: string[];
   page?: number;
   limit?: number;
   filters?: Record<string, string[]>;
 }) => {
-  console.log("🚀 ~ params:", params)
   const searchParams = build_search_params(params);
   if (Object.keys(params?.filters ?? {}).length) await delay(3000);
   try {
     const { data } = await api.get<{
       list: ProductType[];
-      category?: { id: string; name: string; description: string };
+      category?: { id: string; name: string; description: string , view : string[] };
       meta: MetaPagination;
     }>("/get_products?" + searchParams.toString());
+    console.log("🚀 ~ get_products:", data)
     return {
       list: data.list.map(minimize_product),
       category: data.category,
@@ -76,12 +73,15 @@ export const get_features_with_values = async (params: {
   product_id?: string;
   feature_id?: string;
 }) => {
+  
   const searchParams = build_search_params(params);
+  console.log(searchParams.toString());
   try {
-    const { data } = await api.get<FeaturesResponse>(
+    const { data } = await api.get<Feature[]>(
       "/get_features_with_values?" + searchParams.toString()
     );
-    return data.features;
+    console.log("🚀 ~ data:", data)
+    return data;
   } catch (error) {
     throw new Error("Erreur lors de la récupération des features :" + error);
   }

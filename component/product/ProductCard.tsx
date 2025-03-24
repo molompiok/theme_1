@@ -2,7 +2,7 @@ import React from "react";
 import { CartButton } from "../Button";
 import { GroupProductType, ProductClient } from "../../pages/type";
 import { navigate } from "vike/client/router";
-import { formatSlug } from "../../utils";
+import { formatSlug, getFirstFeatureWithView } from "../../utils";
 import { useQuery } from "@tanstack/react-query";
 import {
   get_features_with_values,
@@ -24,14 +24,16 @@ export default function ProductCard({ product  }: { product: ProductClient }) {
       get_features_with_values({ feature_id: product.default_feature_id }),
   });
 
+  console.log("🚀 ~ ProductCard ~ product.default_feature_id:", product.default_feature_id , product.name , feature?.[0].values?.[0].views[0])
+
   // const { data: group_products } = useQuery({
   //   queryKey: ["get_group_products", product?.id],
   //   queryFn: () => get_group_product({ product_id: product?.id }),
   //   enabled: !!product?.id,
   // });
 
-  const mediaList = feature?.[0]?.values?.[0]?.views || [];
-
+  // const mediaList = feature?.[0]?.values?.[0]?.views || [];
+  const mediaList = getFirstFeatureWithView(feature || [])?.values[0].views || [];
   return (
     <div
       onClick={handleGo}

@@ -10,97 +10,80 @@ interface CartItem {
   totalPrice: number;
 }
 
-// Define the state interface
-interface PanierState {
-  panier: CartItem[];
-  showCart: boolean;
-  add: (product: ProductClient, group_product: GroupProductType) => void;
-  subtract: (group_product: GroupProductType, productPrice: number) => void;
-  remove: (groupId: string) => void;
-  clear: () => void;
-  toggleCart: (val: boolean) => void;
-}
-
-export const usePanier = create<PanierState>()(
+export const useModalCart = create(
   persist(
     combine(
       {
-        panier: [] as CartItem[],
+        // panier: [] as CartItem[],
         showCart: false,
       },
-      (set) => ({
-        add: (product: ProductClient, group_product: GroupProductType) =>
-          set((state) => {
-            const index = state.panier.findIndex(
-              (item) => item.group_product.id === group_product.id
-            );
-            
-            const updatedPanier = [...state.panier];
-            
-            if (index !== -1 && updatedPanier[index].nbr >= group_product.stock) {
-              return { panier: updatedPanier };
-            }
+      (set, get) => ({
+        // add: (product: ProductClient, group_product: GroupProductType) => {
+        //   const { panier } = get();
+        //   const existingItem = panier.find(
+        //     (item) => item.group_product.id === group_product.id
+        //   );
+        //   const price =
+        //     (product.price || 0) + (group_product.additional_price || 0);
 
-            const itemPrice = product.price + group_product.additional_price;
+        //   if (existingItem) {
+        //     set({
+        //       panier: panier.map((item) =>
+        //         item.group_product.id === group_product.id
+        //           ? {
+        //               ...item,
+        //               nbr: item.nbr + 1,
+        //               totalPrice: (item.nbr + 1) * price,
+        //             }
+        //           : item
+        //       ),
+        //     });
+        //   } else {
+        //     set({
+        //       panier: [
+        //         ...panier,
+        //         { product, group_product, nbr: 1, totalPrice: price },
+        //       ],
+        //     });
+        //   }
+        // },
+        
+        // subtract: (group_product: GroupProductType, productPrice: number) => {
+        //   const { panier } = get();
+        //   set({
+        //     panier: panier
+        //       .map((item) =>
+        //         item.group_product.id === group_product.id
+        //           ? {
+        //               ...item,
+        //               nbr: item.nbr - 1,
+        //               totalPrice: (item.nbr - 1) * productPrice,
+        //             }
+        //           : item
+        //       )
+        //       .filter((item) => item.nbr > 0),
+        //   });
+        // },
 
-            if (index !== -1) {
-              const newQuantity = updatedPanier[index].nbr + 1;
-              updatedPanier[index] = {
-                ...updatedPanier[index],
-                nbr: newQuantity,
-                totalPrice: newQuantity * itemPrice,
-              };
-            } else {
-              updatedPanier.push({
-                product,
-                group_product,
-                nbr: 1,
-                totalPrice: itemPrice,
-              });
-            }
-            
-            return { panier: updatedPanier };
-          }),
+        // remove: (group_product_id: string) => {
+        //   set((state) => ({
+        //     panier: state.panier.filter(
+        //       (item) => item.group_product.id !== group_product_id
+        //     ),
+        //   }));
+        // },
 
-        subtract: (group_product: GroupProductType, productPrice: number) =>
-          set((state) => {
-            const index = state.panier.findIndex(
-              (item) => item.group_product.id === group_product.id
-            );
+        // clear: () => set({ panier: [] }),
 
-            if (index === -1) return state;
-
-            const updatedPanier = [...state.panier];
-            const itemPrice = productPrice + group_product.additional_price;
-
-            if (updatedPanier[index].nbr === 1) {
-              return {
-                panier: updatedPanier.filter(
-                  (item) => item.group_product.id !== group_product.id
-                ),
-              };
-            }
-
-            const newQuantity = updatedPanier[index].nbr - 1;
-            updatedPanier[index] = {
-              ...updatedPanier[index],
-              nbr: newQuantity,
-              totalPrice: newQuantity * itemPrice,
-            };
-
-            return { panier: updatedPanier };
-          }),
-
-        remove: (groupId: string) =>
+        
+        // setPanier: (items: CartItem[]) => {
+        //   set({ panier: items });
+        // },
+        toggleCart: (value : boolean) => {
           set((state) => ({
-            panier: state.panier.filter(
-              (item) => item.group_product.id !== groupId
-            ),
-          })),
-
-        clear: () => set({ panier: [] }),
-
-        toggleCart: (val: boolean) => set({ showCart: val }),
+            showCart: value !== undefined ? value : !state.showCart,
+          }));
+        },
       })
     ),
     {

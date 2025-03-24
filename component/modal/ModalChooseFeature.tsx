@@ -20,6 +20,8 @@ import { A11y, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import { RxReset } from "react-icons/rx";
+import { RenderFeatureComponent } from "../product/RenderFeatureComponent";
+import { getFirstFeatureWithView } from "../../utils";
 
 export default function ModalChooseFeature() {
   const {
@@ -54,12 +56,15 @@ export default function ModalChooseFeature() {
 
   const mediaViews = useMemo(() => {
     if (!features?.length) return ["/img/default_img.gif"];
-    const colorFeature =
-      features.find((f) => f.type === "color") || features[0];
-    const selectedValue = selectedFeatures.get(colorFeature.name);
+   
+    const defualt_feature = getFirstFeatureWithView(features);
+
+    if (!defualt_feature) return ["/img/default_img.gif"];
+
+    const selectedValue = selectedFeatures.get(defualt_feature.name);
     const value =
-      colorFeature.values.find((v) => v.text === selectedValue) ||
-      colorFeature.values[0];
+      defualt_feature.values.find((v) => v.text === selectedValue) ||
+      defualt_feature.values[0];
     return value?.views.length ? value.views : ["/img/default_img.gif"];
   }, [features, selectedFeatures]);
 
@@ -164,13 +169,7 @@ export default function ModalChooseFeature() {
               <div className="space-y-1">
                 {features.map((feature) => (
                   <div key={feature.id || feature.name} className="space-y-1">
-                    <h3 className="text-sm font-medium text-gray-700 flex items-center gap-1">
-                      {feature.name}
-                      {feature.required && (
-                        <span className="text-red-500">*</span>
-                      )}
-                    </h3>
-                    {renderFeatureComponent(feature, product.id)}
+                    <RenderFeatureComponent feature={feature} product_id={product.id} />
                   </div>
                 ))}
               </div>
@@ -204,24 +203,25 @@ export default function ModalChooseFeature() {
   );
 }
 
-const renderFeatureComponent = (feature: Feature, product_id: string) => {
-  const componentProps = {
-    values: feature.values,
-    feature_name: feature.name,
-    feature_required: feature.required,
-    product_id,
-  };
+// const renderFeatureComponent = (feature: Feature, product_id: string) => {
+//   console.log("🚀 ~ renderFeatureComponent ~ feature:", feature)
+//   const componentProps = {
+//     values: feature.values,
+//     feature_name: feature.name,
+//     feature_required: feature.required,
+//     product_id,
+//   };
 
-  switch (feature.type) {
-    case "color":
-      return <ColorComponent {...componentProps} />;
-    case "text":
-      return <TextComponent {...componentProps} />;
-    default:
-      return (
-        <p className="text-sm text-gray-500 italic">
-          Type de caractéristique non pris en charge
-        </p>
-      );
-  }
-};
+//   switch (feature.type) {
+//     case "color":
+//       return <ColorComponent {...componentProps} />;
+//     case "text":
+//       return <TextComponent {...componentProps} />;
+//     default:
+//       return (
+//         <p className="text-sm text-gray-500 italic">
+//           Type de caractéristique non pris en charge
+//         </p>
+//       );
+//   }
+// };

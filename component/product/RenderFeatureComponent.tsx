@@ -9,6 +9,7 @@ export const RenderFeatureComponent = ({
   feature: Feature;
   product_id: string;
 }) => {
+  console.log("🚀 ~ feature:", feature)
   const componentProps = {
     values: feature.values,
     feature_name: feature.name,
@@ -18,14 +19,25 @@ export const RenderFeatureComponent = ({
 
   switch (feature.type) {
     case "color":
-      return <ColorComponent {...componentProps} />;
-    case "text":
-      return <TextComponent {...componentProps} />;
-    default:
       return (
-        <p className="text-gray-500 text-sm italic">
-          Type de caractéristique non pris en charge
-        </p>
+        <>
+          <h3 className="text-sm font-medium text-gray-700 flex items-center gap-1">
+            {feature.name}
+            {feature.required && <span className="text-red-500">*</span>}
+          </h3>
+          <ColorComponent {...componentProps} />
+        </>
       );
+    case "text":
+      return (
+        <>
+          <h3 className="text-sm font-medium text-gray-700 flex items-center gap-1">
+            {feature.name}
+            {feature.required && <span className="text-red-500">*</span>}
+          </h3>
+          <TextComponent {...componentProps} />
+        </>
+      );
+    default: null
   }
 };

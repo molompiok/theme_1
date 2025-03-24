@@ -9,7 +9,7 @@ import { TextComponent } from "../../../component/FeatureDetailProduct/TextCompo
 import { useproductFeatures } from "../../../store/features";
 import ReviewsStars from "../../../component/comment/ReviewsStars";
 import { ButtonValidCart } from "../../../component/Button";
-import { usePanier } from "../../../store/cart";
+import { useModalCart } from "../../../store/cart";
 import clsx from "clsx";
 import { ProductMedia } from "../../../component/ProductMedia";
 import { Helmet } from "react-helmet";
@@ -26,7 +26,8 @@ import FavoriteButton from "../../../component/FavoriteButton";
 import type { Data } from "./+data";
 import { Feature, ProductClient } from "../../type";
 import gsap from "gsap";
-import { RenderFeatureComponent } from "../../../component/product/renderFeatureComponent";
+import { RenderFeatureComponent } from "../../../component/product/RenderFeatureComponent";
+import { getFirstFeatureWithView } from "../../../utils";
 
 export default function Page() {
   const { dehydratedState } = useData<Data>();
@@ -50,7 +51,6 @@ function ProductPageContent() {
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
 
   const { slug } = useData<Data>();
-
   const {
     data: products,
     isPending,
@@ -70,6 +70,7 @@ function ProductPageContent() {
     queryFn: () => get_features_with_values({ product_id: product?.id }),
     enabled: !!product?.id,
   });
+  console.log("🚀 ~ ProductPageContent ~ features:", features);
 
   const handleImageClick = (index: number) => {
     swiperInstance?.slideTo(index);
@@ -154,17 +155,19 @@ function ProductGallery({
   const mediaViews = useMemo(() => {
     if (!features || !features.length) return ["/img/default_img.gif"];
 
-    const colorFeature =
-      features.find((f) => f.type === "color") || features[0];
-    const selectedValue = selectedFeatures.get(colorFeature.name);
+    const defualt_feature = getFirstFeatureWithView(features);
+
+    if (!defualt_feature) return ["/img/default_img.gif"];
+
+    const selectedValue = selectedFeatures.get(defualt_feature.name);
     const value =
-      colorFeature.values.find((v) => v.text === selectedValue) ||
-      colorFeature.values[0];
+      defualt_feature.values.find((v) => v.text === selectedValue) ||
+      defualt_feature.values[0];
     return value?.views.length ? value.views : [""];
   }, [features, selectedFeatures, product]);
 
   return (
-    <div className="relative flex">
+    <div className="relative flex gap-2">
       <div className=" min-[600px]:flex hidden flex-col gap-2 overflow-x-auto pb-2 scrollbar-thin">
         {mediaViews.map((view, index) => (
           <button
@@ -229,14 +232,6 @@ function ProductDetails({ product, features }: ProductDetailsProps) {
       <div className="space-y-3 max-h-[50dvh] overflow-y-auto scrollbar-thin">
         {features?.map((feature) => (
           <div key={feature.id || feature.name} className="space-y-0">
-            <h3 className="capitalize font-semibold text-gray-700 text-xs sm:text-sm md:text-base flex items-center">
-              {feature.name}
-              {feature.required && (
-                <span className="text-red-500 ml-1 text-[10px] sm:text-xs md:text-sm">
-                  *
-                </span>
-              )}
-            </h3>
             <RenderFeatureComponent feature={feature} product_id={product.id} />
           </div>
         ))}

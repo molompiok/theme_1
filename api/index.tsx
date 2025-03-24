@@ -42,7 +42,7 @@ export function build_search_params(params: {
 }
 
 export function build_form_data(
-  params: Record<string, string | number | undefined>
+  params: Record<string, string | number | boolean | undefined>
 ): FormData {
   const formData = new FormData();
 
@@ -51,7 +51,6 @@ export function build_form_data(
       formData.append(key, value.toString());
     }
   });
-
   return formData;
 }
 

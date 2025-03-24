@@ -5,6 +5,7 @@ import { get_group_by_feature } from "../../api/products.api";
 import Skeleton from "../Skeleton"; // Assume que tu as le Skeleton modulaire
 import clsx from "clsx";
 import { GroupProductType } from "../../pages/type";
+import Loading from "../Loading";
 
 interface ValueComponentProps {
   value: { text: string; id?: string };
@@ -104,8 +105,6 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
     ]
   );
 
-  //
-
   const strikethroughStyles = clsx(
     "absolute inset-0 flex items-center justify-center overflow-hidden",
     {
@@ -152,20 +151,14 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
     return (
       <div
         className={clsx(
-          "flex items-center justify-center",
+          "flex items-center h-9 justify-center",
           isColor
             ? "sm:size-10 size-8 min-h-[32px] sm:min-h-[40px]"
             : "min-w-[60px] min-h-[30px] py-1"
         )}
       >
-        <Skeleton
-          width={isColor ? "100%" : 60}
-          height={isColor ? "100%" : 30}
-          type="custom"
-          customLayout
-          color="gray-200"
-          ariaLabel={`Chargement de ${text}`}
-        />
+        {/* <Loading size={'small'}/> */}
+        Chargement....
       </div>
     );
   }
@@ -173,11 +166,11 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
   if (isError || !group_products.length) {
     return (
       <span
-        className="text-red-500 text-sm italic"
+        className="text-red-500 text-lg italic"
         role="alert"
         aria-label={`${text} indisponible`}
       >
-        Indisponible
+        👻
       </span>
     );
   }

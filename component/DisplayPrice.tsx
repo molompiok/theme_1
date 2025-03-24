@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
 import type { GroupProductType, ProductClient } from "../pages/type";
-import { usePanier } from "../store/cart";
+import { useModalCart } from "../store/cart";
 import { useproductFeatures } from "../store/features";
 import { formatPrice } from "../utils";
+import useCart from "../hook/query/useCart";
 
 interface DisplayPriceProps {
   price: string | number;
@@ -10,7 +11,7 @@ interface DisplayPriceProps {
   barred_price?: string | number;
 }
 
-const safeParsePrice = (value: string | number | undefined | null) : number => {
+const safeParsePrice = (value: string | number | undefined | null): number => {
   if (value === undefined || value === null) return 0;
   const parsed = parseFloat(String(value));
   return isNaN(parsed) ? 0 : Math.max(0, parsed);
@@ -63,39 +64,33 @@ export const DisplayPrice: React.FC<DisplayPriceProps> = React.memo(
 
 export const DisplayPriceDetail: React.FC<DisplayPriceProps> = React.memo(
   ({ price, currency, barred_price }) => {
-  
-
-    const { productFeatures, selectedFeatures, lastGroupProductId } = useproductFeatures();
+    const { productFeatures, selectedFeatures, lastGroupProductId } =
+      useproductFeatures();
 
     const getLatestPriceValue = () => {
-      const lastFeatureType = Array.from(selectedFeatures.keys()).pop(); 
+      const lastFeatureType = Array.from(selectedFeatures.keys()).pop();
       if (lastFeatureType && productFeatures.has(lastGroupProductId)) {
         const features = productFeatures.get(lastGroupProductId);
         return features?.get(lastFeatureType)?.priceValue || null;
       }
       return null;
     };
-  
+
     const totalPrice = useMemo(() => {
       const basePrice = safeParsePrice(price);
-      const featurePrice = safeParsePrice(
-        getLatestPriceValue()
-      );
+      const featurePrice = safeParsePrice(getLatestPriceValue());
       return basePrice + featurePrice;
     }, [price, productFeatures, lastGroupProductId]);
 
     const barredPrice = useMemo(() => {
       const basePrice = safeParsePrice(barred_price);
-      const featurePrice = safeParsePrice(
-        getLatestPriceValue()
-      );
+      const featurePrice = safeParsePrice(getLatestPriceValue());
       return basePrice + featurePrice;
     }, [price, productFeatures, lastGroupProductId]);
 
-
     return (
       <PriceWrapper label={`Prix détaillé en ${currency}`}>
-       <span
+        <span
           className="whitespace-nowrap text-black font-medium"
           aria-label={`Prix total: ${formatPrice(totalPrice)} ${currency}`}
         >
@@ -104,11 +99,13 @@ export const DisplayPriceDetail: React.FC<DisplayPriceProps> = React.memo(
         {barred_price !== undefined && barredPrice > 0 && (
           <span
             className="line-through font-light text-[0.8rem] text-black/80 whitespace-nowrap list-product-breakpoint-4:block"
-            aria-label={`Prix original: ${formatPrice(barredPrice)} ${currency}`}
+            aria-label={`Prix original: ${formatPrice(
+              barredPrice
+            )} ${currency}`}
           >
             {formatPrice(barredPrice)} {currency}
           </span>
-        )} 
+        )}
       </PriceWrapper>
     );
   },
@@ -126,7 +123,7 @@ interface DisplayPriceItemCartProps {
 export const DisplayPriceItemCart: React.FC<DisplayPriceItemCartProps> =
   React.memo(
     ({ product, group_product }) => {
-      const carts = usePanier((state) => state.panier);
+      const { carts } = useCart();
       const itemInPanier = useMemo(
         () => carts.find((item) => item.product.id === product?.id),
         [carts, product]
@@ -154,7 +151,7 @@ export const DisplayPriceItemCart: React.FC<DisplayPriceItemCartProps> =
             </span>
           ) : (
             <span
-              className="text-red-600 text-sm"
+              className="text-gray-600 text-xs italic"
               aria-label="Prix indisponible"
             >
               Prix non disponible

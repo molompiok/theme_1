@@ -1,18 +1,24 @@
 import { BsCartX, BsHandbag, BsTrash, BsX } from "react-icons/bs";
 import { BASE_URL } from "../../api";
-import { GroupProductType, ProductClient } from "../../pages/type";
-import { usePanier } from "../../store/cart";
+import {
+  CartResponse,
+  GroupProductType,
+  ProductClient,
+} from "../../pages/type";
 import AddRemoveItemCart from "./../AddRemoveItemCart";
 import { CommandButton } from "./../Button";
 import Modal from "./Modal";
 import { get_features_with_values } from "../../api/products.api";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Loading from "./../Loading";
 import { DisplayPriceItemCart } from "./../DisplayPrice";
 import { ProductMedia } from "../ProductMedia";
 import { useproductFeatures } from "../../store/features";
 import { navigate } from "vike/client/router";
 import { formatPrice } from "../../utils";
+import useCart from "../../hook/query/useCart";
+import { useUpdateCart } from "../../hook/query/useUpdateCart";
+import { useModalCart } from "../../store/cart";
 
 interface CartItem {
   product: ProductClient;
@@ -20,11 +26,11 @@ interface CartItem {
 }
 
 function ItemCart({ product, group_product }: CartItem) {
-  const removeItem = usePanier((state) => state.remove);
-  const isOpen = usePanier((state) => state.showCart);
-  const pFeature = useproductFeatures((state) => state.productFeatures);
+  const isOpen = useModalCart((state) => state.showCart);
 
-  const { data: feature, status } = useQuery({
+  const removeMutation = useUpdateCart()
+
+  const { data: feature, isPending } = useQuery({
     queryKey: ["get_features_with_values", product.default_feature_id],
     queryFn: () =>
       product.default_feature_id
@@ -33,9 +39,10 @@ function ItemCart({ product, group_product }: CartItem) {
     enabled: !!product.default_feature_id && isOpen,
   });
 
+  const pFeature = useproductFeatures((state) => state.productFeatures);
   const featureV = pFeature.get(group_product?.id);
 
-  if (status === "pending") {
+  if (isPending) {
     return <Loading />;
   }
 
@@ -43,7 +50,7 @@ function ItemCart({ product, group_product }: CartItem) {
 
   return (
     <div className="flex flex-col items-center p-2">
-      <div className="flex justify-center w-full">
+      <div className="flex gap-1 justify-center w-full">
         <ProductMedia
           mediaList={mediaList}
           productName={product.name}
@@ -51,14 +58,20 @@ function ItemCart({ product, group_product }: CartItem) {
         />
         <div className="relative flex-1">
           <BsTrash
-            className="text-lg absolute top-0 -right-4 text-gray-400 hover:text-gray-600 cursor-pointer"
-            onClick={() => removeItem(group_product.id)}
+            className="text-lg absolute top-0 -right-4 text-gray-400 hover:text-gray-600 cursor-pointer z-10"
+            onClick={(e) => {
+              e.stopPropagation(); 
+              console.log("Suppression déclenchée pour", group_product.id);
+              removeMutation.mutate({
+                group_product_id: group_product.id,
+                mode: "clear",
+              });
+            }}
             size={20}
           />
           <h1 className="text-base md:text-lg mr-2.5 font-bold line-clamp-1">
             {product.name}
           </h1>
-
           <div className="flex flex-wrap items-center mb-1 gap-1">
             {featureV
               ? Array.from(featureV.entries()).map(([key, value], i) => (
@@ -89,6 +102,7 @@ function ItemCart({ product, group_product }: CartItem) {
 }
 
 function ListItemCart({ carts }: { carts: CartItem[] }) {
+  console.log("🚀 ~ ListItemCart ~ carts:", carts)
   return (
     <div className="flex flex-col divide-y-2 divide-blue-100 max-h-[60vh] overflow-y-auto scroll-smooth scrollbar-thin pr-2">
       {carts?.map((cart) => (
@@ -99,9 +113,9 @@ function ListItemCart({ carts }: { carts: CartItem[] }) {
 }
 
 export default function ModalCart() {
-  const toggleCart = usePanier((state) => state.toggleCart);
-  const carts = usePanier((state) => state.panier);
-  const showCart = usePanier((state) => state.showCart);
+  const showCart = useModalCart((state) => state.showCart);
+  const toggleCart = useModalCart((state) => state.toggleCart);
+  const { carts } = useCart()
 
   const totalItems = carts.reduce((acc, item) => acc + item.nbr, 0);
   const totalPrice = carts.reduce((acc, item) => acc + item.totalPrice, 0);
@@ -110,6 +124,7 @@ export default function ModalCart() {
     toggleCart(false);
     document.body.style.overflow = "auto";
   };
+
 
   return (
     <Modal
@@ -129,12 +144,10 @@ export default function ModalCart() {
             aria-label="Fermer le panier"
           />
         </div>
-
-        <div className=" flex flex-col justify-around overflow-auto">
+        <div className="flex flex-col justify-around overflow-auto">
           <div className="absolute text-black top-0 pt-5 pb-0 pl-4 border-b border-b-gray-300 flex items-center gap-2">
             <BsHandbag size={20} />
             <span className="text-lg md:text-xl font-semibold">Mon panier</span>
-            {/* <span className="text-sm">({totalItems} articles)</span> */}
           </div>
 
           <ListItemCart carts={carts} />
@@ -155,11 +168,9 @@ export default function ModalCart() {
                   {formatPrice(totalPrice)} {carts[0]?.product?.currency}
                 </span>
               </div>
-              {/* <div className="flex justify-between">
-                <span className="font-bold">Livraison</span>
-                <span>0 {carts[0]?.product?.currency}</span>
-              </div> */}
-        <span className="text-sm text-gray-600">Cout de livraison sera appliquer a la prochaine etape </span>
+              <span className="text-xs italic text-gray-600">
+                Coût de livraison sera appliqué à la prochaine étape
+              </span>
             </div>
           )}
 
@@ -169,7 +180,6 @@ export default function ModalCart() {
               handleModalCartClose();
               navigate("/confirmation");
             }}
-            // className="w-full py-3 bg-black text-white rounded-md hover:bg-gray-800"
           />
         </div>
       </div>

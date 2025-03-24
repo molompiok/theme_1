@@ -1,10 +1,6 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useproductFeatures } from "../../store/features";
-import { FeatureValue, GroupProductType } from "../../pages/type";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { get_group_by_feature } from "../../api/products.api";
-import Loading from "../Loading";
-import clsx from "clsx";
+import { FeatureValue } from "../../pages/type";
 import ValueComponent from "../product/ValueComponent";
 
 interface ColorComponentProps {

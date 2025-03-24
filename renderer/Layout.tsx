@@ -7,7 +7,7 @@ import { Toaster } from "react-hot-toast";
 import { LinkIcon } from "../component/LinkIcon";
 import { Link } from "../component/Link";
 import { BsChevronDown, BsHandbag, BsPerson, BsSearch } from "react-icons/bs";
-import { usePanier } from "../store/cart";
+import { useModalCart } from "../store/cart";
 import { CiMenuBurger } from "react-icons/ci";
 import { navigate } from "vike/client/router";
 import { BiArrowBack, BiSolidUser } from "react-icons/bi";
@@ -30,7 +30,7 @@ function Layout({
   children: React.ReactNode;
   pageContext: PageContext;
 }) {
-  const toggleCart = usePanier((state) => state.toggleCart);
+  const toggleCart = useModalCart((state) => state.toggleCart);
   const openModalAuth = useModalAuth((state) => state.open);
   const [isClient, setIsClient] = useState(false);
 
@@ -49,43 +49,43 @@ function Layout({
   return (
     <PageContextProvider pageContext={pageContext}>
       <Frame>
-          <Header>
-            <SideBarCategories />
-            <Logo />
-            <nav className="flex items-center gap-5">
-              <div className="hidden font-semibold uppercase lg:flex lg:gap-5 lg:justify-center">
-                <LinkIcon href="/">Boutique</LinkIcon>
-                <LinkIcon href="/About">About</LinkIcon>
-              </div>
-              <BsSearch
-                size={24}
-                className="cursor-pointer"
-                onClick={() => navigate("/search")}
-              />
-              <BsHandbag
-                size={24}
-                className="cursor-pointer"
-                onClick={() => {
-                  toggleCart(true);
+        <Header>
+          <SideBarCategories />
+          <Logo />
+          <nav className="flex items-center gap-5">
+            <div className="hidden font-semibold uppercase lg:flex lg:gap-5 lg:justify-center">
+              <LinkIcon href="/">Boutique</LinkIcon>
+              <LinkIcon href="/About">About</LinkIcon>
+            </div>
+            <BsSearch
+              size={24}
+              className="cursor-pointer"
+              onClick={() => navigate("/search")}
+            />
+            <BsHandbag
+              size={24}
+              className="cursor-pointer"
+              onClick={() => {
+                toggleCart(true);
+                document.body.style.overflow = "hidden";
+              }}
+            />
+            <BsPerson
+              size={28}
+              className="cursor-pointer"
+              onClick={() => {
+                const user = useAuthStore.getState().user;
+                if (user) {
+                  navigate("/profile");
+                } else {
+                  openModalAuth("login");
                   document.body.style.overflow = "hidden";
-                }}
-              />
-              <BsPerson
-                size={28}
-                className="cursor-pointer"
-                onClick={() => {
-                  const user = useAuthStore.getState().user;
-                  if (user) {
-                    navigate("/profile");
-                  } else {
-                    openModalAuth("login");
-                    document.body.style.overflow = "hidden";
-                  }
-                }}
-              />
-            </nav>
-          </Header>
-          {children}
+                }
+              }}
+            />
+          </nav>
+        </Header>
+        {children}
 
         <ModalCart />
         <ModalChooseFeature />
@@ -99,10 +99,11 @@ function Frame({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((state) => state.user);
 
   useGoogleOneTapLogin({
-    cancel_on_tap_outside: false,
+    cancel_on_tap_outside: true,
     use_fedcm_for_prompt: true,
     auto_select: false,
-    disabled: Boolean(user),
+    disabled: true,
+    // disabled: Boolean(user),
     onSuccess: async (response) => {
       try {
         await api.post("/google_callback", { token: response.credential });

@@ -9,15 +9,15 @@ import {
 } from "../../../api/products.api";
 
 const data = async (pageContext: PageContextServer) => {
-  const queryClient = createQueryClient();
+  // const queryClient = createQueryClient();
   const slug = pageContext.routeParams!.slug;
 
-  await queryClient.prefetchQuery({
+  await createQueryClient.prefetchQuery({
     queryKey: ["get_products"],
     queryFn: () => get_products({ slug_product : slug }),
   });
 
-  const productData = await queryClient.ensureQueryData({
+  const productData = await createQueryClient.ensureQueryData({
     queryKey: ["get_products", slug],
     queryFn: () => get_products({ slug_product : slug }),
   });
@@ -36,7 +36,7 @@ const data = async (pageContext: PageContextServer) => {
 
   // const firstImg = mediaList.find((media: string) => media.endsWith(".webp"));
   return {
-    dehydratedState: dehydrate(queryClient),
+    dehydratedState: dehydrate(createQueryClient),
     title: product?.[0]?.name || "Page Produit",
     slug,
     meta: {

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useproductFeatures, useProductSelectFeature } from "../store/features";
 import clsx from "clsx";
-import { usePanier } from "../store/cart";
+import { useModalCart } from "../store/cart";
 import { Feature, GroupProductType, ProductClient } from "../pages/type";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -10,6 +10,9 @@ import {
 } from "../api/products.api";
 import AddRemoveItemCart from "./AddRemoveItemCart";
 import Loading from "./Loading";
+import { useAuthStore } from "../store/user";
+import { useUpdateCart } from "../hook/query/useUpdateCart";
+import useCart from "../hook/query/useCart";
 export function CartButton({
   text,
   product,
@@ -20,13 +23,16 @@ export function CartButton({
   const setFeatureModal = useProductSelectFeature(
     (state) => state.setFeatureModal
   );
-  const { add: addProduct, panier: carts, toggleCart } = usePanier();
-  const product_id = product?.id;
+  const { carts } = useCart();
+  const toggleCart = useModalCart((state) => state.toggleCart);
 
+  const product_id = product?.id;
+  const updateCartMutation = useUpdateCart();
   const {
     data: group_products,
     isPending,
     isLoading,
+    isError,
   } = useQuery({
     queryKey: ["get_group_by_feature", { product_id }],
     queryFn: () => get_group_by_feature({ product_id }),
@@ -44,9 +50,13 @@ export function CartButton({
     return <Loading />;
   }
 
-  if (!group_products) {
+  if (!group_products || isError || !features) {
     return <div>⛔</div>;
   }
+
+  const allFeaturesHaveAtMostOneValue = features.every(
+    (feature) => feature.values.length > 1
+  );
 
   const stock = group_products.reduce((sum, group) => sum + group.stock, 0);
   const itemInPanier = carts.find((item) => item.product.id === product_id);
@@ -59,13 +69,17 @@ export function CartButton({
 
   const handleAddToCartClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    document.body.style.overflow = "hidden";
-    if ((features?.length ?? 0) <= 1) {
+    if (!allFeaturesHaveAtMostOneValue) {
       toggleCart(true);
       const groupProduct = group_products.find(
         (p) => p.product_id === product_id
       );
-      if (groupProduct) addProduct(product, groupProduct);
+      if (groupProduct) {
+        updateCartMutation.mutate({
+          group_product_id: groupProduct.id,
+          mode: "increment",
+        });
+      }
     } else {
       setFeatureModal(true, product);
     }
@@ -85,7 +99,7 @@ export function CartButton({
 
   return (
     <div className="w-full font-secondary group relative mt-auto overflow-hidden inline-block">
-      {(group_products?.length ?? 0) > 1 ? (
+      {allFeaturesHaveAtMostOneValue ? (
         <button
           disabled={status !== "success" || stock === 0}
           onClick={handleFeatureModalClick}
@@ -131,9 +145,8 @@ export function CommandButton({
   text: string;
   callBack?: () => void;
 }) {
-  const carts = usePanier((state) => state.panier);
-  const toggleCart = usePanier((state) => state.toggleCart);
-
+  const toggleCart = useModalCart((state) => state.toggleCart);
+  const { carts, isLoading } = useCart();
   const handleModalCartClose = () => {
     toggleCart(false);
     document.body.style.overflow = "auto";
@@ -165,14 +178,34 @@ interface ButtonValidCartProps {
   product: ProductClient;
 }
 
-export function ButtonValidCart({ features, product }: ButtonValidCartProps) {
-  const toggleCart = usePanier((st) => st.toggleCart);
-  const addProduct = usePanier((st) => st.add);
-  const { selectedFeatures, groupProducts, lastGroupProductId } =
-    useproductFeatures();
+export function ButtonValidCart({
+  features = [],
+  product,
+}: ButtonValidCartProps) {
+  const allFeaturesHaveAtMostOneValue = features.every(
+    (feature) => feature.values.length > 1
+  );
+  const updateCartMutation = useUpdateCart();
+
+  const toggleCart = useModalCart((st) => st.toggleCart);
+  // const addProduct = useModalCart((st) => st.add);
   const setFeatureModal = useProductSelectFeature(
     (state) => state.setFeatureModal
   );
+
+  const {
+    data: group_products,
+    isPending,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["get_group_by_feature", { product_id: product.id }],
+    queryFn: () => get_group_by_feature({ product_id: product.id }),
+    enabled: !!product.id,
+  });
+
+  const { selectedFeatures, groupProducts, lastGroupProductId } =
+    useproductFeatures();
 
   const matchingGroup = useMemo(() => {
     const groups = groupProducts.get(lastGroupProductId) || [];
@@ -192,15 +225,30 @@ export function ButtonValidCart({ features, product }: ButtonValidCartProps) {
     });
   }, [selectedFeatures, features]);
 
-  const handleAddToCart = () => {
-    if (!matchingGroup) return;
+  const handleAddToCart = (group: GroupProductType) => {
     toggleCart(true);
     document.body.style.overflow = "hidden";
     setFeatureModal(false);
-    addProduct(product, matchingGroup);
+    // addProduct(product, group);
+    updateCartMutation.mutate({
+      group_product_id: group.id,
+      mode: "increment",
+    });
   };
 
-  if (!groupProducts.size || !matchingGroup) {
+  if (isLoading || isPending) {
+    return <Loading />;
+  }
+
+  if (!group_products || isError) {
+    return <div>⛔</div>;
+  }
+
+  const selectedGroup = allFeaturesHaveAtMostOneValue
+    ? group_products[0]
+    : matchingGroup;
+
+  if (!selectedGroup) {
     return (
       <div className="min-h-[48px] mx-auto text-center text-clamp-base uppercase text-gray-50 w-full py-3 px-4 mt-1 bg-black/45">
         Sélectionnez une variante
@@ -211,9 +259,9 @@ export function ButtonValidCart({ features, product }: ButtonValidCartProps) {
   return (
     <button
       disabled={!!productWhoRequired}
-      onClick={handleAddToCart}
+      onClick={() => handleAddToCart(selectedGroup)}
       className={clsx(
-        "mx-auto cursor-pointer sm:w-auto text-center text-clamp-base uppercase text-gray-50 w-full py-3 px-4 mt-7 min-h-[48px]",
+        "mx-auto cursor-pointer text-center text-clamp-base uppercase text-gray-50 w-full py-3 px-4 mt-7 min-h-[48px]",
         {
           "bg-black/45": !!productWhoRequired,
           "bg-black hover:bg-gray-900": !productWhoRequired,

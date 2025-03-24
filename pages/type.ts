@@ -1,14 +1,13 @@
 export type ProductType = {
   id: string;
   store_id: string;
-  category_id: string;
+  categories_id: string[];
   name: string;
   description: string;
   default_feature_id: string;
   price: number;
   barred_price: number;
   slug: string;
-
   currency: string;
   createdAt: Date;
   updatedAt: Date;
@@ -17,7 +16,7 @@ export type ProductType = {
 export type ProductFavorite = {
   id: string;
   store_id: string;
-  category_id: string | null;
+  categories_id: string[] | null;
   name: string;
   default_feature_id: string;
   description: string;
@@ -61,9 +60,7 @@ export type Feature = {
   values: FeatureValue[];
 };
 
-export type FeaturesResponse = {
-  features: Feature[]; // Tableau de Feature
-};
+
 export type GroupProductType = {
   id: string;
   product_id: string;
@@ -162,3 +159,60 @@ export interface Adresse {
   created_at: string;
   updated_at: string;
 }
+
+// cart
+
+type GroupProductCart = {
+  id: string;
+  product_id: string;
+  stock: number;
+  currency: string;
+  additional_price: number;
+  bind: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+  product: ProductType;
+};
+
+
+type CartItem = {
+  id: string;
+  cart_id: string;
+  group_product_id: string;
+  quantity: number;
+  created_at: string;
+  updated_at: string;
+  group_product: GroupProductCart;
+};
+
+type Cart = {
+  id: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+  expires_at: string | null;
+  items: CartItem[];
+};
+
+export type CartResponse = {
+  cart: Cart;
+  total: number;
+};
+
+
+type UpdatedItem = {
+  id: string;
+  cart_id: string;
+  group_product_id: string;
+  quantity: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CartUpdateResponse = {
+  message: string;
+  cart: Cart;
+  updatedItem: UpdatedItem;
+  total: number;
+  action: "added" | "removed" | "updated";
+};
