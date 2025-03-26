@@ -10,12 +10,10 @@ interface PersonalInfoProps {
   onSave: (fullName: string) => void;
 }
 
-export const PersonalInfo = ({
-
-}) => {
-    const user = useAuthStore((state) => state.user);
-    const fetchUser = useAuthStore((state) => state.fetchUser);
-  const [fullName, setFullName] = useState(user?.full_name || '');
+export const PersonalInfo = ({}) => {
+  const user = useAuthStore((state) => state.user);
+  const fetchUser = useAuthStore((state) => state.fetchUser);
+  const [fullName, setFullName] = useState(user?.full_name || "");
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(fullName);
   const [error, setError] = useState<string | null>(null);
@@ -27,13 +25,10 @@ export const PersonalInfo = ({
       setError(null);
     },
     onError: (error) => {
-      setError(
-        "Erreur lors de la mise à jour du numéro. Veuillez réessayer."
-      );
+      setError("Erreur lors de la mise à jour du numéro. Veuillez réessayer.");
       console.error("Erreur lors de la mise à jour du numero :", error);
     },
   });
-
 
   const handleEditStart = () => {
     setIsEditing(true);
@@ -69,11 +64,14 @@ export const PersonalInfo = ({
       setError("Le nom ne peut pas dépasser 50 caractères.");
       return;
     }
-    updateUserMutation.mutate({full_name : editValue}, {
-      onSuccess : (data) =>{
-        setFullName(editValue);
+    updateUserMutation.mutate(
+      { full_name: editValue },
+      {
+        onSuccess: (data) => {
+          setFullName(editValue);
+        },
       }
-    })
+    );
     setIsEditing(false);
     setError(null);
   };
@@ -84,7 +82,6 @@ export const PersonalInfo = ({
         <h2 className="text-lg font-semibold text-gray-900">
           Informations personnelles
         </h2>
-       
       </div>
 
       <div className="space-y-6">
@@ -147,10 +144,7 @@ export const PersonalInfo = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label
-            htmlFor="email"
-            className="text-sm font-medium text-gray-900"
-          >
+          <label htmlFor="email" className="text-sm font-medium text-gray-900">
             Email
           </label>
           <p id="email" className="text-sm text-gray-700 break-all">

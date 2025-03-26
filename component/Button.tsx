@@ -7,12 +7,14 @@ import { useQuery } from "@tanstack/react-query";
 import {
   get_features_with_values,
   get_group_by_feature,
+  // get_group_by_feature,
 } from "../api/products.api";
 import AddRemoveItemCart from "./AddRemoveItemCart";
 import Loading from "./Loading";
 import { useAuthStore } from "../store/user";
 import { useUpdateCart } from "../hook/query/useUpdateCart";
 import useCart from "../hook/query/useCart";
+import { getAllCombinations } from "../utils";
 export function CartButton({
   text,
   product,
@@ -28,17 +30,16 @@ export function CartButton({
 
   const product_id = product?.id;
   const updateCartMutation = useUpdateCart();
-  const {
-    data: group_products,
-    isPending,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["get_group_by_feature", { product_id }],
-    queryFn: () => get_group_by_feature({ product_id }),
-    enabled: !!product_id,
-  });
-
+  // const {
+  //   data: group_products,
+  //   isPending,
+  //   isLoading,
+  //   isError,
+  // } = useQuery({
+  //   queryKey: ["get_group_by_feature", { product_id }],
+  //   queryFn: () => get_group_by_feature({ product_id }),
+  //   enabled: !!product_id,
+  // });
   const { data: features, status } = useQuery({
     queryKey: ["get_features_with_values", product_id],
     queryFn: () =>
@@ -46,19 +47,18 @@ export function CartButton({
     enabled: !!product_id,
   });
 
-  if (isLoading || isPending) {
-    return <Loading />;
-  }
-
-  if (!group_products || isError || !features) {
+  if (!features) {
     return <div>⛔</div>;
   }
+
+  const group_products = getAllCombinations({ features: features, product_id: product_id });
+
 
   const allFeaturesHaveAtMostOneValue = features.every(
     (feature) => feature.values.length > 1
   );
 
-  const stock = group_products.reduce((sum, group) => sum + group.stock, 0);
+  const stock = group_products.reduce((sum, group) => sum + (group.stock || 0), 0);
   const itemInPanier = carts.find((item) => item.product.id === product_id);
 
   const handleFeatureModalClick = (e: React.MouseEvent) => {
@@ -72,7 +72,7 @@ export function CartButton({
     if (!allFeaturesHaveAtMostOneValue) {
       toggleCart(true);
       const groupProduct = group_products.find(
-        (p) => p.product_id === product_id
+        (p) => p.id === product_id
       );
       if (groupProduct) {
         updateCartMutation.mutate({
@@ -173,22 +173,78 @@ export function CommandButton({
     </div>
   );
 }
+
 interface ButtonValidCartProps {
   features?: Feature[];
   product: ProductClient;
+}
+
+function SingleValuedFeaturesButton({
+  group_products,
+  handleAddToCart,
+}: {
+  group_products: GroupProductType[];
+  handleAddToCart: (group: GroupProductType) => void;
+}) {
+  
+
+  return (
+    <button
+      onClick={() => handleAddToCart(group_products[0])}
+      className={clsx(
+        "mx-auto cursor-pointer text-center text-clamp-base uppercase bg-black text-gray-50 w-full py-3 px-4 mt-7 min-h-[48px]"
+      )}
+    >
+      Ajouter au panier
+    </button>
+  );
+}
+
+function MultiValuedFeaturesButton({
+  productWhoRequired,
+  matchingGroup,
+  handleAddToCart,
+}: {
+  productWhoRequired: Feature | undefined;
+  handleAddToCart: (group: GroupProductType) => void;
+  matchingGroup: GroupProductType | undefined
+}) {
+  if (!matchingGroup) {
+    return (
+      <div className="min-h-[48px] mx-auto text-center text-clamp-base uppercase text-gray-50 w-full py-3 px-4 mt-1 bg-black/45">
+        Sélectionnez une variante
+      </div>
+    );
+  }
+  return (
+    <button
+      disabled={!!productWhoRequired}
+      onClick={() => handleAddToCart(matchingGroup)}
+      className={clsx(
+        "mx-auto cursor-pointer text-center text-clamp-base uppercase text-gray-50 w-full py-3 px-4 mt-7 min-h-[48px]",
+        {
+          "bg-black/45": !!productWhoRequired,
+          "bg-black hover:bg-gray-900": !productWhoRequired,
+        }
+      )}
+    >
+      {productWhoRequired
+        ? `Sélectionnez ${productWhoRequired.name}`
+        : "Ajouter au panier"}
+    </button>
+  );
 }
 
 export function ButtonValidCart({
   features = [],
   product,
 }: ButtonValidCartProps) {
-  const allFeaturesHaveAtMostOneValue = features.every(
-    (feature) => feature.values.length > 1
+  const allFeaturesAreSingleValued = features.every(
+    (feature) => feature.values.length <= 1
   );
   const updateCartMutation = useUpdateCart();
 
   const toggleCart = useModalCart((st) => st.toggleCart);
-  // const addProduct = useModalCart((st) => st.add);
   const setFeatureModal = useProductSelectFeature(
     (state) => state.setFeatureModal
   );
@@ -229,7 +285,6 @@ export function ButtonValidCart({
     toggleCart(true);
     document.body.style.overflow = "hidden";
     setFeatureModal(false);
-    // addProduct(product, group);
     updateCartMutation.mutate({
       group_product_id: group.id,
       mode: "increment",
@@ -244,33 +299,16 @@ export function ButtonValidCart({
     return <div>⛔</div>;
   }
 
-  const selectedGroup = allFeaturesHaveAtMostOneValue
-    ? group_products[0]
-    : matchingGroup;
-
-  if (!selectedGroup) {
-    return (
-      <div className="min-h-[48px] mx-auto text-center text-clamp-base uppercase text-gray-50 w-full py-3 px-4 mt-1 bg-black/45">
-        Sélectionnez une variante
-      </div>
-    );
-  }
-
-  return (
-    <button
-      disabled={!!productWhoRequired}
-      onClick={() => handleAddToCart(selectedGroup)}
-      className={clsx(
-        "mx-auto cursor-pointer text-center text-clamp-base uppercase text-gray-50 w-full py-3 px-4 mt-7 min-h-[48px]",
-        {
-          "bg-black/45": !!productWhoRequired,
-          "bg-black hover:bg-gray-900": !productWhoRequired,
-        }
-      )}
-    >
-      {productWhoRequired
-        ? `Sélectionnez ${productWhoRequired.name}`
-        : "Ajouter au panier"}
-    </button>
+  return allFeaturesAreSingleValued ? (
+    <SingleValuedFeaturesButton
+      group_products={group_products}
+      handleAddToCart={handleAddToCart}
+    />
+  ) : (
+    <MultiValuedFeaturesButton
+      productWhoRequired={productWhoRequired}
+      handleAddToCart={handleAddToCart}
+      matchingGroup={matchingGroup}
+    />
   );
 }

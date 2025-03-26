@@ -1,21 +1,11 @@
 import React, {
-  useState,
-  useEffect,
-  FormEvent,
   JSX,
-  Suspense,
-  useRef,
 } from "react";
 import {
   BsPerson,
-  BsTrash,
-  BsSearch,
-  BsPencil,
-  BsGeoAlt,
 } from "react-icons/bs"; // Ajout de BsGeoAlt
 import { useAuthRedirect } from "../../hook/authRedirect";
 import axios from "axios";
-import { useGeolocationWithIP } from "../../hook/useGeolocationWithIP";
 import { AddressSelector } from "../../component/profile/AddressSelector";
 import { PersonalInfo } from "../../component/profile/PersonalInfo";
 import { PhoneNumbers } from "../../component/profile/PhoneNumbers";
@@ -76,9 +66,9 @@ const COTE_DIVOIRE_BBOX = "4.19,-8.6~10.74,-2.49";
 export default function Page(): JSX.Element {
   useAuthRedirect();
 
-  const handleAddressChange = (address: Address | null) => {
-    console.log("Address updated:", address);
-  };
+  // const handleAddressChange = (address: Address | null) => {
+  //   console.log("Address updated:", address);
+  // };
 
   return (
     <div className="conatiner min-h-dvh font-primary bg-gray-100 px-2 pb-[100px]">
@@ -93,13 +83,6 @@ export default function Page(): JSX.Element {
           <PersonalInfo />
           <PhoneNumbers maxItems={2} />
           <AddressSelector
-            apiKey={YANDEX_API_KEY}
-            geocoderApiKey={YANDEX_API_GEOCODER}
-            bbox={COTE_DIVOIRE_BBOX}
-            initialAddress={null}
-            onAddressChange={handleAddressChange}
-            saveEndpoint="http://votre-api-adonisjs/api/user/profile"
-            language="en_US"
             mapHeight="400px"
           />
         </div>

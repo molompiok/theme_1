@@ -17,6 +17,8 @@ export const RenderFeatureComponent = ({
     product_id,
   };
 
+  if(feature.values.length === 0) return null;
+
   switch (feature.type) {
     case "color":
       return (

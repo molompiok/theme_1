@@ -24,15 +24,6 @@ export default function ProductCard({ product  }: { product: ProductClient }) {
       get_features_with_values({ feature_id: product.default_feature_id }),
   });
 
-  console.log("🚀 ~ ProductCard ~ product.default_feature_id:", product.default_feature_id , product.name , feature?.[0].values?.[0].views[0])
-
-  // const { data: group_products } = useQuery({
-  //   queryKey: ["get_group_products", product?.id],
-  //   queryFn: () => get_group_product({ product_id: product?.id }),
-  //   enabled: !!product?.id,
-  // });
-
-  // const mediaList = feature?.[0]?.values?.[0]?.views || [];
   const mediaList = getFirstFeatureWithView(feature || [])?.values[0].views || [];
   return (
     <div

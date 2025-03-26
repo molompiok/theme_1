@@ -6,6 +6,7 @@ import Skeleton from "../Skeleton"; // Assume que tu as le Skeleton modulaire
 import clsx from "clsx";
 import { GroupProductType } from "../../pages/type";
 import Loading from "../Loading";
+import { getAllCombinations } from "../../utils";
 
 interface ValueComponentProps {
   value: { text: string; id?: string };
@@ -28,24 +29,26 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
     (state) => state.selectedFeatures
   );
 
-  const {
-    data: group_products = [],
-    isPending,
-    isError,
-  } = useQuery<GroupProductType[], Error>({
-    queryKey: [
-      "get_group_by_feature",
-      { product_id, feature_value: text, feature_key: feature_name },
-    ],
-    queryFn: () =>
-      get_group_by_feature({
-        product_id,
-        feature_value: text,
-        feature_key: feature_name,
-      }),
-    staleTime: 5 * 60 * 1000,
-    placeholderData: keepPreviousData,
-  });
+  // const {
+  //   data: group_products = [],
+  //   isPending,
+  //   isError,
+  // } = useQuery<GroupProductType[], Error>({
+  //   queryKey: [
+  //     "get_group_by_feature",
+  //     { product_id, feature_value: text, feature_key: feature_name },
+  //   ],
+  //   queryFn: () =>
+  //     get_group_by_feature({
+  //       product_id,
+  //       feature_value: text,
+  //       feature_key: feature_name,
+  //     }),
+  //   staleTime: 5 * 60 * 1000,
+  //   placeholderData: keepPreviousData,
+  // });
+
+  const group_products = getAllCombinations({ features: features, product_id: product_id });
 
   const { totalStock, mainGroupProduct } = useMemo(() => {
     const validGroups = group_products.filter((gp) => {
@@ -57,13 +60,13 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       return matchesCurrent && matchesOthers;
     });
     const total = validGroups.reduce((sum, gp) => sum + (gp.stock || 0), 0);
-    const main = validGroups.find((gp) => gp.stock > 0) || validGroups[0];
+    const main = validGroups.find((gp) => (gp.stock || 0) > 0) || validGroups[0];
     return { totalStock: total, mainGroupProduct: main };
   }, [group_products, feature_name, text, selectedFeatures]);
 
   const isDisabled = useMemo(
-    () => isPending || isError || !group_products.length || totalStock === 0,
-    [isPending, isError, group_products, totalStock]
+    () => !group_products.length || totalStock === 0,
+    [group_products, totalStock]
   );
 
   const handleClick = useCallback(

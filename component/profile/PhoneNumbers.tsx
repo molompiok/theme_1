@@ -5,7 +5,7 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { IMaskInput } from "react-imask";
+import { IMaskInput, IMask } from "react-imask";
 import { FiEdit2, FiCheck, FiX } from "react-icons/fi";
 import { BsTrash } from "react-icons/bs";
 import { useMutation } from "@tanstack/react-query";
@@ -15,6 +15,8 @@ import {
   update_user_phone,
 } from "../../api/user.api";
 import { useAuthStore } from "../../store/user";
+import clsx from "clsx";
+import { FaPhone } from "react-icons/fa";
 
 const getFlagEmoji = (isoCode: string): string => {
   return isoCode
@@ -22,6 +24,11 @@ const getFlagEmoji = (isoCode: string): string => {
     .split("")
     .map((char) => String.fromCodePoint(char.charCodeAt(0) + 127397))
     .join("");
+};
+
+const formatPhoneNumber = (phone: string, mask: string) => {
+  const Phonemask = IMask.createMask({ mask });
+  return Phonemask.resolve(phone);
 };
 
 interface Country {
@@ -51,12 +58,14 @@ const countries: Country[] = [
 
 interface PhoneNumbersProps {
   maxItems?: number;
+  style? : string;
   initialNumbers?: UserPhone[];
 }
 
 export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
   maxItems = 2,
   initialNumbers = [],
+  style
 }) => {
   const user = useAuthStore((state) => state.user);
   const fetchUser = useAuthStore((state) => state.fetchUser);
@@ -329,95 +338,26 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
   );
 
   return (
-    <section className="w-full p-4 bg-gray-50 rounded-lg shadow-sm">
-      <div className="mb-4">
+    <section className={`w-full p-4 bg-gray-50 rounded-lg shadow-sm ${style}`}>
+      <div className="my-2">
         <h2 className="text-lg font-semibold text-gray-900">
-          Numéros de téléphone ({numbers.length}/{maxItems})
+          Numéros de téléphone <span className="text-gray-600 text-xs">({numbers.length}/{maxItems})</span>
         </h2>
-        <p className="text-sm text-gray-600">
-          Ajoutez ou modifiez vos numéros ci-dessous.
-        </p>
+        {numbers.length >= maxItems ? (
+          <p className="text-sm text-gray-600">
+            Nombre maximum de numéros atteint.
+          </p>
+        ) : (
+          <p className="text-sm text-gray-600">
+            Ajoutez ou modifiez vos numéros ci-dessous.
+          </p>
+        )}
       </div>
-
-      <form
-        ref={formRef}
-        onSubmit={handleAddItem}
-        className="flex flex-col gap-3 md:flex-row md:items-end mb-5"
-      >
-        <div className="flex flex-col gap-1 w-full md:w-auto">
-          <label htmlFor="country" className="text-sm text-gray-700">
-            Pays
-          </label>
-          <select
-            id="country"
-            name="country"
-            value={selectedCountry.code}
-            onChange={(e) =>
-              setSelectedCountry(
-                countries.find((c) => c.code === e.target.value)!
-              )
-            }
-            className="w-full min-w-[100px] max-w-[150px] p-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none"
-          >
-            {countries.map((country) => (
-              <option key={country.code} value={country.code}>
-                {getFlagEmoji(country.code.split("_")[0].toUpperCase())} +
-                {country.code.split("_")[1]} 
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1 w-full">
-          <label htmlFor="number" className="text-sm text-gray-700">
-            Numéro de téléphone
-          </label>
-          <IMaskInput
-            id="number"
-            name="number"
-            mask={selectedCountry.mask}
-            disabled={
-              numbers.length >= maxItems ||
-              createUserPhoneMutation.isPending ||
-              updateUserPhoneMutation.isPending ||
-              deleteUserPhoneMutation.isPending
-            }
-            placeholder={`Ex: ${selectedCountry.mask}`}
-            className={`w-full p-2 text-sm border rounded-md focus:ring-2 focus:outline-none ${
-              numbers.length >= maxItems ||
-              createUserPhoneMutation.isPending ||
-              updateUserPhoneMutation.isPending ||
-              deleteUserPhoneMutation.isPending
-                ? "bg-gray-200 border-gray-300 cursor-not-allowed"
-                : "border-gray-300 focus:ring-gray-500"
-            }`}
-          />
-          {phoneError && (
-            <p className="text-xs text-red-600 mt-1">{phoneError}</p>
-          )}
-          {(createUserPhoneMutation.isPending ||
-            updateUserPhoneMutation.isPending ||
-            deleteUserPhoneMutation.isPending) && (
-            <p className="text-xs text-gray-600 mt-1">Traitement en cours...</p>
-          )}
-        </div>
-        <button
-          type="submit"
-          disabled={
-            numbers.length >= maxItems ||
-            createUserPhoneMutation.isPending ||
-            updateUserPhoneMutation.isPending ||
-            deleteUserPhoneMutation.isPending
-          }
-          className="w-full md:w-auto px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-        >
-          Ajouter
-        </button>
-      </form>
       <ul className="space-y-4">
         {numbers.map((item, i) => (
           <li
             key={item.id || i}
-            className="flex flex-col gap-3 p-3 bg-white rounded-md shadow-sm"
+            className="flex flex-col gap-3 px-3 py-1 bg-white hover:shadow-inner inset-shadow-neutral-800 rounded-md"
           >
             {editState.index === i ? (
               <form
@@ -428,6 +368,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
                   <IMaskInput
                     mask={selectedCountry.mask}
                     value={editState.value}
+                    lazy={false}
                     onChange={handleEditChange}
                     autoFocus
                     placeholder={`Ex: ${selectedCountry.mask}`}
@@ -443,7 +384,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
                     className="p-2 text-green-600 hover:text-green-800"
                     aria-label="Sauvegarder les modifications"
                   >
-                    <FiCheck size={20} />
+                  <FiCheck size={20} />
                   </button>
                   <button
                     type="button"
@@ -457,12 +398,15 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
               </form>
             ) : (
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <span className="text-sm font-medium text-gray-900">
-                    Numéro {i + 1} :
+                <div className="flex gap-2 items-center">
+                  <FaPhone className="text-gray-500" size={16} />
+                  <span className="text-sm font-bold text-gray-700">
+                    Numéro {i + 1}
                   </span>
-                  <span className="ml-1 text-sm text-gray-700 break-all">
-                    {item.phone_number}
+                  <span className="ml-1 text-sm text-gray-700 font-medium text-[1.03rem] break-all">
+                    {IMask.pipe(item.phone_number, {
+                      mask: item.format,
+                    })}
                   </span>
                 </div>
                 <div className="flex gap-2">
@@ -486,6 +430,84 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
           </li>
         ))}
       </ul>
+      <form
+        ref={formRef}
+        onSubmit={handleAddItem}
+        className={clsx("flex-col gap-3 md:flex-row md:items-end my-5", {
+          'hidden' : numbers.length >= maxItems,
+          'flex' : numbers.length < maxItems
+        })}
+      >
+        <div className="flex flex-col gap-1 w-full md:w-auto">
+          <label htmlFor="country" className="text-sm text-gray-700">
+            Pays
+          </label>
+          <select
+            id="country"
+            name="country"
+            value={selectedCountry.code}
+            onChange={(e) =>
+              setSelectedCountry(
+                countries.find((c) => c.code === e.target.value)!
+              )
+            }
+            className="w-full min-w-[100px] max-w-[150px] p-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none"
+          >
+            {countries.map((country) => (
+              <option key={country.code} value={country.code}>
+                {getFlagEmoji(country.code.split("_")[0].toUpperCase())} +
+                {country.code.split("_")[1]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1 w-full">
+          <label htmlFor="number" className="text-sm text-gray-700">
+            Numéro de téléphone
+          </label>
+          <IMaskInput
+            name="number"
+            mask={selectedCountry.mask}
+            lazy={false}
+            disabled={
+              numbers.length >= maxItems ||
+              createUserPhoneMutation.isPending ||
+              updateUserPhoneMutation.isPending ||
+              deleteUserPhoneMutation.isPending
+            }
+            placeholder={`Ex: ${selectedCountry.mask}`}
+            className={`w-full p-2 text-sm border rounded-md focus:ring-2 focus:outline-none ${
+              numbers.length >= maxItems ||
+              createUserPhoneMutation.isPending ||
+              updateUserPhoneMutation.isPending ||
+              deleteUserPhoneMutation.isPending
+                ? "bg-gray-200 border-gray-300 cursor-not-allowed"
+                : "border-gray-300 focus:ring-gray-500"
+            }`}
+          />
+          {phoneError && (
+            <p className="text-xs text-red-500 font-semibold mt-1">{phoneError}</p>
+          )}
+          {(createUserPhoneMutation.isPending ||
+            updateUserPhoneMutation.isPending ||
+            deleteUserPhoneMutation.isPending) && (
+            <p className="text-xs text-gray-600 mt-1">Traitement en cours...</p>
+          )}
+        </div>
+        <button
+          type="submit"
+          disabled={
+            numbers.length >= maxItems ||
+            createUserPhoneMutation.isPending ||
+            updateUserPhoneMutation.isPending ||
+            deleteUserPhoneMutation.isPending
+          }
+          className="w-full md:w-auto px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+        >
+          Ajouter
+        </button>
+      </form>
+
     </section>
   );
 };

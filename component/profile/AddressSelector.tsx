@@ -15,7 +15,11 @@ import { YMaps, Map, Placemark } from "@pbe/react-yandex-maps";
 import { useGeolocationWithIP } from "../../hook/useGeolocationWithIP";
 import Loading from "../Loading";
 import { useAuthStore } from "../../store/user";
-import { create_user_address, delete_user_address, update_user_address } from "../../api/user.api";
+import {
+  create_user_address,
+  delete_user_address,
+  update_user_address,
+} from "../../api/user.api";
 import { useMutation } from "@tanstack/react-query";
 
 interface Address {
@@ -34,19 +38,15 @@ interface SuggestionItem {
 }
 
 interface AddressSelectorProps {
-  apiKey: string;
-  geocoderApiKey: string;
-  bbox: string;
-  initialAddress?: Address | null;
-  onAddressChange: (address: Address | null) => void;
-  saveEndpoint?: string;
-  language?: string;
-  mapHeight?: string;
+  // apiKey: string;
+  // geocoderApiKey: string;
+  // bbox: string;
+  // initialAddress?: Address | null;
+  // onAddressChange: (address: Address | null) => void;
+  // saveEndpoint?: string;
+  // language?: string;
+  // mapHeight?: string;
 }
-
-
-
-
 
 const debounce = <T extends (...args: any[]) => void>(
   func: T,
@@ -182,12 +182,11 @@ const highlightText = (
   return <>{parts}</>;
 };
 
-export const AddressSelector: React.FC<AddressSelectorProps> = ({
-  apiKey,
-  geocoderApiKey,
-  bbox,
-  onAddressChange,
-  language = "fr_FR",
+const apiKey = "67b74e18-a7a6-40d9-82ae-fb7460a81010";
+const geocoderApiKey = "21e88d05-cb30-4849-8e1c-dee1bb671c75";
+const bbox = "4.19,-8.6~10.74,-2.49";
+const language = "fr_FR";
+export const AddressSelector: React.FC<{ mapHeight: string }> = ({
   mapHeight = "300px",
 }) => {
   const user = useAuthStore((state) => state.user);
@@ -224,7 +223,10 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
       setMessage({ type: "success", text: "Adresse créée avec succès !" });
     },
     onError: (error) => {
-      setMessage({ type: "error", text: "Erreur lors de la création de l'adresse." });
+      setMessage({
+        type: "error",
+        text: "Erreur lors de la création de l'adresse.",
+      });
       console.error("Erreur lors de la création de l'adresse :", error);
     },
   });
@@ -233,10 +235,16 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
     mutationFn: update_user_address,
     onSuccess: () => {
       fetchUser();
-      setMessage({ type: "success", text: "Adresse mise à jour avec succès !" });
+      setMessage({
+        type: "success",
+        text: "Adresse mise à jour avec succès !",
+      });
     },
     onError: (error) => {
-      setMessage({ type: "error", text: "Erreur lors de la mise à jour de l'adresse." });
+      setMessage({
+        type: "error",
+        text: "Erreur lors de la mise à jour de l'adresse.",
+      });
       console.error("Erreur lors de la mise à jour de l'adresse :", error);
     },
   });
@@ -249,7 +257,10 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
       setMessage({ type: "success", text: "Adresse supprimée avec succès !" });
     },
     onError: (error) => {
-      setMessage({ type: "error", text: "Erreur lors de la suppression de l'adresse." });
+      setMessage({
+        type: "error",
+        text: "Erreur lors de la suppression de l'adresse.",
+      });
       console.error("Erreur lors de la suppression de l'adresse :", error);
     },
   });
@@ -314,7 +325,6 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
     }
 
     setAddress({ ...newAddress, id: address?.id || newAddress?.id });
-    onAddressChange(newAddress);
   };
 
   const handleSearch = async (e: FormEvent) => {
@@ -431,7 +441,9 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder={
-                address?.text ? "Modifier votre adresse" : "Entrez votre adresse"
+                address?.text 
+                  ? "Modifier votre adresse"
+                  : "Recherchez votre adresse"
               }
               className={`w-full p-2 text-sm border rounded-md focus:ring-2 focus:outline-none ${
                 isGeocoding
@@ -616,7 +628,10 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
         </div>
       )}
 
-      {(isGeocoding || createUserAddressMutation.isPending || updateUserAddressMutation.isPending || deleteUserAddressMutation.isPending) && (
+      {(isGeocoding ||
+        createUserAddressMutation.isPending ||
+        updateUserAddressMutation.isPending ||
+        deleteUserAddressMutation.isPending) && (
         <div className="absolute right-[45%] top-[40%] bg-gray-200 bg-opacity-50 flex items-center justify-center z-20">
           <Loading size="large" />
         </div>

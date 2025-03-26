@@ -28,7 +28,7 @@ interface CartItem {
 function ItemCart({ product, group_product }: CartItem) {
   const isOpen = useModalCart((state) => state.showCart);
 
-  const removeMutation = useUpdateCart()
+  const removeMutation = useUpdateCart();
 
   const { data: feature, isPending } = useQuery({
     queryKey: ["get_features_with_values", product.default_feature_id],
@@ -60,7 +60,7 @@ function ItemCart({ product, group_product }: CartItem) {
           <BsTrash
             className="text-lg absolute top-0 -right-4 text-gray-400 hover:text-gray-600 cursor-pointer z-10"
             onClick={(e) => {
-              e.stopPropagation(); 
+              e.stopPropagation();
               console.log("Suppression déclenchée pour", group_product.id);
               removeMutation.mutate({
                 group_product_id: group_product.id,
@@ -102,7 +102,6 @@ function ItemCart({ product, group_product }: CartItem) {
 }
 
 function ListItemCart({ carts }: { carts: CartItem[] }) {
-  console.log("🚀 ~ ListItemCart ~ carts:", carts)
   return (
     <div className="flex flex-col divide-y-2 divide-blue-100 max-h-[60vh] overflow-y-auto scroll-smooth scrollbar-thin pr-2">
       {carts?.map((cart) => (
@@ -115,7 +114,7 @@ function ListItemCart({ carts }: { carts: CartItem[] }) {
 export default function ModalCart() {
   const showCart = useModalCart((state) => state.showCart);
   const toggleCart = useModalCart((state) => state.toggleCart);
-  const { carts } = useCart()
+  const { carts } = useCart();
 
   const totalItems = carts.reduce((acc, item) => acc + item.nbr, 0);
   const totalPrice = carts.reduce((acc, item) => acc + item.totalPrice, 0);
@@ -124,7 +123,6 @@ export default function ModalCart() {
     toggleCart(false);
     document.body.style.overflow = "auto";
   };
-
 
   return (
     <Modal
@@ -169,7 +167,7 @@ export default function ModalCart() {
                 </span>
               </div>
               <span className="text-xs italic text-gray-600">
-                Coût de livraison sera appliqué à la prochaine étape
+                Coût de livraison sera appliqué à la prochaine step
               </span>
             </div>
           )}

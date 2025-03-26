@@ -43,6 +43,11 @@ export type FeatureValue = {
   maxSize: number | null;
   multiple: boolean;
   isDouble: boolean;
+  key?: string | null; 
+  stock?:number |null
+  additional_price?:number|null
+  decreases_stock?:boolean,
+  continue_selling?:boolean
   createdAt: string | Date;
   updatedAt: string | Date;
 };
@@ -162,7 +167,7 @@ export interface Adresse {
 
 // cart
 
-type GroupProductCart = {
+export type GroupProductCart = {
   id: string;
   product_id: string;
   stock: number;

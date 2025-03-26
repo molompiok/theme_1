@@ -9,7 +9,6 @@ import { useAuthRedirect } from "../../../hook/authRedirect";
 import FilterPopover from "../../../component/FilterPopover";
 import { formatPrice } from "../../../utils";
 
-// Define the order type
 type Order = {
   views: string[];
   name: string;
@@ -21,7 +20,6 @@ type Order = {
   status: "DELIVERED" | "RETURN";
 };
 
-// Generate fake orders
 const generateFakeOrders = (): Order[] => {
   const products = [
     {
@@ -93,7 +91,7 @@ export default function Page() {
               Mes commandes
             </h1>
           </div>
-          <FilterPopover options={sortOptions}  />
+          <FilterPopover  />
         </div>
 
         <div className="space-y-6 h-full">
