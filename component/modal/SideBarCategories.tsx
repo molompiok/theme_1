@@ -34,8 +34,8 @@ export default function SideBarCategories() {
         {
           opacity: 1,
           x: 0,
-          duration: 0.4,
-          stagger: 0.1,
+          duration: 0.6,
+          stagger: 0.3,
           ease: "power2.out",
         }
       );
@@ -296,7 +296,7 @@ export default function SideBarCategories() {
                     navigate(`/categorie/${currentCategory?.slug}`);
                     handleModalClose();
                   }}
-                  className="flex underline-animation text-left  font-semibold sm:text-lg mt-4 transition-colors"
+                  className="flex underline-animation text-left sm:text-lg mt-4 transition-colors"
                 >
                   Tout {currentCategory?.name}
                   <IoMdLink size={20} className="ml-2 text-gray-700 inline" />
@@ -340,7 +340,7 @@ export default function SideBarCategories() {
                           className="mr-2 size-8 rounded-md text-gray-600"
                         />
                       )}
-                      <span className="text-[.95rem] ">{category.name}</span>
+                      <span className="text-[1.15rem] font-semibold sm:text-lg">{category.name}</span>
                     </LinkSideBar>
                     {hasSubCategories(category.id) && (
                       <button

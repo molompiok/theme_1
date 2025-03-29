@@ -22,7 +22,6 @@ const data = async (pageContext: PageContextServer) => {
     queryFn: () => get_products({ slug_product : slug }),
   });
   
-  console.log("🚀 ~ data ~ product:", productData)
   const product = productData.list
 
   // const features = await queryClient.ensureQueryData({

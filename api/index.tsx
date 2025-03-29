@@ -41,16 +41,22 @@ export function build_search_params(params: {
   return searchParams;
 }
 
-export function build_form_data(
-  params: Record<string, string | number | boolean | undefined>
-): FormData {
+export function build_form_data(params: Record<string, string | number | boolean | undefined | Record<string, string>>): FormData {
   const formData = new FormData();
 
   Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined) {
-      formData.append(key, value.toString());
+    if (value === undefined) return;
+
+    if (key === "bind" && typeof value === "object" && !Array.isArray(value)) {
+      // Gérer bind comme un objet imbriqué
+      Object.entries(value as Record<string, string>).forEach(([bindKey, bindValue]) => {
+        formData.append(`bind[${bindKey}]`, bindValue);
+      });
+    } else {
+      formData.append(key, String(value));
     }
   });
+
   return formData;
 }
 

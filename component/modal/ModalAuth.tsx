@@ -25,7 +25,6 @@ export default function ModalAuth() {
     }
 
     try {
-      console.log("Submit:", { email, password, type });
       close();
     } catch (err) {
       setError("Une erreur est survenue. Veuillez réessayer.");

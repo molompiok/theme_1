@@ -9,19 +9,21 @@ import {
   FaTruck,
 } from "react-icons/fa";
 import { useAuthStore } from "../../store/user";
+import { InfoOrderOwner } from "../../utils";
+import { useOrderInCart } from "../../store/cart";
 
-const pickupDeadline = new Date();
-const sellerPhone = "+2250707631861";
-const formattedPhone = IMask.pipe(sellerPhone, { mask: "+225 00 00 000 000" });
-const googleMapsLink =
-  "https://www.google.com/maps/search/?api=1&query=Koumassi+Remblais,+Abidjan,+Côte+d'Ivoire";
-pickupDeadline.setDate(pickupDeadline.getDate() + 3);
-const formattedDeadline = pickupDeadline.toLocaleDateString("fr-FR", {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
+// const pickupDeadline = new Date();
+// const sellerPhone = "+2250707631861";
+// const formattedPhone = IMask.pipe(sellerPhone, { mask: "+225 00 00 000 000" });
+// const googleMapsLink =
+//   `geo:5.308844,-4.013481?q=Koumassi+Remblais,+Abidjan`;
+// pickupDeadline.setDate(pickupDeadline.getDate() + 3);
+// const formattedDeadline = pickupDeadline.toLocaleDateString("fr-FR", {
+//   weekday: "long",
+//   year: "numeric",
+//   month: "long",
+//   day: "numeric",
+// });
 
 const LivraisonStep = ({
   step,
@@ -32,12 +34,14 @@ const LivraisonStep = ({
     React.SetStateAction<"info" | "livraison" | "Finalisation">
   >;
 }) => {
-  if (step !== "livraison") return null;
 
   const [selectedOption, setSelectedOption] = useState<"livraison" | "retrait" | null>(null);
   const user = useAuthStore((state) => state.user);
+  const {setWithDelivery} = useOrderInCart()
+
 
   const handleSelect = (option: "livraison" | "retrait") => {
+    setWithDelivery(option === "livraison");
     setSelectedOption((state) => (state === option ? null : option));
   };
 
@@ -45,7 +49,6 @@ const LivraisonStep = ({
   const isPermitToProceedForPickup = user?.id && selectedOption === "retrait";
   const isPermitToProceed = isPermitToProceedForDelivery || isPermitToProceedForPickup;
 
-  // Message d'erreur ou d'information
   const getErrorMessage = () => {
     if (!selectedOption) return "Veuillez choisir une option de livraison ou de retrait.";
     if (selectedOption === "livraison" && (!user?.addresses?.length)) {
@@ -61,7 +64,6 @@ const LivraisonStep = ({
       </h2>
 
       <div className="space-y-4">
-        {/* Option Livraison */}
         <div
           className={`w-full border rounded-md overflow-hidden transition-all duration-200 ${
             selectedOption === "livraison" ? "border-black bg-gray-100" : "border-gray-300"
@@ -129,24 +131,24 @@ const LivraisonStep = ({
             <div className="p-4 text-gray-700 text-sm space-y-3">
               <p className="flex items-center">
                 <FaMapMarkerAlt className="mr-2 text-gray-500" size={16} />
-                <span>Lieu : Koumassi Remblais, à côté de la Mama</span>
+                <span>Lieu : {InfoOrderOwner.pickup_address}</span>
               </p>
               <p className="flex items-center">
                 <FaCalendarAlt className="mr-2 text-gray-500" size={16} />
-                <span>Date limite : {formattedDeadline}</span>
+                <span>Date limite : {InfoOrderOwner.pickup_date}</span>
               </p>
               <p className="flex items-center">
                 <FaPhone className="mr-2 text-gray-500" size={16} />
                 <span>
                   Contact :{" "}
-                  <a href={`tel:${sellerPhone}`} className="text-blue-600 hover:underline">
-                    {formattedPhone}
+                  <a href={`tel:${InfoOrderOwner.pickup_phone}`} className="text-blue-600 hover:underline">
+                    {InfoOrderOwner.pickup_phone}
                   </a>
                 </span>
               </p>
               <p className="flex items-center">
                 <a
-                  href={googleMapsLink}
+                  href={InfoOrderOwner.pickup_maps_link}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline flex items-center"

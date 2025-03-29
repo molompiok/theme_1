@@ -55,7 +55,6 @@ export const get_products = async (params: {
       category?: { id: string; name: string; description: string , view : string[] };
       meta: MetaPagination;
     }>("/get_products?" + searchParams.toString());
-    console.log("🚀 ~ get_products:", data)
     return {
       list: data.list.map(minimize_product),
       category: data.category,
@@ -75,12 +74,10 @@ export const get_features_with_values = async (params: {
 }) => {
   
   const searchParams = build_search_params(params);
-  console.log(searchParams.toString());
   try {
     const { data } = await api.get<Feature[]>(
       "/get_features_with_values?" + searchParams.toString()
     );
-    console.log("🚀 ~ data:", data)
     return data;
   } catch (error) {
     throw new Error("Erreur lors de la récupération des features :" + error);
@@ -177,23 +174,23 @@ export const get_favorites = async (params: {
   }
 };
 
-export const get_group_by_feature = async (params: {
-  product_id: string;
-  feature_key?: string;
-  feature_value?: string;
-}) => {
-  const searchParams = build_search_params(params);
+// export const get_group_by_feature = async (params: {
+//   product_id: string;
+//   feature_key?: string;
+//   feature_value?: string;
+// }) => {
+//   const searchParams = build_search_params(params);
 
-  try {
-    const response = await api.get<GroupProductType[]>(
-      "/get_group_by_feature?" + searchParams.toString()
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching feature details:", error);
-    throw error;
-  }
-};
+//   try {
+//     const response = await api.get<GroupProductType[]>(
+//       "/get_group_by_feature?" + searchParams.toString()
+//     );
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error fetching feature details:", error);
+//     throw error;
+//   }
+// };
 
 export const get_filters = async (params: { slug?: string }) => {
   const searchParams = build_search_params(params);

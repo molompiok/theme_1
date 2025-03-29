@@ -1,48 +1,54 @@
 import React, { useMemo } from "react";
 import { useproductFeatures } from "../../store/features";
-import { FeatureValue } from "../../pages/type";
+import { Feature, ProductFeature } from "../../pages/type";
 import ValueComponent from "../product/ValueComponent";
 
 interface ColorComponentProps {
-  values: FeatureValue[];
+  values: ProductFeature[];
   feature_name: string;
   product_id: string;
+  features: Feature[];
+  feature_id: string;
 }
 
 export const ColorComponent: React.FC<ColorComponentProps> = ({
   values,
   feature_name,
+  features,
   product_id,
+  feature_id,
 }) => {
   const validValues = useMemo(() => values.filter((v) => !!v.text), [values]);
-  const { productFeatures, lastGroupProductId } = useproductFeatures();
-  const selectedValue = productFeatures.get(lastGroupProductId)?.get(feature_name);
+  const { selections } = useproductFeatures();
+  // const selectedValue = selections[feature_id];
+  
 
   if (!validValues.length) {
     return (
-      <div className="text-gray-500 text-sm p-0.5" role="alert">
+      <div className="text-gray-500 text-sm p-2">
         Aucune couleur disponible pour {feature_name}
       </div>
     );
   }
 
   return (
-    <div
-      className="p-0.5 pl-2"
-      role="group"
-      aria-label={`Sélection de couleur pour ${feature_name}`}
-    >
-      <div className="flex items-center p-2 justify-start flex-wrap gap-2 scrollbar-thin max-w-full">
-        {validValues.map((value) => (
-          <ValueComponent
-            key={value.id}
-            value={{text : value.text! , id : value.id}}
+    <div className="p-2">
+      <div className="flex flex-wrap gap-2">
+        {validValues.map((value) =>{
+          const selectedValue = selections.get(product_id)?.get(feature_id)?.valueFeature;
+          return (
+            <ValueComponent
+              key={value.id}
+              value={value}
             isColor={true}
+            feature_id={feature_id}
             feature_name={feature_name}
+            features={features}
             product_id={product_id}
-            isSelected={selectedValue?.valueFeature === value.text}
+            isSelected={selectedValue === value.id}
           />
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -57,7 +63,7 @@ export const ColorComponent: React.FC<ColorComponentProps> = ({
 // } as const;
 
 // interface ValueComponentProps {
-//   value: FeatureValue;
+//   value: ProductFeature;
 //   feature_name: string;
 //   product_id: string;
 //   isSelected: boolean;

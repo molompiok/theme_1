@@ -1,8 +1,7 @@
 import React, { useMemo } from "react";
-import type { GroupProductType, ProductClient } from "../pages/type";
-import { useModalCart } from "../store/cart";
+import type {  Feature, ProductClient } from "../pages/type";
 import { useproductFeatures } from "../store/features";
-import { formatPrice } from "../utils";
+import { formatPrice, getOptions } from "../utils";
 import useCart from "../hook/query/useCart";
 
 interface DisplayPriceProps {
@@ -39,18 +38,18 @@ export const DisplayPrice: React.FC<DisplayPriceProps> = React.memo(
       <PriceWrapper label={`Prix en ${currency}`}>
         <span
           className="whitespace-nowrap font-bold text-clamp-xs text-gray-900"
-          aria-label={`Prix actuel: ${formatPrice(displayPrice)} ${currency}`}
+          aria-label={`Prix actuel: ${formatPrice(displayPrice , currency)}`}
         >
-          {formatPrice(displayPrice)} {currency}
+          {formatPrice(displayPrice , currency)}
         </span>
         {barred_price !== undefined && displayBarredPrice > 0 && (
           <span
             className="line-through font-light text-[0.8rem] text-black/80 whitespace-nowrap list-product-breakpoint-4:block"
             aria-label={`Prix original: ${formatPrice(
-              displayBarredPrice
-            )} ${currency}`}
+              displayBarredPrice , currency
+            )}`}
           >
-            {formatPrice(displayBarredPrice)} {currency}
+            {formatPrice(displayBarredPrice , currency)}
           </span>
         )}
       </PriceWrapper>
@@ -64,46 +63,47 @@ export const DisplayPrice: React.FC<DisplayPriceProps> = React.memo(
 
 export const DisplayPriceDetail: React.FC<DisplayPriceProps> = React.memo(
   ({ price, currency, barred_price }) => {
-    const { productFeatures, selectedFeatures, lastGroupProductId } =
+    const { selections ,lastValueId ,lastSelectedFeatureId } =
       useproductFeatures();
 
     const getLatestPriceValue = () => {
-      const lastFeatureType = Array.from(selectedFeatures.keys()).pop();
-      if (lastFeatureType && productFeatures.has(lastGroupProductId)) {
-        const features = productFeatures.get(lastGroupProductId);
-        return features?.get(lastFeatureType)?.priceValue || null;
+      const lastFeatureType = Array.from(Object.keys(selections)).pop();
+      if (!lastFeatureType) {
+        return 0;
       }
-      return null;
+      const priceValue = selections.get(lastFeatureType)?.get(lastValueId)?.priceValue;
+
+      return priceValue || 0;
     };
 
     const totalPrice = useMemo(() => {
       const basePrice = safeParsePrice(price);
-      const featurePrice = safeParsePrice(getLatestPriceValue());
+      const featurePrice = safeParsePrice(getLatestPriceValue() || 0);
       return basePrice + featurePrice;
-    }, [price, productFeatures, lastGroupProductId]);
+    }, [price, selections]);
 
     const barredPrice = useMemo(() => {
       const basePrice = safeParsePrice(barred_price);
       const featurePrice = safeParsePrice(getLatestPriceValue());
       return basePrice + featurePrice;
-    }, [price, productFeatures, lastGroupProductId]);
+    }, [price, selections, barred_price]);
 
     return (
       <PriceWrapper label={`Prix détaillé en ${currency}`}>
         <span
           className="whitespace-nowrap text-black font-medium"
-          aria-label={`Prix total: ${formatPrice(totalPrice)} ${currency}`}
+          aria-label={`Prix total: ${formatPrice(totalPrice , currency)}`}
         >
-          {formatPrice(totalPrice)} {currency}
+          {formatPrice(totalPrice , currency)}
         </span>
         {barred_price !== undefined && barredPrice > 0 && (
           <span
             className="line-through font-light text-[0.8rem] text-black/80 whitespace-nowrap list-product-breakpoint-4:block"
             aria-label={`Prix original: ${formatPrice(
-              barredPrice
-            )} ${currency}`}
+              barredPrice , currency
+            )}`}
           >
-            {formatPrice(barredPrice)} {currency}
+            {formatPrice(barredPrice , currency)} 
           </span>
         )}
       </PriceWrapper>
@@ -117,24 +117,27 @@ export const DisplayPriceDetail: React.FC<DisplayPriceProps> = React.memo(
 
 interface DisplayPriceItemCartProps {
   product: ProductClient | null;
-  group_product: GroupProductType;
+  bind: Record<string, string>;
+  features : Feature[]
 }
 
 export const DisplayPriceItemCart: React.FC<DisplayPriceItemCartProps> =
   React.memo(
-    ({ product, group_product }) => {
-      const { carts } = useCart();
+    ({ product, bind, features }) => {
+      const { data: cart } = useCart();
       const itemInPanier = useMemo(
-        () => carts.find((item) => item.product.id === product?.id),
-        [carts, product]
+        () => cart?.cart?.items?.find((item) => item?.product?.id === product?.id),
+        [cart, product]
       );
 
+      const options = getOptions({ bind, features: features || [], product_id: product?.id || '' });
+
       const totalPrice = useMemo(() => {
-        const basePrice = itemInPanier
-          ? itemInPanier.nbr * safeParsePrice(itemInPanier.product.price)
+        const basePrice = itemInPanier && itemInPanier.product
+          ? itemInPanier.quantity * safeParsePrice(itemInPanier.product.price)
           : 0;
-        return basePrice + safeParsePrice(group_product.additional_price);
-      }, [itemInPanier, group_product.additional_price]);
+        return basePrice + safeParsePrice(options.additional_price);
+      }, [itemInPanier, options.additional_price]);
 
       const currency = itemInPanier?.product.currency || "";
 
@@ -144,10 +147,10 @@ export const DisplayPriceItemCart: React.FC<DisplayPriceItemCartProps> =
             <span
               className="whitespace-nowrap font-light text-clamp-base text-green-900"
               aria-label={`Prix total du panier: ${formatPrice(
-                totalPrice
-              )} ${currency}`}
+                totalPrice , currency
+              )}`}
             >
-              {formatPrice(totalPrice)} {currency}
+              {formatPrice(totalPrice , currency)}
             </span>
           ) : (
             <span
@@ -161,6 +164,5 @@ export const DisplayPriceItemCart: React.FC<DisplayPriceItemCartProps> =
       );
     },
     (prev, next) =>
-      prev.product?.id === next.product?.id &&
-      prev.group_product.id === next.group_product.id
+      prev.product?.id === next.product?.id
   );

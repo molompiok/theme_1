@@ -11,17 +11,7 @@ const useCart = () => {
     queryFn: view_cart,
   });
 
-  const carts = query.data?.cart?.items?.map((item) => ({
-    product: item.group_product.product,
-    group_product: item.group_product,
-    nbr: item.quantity,
-    totalPrice:
-      item.quantity *
-      ((item.group_product.product.price || 0) +
-        (item.group_product.additional_price || 0)),
-  })) || [];
-
-  return { carts, ...query };
+  return query
 };
 
 export default useCart;

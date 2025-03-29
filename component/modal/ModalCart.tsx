@@ -1,6 +1,7 @@
 import { BsCartX, BsHandbag, BsTrash, BsX } from "react-icons/bs";
 import { BASE_URL } from "../../api";
 import {
+  CartItem,
   CartResponse,
   GroupProductType,
   ProductClient,
@@ -15,44 +16,82 @@ import { DisplayPriceItemCart } from "./../DisplayPrice";
 import { ProductMedia } from "../ProductMedia";
 import { useproductFeatures } from "../../store/features";
 import { navigate } from "vike/client/router";
-import { formatPrice } from "../../utils";
+import { formatPrice, getFirstFeatureWithView, getOptions } from "../../utils";
 import useCart from "../../hook/query/useCart";
 import { useUpdateCart } from "../../hook/query/useUpdateCart";
 import { useModalCart } from "../../store/cart";
+import { useMemo } from "react";
+import { features } from "process";
+import { useMediaViews } from "../../hook/query/useMediaViews";
 
-interface CartItem {
-  product: ProductClient;
-  group_product: GroupProductType;
-}
 
-function ItemCart({ product, group_product }: CartItem) {
+
+function ItemCart({ product, bind }: { product: ProductClient; bind: Record<string, string> }) {
+  console.log("🚀 ~ ItemCart ~ bind:", bind)
   const isOpen = useModalCart((state) => state.showCart);
 
   const removeMutation = useUpdateCart();
 
-  const { data: feature, isPending } = useQuery({
-    queryKey: ["get_features_with_values", product.default_feature_id],
+  const { data: features, isPending } = useQuery({
+    queryKey: ["get_features_with_values", product?.id],
     queryFn: () =>
-      product.default_feature_id
-        ? get_features_with_values({ feature_id: product.default_feature_id })
+      product?.id
+        ? get_features_with_values({ product_id: product?.id })
         : Promise.resolve(null),
-    enabled: !!product.default_feature_id && isOpen,
+    enabled: !!product?.id && isOpen,
   });
 
-  const pFeature = useproductFeatures((state) => state.productFeatures);
-  const featureV = pFeature.get(group_product?.id);
+  
+  // const lastSelectedFeatureId = useproductFeatures((state) => state.lastSelectedFeatureId);
+  // const lastValueId = useproductFeatures((state) => state.lastValueId);
+
+  // const bind = useMemo(() => {
+
+  //   const productSelections = selections?.get(product?.id);
+  //   if (!productSelections) return {};
+  //   const bind: Record<string, string> = {};
+  //   productSelections.forEach((value, key) => {
+  //     bind[key] = value.valueFeature;
+  //   });
+  //   return bind;
+
+  // }, [selections, product?.id]);
+
+
+
+
+  // const mediaViews = useMemo(() => {
+  //   if (!features?.length) return ["/img/default_img.gif"];
+  
+  //   // const selectedViews = features?.find(f => f.id === lastSelectedFeatureId)?.values.find(v => v.id === lastValueId)?.views || [];
+  //   // if (selectedViews.length > 0) {
+  //   //   return selectedViews;
+  //   // }
+  
+  //   const defaultFeature = getFirstFeatureWithView(features);
+  //   const defaultViews = defaultFeature?.values[0]?.views || [];
+  //   if (defaultViews.length > 0) {
+  //     return defaultViews;
+  //   }
+  
+  //   return ["/img/default_img.gif"];
+  // }, [features]);
+
+
+  const options = getOptions({ bind, features: features || [], product_id: product.id });
+
+  const { isPendingFeatures ,mediaViews } = useMediaViews({ bindNames : options.bindNames ,product_id :  product.id})
 
   if (isPending) {
     return <Loading />;
   }
 
-  const mediaList = feature?.[0]?.values?.[0]?.views ?? [];
 
   return (
     <div className="flex flex-col items-center p-2">
       <div className="flex gap-1 justify-center w-full">
         <ProductMedia
-          mediaList={mediaList}
+          mediaList={mediaViews}
           productName={product.name}
           className="aspect-square size-[80px] md:size-[100px]"
         />
@@ -61,9 +100,9 @@ function ItemCart({ product, group_product }: CartItem) {
             className="text-lg absolute top-0 -right-4 text-gray-400 hover:text-gray-600 cursor-pointer z-10"
             onClick={(e) => {
               e.stopPropagation();
-              console.log("Suppression déclenchée pour", group_product.id);
               removeMutation.mutate({
-                group_product_id: group_product.id,
+                product_id: product.id,
+                bind,
                 mode: "clear",
               });
             }}
@@ -73,13 +112,13 @@ function ItemCart({ product, group_product }: CartItem) {
             {product.name}
           </h1>
           <div className="flex flex-wrap items-center mb-1 gap-1">
-            {featureV
-              ? Array.from(featureV.entries()).map(([key, value], i) => (
+            {options.bindNames
+              ? Array.from(Object.entries(options.bindNames)).map(([key, value], i) => (
                   <span
                     key={`${key}-${i}`}
                     className="text-[.68rem] rotating-border text-gray-100 border border-gray-300 px-2 py-0.5 rounded-[5px]"
                   >
-                    {value.valueFeature ?? "N/A"}
+                    {typeof value === 'string' ? value : value?.text || value?.key || 'N/A'}
                   </span>
                 ))
               : null}
@@ -92,20 +131,21 @@ function ItemCart({ product, group_product }: CartItem) {
       <div className="w-full flex justify-between gap-2">
         <AddRemoveItemCart
           product={product}
-          group_product={group_product}
+          bind={bind} 
+          features={features ??  []}
           inList={false}
         />
-        <DisplayPriceItemCart product={product} group_product={group_product} />
+        <DisplayPriceItemCart  product={product} bind={bind} features={features ??  []} />
       </div>
     </div>
   );
 }
 
-function ListItemCart({ carts }: { carts: CartItem[] }) {
+function ListItemCart({ cart }: { cart: CartItem[] }) {
   return (
     <div className="flex flex-col divide-y-2 divide-blue-100 max-h-[60vh] overflow-y-auto scroll-smooth scrollbar-thin pr-2">
-      {carts?.map((cart) => (
-        <ItemCart key={cart.group_product.id} {...cart} />
+      {cart?.map((item , i) => (
+        <ItemCart key={i} product={item.product} bind={item.realBind} />
       ))}
     </div>
   );
@@ -114,10 +154,10 @@ function ListItemCart({ carts }: { carts: CartItem[] }) {
 export default function ModalCart() {
   const showCart = useModalCart((state) => state.showCart);
   const toggleCart = useModalCart((state) => state.toggleCart);
-  const { carts } = useCart();
+  const { data: cart } = useCart();
 
-  const totalItems = carts.reduce((acc, item) => acc + item.nbr, 0);
-  const totalPrice = carts.reduce((acc, item) => acc + item.totalPrice, 0);
+  const totalItems = cart?.cart?.items?.reduce((acc: number, item) => acc + item.quantity, 0) || 0;
+  const totalPrice = cart?.total || 0;
 
   const handleModalCartClose = () => {
     toggleCart(false);
@@ -148,26 +188,26 @@ export default function ModalCart() {
             <span className="text-lg md:text-xl font-semibold">Mon panier</span>
           </div>
 
-          <ListItemCart carts={carts} />
-          {carts.length === 0 ? (
+          <ListItemCart cart={cart?.cart.items || []} />
+          {cart?.cart?.items?.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-4 mt-10">
               <BsCartX size={70} className="text-gray-400 animate-pulse" />
               <p className="text-lg font-medium text-gray-600">
                 Votre panier est vide
               </p>
             </div>
-          ) : (
+          ) : (   
             <div className="flex flex-col gap-2 my-5 overflow-auto">
               <div className="flex justify-between">
                 <span className="font-light">
                   Sous-total ({totalItems} articles)
                 </span>
                 <span className="font-light">
-                  {formatPrice(totalPrice)} {carts[0]?.product?.currency}
+                  {formatPrice(totalPrice , cart?.cart?.items?.[0]?.product?.currency)} 
                 </span>
               </div>
               <span className="text-xs italic text-gray-600">
-                Coût de livraison sera appliqué à la prochaine step
+                Coût de livraison sera appliqué à la prochaine étape
               </span>
             </div>
           )}

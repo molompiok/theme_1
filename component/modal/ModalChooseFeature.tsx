@@ -21,7 +21,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { RxReset } from "react-icons/rx";
 import { RenderFeatureComponent } from "../product/RenderFeatureComponent";
-import { getFirstFeatureWithView } from "../../utils";
+import { getFirstFeatureWithView, getOptions } from "../../utils";
 
 export default function ModalChooseFeature() {
   const {
@@ -29,10 +29,7 @@ export default function ModalChooseFeature() {
     isVisible,
     setFeatureModal,
   } = useProductSelectFeature();
-  const clear = useproductFeatures((state) => state.clearSelections);
-  const selectedFeatures = useproductFeatures(
-    (state) => state.selectedFeatures
-  );
+  const {lastSelectedFeatureId ,lastValueId} = useproductFeatures();
 
   const [imgIndex, setImgIndex] = useState(0);
   const [swiperInstance, setSwiperInstance] = useState<any>(null);
@@ -48,25 +45,27 @@ export default function ModalChooseFeature() {
     isError,
   } = useQuery<Feature[], Error>({
     queryKey: ["get_features_with_values", product?.id],
-    queryFn: () => get_features_with_values({ feature_id: product?.id || "" }),
+    queryFn: () => get_features_with_values({ product_id: product?.id || "" }),
     enabled: !!product?.id,
     placeholderData: (previousData) => previousData,
-    staleTime: 5 * 60 * 1000,
   });
-
+  
   const mediaViews = useMemo(() => {
     if (!features?.length) return ["/img/default_img.gif"];
-   
-    const defualt_feature = getFirstFeatureWithView(features);
-
-    if (!defualt_feature) return ["/img/default_img.gif"];
-
-    const selectedValue = selectedFeatures.get(defualt_feature.name);
-    const value =
-      defualt_feature.values.find((v) => v.text === selectedValue) ||
-      defualt_feature.values[0];
-    return value?.views.length ? value.views : ["/img/default_img.gif"];
-  }, [features, selectedFeatures]);
+  
+    const selectedViews = features.find(f => f.id === lastSelectedFeatureId)?.values.find(v => v.id === lastValueId)?.views || [];
+    if (selectedViews.length > 0) {
+      return selectedViews;
+    }
+  
+    const defaultFeature = getFirstFeatureWithView(features);
+    const defaultViews = defaultFeature?.values[0]?.views || [];
+    if (defaultViews.length > 0) {
+      return defaultViews;
+    }
+  
+    return ["/img/default_img.gif"];
+  }, [features, lastSelectedFeatureId, lastValueId]);
 
   if (!product || !isVisible) return null;
 
@@ -169,7 +168,7 @@ export default function ModalChooseFeature() {
               <div className="space-y-1">
                 {features.map((feature) => (
                   <div key={feature.id || feature.name} className="space-y-1">
-                    <RenderFeatureComponent feature={feature} product_id={product.id} />
+                    <RenderFeatureComponent features={features} feature={feature} product_id={product.id} />
                   </div>
                 ))}
               </div>
@@ -204,7 +203,6 @@ export default function ModalChooseFeature() {
 }
 
 // const renderFeatureComponent = (feature: Feature, product_id: string) => {
-//   console.log("🚀 ~ renderFeatureComponent ~ feature:", feature)
 //   const componentProps = {
 //     values: feature.values,
 //     feature_name: feature.name,

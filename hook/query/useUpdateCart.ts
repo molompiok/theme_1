@@ -1,32 +1,33 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, QueryClient } from "@tanstack/react-query";
 import { update_cart } from "../../api/cart.api";
-import { CartResponse } from "../../pages/type";
-import { createQueryClient } from "../../utils";
+import { CartResponse, Currency, Feature } from "../../pages/type";
+import { createQueryClient, deepEqual, getOptions } from "../../utils";
 import { useAuthStore } from "../../store/user";
 
-
 interface UpdateCartParams {
-  group_product_id: string;
+  product_id: string;
   mode: "increment" | "decrement" | "clear" | "set" | "max";
   value?: number;
+  bind: Record<string, string>;
+}
+
+interface MutationContext {
+  previousCart?: CartResponse;
 }
 
 export const useUpdateCart = () => {
-  const user = useAuthStore((state) => state.user?.id || 'guest');
+  const user = useAuthStore((state) => state.user?.id || "guest");
+  const queryClient: QueryClient = createQueryClient;
 
   return useMutation({
     mutationFn: update_cart,
-    onMutate: async (params: UpdateCartParams) => {
-      await createQueryClient.cancelQueries({ queryKey: ["cart", user] });
+    onMutate: async (params) => {
+      await queryClient.cancelQueries({ queryKey: ["cart", user] });
 
-      const previousCart = createQueryClient.getQueryData(["cart", user]) as CartResponse;
+      const previousCart = queryClient.getQueryData<CartResponse>(["cart", user]);
 
-      let updatedItems = previousCart?.cart?.items
-        ? [...previousCart.cart.items]
-        : [];
-      const itemIndex = updatedItems.findIndex(
-        (item) => item.group_product_id === params.group_product_id
-      );
+      let updatedItems = previousCart?.cart?.items ? [...previousCart.cart.items] : [];
+      const itemIndex = updatedItems.findIndex((item) => deepEqual(item.bind, params.bind));
 
       if (params.mode === "increment") {
         if (itemIndex >= 0) {
@@ -34,6 +35,18 @@ export const useUpdateCart = () => {
             ...updatedItems[itemIndex],
             quantity: updatedItems[itemIndex].quantity + (params.value || 1),
           };
+        } else {
+          updatedItems.push({
+            product: { id: params.product_id  , store_id: '', categories_id: [], name: '', description: '', default_feature_id: '', price: 0, barred_price: 0, slug: '', currency: Currency.FCFA, createdAt: new Date(), updatedAt: new Date() },
+            quantity: params.value || 1,
+            // bind: params.bind,
+            realBind: params.bind,
+            id: '',
+            cart_id: '',
+            bind: JSON.stringify(params.bind),
+            created_at: '',
+            updated_at: '',
+          });
         }
       } else if (params.mode === "decrement" && itemIndex >= 0) {
         updatedItems[itemIndex] = {
@@ -45,28 +58,40 @@ export const useUpdateCart = () => {
         }
       } else if (params.mode === "clear" && itemIndex >= 0) {
         updatedItems.splice(itemIndex, 1);
+      } else if (params.mode === "set" && itemIndex >= 0) {
+        updatedItems[itemIndex] = {
+          ...updatedItems[itemIndex],
+          quantity: params.value || 0,
+        };
+      } else if (params.mode === "max") {
+        
       }
 
-      createQueryClient.setQueryData(["cart", user], {
+      const features = queryClient.getQueryData<Feature[]>(["get_features_with_values", params.product_id]) || [];
+      const option = getOptions({ bind: params.bind, features, product_id: params.product_id });
+
+      let sum = 0;
+      for (const item of updatedItems) {
+        const product = item.product;
+        const itemPrice = (option?.additional_price || 0) + (product?.price || 0);
+        sum += item.quantity * itemPrice;
+      }
+
+      const updatedCart: CartResponse = {
         ...previousCart,
-        cart: { ...previousCart?.cart, items: updatedItems },
-        total: updatedItems.reduce(
-          (sum, item) =>
-            sum +
-            item.quantity *
-              ((item.group_product.product?.price || 0) +
-                (item.group_product.additional_price || 0)),
-          0
-        ),
-      });
+        //@ts-ignore
+        cart: { ...previousCart?.cart, items: updatedItems, id: previousCart?.cart?.id || "" },
+        total: sum,
+      };
+      queryClient.setQueryData(["cart", user], updatedCart);
 
       return { previousCart };
     },
     onError: (err, params, context) => {
-      createQueryClient.setQueryData(["cart", user], context?.previousCart);
+      queryClient.setQueryData(["cart", user], context?.previousCart);
     },
     onSettled: () => {
-      createQueryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["cart", user] });
     },
   });
 };

@@ -66,9 +66,6 @@ const COTE_DIVOIRE_BBOX = "4.19,-8.6~10.74,-2.49";
 export default function Page(): JSX.Element {
   useAuthRedirect();
 
-  // const handleAddressChange = (address: Address | null) => {
-  //   console.log("Address updated:", address);
-  // };
 
   return (
     <div className="conatiner min-h-dvh font-primary bg-gray-100 px-2 pb-[100px]">

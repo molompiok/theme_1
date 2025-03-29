@@ -24,8 +24,6 @@ const data = async (pageContext: PageContextServer) => {
     queryKey: ["get_products", { slug_cat : slug }],
     queryFn: () => get_products({ slug_cat : slug }),
   });
-  console.log("🚀 ~ data ~ data:", data)
-
   return {
     dehydratedState: dehydrate(createQueryClient),
     title: data?.category?.name,

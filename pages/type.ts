@@ -8,7 +8,7 @@ export type ProductType = {
   price: number;
   barred_price: number;
   slug: string;
-  currency: string;
+  currency: Currency;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -30,7 +30,7 @@ export type ProductFavorite = {
   product_id: string;
 };
 
-export type FeatureValue = {
+export type ProductFeature = {
   id: string;
   featureId: string;
   currency: string;
@@ -62,18 +62,18 @@ export type Feature = {
   default: string | number | null;
   createdAt: string | Date;
   updatedAt: string | Date;
-  values: FeatureValue[];
+  values: ProductFeature[];
 };
 
 
 export type GroupProductType = {
-  id: string;
+  // id: string;
   product_id: string;
-  stock: number;
+  stock: number | null;
   additional_price: number;
   bind: { [key: string]: string };
-  created_at: string;
-  updated_at: string;
+  // created_at: string;
+  // updated_at: string;
 };
 
 export interface Category {
@@ -123,6 +123,18 @@ export const defaultOptions = [
 export type OrderByType = "date_asc" | "date_desc" | "price_asc" | "price_desc";
 export type OptionType = (typeof defaultOptions)[number]
 
+export enum VariantType {
+  ICON_TEXT = 'icon_text',
+  COLOR = 'color',
+  TEXT = 'text',
+  ICON = 'icon',
+  INPUT = 'input',
+  DATE = 'date',
+  DOUBLE_DATE = 'double_date',
+  RANGE = 'range',
+  LEVEL = 'level',
+  FILE = ' file',
+}
 
 export const filterOptions: {
   id: OrderByType;
@@ -134,18 +146,13 @@ export const filterOptions: {
   { id: "price_asc", name: "prix bas" },
 ];
 
-export enum FeaturType {
-  COLOR = "color",
-  TEXT = "text",
-  ICON = "icon",
-  ICON_TEXT = "icon_text",
-}
+
 
 export interface Filter {
   id: string;
   name: string;
   values: string[];
-  type?: FeaturType;
+  type?: VariantType;
 }
 export interface PhoneNumber {
   id: string;
@@ -166,28 +173,28 @@ export interface Adresse {
 }
 
 // cart
+// export type GroupProductCart = {
+//   id: string;
+//   product_id: string;
+//   stock: number;
+//   currency: string;
+//   additional_price: number;
+//   bind: Record<string, any>;
+//   created_at: string;
+//   updated_at: string;
+//   product: ProductType;
+// };
 
-export type GroupProductCart = {
-  id: string;
-  product_id: string;
-  stock: number;
-  currency: string;
-  additional_price: number;
-  bind: Record<string, any>;
-  created_at: string;
-  updated_at: string;
-  product: ProductType;
-};
 
-
-type CartItem = {
+export type CartItem = {
   id: string;
   cart_id: string;
-  group_product_id: string;
+  bind: string
+  realBind: Record<string, any>;
   quantity: number;
   created_at: string;
   updated_at: string;
-  group_product: GroupProductCart;
+  product: ProductType;
 };
 
 type Cart = {
@@ -204,20 +211,93 @@ export type CartResponse = {
   total: number;
 };
 
-
-type UpdatedItem = {
-  id: string;
-  cart_id: string;
-  group_product_id: string;
-  quantity: number;
-  created_at: string;
-  updated_at: string;
-};
-
 export type CartUpdateResponse = {
   message: string;
   cart: Cart;
-  updatedItem: UpdatedItem;
+  updatedItem: CartItem;
   total: number;
   action: "added" | "removed" | "updated";
 };
+
+
+
+export enum OrderStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELED = 'canceled',
+  RETURNED = 'returned',
+  DELIVERED = 'delivered',
+  PICKED_UP = 'picked_up',
+  NOT_DELIVERED = 'not_delivered',
+  NOT_PICKED_UP = 'not_picked_up',
+  WAITING_FOR_PAYMENT = 'waiting_for_payment',
+  WAITING_PICKED_UP = 'waiting_picked_up',
+}
+
+export enum Currency {
+  FCFA = 'FCFA',
+}
+
+export enum PaymentMethod {
+  CREDIT_CARD = 'credit_card',
+  PAYPAL = 'paypal',
+  MOBILE_MONEY = 'mobile_money',
+  CASH = 'cash',
+}
+
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  FAILED = 'failed',
+  REFUNDED = 'refunded',
+}
+
+
+export interface UserOrderItem {
+  id: string;
+  store_id: string;
+  user_id: string;
+  order_id: string;
+  status: OrderStatus;
+  product_id: string;
+  bind_name: Record<string, ProductFeature>; // Parsed JSON from bind_name
+  bind: Record<string, string>; // Parsed JSON from bind
+  quantity: number;
+  price_unit: number;
+  currency: Currency;
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
+  product: ProductType;
+}
+
+
+export interface UserOrder {
+  id: string;
+  store_id: string;
+  user_id: string;
+  phone_number: string;
+  formatted_phone_number: string;
+  country_code: string;
+  reference: string;
+  status: OrderStatus;
+  payment_method: PaymentMethod;
+  payment_status: PaymentStatus;
+  currency: Currency;
+  total_price: number;
+  delivery_price: number;
+  return_delivery_price: number;
+  with_delivery: boolean;
+  delivery_address?: string;
+  delivery_address_name?: string;
+  delivery_date?: string; // ISO date string
+  delivery_latitude?: number;
+  delivery_longitude?: number;
+  pickup_address?: string;
+  pickup_address_name?: string;
+  pickup_date?: string; // ISO date string
+  pickup_latitude?: number;
+  pickup_longitude?: number;
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
+  items: UserOrderItem[];
+}

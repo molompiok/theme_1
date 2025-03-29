@@ -69,6 +69,7 @@ async function startServer() {
     };
     const pageContext = await renderPage(pageContextInit);
     if (pageContext.errorWhileRendering) {
+      console.log("🚀 ~ app.get ~ (pageContext.errorWhileRendering:", (pageContext.errorWhileRendering))
       // Install error tracking here, see https://vike.dev/error-tracking
     }
     const { httpResponse } = pageContext;
@@ -84,7 +85,7 @@ async function startServer() {
 
   const port = process.env.PORT || 3000;
   app.listen(port);
-  console.log(`Server running at http://localhost:${port}`);
+  console.warn(`Server running at http://localhost:${port}`);
 }
 
 function getCookieValue(cookieHeader: string, cookieName: string) {

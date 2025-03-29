@@ -3,17 +3,19 @@ import { ColorComponent } from "../FeatureDetailProduct/ColorComponent";
 import { TextComponent } from "../FeatureDetailProduct/TextComponent";
 
 export const RenderFeatureComponent = ({
+  features,
   feature,
   product_id,
 }: {
+  features: Feature[];
   feature: Feature;
   product_id: string;
 }) => {
-  console.log("🚀 ~ feature:", feature)
   const componentProps = {
     values: feature.values,
+    features,
     feature_name: feature.name,
-    feature_required: feature.required,
+    feature_id: feature.id,
     product_id,
   };
 

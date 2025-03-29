@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { combine, createJSONStorage, persist } from "zustand/middleware";
 import { GroupProductType, ProductClient } from "../pages/type";
 
-// Define the cart item interface for better type safety
 interface CartItem {
   product: ProductClient;
   group_product: GroupProductType;
@@ -90,5 +89,22 @@ export const useModalCart = create(
       name: "panier",
       storage: createJSONStorage(() => localStorage),
     }
+  )
+);
+
+
+
+
+export const useOrderInCart = create(
+  combine(
+    {
+      with_delivery: null as boolean | null,
+    },
+    (set) => ({
+      setWithDelivery: (withDelivery: boolean) =>
+        set((state) => ({
+          with_delivery: withDelivery ?? state.with_delivery,
+        })),
+    })
   )
 );

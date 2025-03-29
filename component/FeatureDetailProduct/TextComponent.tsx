@@ -1,23 +1,28 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { useproductFeatures } from "../../store/features";
-import { FeatureValue, GroupProductType } from "../../pages/type";
+import { Feature, ProductFeature, GroupProductType } from "../../pages/type";
 
 import ValueComponent from "../product/ValueComponent";
+import { features } from "process";
+import { useproductFeatures } from "../../store/features";
 
 interface TextComponentProps {
-  values: FeatureValue[];
+  values: ProductFeature[];
   feature_name: string;
+  feature_id: string;
   product_id: string;
+  features: Feature[];
 }
 
 export const TextComponent: React.FC<TextComponentProps> = ({
   values,
   feature_name,
   product_id,
+  feature_id,
+  features,
 }) => {
   const validValues = useMemo(() => values.filter((v) => !!v.text), [values]);
-  const { productFeatures, lastGroupProductId } = useproductFeatures();
-  const selectedValue = productFeatures.get(lastGroupProductId)?.get(feature_name);
+  const { selections } = useproductFeatures();
+  // const selectedValue = selections[feature_id];
 
   if (!validValues.length) {
     return (
@@ -34,23 +39,27 @@ export const TextComponent: React.FC<TextComponentProps> = ({
       aria-label={`Options pour ${feature_name}`}
     >
       <div className="flex items-center justify-start flex-wrap gap-2 scrollbar-thin max-w-full">
-        {validValues.map((value) => (
-          <ValueComponent
-            value={{text : value.text! , id : value.id}}
-            key={value.id}
-            // value={value}
+        {validValues.map((value) =>  {
+          const selectedValue = selections.get(product_id)?.get(feature_id)?.valueFeature;
+          return (
+            <ValueComponent
+              key={value.id}
+              value={value}
+              feature_id={feature_id}
+              features={features}
             feature_name={feature_name}
             product_id={product_id}
-            isSelected={selectedValue?.valueFeature === value.text}
+            isSelected={selectedValue === value.id}
           />
-        ))}
+        );
+      })}
       </div>
     </div>
   );
 };
 
 // interface ValueComponentProps {
-//   value: FeatureValue;
+//   value: ProductFeature;
 //   feature_name: string;
 //   product_id: string;
 //   isSelected: boolean;

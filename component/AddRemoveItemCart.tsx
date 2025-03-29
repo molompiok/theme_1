@@ -3,113 +3,66 @@ import clsx from "clsx";
 import { IoMdAdd, IoMdRemove } from "react-icons/io";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { update_cart, view_cart } from "../api/cart.api";
-import { CartResponse, GroupProductType, ProductClient } from "../pages/type";
+import { CartResponse, Feature, GroupProductType, ProductClient } from "../pages/type";
 import { useAuthStore } from "../store/user";
 import { FaSpinner } from "react-icons/fa";
-import { createQueryClient } from "../utils";
+import { deepEqual, getOptions } from "../utils";
 import useCart from "../hook/query/useCart";
+import { useUpdateCart } from "../hook/query/useUpdateCart";
 
 export default function AddRemoveItemCart({
   product,
-  group_product,
   inList,
+  bind,
+  features
 }: {
   product: ProductClient | null;
-  group_product: GroupProductType;
   inList: boolean;
+  bind: Record<string, string>;
+  features : Feature[]
 }) {
-  const user = useAuthStore((state) => state.user?.id || 'guest');
 
   const { data: serverCart, isLoading: isCartLoading } = useCart()
 
   const itemInPanier = useMemo(
     () =>
       serverCart?.cart?.items.find(
-        (item) => item.group_product_id === group_product?.id
+        (item) => deepEqual(item?.realBind, bind)
       ),
-    [serverCart?.cart?.items, group_product?.id]
+    [serverCart?.cart?.items, bind]
   );
+  const group_product =  getOptions({ bind, features, product_id: product?.id || '' });
 
   const isStockLimitReached = useMemo(
-    () => itemInPanier?.quantity === group_product.stock,
-    [itemInPanier?.quantity, group_product.stock]
+    () => itemInPanier?.quantity === 0,
+    [itemInPanier?.quantity]
   );
 
-  const updateCartMutation = useMutation({
-    mutationFn: update_cart,
-    onMutate: async (params) => {
-      await createQueryClient.cancelQueries({ queryKey: ["cart", user] });
-      const previousCart = createQueryClient.getQueryData(["cart", user]) as CartResponse;
-
-      let updatedItems = previousCart?.cart?.items
-        ? [...previousCart.cart.items]
-        : [];
-      const itemIndex = updatedItems.findIndex(
-        (item) => item.group_product_id === params.group_product_id
-      );
-
-      if (params.mode === "increment") {
-        if (itemIndex >= 0) {
-          updatedItems[itemIndex] = {
-            ...updatedItems[itemIndex],
-            quantity: updatedItems[itemIndex].quantity + (params.value || 1),
-          };
-        }
-      } else if (params.mode === "decrement" && itemIndex >= 0) {
-        updatedItems[itemIndex] = {
-          ...updatedItems[itemIndex],
-          quantity: updatedItems[itemIndex].quantity - (params.value || 1),
-        };
-        if (updatedItems[itemIndex].quantity <= 0) {
-          updatedItems.splice(itemIndex, 1);
-        }
-      } else if (params.mode === "clear" && itemIndex >= 0) {
-        updatedItems.splice(itemIndex, 1);
-      }
-
-      createQueryClient.setQueryData(["cart", user], {
-        ...previousCart,
-        cart: { ...previousCart?.cart, items: updatedItems },
-        total: updatedItems.reduce(
-          (sum, item) =>
-            sum +
-            item.quantity *
-              ((item.group_product.product?.price || 0) +
-                (item.group_product.additional_price || 0)),
-          0
-        ),
-      });
-
-      return { previousCart };
-    },
-    onError: (err, params, context) => {
-      createQueryClient.setQueryData(["cart", user], context?.previousCart);
-    },
-    onSettled: () => {
-      createQueryClient.invalidateQueries({ queryKey: ["cart"] });
-    },
-  });
+  const updateCartMutation = useUpdateCart()
 
   const handleClick = (type: "add" | "remove") => (e: React.MouseEvent) => {
     e.stopPropagation();
+  
     if (!product?.id || updateCartMutation.isPending) return;
-
+    const bindT = bind && Object.keys(bind).length > 0 
+    ? bind 
+    : itemInPanier?.realBind ?? {};
+  
+    const mutationPayload = {
+      product_id: product.id,
+      bind: bindT,
+    };
+  
     if (type === "remove") {
-      if (inList || (itemInPanier?.quantity ?? 0) > 1) {
-        updateCartMutation.mutate({
-          group_product_id: group_product.id,
-          mode: "decrement",
-          value: 1,
-        });
-      } else {
-        updateCartMutation.mutate({
-          group_product_id: group_product.id,
-          mode: "clear",
-        });
-      }
-    } else if (!isStockLimitReached) {
+      const quantity = itemInPanier?.quantity ?? 0;
       updateCartMutation.mutate({
-        group_product_id: group_product.id,
+        ...mutationPayload,
+        mode: quantity > 1 || inList ? "decrement" : "clear",
+        value: quantity > 1 || inList ? 1 : undefined,
+      });
+    } else if (type === "add" && !isStockLimitReached) {
+      updateCartMutation.mutate({
+        ...mutationPayload,
         mode: "increment",
         value: 1,
       });

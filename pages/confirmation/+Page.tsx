@@ -7,6 +7,10 @@ import LivraisonStep from "../../component/confirmation/LivraisonStep";
 import { PersonalInfo } from "../../component/profile/PersonalInfo";
 import { OrderSummary } from "../../component/confirmation/OrderSummary";
 import clsx from "clsx";
+import { useOrderInCart } from "../../store/cart";
+import { formatPrice } from "../../utils";
+import useCart from "../../hook/query/useCart";
+import FinalInfo from "../../component/confirmation/FinalInfo";
 
 interface DétailsCommande {
   adresse_livraison: string;
@@ -33,22 +37,23 @@ interface ArticlePanier {
 
 export default function PagePaiement() {
 
-  const [withDelivery, setWithDelivery] = useState<boolean>(false); // true pour livraison, false pour retrait
-  const [deliveryDate, setDeliveryDate] = useState<string>("25/03/2025"); // Date limite livraison
-  const [pickupDate, setPickupDate] = useState<string>("26/03/2025"); // Date limite retrait
-  const [phoneNumber, setPhoneNumber] = useState<string>("+221 77 123 45 67");
-  const [deliveryAddress, setDeliveryAddress] = useState<string>("123 Rue Exemple, Dakar");
-  const [pickupAddress, setPickupAddress] = useState<string>("Magasin Central, Dakar");
-  const [itemsPrice, setItemsPrice] = useState<number>(5000); // Prix des articles
-  const [deliveryPrice, setDeliveryPrice] = useState<number>(1000); // Prix livraison
-  const [isPending, setIsPending] = useState<boolean>(false); // État de chargement
-
-
+  // const [withDelivery, setWithDelivery] = useState<boolean>(false); // true pour livraison, false pour retrait
+  // const [deliveryDate, setDeliveryDate] = useState<string>("25/03/2025"); // Date limite livraison
+  // const [pickupDate, setPickupDate] = useState<string>("26/03/2025"); // Date limite retrait
+  // const [phoneNumber, setPhoneNumber] = useState<string>("+221 77 123 45 67");
+  // const [deliveryAddress, setDeliveryAddress] = useState<string>("123 Rue Exemple, Dakar");
+  // const [pickupAddress, setPickupAddress] = useState<string>("Magasin Central, Dakar");
+  // const [itemsPrice, setItemsPrice] = useState<number>(5000); // Prix des articles
+  // const [deliveryPrice, setDeliveryPrice] = useState<number>(1000); // Prix livraison
+  // const [isPending, setIsPending] = useState<boolean>(false); // État de chargement
 
   const [step, setStep] = useState<"info" | "livraison" | "Finalisation">("info");
   const user = useAuthStore((state) => state.user);
-  const isPermitToProceed = user?.id && user.phone_numbers?.length > 0 && user.email && user.full_name;
 
+  const isPermitToProceed = user?.id && user.phone_numbers?.length > 0 && user.email && user.full_name;
+  const { data: cart } = useCart();
+
+  const totalPrice = cart?.total || 0;
   const getInfoErrorMessage = () => {
     if (!user?.id) return "Veuillez vous connecter pour continuer.";
     if (!user.full_name) return "Veuillez renseigner votre nom complet.";
@@ -58,7 +63,7 @@ export default function PagePaiement() {
   };
 
   return (
-    <div className="bg-white flex flex-col-reverse lg:flex-row font-sans min-h-screen">
+    <div className="bg-white font-primary flex flex-col-reverse lg:flex-row min-h-screen">
       <div className="w-full lg:w-2/3 p-4 sm:p-6 bg-gray-50 pt-8">
         <div className="max-w-xl mx-auto">
           <h1 className="text-2xl sm:text-3xl font-light mb-8 text-black border-b border-gray-200 pb-4">
@@ -112,94 +117,12 @@ export default function PagePaiement() {
                 )}
               </div>
             )}
-            <LivraisonStep step={step} setStep={setStep} />
+            {step === "livraison" && (
+              <LivraisonStep step={step} setStep={setStep} />
+            )}
             {step === "Finalisation" && (
-  <section className="space-y-6 max-w-2xl mx-auto p-4 sm:p-6">
-    {/* Conteneur principal */}
-    
-    {/* Titre */}
-    <header>
-      <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
-        Récapitulatif de la commande
-      </h2>
-    </header>
-
-    {/* Contenu du récapitulatif */}
-    <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 space-y-4">
-      {/* Type de livraison et date limite */}
-      <div className="space-y-2">
-        <p className="text-gray-600">
-          <span className="font-medium">Type de livraison : </span>
-          {withDelivery ? "Livraison" : "Retrait"}
-        </p>
-        <p className="text-gray-600">
-          <span className="font-medium">Date limite : </span>
-          {withDelivery ? deliveryDate : pickupDate || "Non spécifiée"}
-        </p>
-      </div>
-
-      {/* Numéro du client */}
-      <p className="text-gray-600">
-        <span className="font-medium">Numéro de téléphone : </span>
-        {phoneNumber || "Non fourni"}
-      </p>
-
-      {/* Adresse selon le type de livraison */}
-      <p className="text-gray-600">
-        <span className="font-medium">
-          {withDelivery ? "Adresse de livraison" : "Adresse de retrait"} : 
-        </span>
-        {withDelivery ? deliveryAddress : pickupAddress || "Non spécifiée"}
-      </p>
-
-      {/* Prix des articles */}
-      <div className="flex justify-between">
-        <span className="text-gray-600">Prix des articles</span>
-        <span className="text-gray-900">{itemsPrice} CFA</span>
-      </div>
-
-      {/* Prix de livraison (seulement si withDelivery est true) */}
-      {withDelivery && (
-        <div className="flex justify-between">
-          <span className="text-gray-600">Frais de livraison</span>
-          <span className="text-gray-900">{deliveryPrice} CFA</span>
-        </div>
-      )}
-
-      {/* Total */}
-      <div className="flex justify-between font-semibold pt-2 border-t border-gray-200">
-        <span>Total</span>
-        <span>{withDelivery ? itemsPrice + deliveryPrice : itemsPrice} CFA</span>
-      </div>
-    </div>
-
-    {/* Boutons */}
-    <div className="grid gap-4 sm:grid-cols-2">
-      <button
-        type="submit"
-        className="w-full bg-black text-white py-3 px-4 rounded-lg hover:bg-gray-800 
-                  focus:ring-2 focus:ring-offset-2 focus:ring-black 
-                  transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-        aria-label="Finaliser la commande"
-        disabled={isPending}
-      >
-        Compléter la Commande
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setStep("livraison")}
-        className="w-full text-gray-600 py-3 px-4 rounded-lg 
-                  hover:text-black hover:bg-gray-100 
-                  focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 
-                  transition-colors duration-200"
-        aria-label="Retour à l'étape livraison"
-      >
-        Retour à la Livraison
-      </button>
-    </div>
-  </section>
-)}
+              <FinalInfo step={step} setStep={setStep} />
+            )}
           </div>
         </div>
       </div>
@@ -219,20 +142,18 @@ const Step: React.FC<StepProps> = ({ title, active, completed }) => (
   <div className="flex-1">
     <div className="flex items-center">
       <div
-        className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
-          active
+        className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${active
             ? "border-black bg-black text-white"
             : completed
-            ? "border-gray- bg-green-500 text-white"
-            : "border-gray-300 bg-white"
-        }`}
+              ? "border-gray- bg-green-500 text-white"
+              : "border-gray-300 bg-white"
+          }`}
       >
         {completed ? "✓" : active ? "●" : "○"}
       </div>
       <p
-        className={`ml-2  ${
-          active ? "font-medium text-black" : "text-gray-500"
-        }`}
+        className={`ml-2  ${active ? "font-medium text-black" : "text-gray-500"
+          }`}
       >
         {title}
       </p>

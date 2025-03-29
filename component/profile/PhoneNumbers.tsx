@@ -339,25 +339,14 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
 
   return (
     <section className={`w-full p-4 bg-gray-50 rounded-lg shadow-sm ${style}`}>
-      <div className="my-2">
-        <h2 className="text-lg font-semibold text-gray-900">
+      <h2 className="text-lg mb-3 font-semibold text-gray-900">
           Numéros de téléphone <span className="text-gray-600 text-xs">({numbers.length}/{maxItems})</span>
         </h2>
-        {numbers.length >= maxItems ? (
-          <p className="text-sm text-gray-600">
-            Nombre maximum de numéros atteint.
-          </p>
-        ) : (
-          <p className="text-sm text-gray-600">
-            Ajoutez ou modifiez vos numéros ci-dessous.
-          </p>
-        )}
-      </div>
       <ul className="space-y-4">
         {numbers.map((item, i) => (
           <li
             key={item.id || i}
-            className="flex flex-col gap-3 px-3 py-1 bg-white hover:shadow-inner inset-shadow-neutral-800 rounded-md"
+            className="flex flex-col gap-3 px-3 py-1 justify-center items-start bg-white border-b-[.05rem] border-gray-300"
           >
             {editState.index === i ? (
               <form
@@ -430,10 +419,22 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
           </li>
         ))}
       </ul>
+      <div className="mt-7 mb-3">
+      
+        {numbers.length >= maxItems ? (
+          <p className="text-sm text-gray-600">
+            Nombre maximum de numéros atteint.
+          </p>
+        ) : (
+          <p className="text-sm text-gray-600">
+            Ajoutez ou modifiez vos numéros ci-dessous.
+          </p>
+        )}
+      </div>
       <form
         ref={formRef}
         onSubmit={handleAddItem}
-        className={clsx("flex-col gap-3 md:flex-row md:items-end my-5", {
+        className={clsx("flex-col gap-3 md:flex-row md:items-end mb-5", {
           'hidden' : numbers.length >= maxItems,
           'flex' : numbers.length < maxItems
         })}

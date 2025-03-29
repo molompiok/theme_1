@@ -28,6 +28,7 @@ import { Feature, ProductClient } from "../../type";
 import gsap from "gsap";
 import { RenderFeatureComponent } from "../../../component/product/RenderFeatureComponent";
 import { getFirstFeatureWithView } from "../../../utils";
+import { markdownToPlainText, MarkdownViewer } from "../../../component/MarkdownViewer";
 
 export default function Page() {
   const { dehydratedState } = useData<Data>();
@@ -70,7 +71,6 @@ function ProductPageContent() {
     queryFn: () => get_features_with_values({ product_id: product?.id }),
     enabled: !!product?.id,
   });
-  console.log("🚀 ~ ProductPageContent ~ features:", features);
 
   const handleImageClick = (index: number) => {
     swiperInstance?.slideTo(index);
@@ -148,23 +148,25 @@ function ProductGallery({
   handleImageClick,
   setImgIndex,
 }: ProductGalleryProps) {
-  const selectedFeatures = useproductFeatures(
-    (state) => state.selectedFeatures
-  );
+  const {lastSelectedFeatureId ,lastValueId} = useproductFeatures();
+
 
   const mediaViews = useMemo(() => {
-    if (!features || !features.length) return ["/img/default_img.gif"];
-
-    const defualt_feature = getFirstFeatureWithView(features);
-
-    if (!defualt_feature) return ["/img/default_img.gif"];
-
-    const selectedValue = selectedFeatures.get(defualt_feature.name);
-    const value =
-      defualt_feature.values.find((v) => v.text === selectedValue) ||
-      defualt_feature.values[0];
-    return value?.views.length ? value.views : [""];
-  }, [features, selectedFeatures, product]);
+    if (!features?.length) return ["/img/default_img.gif"];
+  
+    const selectedViews = features.find(f => f.id === lastSelectedFeatureId)?.values.find(v => v.id === lastValueId)?.views || [];
+    if (selectedViews.length > 0) {
+      return selectedViews;
+    }
+  
+    const defaultFeature = getFirstFeatureWithView(features);
+    const defaultViews = defaultFeature?.values[0]?.views || [];
+    if (defaultViews.length > 0) {
+      return defaultViews;
+    }
+  
+    return ["/img/default_img.gif"];
+  }, [features, lastSelectedFeatureId, lastValueId]);
 
   return (
     <div className="relative flex gap-2">
@@ -222,7 +224,8 @@ function ProductDetails({ product, features }: ProductDetailsProps) {
     <div className="space-y-3">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold">{product.name}</h1>
-        <p className="text-gray-600 text-base/5 mt-2">{product.description}</p>
+        {/* <MarkdownViewer markdown={product.description} /> */}
+        <p className="text-gray-600 text-base/5 mt-2">{(product.description)}</p>
       </div>
       <div className="flex items-center gap-2">
         <ReviewsStars note={4.6} size={20} style="text-orange-500" />
@@ -232,7 +235,7 @@ function ProductDetails({ product, features }: ProductDetailsProps) {
       <div className="space-y-3 max-h-[50dvh] overflow-y-auto scrollbar-thin">
         {features?.map((feature) => (
           <div key={feature.id || feature.name} className="space-y-0">
-            <RenderFeatureComponent feature={feature} product_id={product.id} />
+            <RenderFeatureComponent features={features} feature={feature} product_id={product.id} />
           </div>
         ))}
       </div>

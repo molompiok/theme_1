@@ -41,7 +41,7 @@ export default function Page() {
             <BsHeartFill className="text-2xl sm:text-4xl text-red-500 animate-pulse" />
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Mes Favoris</h1>
           </div>
-          <FilterPopover options={sortOptions} />
+          <FilterPopover  />
         </div>
         <HydrationBoundary state={dehydratedState}>
           <ProductList />
@@ -93,7 +93,6 @@ function ProductList() {
 }
 
 function ProductCard({ favorite }: { favorite: ProductFavorite }) {
-  console.log("🚀 ~ ProductCard ~ favorite:", favorite)
   const { data: feature, status } = useQuery({
     queryKey: ["get_features_with_values", favorite.default_feature_id],
     queryFn: () =>

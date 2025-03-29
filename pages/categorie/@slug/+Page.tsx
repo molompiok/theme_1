@@ -7,7 +7,6 @@ export { Page };
 
 function Page() {
   const { dehydratedState, description, title ,view } = useData<Data>();
-  console.log("🚀 ~ Page ~  description, title:",  description, title)
 
   return (
     <div className="min-h-dvh  antialiased">

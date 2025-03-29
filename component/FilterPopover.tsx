@@ -12,9 +12,7 @@ const FilterPopover = ({ className = '' }: FilterPopoverProps) => {
 
 
   const handleClick = (option: OptionType) => {
-    console.log("🚀 ~ handleClick ~ option:", option)
     setFilter('order_by', [option]);
-   
   };
 
   return (

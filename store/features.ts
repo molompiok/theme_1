@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { combine, createJSONStorage, persist } from "zustand/middleware";
 import { GroupProductType, ProductClient } from "../pages/type";
 
-export interface FeatureValueType {
+export interface ProductFeatureType {
   valueFeature: string;
   priceValue: number;
   stock: number;
@@ -10,80 +10,64 @@ export interface FeatureValueType {
 export const useproductFeatures = create(
   combine(
     {
-      productFeatures: new Map<string, Map<string, FeatureValueType>>(),
-      selectedFeatures: new Map<string, string>(), // Ex. { "couleur": "yellow", "ram": "16" }
-      groupProducts: new Map<string, GroupProductType[]>(), // Groupes par ID
-      lastGroupProductId: "" as string,
+      selections: new Map<string, Map<string, ProductFeatureType>>(), 
+      lastSelectedFeatureId: "" as string,
+      lastValueId: "" as string,
     },
-    (set) => ({
-      add: (
-        id: string,
-        typeFeature: string,
-        valueFeature: string,
-        priceValue: number,
-        stock: number,
-        groups: GroupProductType[]
-      ) => {
+    (set, get) => ({
+      toggleSelection: ({ 
+        featureId,
+        valueId,
+        priceValue,
+        stock,
+        productId,
+      }: {
+        featureId: string;
+        valueId: string;
+        priceValue: number;
+        stock: number;
+        productId: string;
+      }) => {
         set((state) => {
-          const newProductFeatures = new Map(state.productFeatures);
-          const newGroupProducts = new Map(state.groupProducts);
-          const newSelectedFeatures = new Map(state.selectedFeatures);
+          const newSelections = new Map(state.selections);
+          const existingFeatures = newSelections.get(productId)
+            ? new Map(newSelections.get(productId))
+            : new Map();
 
-          const featureMap = new Map(newProductFeatures.get(id) || []);
-          featureMap.set(typeFeature, { valueFeature, priceValue, stock });
-          newProductFeatures.set(id, featureMap);
+          const currentValue = existingFeatures.get(featureId);
 
-          newGroupProducts.set(id, groups);
-
-          newSelectedFeatures.set(typeFeature, valueFeature);
-
-          const matchingGroup = groups.find((gp) =>
-            Array.from(newSelectedFeatures.entries()).every(
-              ([key, val]) => !gp.bind[key] || gp.bind[key] === val
-            )
-          );
-
-          return {
-            productFeatures: newProductFeatures,
-            groupProducts: newGroupProducts,
-            selectedFeatures: newSelectedFeatures,
-            lastGroupProductId: matchingGroup?.id || id,
-          };
-        });
-      },
-      remove: (typeFeature: string) => {
-        set((state) => {
-          const newSelectedFeatures = new Map(state.selectedFeatures);
-          const newProductFeatures = new Map(state.productFeatures);
-          const currentId = state.lastGroupProductId;
-
-          newSelectedFeatures.delete(typeFeature);
-
-          if (newProductFeatures.has(currentId)) {
-            const featureMap = new Map(newProductFeatures.get(currentId)!);
-            featureMap.delete(typeFeature);
-            if (featureMap.size === 0) {
-              newProductFeatures.delete(currentId);
-            } else {
-              newProductFeatures.set(currentId, featureMap);
-            }
+          if (currentValue && currentValue.valueFeature === valueId) {
+            existingFeatures.delete(featureId);
+          } else {
+            existingFeatures.set(featureId, { valueFeature: valueId, priceValue, stock });
           }
 
-          const groups = state.groupProducts.get(currentId) || [];
-          const matchingGroup = groups.find((gp) =>
-            Array.from(newSelectedFeatures.entries()).every(
-              ([key, val]) => !gp.bind[key] || gp.bind[key] === val
-            )
-          );
+          newSelections.set(productId, existingFeatures);
+          const updatedLastSelectedFeatureId = existingFeatures.has(featureId)
+            ? featureId
+            : state.lastSelectedFeatureId;
+          const updatedLastValueId = existingFeatures.has(featureId)
+            ? valueId
+            : state.lastValueId;
 
           return {
-            productFeatures: newProductFeatures,
-            selectedFeatures: newSelectedFeatures,
-            lastGroupProductId: matchingGroup?.id || (newSelectedFeatures.size > 0 ? currentId : ""),
+            selections: newSelections,
+            lastSelectedFeatureId: updatedLastSelectedFeatureId,
+            lastValueId: updatedLastValueId,
           };
         });
       },
-      clearSelections: () => set({ selectedFeatures: new Map(), lastGroupProductId: "" , groupProducts: new Map() ,productFeatures: new Map() }),
+      hasSelection: (productId: string, featureId: string) => {
+        return get().selections.has(productId) && get().selections.get(productId)?.has(featureId);
+      },
+      getSelection: (productId: string, featureId: string) => {
+        return get().selections.get(productId)?.get(featureId);
+      },
+      clear: () => {
+        set(() => {
+          return { selections: new Map() };
+        });
+      },
     })
   )
 );

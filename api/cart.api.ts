@@ -1,18 +1,18 @@
 import { AxiosError } from "axios";
 import { api, build_form_data, build_search_params } from ".";
-import { CartResponse, CartUpdateResponse } from "../pages/type";
+import { CartResponse, CartUpdateResponse, UserOrder } from "../pages/type";
 import { delay } from "../utils";
 
 export const update_cart = async (params: {
-    group_product_id: string;
-    mode: 'increment' | 'decrement' | 'set' | 'clear' | 'max';
-    value?: number;
-    ignoreStock?: boolean;
-  }) => {
-    const formData = build_form_data(params);
+  product_id: string;
+  mode: 'increment' | 'decrement' | 'set' | 'clear' | 'max';
+  value?: number;
+  ignoreStock?: boolean;
+  bind: Record<string, string>;
+}) => {
+  const formData = build_form_data(params);
     try {
       const { data } = await api.post<CartUpdateResponse>('/update_cart', formData);
-      console.log('Réponse de update_cart', data); 
       await delay(1000); 
       return data;
     } catch (error) {
@@ -20,8 +20,6 @@ export const update_cart = async (params: {
       throw error; 
     }
   };
-
-
 
 export const view_cart = async () => {
   try {
@@ -39,6 +37,7 @@ export const view_cart = async () => {
 
 export const create_user_order = async (params: {
   delivery_price?: number;
+  total_price?: number;
   phone_number?: string;
   formatted_phone_number?: string;
   country_code?: string;
@@ -58,8 +57,6 @@ export const create_user_order = async (params: {
   try {
     const response = await api.post('/create_user_order', formData);
 
-    console.log('Réponse de create_user_order', response.data);
-    
     return response.data;
 
   } catch (error) {
@@ -78,3 +75,14 @@ export const create_user_order = async (params: {
     throw error;
   }
 };
+
+export const get_orders = async ()=>{
+  await delay(3000);
+  try {
+    const response = await api.get<UserOrder[]>('/get_orders');
+    return response.data
+  } catch (error) {
+    console.error('Erreur lors de la récupération des commandes:', error);
+    throw error;
+  }
+}

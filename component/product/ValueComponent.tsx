@@ -1,110 +1,73 @@
 import React, { useCallback, useMemo } from "react";
 import { useproductFeatures } from "../../store/features";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { get_group_by_feature } from "../../api/products.api";
-import Skeleton from "../Skeleton"; // Assume que tu as le Skeleton modulaire
 import clsx from "clsx";
-import { GroupProductType } from "../../pages/type";
-import Loading from "../Loading";
-import { getAllCombinations } from "../../utils";
+import { Feature, ProductFeature } from "../../pages/type";
+import { getAllOptions } from "../../utils";
 
 interface ValueComponentProps {
-  value: { text: string; id?: string };
+  value: ProductFeature;
+  features: Feature[];
   feature_name: string;
   product_id: string;
   isSelected: boolean;
+  feature_id: string;
   isColor?: boolean;
 }
 
 const ValueComponent: React.FC<ValueComponentProps> = ({
   value,
-  feature_name,
+  features,
   product_id,
+  feature_id,
+  feature_name,
   isSelected,
   isColor = false,
 }) => {
   const text = value.text!;
-  const { add, remove } = useproductFeatures();
-  const selectedFeatures = useproductFeatures(
-    (state) => state.selectedFeatures
-  );
+  const { toggleSelection, selections } = useproductFeatures();
 
-  // const {
-  //   data: group_products = [],
-  //   isPending,
-  //   isError,
-  // } = useQuery<GroupProductType[], Error>({
-  //   queryKey: [
-  //     "get_group_by_feature",
-  //     { product_id, feature_value: text, feature_key: feature_name },
-  //   ],
-  //   queryFn: () =>
-  //     get_group_by_feature({
-  //       product_id,
-  //       feature_value: text,
-  //       feature_key: feature_name,
-  //     }),
-  //   staleTime: 5 * 60 * 1000,
-  //   placeholderData: keepPreviousData,
-  // });
-
-  const group_products = getAllCombinations({ features: features, product_id: product_id });
+  const group_products = getAllOptions({ features, product_id });
 
   const { totalStock, mainGroupProduct } = useMemo(() => {
+    const currentSelections = selections.get(product_id)
     const validGroups = group_products.filter((gp) => {
-      const matchesCurrent = gp.bind[feature_name] === text;
-      const matchesOthers = Array.from(selectedFeatures.entries()).every(
+      const matchesCurrent = gp.bind[feature_id] === value.id;
+      const matchesOthers = Array.from(currentSelections?.entries() || []).every(
         ([key, val]) =>
-          key === feature_name || !gp.bind[key] || gp.bind[key] === val
+          key === feature_id || !gp.bind[key] || gp.bind[key] === val.valueFeature
       );
       return matchesCurrent && matchesOthers;
     });
-    const total = validGroups.reduce((sum, gp) => sum + (gp.stock || 0), 0);
+    const total = validGroups.sort((a, b) => (b.stock || 0) - (a.stock || 0))[0]?.stock || 0;
     const main = validGroups.find((gp) => (gp.stock || 0) > 0) || validGroups[0];
     return { totalStock: total, mainGroupProduct: main };
-  }, [group_products, feature_name, text, selectedFeatures]);
+  }, [group_products, feature_id, value.id, selections.get(product_id)]);
 
   const isDisabled = useMemo(
-    () => !group_products.length || totalStock === 0,
-    [group_products, totalStock]
+    () => (mainGroupProduct?.stock || 0) === 0,
+    [mainGroupProduct]
   );
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       e.stopPropagation();
-
-      if (isDisabled || !group_products.length) return;
-
-      if (isSelected) {
-        remove(feature_name);
-      } else {
-        const validGroups = group_products.filter(
-          (gp) => gp.bind[feature_name] === text
-        );
-        const groupId =
-          mainGroupProduct?.id || validGroups[0]?.id || `${product_id}-${text}`;
-        add(
-          groupId,
-          feature_name,
-          text,
-          mainGroupProduct?.additional_price || 0,
-          totalStock,
-          validGroups
-        );
-      }
+      const val = value.id;
+      if (isDisabled || !group_products || !val) return;
+      toggleSelection({
+        featureId: feature_id,
+        valueId: val,
+        priceValue: mainGroupProduct?.additional_price || 0,
+        stock: mainGroupProduct?.stock || 0,
+        productId: product_id
+      });
     },
     [
-      add,
-      remove,
-      feature_name,
-      group_products,
+      toggleSelection,
       isDisabled,
-      isSelected,
-      mainGroupProduct,
-      product_id,
-      text,
-      totalStock,
+      group_products,
+      feature_id,
+      value.id
     ]
   );
 
@@ -132,10 +95,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       "hover:scale-105": !isSelected && !isDisabled && isColor,
       "opacity-50 cursor-not-allowed border-gray-300": isDisabled,
     },
-    isColor &&
-      (["blue", "red", "green", "yellow"].includes(text.toLowerCase())
-        ? `bg-${text.toLowerCase()}-600`
-        : "bg-gray-400")
+
   );
 
   const stockIndicatorStyles = clsx(
@@ -150,23 +110,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
     }
   );
 
-  if (isPending) {
-    return (
-      <div
-        className={clsx(
-          "flex items-center h-9 justify-center",
-          isColor
-            ? "sm:size-10 size-8 min-h-[32px] sm:min-h-[40px]"
-            : "min-w-[60px] min-h-[30px] py-1"
-        )}
-      >
-        {/* <Loading size={'small'}/> */}
-        Chargement....
-      </div>
-    );
-  }
-
-  if (isError || !group_products.length) {
+  if (!group_products) {
     return (
       <span
         className="text-red-500 text-lg italic"
@@ -187,6 +131,9 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       aria-selected={isSelected}
       aria-label={`Sélectionner ${text}${isDisabled ? " (indisponible)" : ""}`}
       aria-disabled={isDisabled}
+      style={{
+        backgroundColor: isColor ? value.key || '' : ''
+      }}
       title={
         isDisabled
           ? `${text} est indisponible (restant: ${totalStock})`
