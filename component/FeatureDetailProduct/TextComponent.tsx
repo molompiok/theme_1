@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { Feature, ProductFeature, GroupProductType } from "../../pages/type";
+import { Feature, ProductFeature } from "../../pages/type";
 
 import ValueComponent from "../product/ValueComponent";
-import { features } from "process";
 import { useproductFeatures } from "../../store/features";
 
 interface TextComponentProps {

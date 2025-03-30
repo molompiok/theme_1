@@ -11,8 +11,14 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+interface FilterValue {
+  text: string;
+  key: string | null;
+  icon: string[] | Record<string, never>;
+}
+
 export function build_search_params(params: {
-  [key: string]: string | number | string[] | Record<string, string[] | string> | undefined;
+  [key: string]: string | number | string[] | Record<string, FilterValue[]> | undefined;
 }): URLSearchParams {
   const searchParams = new URLSearchParams();
 
@@ -20,18 +26,25 @@ export function build_search_params(params: {
     if (value === undefined) return;
 
     if (key === "filters" && typeof value === "object" && !Array.isArray(value)) {
-      Object.entries(value).forEach(([filterKey, filterValues]) => {
-        if (Array.isArray(filterValues)) {
-          filterValues.forEach((filterValue) => {
-            searchParams.append(`filters[${filterKey}][]`, filterValue);
-          });
-        } else {
-          searchParams.append(`filters[${filterKey}]`, filterValues);
-        }
+      // Gestion des filtres comme Record<string, FilterValue[]>
+      Object.entries(value as Record<string, FilterValue[]>).forEach(([filterKey, filterValues]) => {
+        filterValues.forEach((filterValue, index) => {
+          // Ajouter text comme valeur principale
+          searchParams.append(`filters[${filterKey}][${index}][text]`, filterValue.text);
+          // Ajouter key s'il existe, ou "null" explicite
+          searchParams.append(
+            `filters[${filterKey}][${index}][key]`,
+            filterValue.key !== null ? filterValue.key : "null"
+          );
+          // Optionnel : inclure icon si nécessaire (par exemple, la première URL)
+          if (Array.isArray(filterValue.icon) && filterValue.icon.length > 0) {
+            searchParams.append(`filters[${filterKey}][${index}][icon]`, filterValue.icon[0]);
+          }
+        });
       });
     } else if (Array.isArray(value)) {
       value.forEach((item) => {
-        searchParams.append(key, item);
+        searchParams.append(key, item.toString());
       });
     } else {
       searchParams.set(key, value.toString());

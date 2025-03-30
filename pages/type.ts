@@ -56,7 +56,7 @@ export type Feature = {
   id: string;
   product_id: string;
   name: string;
-  type: string | null;
+  type: VariantType;
   icon: string[];
   required: boolean;
   default: string | number | null;
@@ -146,12 +146,16 @@ export const filterOptions: {
   { id: "price_asc", name: "prix bas" },
 ];
 
-
+export interface FilterValue {
+  text: string;
+  icon: string[] | Record<string, never>;
+  key: string | null;
+}
 
 export interface Filter {
   id: string;
   name: string;
-  values: string[];
+  values: FilterValue[];
   type?: VariantType;
 }
 export interface PhoneNumber {

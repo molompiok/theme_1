@@ -16,13 +16,13 @@ export default function LayoutProduct({
 
   return (
     <main className="container font-primary mx-auto py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 lg:gap-8">
-        <aside className="hidden lg:block lg:sticky lg:top-0 self-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 lg:gap-8">
+        <aside className="hidden lg:block lg:sticky lg:top-7 self-start">
           <FilterPanel />
         </aside>
-        <section className="space-y-6">
+        <section className="space-y-6 ">
           <div className="flex justify-start flex-row-reverse gap-2">
-            <div className="lg:hidden flex  gap-2">
+            <div className="lg:hidden flex   gap-2">
               <FilterPanel />
             </div>
             <FilterPopover />

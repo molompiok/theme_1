@@ -199,6 +199,28 @@ export function hasContinueSelling({features}: {features: Feature[]}) {
   return false;
 }
 
+
+export function isEmpty(value: any): boolean {
+  if (value === null || value === undefined) return true;
+  if (typeof value === 'string') return value.trim() === '' || value === '{}';
+  if (typeof value === 'object') return Object.keys(value).length === 0;
+  return false;
+}
+
+export function getFeatureValuePairs(features: Feature[]) {
+  const result: Record<string, string> = {};
+
+  features.forEach(feature => {
+      if (feature.values && feature.values.length > 0) {
+          feature.values.forEach(value => {
+              if(value.id) result[feature.id] = value.id;
+          });
+      }
+  });
+
+  return result;
+}
+
 const pickupDeadline = new Date();
 pickupDeadline.setDate(pickupDeadline.getDate() + 3);
 export const InfoOrderOwner = {

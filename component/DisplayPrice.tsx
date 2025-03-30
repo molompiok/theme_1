@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import type {  Feature, ProductClient } from "../pages/type";
 import { useproductFeatures } from "../store/features";
-import { formatPrice, getOptions } from "../utils";
+import { deepEqual, formatPrice, getOptions, isEmpty } from "../utils";
 import useCart from "../hook/query/useCart";
 
 interface DisplayPriceProps {
@@ -125,10 +125,29 @@ export const DisplayPriceItemCart: React.FC<DisplayPriceItemCartProps> =
   React.memo(
     ({ product, bind, features }) => {
       const { data: cart } = useCart();
-      const itemInPanier = useMemo(
-        () => cart?.cart?.items?.find((item) => item?.product?.id === product?.id),
-        [cart, product]
-      );
+
+    const itemInPanier = useMemo(
+    () =>
+      cart?.cart?.items.find(
+        (item) => {
+          let bindT = item.realBind || item.bind;
+          
+          if (item.realBind || item.bind) {
+            //@ts-ignore
+            bindT = isEmpty(item.realBind) ? item.bind : item.realBind;
+          }
+  
+          bindT = typeof bindT === 'string' ? JSON.parse(bindT) : bindT;
+  
+          bindT = bindT || {};
+          const isEqual = deepEqual(bind, bindT);
+          // console.log("🚀 ~ bindT:", bindT , product?.name)
+          console.log("🚀 ~ bindT = bindT :", {bindT , bind , isEqual})
+          return isEqual && product?.id == item?.product?.id
+        }
+      ),
+    [cart?.cart?.items, bind]
+  );
 
       const options = getOptions({ bind, features: features || [], product_id: product?.id || '' });
 

@@ -6,7 +6,7 @@ import { update_cart, view_cart } from "../api/cart.api";
 import { CartResponse, Feature, GroupProductType, ProductClient } from "../pages/type";
 import { useAuthStore } from "../store/user";
 import { FaSpinner } from "react-icons/fa";
-import { deepEqual, getOptions } from "../utils";
+import { deepEqual, getOptions, isEmpty } from "../utils";
 import useCart from "../hook/query/useCart";
 import { useUpdateCart } from "../hook/query/useUpdateCart";
 
@@ -23,15 +23,42 @@ export default function AddRemoveItemCart({
 }) {
 
   const { data: serverCart, isLoading: isCartLoading } = useCart()
+  // console.log("🚀 ~ serverCart:", serverCart?.cart.items)
+  // let bind = item.realBind || item.bind;
+        
+  // if (item.realBind && item.bind) {
+  //   //@ts-ignore
+  //   bind = isEmpty(item.realBind) ? item.bind : item.realBind;
+  // }
+  // bind = typeof bind === 'string' ? JSON.parse(bind) : bind;
+
+  // bind = bind || {};
 
   const itemInPanier = useMemo(
     () =>
       serverCart?.cart?.items.find(
-        (item) => deepEqual(item?.realBind, bind)
+        (item) => {
+          let bindT = item.realBind || item.bind;
+          
+          if (item.realBind || item.bind) {
+            //@ts-ignore
+            bindT = isEmpty(item.realBind) ? item.bind : item.realBind;
+          }
+  
+          bindT = typeof bindT === 'string' ? JSON.parse(bindT) : bindT;
+  
+          bindT = bindT || {};
+          const isEqual = deepEqual(bind, bindT);
+          // console.log("🚀 ~ bindT:", bindT , product?.name)
+          console.log("🚀 ~ bindT = bindT :", {bindT , bind , isEqual})
+          return isEqual && product?.id == item?.product?.id
+        }
       ),
     [serverCart?.cart?.items, bind]
   );
-  const group_product =  getOptions({ bind, features, product_id: product?.id || '' });
+  console.log("🚀 ~ itemInPanier:", itemInPanier)
+
+  const group_product =  getOptions({ bind: itemInPanier?.realBind || {}, features, product_id: product?.id || '' });
 
   const isStockLimitReached = useMemo(
     () => itemInPanier?.quantity === 0,

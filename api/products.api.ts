@@ -2,6 +2,7 @@ import { api, build_search_params } from "./";
 import {
   Feature,
   Filter,
+  FilterValue,
   GroupProductType,
   MetaPagination,
   OrderByType,
@@ -45,9 +46,10 @@ export const get_products = async (params: {
   categories_id?: string[];
   page?: number;
   limit?: number;
-  filters?: Record<string, string[]>;
+  filters?: Record<string, FilterValue[]>;
 }) => {
   const searchParams = build_search_params(params);
+  console.log("🚀 ~ filters:", params.filters)
   if (Object.keys(params?.filters ?? {}).length) await delay(3000);
   try {
     const { data } = await api.get<{
@@ -59,8 +61,8 @@ export const get_products = async (params: {
       list: data.list.map(minimize_product),
       category: data.category,
     };
-  } catch (error) {
-    console.error("Erreur lors de la récupération des produits :", error);
+  } catch (error : any) {
+    console.error("Erreur lors de la récupération des produits :", error.message );
     return {
       list: [],
       category: null,
@@ -199,6 +201,7 @@ export const get_filters = async (params: { slug?: string }) => {
     const response = await api.get<Filter[]>(
       "/get_filters?" + searchParams.toString()
     );
+    console.log("🚀 ~ constget_filters= ~ response:", response.data)
     return response.data;
   } catch (error) {
     console.error("Error fetching feature details:", error);

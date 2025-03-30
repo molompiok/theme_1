@@ -1,6 +1,5 @@
 import { Feature } from "../../pages/type";
-import { ColorComponent } from "../FeatureDetailProduct/ColorComponent";
-import { TextComponent } from "../FeatureDetailProduct/TextComponent";
+import { FeatureSelector } from "../FeatureDetailProduct/FeatureSelector";
 
 export const RenderFeatureComponent = ({
   features,
@@ -11,37 +10,23 @@ export const RenderFeatureComponent = ({
   feature: Feature;
   product_id: string;
 }) => {
+  if (feature.values.length === 0) return null;
+
+  console.log("🚀 ~ Rendering feature:", feature.id, feature.name, feature.type);
+
   const componentProps = {
-    values: feature.values,
-    features,
+    features: [feature],
     feature_name: feature.name,
-    feature_id: feature.id,
     product_id,
   };
 
-  if(feature.values.length === 0) return null;
-
-  switch (feature.type) {
-    case "color":
-      return (
-        <>
-          <h3 className="text-sm font-medium text-gray-700 flex items-center gap-1">
-            {feature.name}
-            {feature.required && <span className="text-red-500">*</span>}
-          </h3>
-          <ColorComponent {...componentProps} />
-        </>
-      );
-    case "text":
-      return (
-        <>
-          <h3 className="text-sm font-medium text-gray-700 flex items-center gap-1">
-            {feature.name}
-            {feature.required && <span className="text-red-500">*</span>}
-          </h3>
-          <TextComponent {...componentProps} />
-        </>
-      );
-    default: null
-  }
+  return (
+    <div className="mb-4">
+      <h3 className="text-sm font-medium text-gray-700 flex items-center gap-1">
+        {feature.name}
+        {feature.required && <span className="text-red-500">*</span>}
+      </h3>
+      <FeatureSelector {...componentProps} />
+    </div>
+  );
 };

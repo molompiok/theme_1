@@ -16,7 +16,7 @@ import { DisplayPriceItemCart } from "./../DisplayPrice";
 import { ProductMedia } from "../ProductMedia";
 import { useproductFeatures } from "../../store/features";
 import { navigate } from "vike/client/router";
-import { formatPrice, getFirstFeatureWithView, getOptions } from "../../utils";
+import { formatPrice, getFirstFeatureWithView, getOptions, isEmpty } from "../../utils";
 import useCart from "../../hook/query/useCart";
 import { useUpdateCart } from "../../hook/query/useUpdateCart";
 import { useModalCart } from "../../store/cart";
@@ -27,10 +27,10 @@ import { useMediaViews } from "../../hook/query/useMediaViews";
 
 
 function ItemCart({ product, bind }: { product: ProductClient; bind: Record<string, string> }) {
-  console.log("🚀 ~ ItemCart ~ bind:", bind)
   const isOpen = useModalCart((state) => state.showCart);
 
   const removeMutation = useUpdateCart();
+  const selections = useproductFeatures((state) => state.selections);
 
   const { data: features, isPending } = useQuery({
     queryKey: ["get_features_with_values", product?.id],
@@ -42,8 +42,8 @@ function ItemCart({ product, bind }: { product: ProductClient; bind: Record<stri
   });
 
   
-  // const lastSelectedFeatureId = useproductFeatures((state) => state.lastSelectedFeatureId);
-  // const lastValueId = useproductFeatures((state) => state.lastValueId);
+  const lastSelectedFeatureId = useproductFeatures((state) => state.lastSelectedFeatureId);
+  const lastValueId = useproductFeatures((state) => state.lastValueId);
 
   // const bind = useMemo(() => {
 
@@ -78,9 +78,11 @@ function ItemCart({ product, bind }: { product: ProductClient; bind: Record<stri
   // }, [features]);
 
 
-  const options = getOptions({ bind, features: features || [], product_id: product.id });
+  const options = useMemo(() => getOptions({ bind, features: features || [], product_id: product.id }), [bind, features, product.id]);
 
-  const { isPendingFeatures ,mediaViews } = useMediaViews({ bindNames : options.bindNames ,product_id :  product.id})
+  // console.log("🚀 ~ ItemCart ~ options:", options)
+
+  const { isPendingFeatures , mediaViews } = useMediaViews({ bindNames : options.bindNames ,product_id :  product.id})
 
   if (isPending) {
     return <Loading />;
@@ -112,16 +114,14 @@ function ItemCart({ product, bind }: { product: ProductClient; bind: Record<stri
             {product.name}
           </h1>
           <div className="flex flex-wrap items-center mb-1 gap-1">
-            {options.bindNames
-              ? Array.from(Object.entries(options.bindNames)).map(([key, value], i) => (
+            {Array.from(Object.entries(options?.bindNames || {})).map(([key, value], i) => (
                   <span
                     key={`${key}-${i}`}
                     className="text-[.68rem] rotating-border text-gray-100 border border-gray-300 px-2 py-0.5 rounded-[5px]"
                   >
                     {typeof value === 'string' ? value : value?.text || value?.key || 'N/A'}
                   </span>
-                ))
-              : null}
+                ))}
           </div>
           <p className="text-xs/4 md:text-sm/4 mb-2 font-light line-clamp-2">
             {product.description || "Aucune description"}
@@ -131,7 +131,7 @@ function ItemCart({ product, bind }: { product: ProductClient; bind: Record<stri
       <div className="w-full flex justify-between gap-2">
         <AddRemoveItemCart
           product={product}
-          bind={bind} 
+          bind={options.bind} 
           features={features ??  []}
           inList={false}
         />
@@ -144,13 +144,23 @@ function ItemCart({ product, bind }: { product: ProductClient; bind: Record<stri
 function ListItemCart({ cart }: { cart: CartItem[] }) {
   return (
     <div className="flex flex-col divide-y-2 divide-blue-100 max-h-[60vh] overflow-y-auto scroll-smooth scrollbar-thin pr-2">
-      {cart?.map((item , i) => (
-        <ItemCart key={i} product={item.product} bind={item.realBind} />
-      ))}
+      {cart?.map((item, i) => {
+        let bind = item.realBind || item.bind;
+        
+        if (item.realBind && item.bind) { 
+          //@ts-ignore
+          bind = isEmpty(item.realBind) ? item.bind : item.realBind;
+        }
+
+        bind = typeof bind === 'string' ? JSON.parse(bind) : bind;
+
+        bind = bind || {};
+
+        return <ItemCart key={i} product={item.product} bind={bind} />;
+      })}
     </div>
   );
 }
-
 export default function ModalCart() {
   const showCart = useModalCart((state) => state.showCart);
   const toggleCart = useModalCart((state) => state.toggleCart);

@@ -154,6 +154,7 @@ const OrderList = ({ order }: { order: UserOrder }) => {
 
 
 const OrderItemProduct = ({ item }: { item: UserOrderItem }) => {
+console.log("🚀 ~ OrderItemProduct ~ item:", item)
 
   const { isPendingFeatures, mediaViews } = useMediaViews({ bindNames: item.bind_name, product_id: item.product_id })
 

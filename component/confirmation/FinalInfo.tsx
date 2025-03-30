@@ -10,7 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 import { create_user_order } from "../../api/cart.api";
 import { navigate } from "vike/client/router";
 import { useAuthStore } from "../../store/user";
-import { InfoOrderOwner } from "../../utils";
+import { createQueryClient, InfoOrderOwner } from "../../utils";
 import useCart from "../../hook/query/useCart";
 
 type RecapitulatifStepProps = {
@@ -29,6 +29,9 @@ const {user} = useAuthStore();
     mutationFn: create_user_order,
     onSuccess: (data) => {
       console.log('Commande créée avec succès:', data);
+      createQueryClient.cancelQueries({
+        queryKey: ['get_orders'],
+      });
       navigate('/profile/commandes');
     },
     onError: (error: Error) => {

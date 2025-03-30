@@ -1,25 +1,29 @@
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
-
-type SelectedFilters = Record<string, string[]>;
+import { FilterValue } from "../pages/type";
 
 export const useSelectedFiltersStore = create(
   combine(
     {
-      selectedFilters: {} as SelectedFilters,
+      selectedFilters: {} as Record<string, FilterValue[]>,
     },
     (set, get) => ({
-      setSelectedFilters: (filters: SelectedFilters) =>
+      setSelectedFilters: (filters: Record<string, FilterValue[]>) =>
         set({ selectedFilters: filters }),
-      toggleFilter: (filterId: string, value: string) => {
+      toggleFilter: (filterId: string, value: FilterValue) => {
         const { selectedFilters } = get();
-        const currentValues = [...(selectedFilters[filterId] || [])];
+        const currentValues = selectedFilters[filterId] || [];
+        const valueExists = currentValues.some(
+          (v) => v.text === value.text && v.key === value.key
+        );
 
-        if (currentValues.includes(value)) {
+        if (valueExists) {
           set({
             selectedFilters: {
               ...selectedFilters,
-              [filterId]: currentValues.filter((v) => v !== value),
+              [filterId]: currentValues.filter(
+                (v) => !(v.text === value.text && v.key === value.key)
+              ),
             },
           });
         } else {
@@ -31,15 +35,8 @@ export const useSelectedFiltersStore = create(
           });
         }
       },
-      setFilter: (key : string, value : [string]) => {
-        const currentFilters = get().selectedFilters;
-        set({
-          selectedFilters: {
-            ...currentFilters,
-            [key]: value,
-          },
-        });
-      },
+      setFilter: (key: string, value: FilterValue[]) =>
+        set({ selectedFilters: { ...get().selectedFilters, [key]: value } }),
       clearFilter: () => set({ selectedFilters: {} }),
     })
   )
