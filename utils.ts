@@ -157,50 +157,47 @@ export const statusStyles: Record<OrderStatus, string> = {
   [OrderStatus.WAITING_PICKED_UP]: 'bg-orange-100 text-orange-800',
 };
 
-//   // Vérifier les features et récupérer les infos des valeurs sélectionnées
-//   for (let feature of features || []) {
-//     let featureId = feature.id;
-//     let valueId = bind[featureId];
+export function getMinimumStock({features , ignoreStock}: {features: Feature[] , ignoreStock?: boolean}) {
 
-//     if (!valueId) continue; // Si la feature n'est pas dans le bind, on passe
+  if (ignoreStock) return Infinity;
 
-//     let value = feature.values?.find(v => v.id === valueId);
-//     if (!value) continue; // Si la valeur n'existe pas, on passe
+  if (!features || features.length === 0) {
+      return 0;
+  }
 
-//     // Mettre à jour le prix supplémentaire
-//     if (value?.additional_price) {
-//       additionalPrice += value.additional_price;
-//     }
+  let minStock = Infinity;
 
-//     // Mettre à jour le stock (on prend le minimum)
-//     if (value?.stock !== null && value?.stock !== undefined) {
-//       (stock = Math.min(stock, value.stock));
-//     }
+  features.forEach(feature => {
+      if (feature.values && feature.values.length > 0) {
+          feature.values.forEach(value => {
+              if (typeof value.stock === 'number') {
+                  minStock = Math.min(minStock, value.stock);
+              }
+          });
+      }
+  });
 
-//     // Mettre à jour les booléens s'ils sont définis
-//     if (value.decreases_stock !== null) {
-//       decreasesStock = decreasesStock || !!value.decreases_stock;
-//     }
-//     if (value.continue_selling !== null) {
-//       continueSelling = continueSelling || !!value.continue_selling;
-//     }
-//   }
+  return minStock === Infinity ? 0 : minStock;
+}
 
-//   // Si aucun stock n'a été défini (aucune valeur n'a de stock renseigné), on met stock = null
-//   if (stock === Infinity) {
-//     stock = null;
-//   }
 
-//   return {
-//     bind,
-//     additional_price: additionalPrice,
-//     stock: stock,
-//     product_id : product_id,
-//     decreases_stock: decreasesStock,
-//     continue_selling: continueSelling
-//   };
-// }
+export function hasContinueSelling({features}: {features: Feature[]}) {
+  if (!features || features.length === 0) {
+      return false;
+  }
 
+  for (const feature of features) {
+      if (feature.values && feature.values.length > 0) {
+          for (const value of feature.values) {
+              if (value.continue_selling === true) {
+                  return true;
+              }
+          }
+      }
+  }
+  
+  return false;
+}
 
 const pickupDeadline = new Date();
 pickupDeadline.setDate(pickupDeadline.getDate() + 3);

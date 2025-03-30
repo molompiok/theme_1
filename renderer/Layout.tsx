@@ -124,6 +124,7 @@ function Frame({ children }: { children: React.ReactNode }) {
         background: "#D1FAE5",
         color: "#065F46",
         borderLeft: "4px solid #10B981",
+        fontSize: "10px",
         padding: "12px",
         borderRadius: "8px",
         fontWeight: "bold",
@@ -134,6 +135,9 @@ function Frame({ children }: { children: React.ReactNode }) {
       style: {
         background: "#FEE2E2",
         color: "#991B1B",
+        fontSize: "10px",
+        padding: "12px",
+        borderRadius: "8px",
         borderLeft: "4px solid #EF4444",
       },
     },

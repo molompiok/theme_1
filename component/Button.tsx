@@ -10,7 +10,7 @@ import Loading from "./Loading";
 import { useAuthStore } from "../store/user";
 import { useUpdateCart } from "../hook/query/useUpdateCart";
 import useCart from "../hook/query/useCart";
-import { getAllOptions, getOptions } from "../utils";
+import { getAllOptions, getMinimumStock, getOptions, hasContinueSelling } from "../utils";
 export function CartButton({
   text,
   product,
@@ -34,14 +34,13 @@ export function CartButton({
       product_id ? get_features_with_values({ product_id }) : null,
     enabled: !!product_id,
   });
-
+  
   const atLeastOneFeatureHasTwoValues = useMemo(
     () => features?.some((feature) => {
       return feature.values.length >= 2;
     }), 
     [features,product_id]
   );
-
 
   const selections = useproductFeatures((state) => state.selections);
 
@@ -58,9 +57,8 @@ export function CartButton({
   if (!features) {
     return <div>⛔</div>;
   }
-  const group_products = getOptions({ bind, features, product_id });
-
-  const stock =  atLeastOneFeatureHasTwoValues  ? Infinity : group_products?.stock || 0;
+  const hasContinue = hasContinueSelling({ features });
+  const stock = getMinimumStock({ features , ignoreStock: hasContinue });
   const itemInPanier = cart?.cart?.items?.find((item) => item?.product?.id === product_id);
 
   const handleFeatureModalClick = (e: React.MouseEvent) => {
@@ -73,7 +71,7 @@ export function CartButton({
     e.stopPropagation();
     if (!atLeastOneFeatureHasTwoValues) {
       toggleCart(true);
-      if (group_products) {
+      if (stock > 0) {
         updateCartMutation.mutate({
           product_id: product_id,
           bind,
