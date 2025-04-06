@@ -49,6 +49,7 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRender
       </head>
       <body>
         <div id="root">${dangerouslySkipEscape(pageHtml)}</div>
+        <div id="modal-root"></div>
       </body>
 
     </html>`

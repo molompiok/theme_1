@@ -41,7 +41,6 @@ export function CartButton({
   //   () => features ? getFeatureValuePairs(features) : {},
   //   [features]
   // );
-  // console.log("🚀 ~ featureValuePairs:", featureValuePairs)
 
   const requiresOptionSelection = useMemo(
     () => features?.some((feature) => feature.values.length >= 2) ?? false,
@@ -220,7 +219,7 @@ export function CommandButton({
 }
 interface ButtonValidCartProps {
   features?: Feature[];
-  product: ProductClient;
+  product: ProductClient | null;
 }
 function SingleValuedFeaturesButton({
   handleAddToCart,
@@ -237,7 +236,7 @@ function SingleValuedFeaturesButton({
       onClick={handleAddToCart}
       disabled={isOutOfStock}
       className={clsx(
-        "mx-auto text-center text-clamp-base uppercase w-full py-3 px-4 mt-7 min-h-[48px] transition-colors duration-300 rounded", 
+        "mx-auto text-center text-clamp-base uppercase w-full py-3 px-4  min-h-[48px] transition-colors duration-300 rounded", 
         {
           "bg-black text-gray-50 cursor-pointer hover:bg-gray-800": !isOutOfStock,
           "bg-gray-400 text-gray-700 cursor-not-allowed": isOutOfStock,
@@ -276,7 +275,7 @@ function MultiValuedFeaturesButton({
       disabled={isDisabled || isOutOfStock}
       onClick={handleAddToCart}
       className={clsx(
-        "mx-auto text-center text-clamp-base uppercase w-full py-3 px-4 mt-7 min-h-[48px] transition-colors duration-300 rounded",
+        "mx-auto text-center text-clamp-base uppercase w-full py-3 px-4  min-h-[48px] transition-colors duration-300 rounded",
         {
           "bg-black text-gray-50 cursor-pointer hover:bg-gray-900": !isDisabled && !isOutOfStock,
           "bg-gray-400 text-gray-700 cursor-not-allowed": isDisabled || isOutOfStock,
@@ -291,6 +290,7 @@ export function ButtonValidCart({
   features = [],
   product,
 }: ButtonValidCartProps) {
+  if (!product) return null;
   const updateCartMutation = useUpdateCart();
   const toggleCart = useModalCart((st) => st.toggleCart);
   const setFeatureModal = useProductSelectFeature(
@@ -309,7 +309,7 @@ export function ButtonValidCart({
     });
     return bind;
   }, [selections, product.id]);
-  console.log("🚀 ~ bind ~ bind:", bind)
+  
   const matchingGroup = useMemo(() =>
     getOptions({ bind, features, product_id: product.id }),
     [bind, features, product.id]

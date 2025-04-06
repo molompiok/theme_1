@@ -42,10 +42,11 @@ export function delay(ms: number): Promise<void> {
 }
 
 
-export const getFirstFeatureWithView = (features: Feature[]): Feature | undefined => {
-  return features.find((feature) =>
+export const getFirstFeatureWithView = (features: Feature[]) => {
+const feature =  features.find((feature) =>
     feature.values.some((value) => value.views.length > 0)
   );
+  return feature;
 };
 
 export function getAllOptions({features, product_id} : {features: Feature[] , product_id: string}) {
@@ -133,6 +134,17 @@ export function deepEqual<T>(obj1: T | string, obj2: T | string): boolean {
 }
 
 
+export const debounce = <T extends (...args: any[]) => void>(
+  func: T,
+  delay: number
+) => {
+  let timeoutId: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
+
 export function findFirstBindNameWithViews({ bindNames }: { bindNames?: Record<string, ProductFeature | string> }): ProductFeature | null {
   if(!bindNames) return null
   const bindNameEntries = Object.entries(bindNames);
@@ -171,6 +183,7 @@ export function getMinimumStock({features , ignoreStock}: {features: Feature[] ,
       if (feature.values && feature.values.length > 0) {
           feature.values.forEach(value => {
               if (typeof value.stock === 'number') {
+                if(value.stock === 0 || value.stock === null || value.stock === undefined) return;
                   minStock = Math.min(minStock, value.stock);
               }
           });
@@ -305,7 +318,6 @@ export function getOptions({bind, features, product_id} : {bind: Record<string, 
     decreases_stock: decreasesStock,
     continue_selling: continueSelling
   };
-  // console.log("🚀 ~ getOptions 265-ligne ~ options:", options)
 
   return options;
 }

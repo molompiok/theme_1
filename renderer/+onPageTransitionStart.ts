@@ -1,12 +1,13 @@
 import { OnPageTransitionStartAsync } from "vike/types"
 
 export const onPageTransitionStart: OnPageTransitionStartAsync = async (): ReturnType<OnPageTransitionStartAsync> => {
-  console.log('Page transition start')
-  document.querySelector('body')!.classList.add('page-is-transitioning')
-  
-  // Optionnel: ajouter un effet de sortie
-  const pageContent = document.querySelector('.page-content')
-  if (pageContent) {
-    pageContent.classList.add('page-exit')
+  console.log('Page transition start: Showing loader');
+
+  const loader = document.getElementById('page-loader'); // Utilise l'ID c'est plus sûr
+  if (loader) {
+    loader.classList.remove('is-hidden');
+  } else {
+    console.warn('Page loader element (#page-loader) not found.');
   }
+
 }

@@ -17,23 +17,16 @@ export const useSelectedFiltersStore = create(
           (v) => v.text === value.text && v.key === value.key
         );
 
-        if (valueExists) {
-          set({
-            selectedFilters: {
-              ...selectedFilters,
-              [filterId]: currentValues.filter(
-                (v) => !(v.text === value.text && v.key === value.key)
-              ),
-            },
-          });
-        } else {
-          set({
-            selectedFilters: {
-              ...selectedFilters,
-              [filterId]: [...currentValues, value],
-            },
-          });
-        }
+        set({
+          selectedFilters: {
+            ...selectedFilters,
+            [filterId]: valueExists
+              ? currentValues.filter(
+                  (v) => !(v.text === value.text && v.key === value.key)
+                )
+              : [...currentValues, value],
+          },
+        });
       },
       setFilter: (key: string, value: FilterValue[]) =>
         set({ selectedFilters: { ...get().selectedFilters, [key]: value } }),
@@ -41,6 +34,7 @@ export const useSelectedFiltersStore = create(
     })
   )
 );
+
 
 
 const defaultOptions = ['plus recent', 'moins recent', 'prix eleve', 'prix bas'] as const;

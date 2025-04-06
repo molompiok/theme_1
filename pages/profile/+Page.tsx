@@ -1,5 +1,7 @@
 import React, {
   JSX,
+  useEffect,
+  useState,
 } from "react";
 import {
   BsPerson,
@@ -59,30 +61,52 @@ interface Address {
   lng: number | null;
 }
 
-const YANDEX_API_KEY = "67b74e18-a7a6-40d9-82ae-fb7460a81010";
-const YANDEX_API_GEOCODER = "21e88d05-cb30-4849-8e1c-dee1bb671c75";
-const COTE_DIVOIRE_BBOX = "4.19,-8.6~10.74,-2.49";
+// const YANDEX_API_KEY = "67b74e18-a7a6-40d9-82ae-fb7460a81010";
+// const YANDEX_API_GEOCODER = "21e88d05-cb30-4849-8e1c-dee1bb671c75";
+// const COTE_DIVOIRE_BBOX = "4.19,-8.6~10.74,-2.49";
 
 export default function Page(): JSX.Element {
   useAuthRedirect();
+  const [isScrolled, setIsScrolled] = useState(false);
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 50);
+    };
 
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <div className="conatiner min-h-dvh font-primary bg-gray-100 px-2 pb-[100px]">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-2 sm:gap-3 mb-4">
-          <BsPerson className="text-2xl sm:text-4xl text-gray-800" />
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Informations de livraison
-          </h1>
+    <div className="container min-h-dvh font-primary px-2 pb-[100px]">
+        <div
+          className={`sticky inset-x-0 bg-white border-gray-200 transition-all w-full duration-300 py-5 ${isScrolled ? 'border-b mt-0 top-11 sm:top-14 z-40' : 'top-0 mt-7 z-40'
+            }`}
+          style={{
+            paddingLeft: isScrolled ? '1rem' : '0',
+            paddingRight: isScrolled ? '1rem' : '0',
+          }}
+        >
+          <div className="max-w-5xl mx-auto ">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <BsPerson className="text-2xl sm:text-4xl text-gray-800" />
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                  Informations de livraison
+                </h1>
+              </div>
+
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-7">
+        <div className="h-6"></div>
+        <div className="flex flex-col gap-7 max-w-5xl mx-auto">
           <PersonalInfo />
           <PhoneNumbers maxItems={2} />
           <AddressSelector
             mapHeight="400px"
           />
-        </div>
       </div>
     </div>
   );

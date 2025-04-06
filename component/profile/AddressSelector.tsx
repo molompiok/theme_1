@@ -21,6 +21,7 @@ import {
   update_user_address,
 } from "../../api/user.api";
 import { useMutation } from "@tanstack/react-query";
+import { debounce } from "../../utils";
 
 interface Address {
   id?: string;
@@ -48,16 +49,7 @@ interface AddressSelectorProps {
   // mapHeight?: string;
 }
 
-const debounce = <T extends (...args: any[]) => void>(
-  func: T,
-  delay: number
-) => {
-  let timeoutId: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func(...args), delay);
-  };
-};
+
 
 const getCoordinates = async (
   address: string,

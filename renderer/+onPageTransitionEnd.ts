@@ -1,14 +1,13 @@
 import { OnPageTransitionEndAsync } from "vike/types"
 
 export const onPageTransitionEnd: OnPageTransitionEndAsync = async (): ReturnType<OnPageTransitionEndAsync> => {
-  console.log('Page transition end')
-  document.querySelector('body')!.classList.remove('page-is-transitioning')
-  
-  // Faire apparaître la nouvelle page
-  const pageContent = document.querySelector('.page-content')
-  if (pageContent) {
-  
-    // Ou avec l'animation
-    pageContent.classList.add('fade-in-page')
+  console.log('Page transition end: Hiding loader');
+
+  const loader = document.getElementById('page-loader');
+  if (loader) {
+    loader.classList.add('is-hidden');
+  } else {
+    console.warn('Page loader element (#page-loader) not found.');
   }
+
 }

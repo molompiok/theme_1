@@ -1,19 +1,55 @@
-import '@toast-ui/editor/dist/toastui-editor-viewer.css';
-import { Viewer } from '@toast-ui/react-editor';
+import { useEffect, useState } from 'react';
+import { marked } from 'marked';
 
-export {markdownToPlainText, MarkdownViewer }
+
+export {markdownToPlainText,MarkdownViewer }
 
 function MarkdownViewer({ markdown }: { markdown: string }) {
-    return <Viewer initialValue={markdown || "Aucun contenu"} />;
+  const [isClient, setIsClient] = useState(false);
+  const [htmlContent, setHtmlContent] = useState('');
+
+  useEffect(() => {
+    // Configurer marked (optionnel)
+    marked.setOptions({
+      gfm: true,
+      breaks: true,
+
+    });
+
+    const convertMarkdown = async () => {
+      const html = await marked.parse(markdown || 'Aucun contenu', { async: true });
+      setHtmlContent(html);
+    };
+
+    setIsClient(true);
+    convertMarkdown();
+  }, [markdown]);
+
+  if (!isClient) {
+    return <div>Chargement côté client...</div>;
+  }
+
+  return (
+      <div
+        className="prose"
+        dangerouslySetInnerHTML={{ __html: htmlContent }}
+      />
+  );
 }
 
 function markdownToPlainText(markdown: string): string {
-    return markdown
-        .replace(/[#*_~`>\-+|]/g, '') // Supprime les caractères spéciaux Markdown
-        .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Supprime les liens, garde le texte
-        .replace(/!\[.*?\]\(.*?\)/g, '') // Supprime les images
-        .replace(/```[\s\S]*?```/g, '') // Supprime les blocs de code
-        .replace(/`([^`]+)`/g, '$1') // Supprime les inline-code
-        .replace(/\n+/g, ' ') // Remplace les retours à la ligne par des espaces
-        .trim();
+    const mrk = markdown
+    .replaceAll(/[#*_~`>\-+|]/g, '') // Supprime les caractères spéciaux Markdown
+    .replaceAll(/\[(.*?)\]\(.*?\)/g, '$1') // Supprime les liens, garde le texte
+    .replaceAll(/!\[.*?\]\(.*?\)/g, '') // Supprime les images
+    .replaceAll(/```[\s\S]*?```/g, '') // Supprime les blocs de code
+    .replaceAll(/`([^`]+)`/g, '$1') // Supprime les inline-code
+    .replaceAll(/\n+/g, ' ') // Remplace les retours à la ligne par des espaces
+    .replaceAll(/\r+/g, ' ') // Remplace les retours à la ligne par des espaces
+    .replaceAll(/\t+/g, ' ') // Remplace les retours à la ligne par des espaces
+    .replaceAll(/\s+/g, ' ') // Remplace les retours à la ligne par des espaces
+    .trim();
+    return mrk;
 }
+
+export const client = true;

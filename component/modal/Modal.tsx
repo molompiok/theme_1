@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from "react";
 import { useEffect, useRef } from "react";
 import { twMerge } from "tailwind-merge";
+import { createPortal } from "react-dom";
 
 const animation = {
   zoom: ["scale-100", "scale-0"],
@@ -44,6 +45,7 @@ export default function Modal({
 
     const handlePopState = (event: PopStateEvent) => {
       if (event.state?.modalOpen) {
+        document.body.style.overflow = "auto";
         setHide();
       }
     };
@@ -93,11 +95,13 @@ export default function Modal({
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
+      document.body.style.overflow = "auto";
     };
   }, [isOpen, setHide]);
 
-  return (
+  if (typeof window === "undefined") return null;
+
+  const modalContent = (
     <div
       role="dialog"
       aria-modal="true"
@@ -137,4 +141,6 @@ export default function Modal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.getElementById("modal-root") || document.body);
 }

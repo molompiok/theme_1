@@ -1,5 +1,4 @@
-export { Layout };
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import logoUrl from "./logo.svg";
 import { PageContextProvider, usePageContext } from "./usePageContext";
 import type { PageContext } from "vike/types";
@@ -22,6 +21,7 @@ import ModalChooseFeature from "../component/modal/ModalChooseFeature";
 import ModalAuth from "../component/modal/ModalAuth";
 import SideBarCategories from "../component/modal/SideBarCategories";
 import Modal from "../component/modal/Modal";
+import clsx from "clsx";
 
 function Layout({
   children,
@@ -41,13 +41,20 @@ function Layout({
   if (!isClient) {
     return (
       <div className="flex h-dvh w-dvw justify-center items-center animate-pulse">
-        <Logo />
+        <Logo size="large"/>
       </div>
     );
   }
 
   return (
     <PageContextProvider pageContext={pageContext}>
+      <div id="page-loader" className="flex flex-col justify-center items-center page-loader is-hidden">
+        {/* <Loading size={'xl'}/> */}
+        <div className="flex h-dvh w-dvw justify-center items-center animate-pulse">
+          <Logo size="large" />
+        </div>
+        {/* <div className="spinner"></div>  */}
+      </div>
       <Frame>
         <Header>
           <SideBarCategories />
@@ -86,7 +93,6 @@ function Layout({
           </nav>
         </Header>
         {children}
-
         <ModalCart />
         <ModalChooseFeature />
         <ModalAuth />
@@ -102,8 +108,7 @@ function Frame({ children }: { children: React.ReactNode }) {
     cancel_on_tap_outside: true,
     use_fedcm_for_prompt: true,
     auto_select: false,
-    disabled: true,
-    // disabled: Boolean(user),
+    disabled: Boolean(user),
     onSuccess: async (response) => {
       try {
         await api.post("/google_callback", { token: response.credential });
@@ -124,7 +129,7 @@ function Frame({ children }: { children: React.ReactNode }) {
         background: "#D1FAE5",
         color: "#065F46",
         borderLeft: "4px solid #10B981",
-        fontSize: "10px",
+        fontSize: "16px",
         padding: "12px",
         borderRadius: "8px",
         fontWeight: "bold",
@@ -135,7 +140,7 @@ function Frame({ children }: { children: React.ReactNode }) {
       style: {
         background: "#FEE2E2",
         color: "#991B1B",
-        fontSize: "10px",
+        fontSize: "16px",
         padding: "12px",
         borderRadius: "8px",
         borderLeft: "4px solid #EF4444",
@@ -158,6 +163,8 @@ function Header({ children }: { children: React.ReactNode }) {
   const { urlPathname } = usePageContext();
   const user = useAuthStore((state) => state.user);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null); // Référence pour l’élément header
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const handleModalOpen = () => {
     setIsModalOpen(true);
@@ -169,10 +176,23 @@ function Header({ children }: { children: React.ReactNode }) {
     document.body.style.overflow = "auto";
   };
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const shouldBeFixed = scrollPosition > 50;
+      
+      if (shouldBeFixed !== isScrolled) {
+        setIsScrolled(shouldBeFixed);
+      }
+    };
+    
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isScrolled]);
+
   const bannerClasses =
-    "relative w-full top-0 z-40 bg-yellow-600 text-black flex justify-center items-center";
-  const headerClasses =
-    "sticky inset-x-0 top-0 w-full font-primary z-90 px-5 bg-slate-50 flex items-center justify-between py-2 shadow-xl border-b border-slate-100";
+    "relative w-full top-0 z-40 bg-gray-700 text-white flex justify-center items-center";
 
   return (
     <>
@@ -186,11 +206,19 @@ function Header({ children }: { children: React.ReactNode }) {
               Livraison gratuite en Côte d'Ivoire
             </span>
           </button>
-          <header className={headerClasses}>{children}</header>
+          <header ref={headerRef} className={`w-full font-primary flex items-center shadow-md justify-between transition-all duration-300 ease-out
+              ${isScrolled ? 'fixed top-0 left-0 right-0 z-90 bg-white  px-7 py-2' : 'relative px-3 py-2'}`}>
+            {children}
+          </header>
+          {isScrolled && <div className="h-16"></div>}
         </>
       ) : (
         <>
-          <header className="sticky inset-x-0 top-0 w-full font-primary z-90 bg-white px-5 flex items-center justify-between py-2 shadow-xl border-b border-slate-100">
+          <header
+            ref={headerRef}
+            className={`w-full font-primary flex items-center justify-between shadow-md transition-all duration-300 ease-out
+              ${isScrolled ? 'fixed top-0 left-0 right-0 z-90 bg-white  px-7 py-2' : 'relative px-3 py-2'}`}
+          >
             <CiMenuBurger
               className="flex sm:hidden cursor-pointer"
               size={35}
@@ -248,6 +276,7 @@ function Header({ children }: { children: React.ReactNode }) {
               </PopoverContent>
             </Popover>
           </header>
+          {isScrolled && <div className="h-16"></div>}
           <Modal
             styleContainer="flex items-center select-none size-full justify-start"
             position="start"
@@ -302,20 +331,66 @@ function Header({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function Logo() {
+type LogoSize = 'small' | 'medium' | 'large';
+
+interface LogoProps {
+  size?: LogoSize;
+  className?: string;
+}
+
+export function Logo({
+  size = 'small',
+  className
+}: LogoProps) {
+
+  const brandName = "Marque"; 
+  const href = "/";
+  const sizeClasses = {
+    image: {
+      small:  "size-6 sm:size-8 md:size-10", // Plus petit
+      medium: "size-8 sm:size-10 md:size-12 lg:size-14", // Taille standard (comme avant)
+      large:  "size-10 sm:size-12 md:size-14 lg:size-16 xl:size-18", // Plus grand
+    },
+    text: {
+      small:  "hidden sm:block text-xs sm:text-sm md:text-base", // Texte plus petit, apparaît sur sm
+      medium: "hidden xs:block text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl", // Standard (comme avant)
+      large:  "hidden xs:block text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl", // Texte plus grand
+    },
+    gap: {
+      small:  "gap-1 sm:gap-1.5",
+      medium: "gap-1 sm:gap-1.5 md:gap-2",
+      large:  "gap-1.5 sm:gap-2 md:gap-2.5",
+    }
+  };
+
   return (
     <button
-      onClick={() => navigate("/")}
-      className="flex items-center gap-1.5 transition-all duration-300"
+      onClick={() => navigate(href)}
+      className={clsx(
+        "flex items-center",
+        sizeClasses.gap[size], // Applique le gap correspondant à la taille
+        "transition-all duration-300",
+        className // Classes externes pour le bouton
+      )}
     >
       <img
         src={logoUrl}
-        className="size-10 md:size-12 object-contain"
-        alt="logo"
+        className={clsx(
+          "object-contain flex-shrink-0",
+          sizeClasses.image[size] // Applique les classes de taille d'image
+        )}
+        alt={`${brandName} Logo`}
       />
-      <h1 className="hidden xs:block text-sm sm:text-base md:text-lg lg:text-2xl text-black font-primary transition-all duration-300">
-        Marque
+      <h1
+        className={clsx(
+          "font-primary text-black whitespace-nowrap",
+          "transition-all duration-300",
+          sizeClasses.text[size] // Applique les classes de visibilité/taille de texte
+        )}
+      >
+        {brandName}
       </h1>
     </button>
   );
 }
+export { Layout };

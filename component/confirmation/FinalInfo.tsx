@@ -28,7 +28,6 @@ const {user} = useAuthStore();
   const { mutate, isError, error, isSuccess , isPending} = useMutation({
     mutationFn: create_user_order,
     onSuccess: (data) => {
-      console.log('Commande créée avec succès:', data);
       createQueryClient.cancelQueries({
         queryKey: ['get_orders'],
       });

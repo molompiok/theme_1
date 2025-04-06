@@ -4,12 +4,12 @@ import { IoIosArrowRoundForward } from "react-icons/io";
 import { get_filters } from "../../api/products.api";
 import { usePageContext } from "../../renderer/usePageContext";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { Filter, FilterValue, VariantType } from "../../pages/type";
+import { Filter, filterOptions, FilterValue, VariantType } from "../../pages/type";
 import { useSelectedFiltersStore } from "../../store/filter";
 import Modal from "../modal/Modal";
 import gsap from "gsap";
-import clsx from "clsx";
 import { ColorFilterOption, IconFilterOption, IconTextFilterOption, TextFilterOption } from "./FilterOptions";
+import { useFiltersAndUrlSync } from "../../hook/useUrlFilterManager";
 
 
 export default function FilterPanel() {
@@ -63,7 +63,7 @@ export default function FilterPanel() {
           <h2 className="text-sm text-gray-900">Filtres</h2>
           <CiSliderHorizontal size={20} />
         </div>
-        <div className="hidden border-r border-gray-200 inset-shadow-green-800 shadow-md lg:block">
+        <div className="hidden lg:block">
           <FilterModal filters={filters} />
         </div>
       </div>
@@ -99,76 +99,11 @@ export default function FilterPanel() {
 function FilterModal({ filters }: { filters: Filter[] }) {
   const pageContext = usePageContext();
   const { urlPathname } = pageContext;
-  const { selectedFilters, setSelectedFilters, clearFilter, toggleFilter } =
-    useSelectedFiltersStore();
+  const { setSelectedFilters, selectedFilters , clearFilter, toggleFilter } = useSelectedFiltersStore();
+  useFiltersAndUrlSync(filters, urlPathname, setSelectedFilters, selectedFilters);
   const filterOptionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  const { filterIdToName, filterNameToId } = useMemo(() => {
-    const idToName: Record<string, string> = {};
-    const nameToId: Record<string, string> = {};
-    filters.forEach((filter) => {
-      const lowerCaseName = filter.name.toLowerCase();
-      idToName[filter.id] = lowerCaseName;
-      nameToId[lowerCaseName] = filter.id;
-    });
-    return { filterIdToName: idToName, filterNameToId: nameToId };
-  }, [filters]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const currentSearchParams = new URLSearchParams(window.location.search);
-    const urlFilters: Record<string, FilterValue[]> = {};
-
-    currentSearchParams.forEach((value, name) => {
-      const filterId = filterNameToId[name.toLowerCase()];
-      if (filterId) {
-        const filterValue = filters
-          .find((f) => f.id === filterId)
-          ?.values.find((v) => v.text === value);
-        if (filterValue) {
-          urlFilters[filterId] = urlFilters[filterId] || [];
-          if (!urlFilters[filterId].some((v) => v.text === value)) {
-            urlFilters[filterId].push(filterValue);
-          }
-        }
-      }
-    });
-
-    if (JSON.stringify(urlFilters) !== JSON.stringify(selectedFilters)) {
-      setSelectedFilters(urlFilters);
-    }
-  }, [filters, urlPathname, setSelectedFilters, filterNameToId]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const newSearchParams = new URLSearchParams();
-    Object.entries(selectedFilters).forEach(([filterId, values]) => {
-      if (values.length > 0) {
-        const filterName = filterIdToName[filterId];
-        if (filterName) {
-          values.forEach((value) => newSearchParams.append(filterName, value.text));
-        }
-      }
-    });
-
-    const queryString = newSearchParams.toString();
-    const newUrl = queryString ? `${urlPathname}?${queryString}` : urlPathname;
-    if (window.location.search.substring(1) !== queryString) {
-      window.history.replaceState(null, "", newUrl);
-    }
-
-    filterOptionRefs.current.forEach((ref, key) => {
-      const [filterId, valueText] = key.split("-");
-      const isSelected = selectedFilters[filterId]?.some((v) => v.text === valueText);
-      gsap.to(ref, {
-        scale: isSelected ? 1.05 : 1,
-        duration: 0.2,
-        ease: "power1.out",
-      });
-    });
-  }, [selectedFilters, urlPathname, filterIdToName, filters]);
 
   const activeFilters = useMemo(() =>
     Object.entries(selectedFilters).flatMap(([filterId, values]) =>
@@ -245,16 +180,16 @@ function FilterModal({ filters }: { filters: Filter[] }) {
     <div className="lg:mb-1 lg:pt-9 ">
       <div className="text-xl uppercase text-gray-900 pl-5 py-3">Filtres</div>
       <div className="p-4 mt-0 max-h-[85dvh] overflow-y-auto  scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 space-y-6">
-        {activeFilters.length > 0 && (
+        {activeFilters.filter(({ filterId }) => filterId !== "order_by").length > 0 && (
           <div className="border-b border-gray-200 pb-4">
             <button
               onClick={handleClearFilters}
               className="text-sm text-gray-600 mb-3 hover:text-black underline underline-offset-2 transition duration-200"
             >
-              Réinitialiser tous les filtres
+              Réinitialiser tous les filtress
             </button>
             <div className="flex flex-wrap gap-2">
-              {activeFilters.map(({ filterId, value }) => (
+              {activeFilters.filter(({ filterId }) => filterId !== "order_by").map(({ filterId, value }) => (
                 <div
                   key={`${filterId}-${value.text}`}
                   className="active-filter-tag flex items-center gap-1.5 border border-gray-300 bg-gray-50 hover:border-gray-400 text-black text-sm px-2.5 py-1 rounded-full"

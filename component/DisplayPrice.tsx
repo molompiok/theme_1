@@ -3,11 +3,13 @@ import type {  Feature, ProductClient } from "../pages/type";
 import { useproductFeatures } from "../store/features";
 import { deepEqual, formatPrice, getOptions, isEmpty } from "../utils";
 import useCart from "../hook/query/useCart";
+import clsx from "clsx";
 
 interface DisplayPriceProps {
   price: string | number;
   currency: string;
   barred_price?: string | number;
+  className?: string;
 }
 
 const safeParsePrice = (value: string | number | undefined | null): number => {
@@ -19,23 +21,24 @@ const safeParsePrice = (value: string | number | undefined | null): number => {
 const PriceWrapper: React.FC<{
   children: React.ReactNode;
   label: string;
-}> = ({ children, label }) => (
+  className?: string;
+}> = ({ children, label , className }) => (
   <div
     role="region"
     aria-label={label}
-    className="flex justify-start gap-2 items-center"
+    className={clsx("flex justify-start gap-2 items-center", className)}
   >
     {children}
   </div>
 );
 
 export const DisplayPrice: React.FC<DisplayPriceProps> = React.memo(
-  ({ price, currency, barred_price }) => {
+  ({ price, currency, barred_price ,className }) => {
     const displayPrice = safeParsePrice(price);
     const displayBarredPrice = safeParsePrice(barred_price);
 
     return (
-      <PriceWrapper label={`Prix en ${currency}`}>
+      <PriceWrapper label={`Prix en ${currency}`} className={className}>
         <span
           className="whitespace-nowrap font-bold text-clamp-xs text-gray-900"
           aria-label={`Prix actuel: ${formatPrice(displayPrice , currency)}`}
@@ -62,7 +65,7 @@ export const DisplayPrice: React.FC<DisplayPriceProps> = React.memo(
 );
 
 export const DisplayPriceDetail: React.FC<DisplayPriceProps> = React.memo(
-  ({ price, currency, barred_price }) => {
+  ({ price, currency, barred_price ,className }) => {
     const { selections ,lastValueId ,lastSelectedFeatureId } =
       useproductFeatures();
 
@@ -89,9 +92,9 @@ export const DisplayPriceDetail: React.FC<DisplayPriceProps> = React.memo(
     }, [price, selections, barred_price]);
 
     return (
-      <PriceWrapper label={`Prix détaillé en ${currency}`}>
+      <PriceWrapper label={`Prix détaillé en ${currency}`} className={className}>
         <span
-          className="whitespace-nowrap text-black font-medium"
+          className="whitespace-nowrap text-black text-lg font-medium"
           aria-label={`Prix total: ${formatPrice(totalPrice , currency)}`}
         >
           {formatPrice(totalPrice , currency)}
@@ -141,8 +144,7 @@ export const DisplayPriceItemCart: React.FC<DisplayPriceItemCartProps> =
   
           bindT = bindT || {};
           const isEqual = deepEqual(bind, bindT);
-          // console.log("🚀 ~ bindT:", bindT , product?.name)
-          console.log("🚀 ~ bindT = bindT :", {bindT , bind , isEqual})
+  
           return isEqual && product?.id == item?.product?.id
         }
       ),
@@ -164,7 +166,7 @@ export const DisplayPriceItemCart: React.FC<DisplayPriceItemCartProps> =
         <PriceWrapper label={`Prix du panier en ${currency}`}>
           {totalPrice > 0 ? (
             <span
-              className="whitespace-nowrap font-light text-clamp-base text-green-900"
+              className="whitespace-nowrap font-light text-lg text-green-900"
               aria-label={`Prix total du panier: ${formatPrice(
                 totalPrice , currency
               )}`}

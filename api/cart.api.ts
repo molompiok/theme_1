@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
 import { api, build_form_data, build_search_params } from ".";
-import { CartResponse, CartUpdateResponse, UserOrder } from "../pages/type";
+import { CartResponse, CartUpdateResponse, MetaPagination, OrderByType, OrderByTypeOrder, UserOrder } from "../pages/type";
 import { delay } from "../utils";
 
 export const update_cart = async (params: {
@@ -76,10 +76,11 @@ export const create_user_order = async (params: {
   }
 };
 
-export const get_orders = async ()=>{
-  await delay(3000);
+export const get_orders = async (params : { order_by : OrderByTypeOrder , page : number , limit : number })=>{
+  const searchParams = build_search_params(params);
+  await delay(1000);
   try {
-    const response = await api.get<UserOrder[]>('/get_orders');
+    const response = await api.get<{list : UserOrder[] , meta : MetaPagination}>('/get_orders?' + searchParams.toString());
     return response.data
   } catch (error) {
     console.error('Erreur lors de la récupération des commandes:', error);

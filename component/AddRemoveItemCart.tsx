@@ -23,7 +23,6 @@ export default function AddRemoveItemCart({
 }) {
 
   const { data: serverCart, isLoading: isCartLoading } = useCart()
-  // console.log("🚀 ~ serverCart:", serverCart?.cart.items)
   // let bind = item.realBind || item.bind;
         
   // if (item.realBind && item.bind) {
@@ -49,14 +48,11 @@ export default function AddRemoveItemCart({
   
           bindT = bindT || {};
           const isEqual = deepEqual(bind, bindT);
-          // console.log("🚀 ~ bindT:", bindT , product?.name)
-          console.log("🚀 ~ bindT = bindT :", {bindT , bind , isEqual})
           return isEqual && product?.id == item?.product?.id
         }
       ),
     [serverCart?.cart?.items, bind]
   );
-  console.log("🚀 ~ itemInPanier:", itemInPanier)
 
   const group_product =  getOptions({ bind: itemInPanier?.realBind || {}, features, product_id: product?.id || '' });
 

@@ -15,7 +15,7 @@ import { DisplayPrice } from "../DisplayPrice";
 
 export default function ProductCard({ product  }: { product: ProductClient }) {
   const handleGo = () => {
-    navigate(`/${formatSlug(product.slug)}`);
+    navigate(`/${formatSlug(product.slug)}`, { keepScrollPosition: false });
   };
 
   const { data: feature, status } = useQuery({
@@ -26,7 +26,7 @@ export default function ProductCard({ product  }: { product: ProductClient }) {
 
   const mediaList = getFirstFeatureWithView(feature || [])?.values[0].views || [];
   return (
-    <div
+    <article
       onClick={handleGo}
       className="group bg-white border border-gray-50 hover:border-gray-100  rounded-md
             transition-all duration-300 flex flex-col h-full cursor-pointer overflow-hidden max-w-md"
@@ -74,6 +74,6 @@ export default function ProductCard({ product  }: { product: ProductClient }) {
           />
         </div>
       </div>
-    </div>
+    </article>
   );
 }

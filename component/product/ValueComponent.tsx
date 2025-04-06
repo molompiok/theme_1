@@ -68,31 +68,31 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
   );
 
   const baseButtonStyles = clsx(
-    "relative transition-all duration-300 ease-out focus:outline-none shadow-lg",
-    "focus:ring-1 focus:ring-blue-200 focus:ring-offset-1",
+    "relative transition-all duration-300 mx-2 ease-out focus:outline-none shadow-lg",
+    "focus:ring-1 focus:ring-blue-300 focus:ring-offset-1",
     isDisabled && "opacity-50 cursor-not-allowed border-gray-300"
   );
 
   const typeStyles = clsx({
     // Color
-    "sm:size-10 size-8 rounded-full": isColor,
+    "sm:size-10 size-9 rounded-lg": isColor,
     // Icon
-    "size-10 flex items-center justify-center rounded-md": isIcon && !isIconText,
+    "md:size-10 size-9 overflow-hidden flex items-center justify-center rounded-md": isIcon && !isIconText,
     // IconText ou Text
-    "border text-clamp-xs flex items-center gap-2 px-3 py-1 rounded-md": isIconText || (!isColor && !isIcon),
+    "border text-clamp-xs flex items-center px-3  rounded-md": isIconText || (!isColor && !isIcon),
   });
 
   // Styles  (sélectionné ou non)
   const stateStyles = clsx({
     // Color
-    "border-1 border-blue-400 scale-105 shadow-sm": isColor && isSelected && !isDisabled,
+    "border border-black scale-125 shadow-xl": isColor && isSelected && !isDisabled,
     "hover:scale-105": isColor && !isSelected && !isDisabled,
     // Icon
-    "border-black": isIcon && isSelected && !isDisabled,
-    "hover:border-gray-500 border-gray-300": isIcon && !isSelected && !isDisabled,
+    "border-black scale-125 shadow-xl border border-black": isIcon && isSelected && !isDisabled,
+    "hover:border-gray-500 scale-95 border-gray-300": isIcon && !isSelected && !isDisabled,
     // Text ou IconText
-    "bg-black text-white border-black shadow-sm": !isColor && !isIcon && isSelected && !isDisabled,
-    "bg-white text-gray-800 hover:bg-gray-100 border-gray-300": !isColor && !isIcon && !isSelected && !isDisabled,
+    "bg-black text-white py-1 border-black shadow-sm": !isColor && !isIcon && isSelected && !isDisabled,
+    "bg-white text-gray-800 py-1 hover:bg-gray-100 border-gray-300": !isColor && !isIcon && !isSelected && !isDisabled,
   });
 
   const strikethroughStyles = clsx(
@@ -135,7 +135,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       <div className={strikethroughStyles} />
       {/* Icône seule pour "icon" */}
       {isIcon && !isIconText && icon && (
-        <img src={`${BASE_URL}${icon}`} alt={text} className="size-6 object-contain" />
+        <img src={`${BASE_URL}${icon}`} alt={text} className="size-11 object-contain" />
       )}
       {/* Icône + texte pour "icon_text" */}
       {isIconText && icon && (

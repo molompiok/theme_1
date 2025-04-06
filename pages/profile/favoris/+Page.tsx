@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BsHeartFill } from "react-icons/bs";
 import clsx from "clsx";
 import {
@@ -9,7 +9,7 @@ import {
 import { DisplayPrice } from "../../../component/DisplayPrice";
 import { Data } from "./+data";
 import { useData } from "../../../renderer/useData";
-import { HydrationBoundary, useQuery } from "@tanstack/react-query";
+import { HydrationBoundary, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   get_favorites,
   get_features_with_values,
@@ -17,9 +17,13 @@ import {
 import Loading from "../../../component/Loading";
 import FavoriteButton from "../../../component/FavoriteButton";
 import { ProductMedia } from "../../../component/ProductMedia";
-import { ProductFavorite } from "../../type";
+import { defaultOptions, defaultOptionsOrder, filterOptions, OrderByType, ProductFavorite } from "../../type";
 import { useAuthRedirect } from "../../../hook/authRedirect";
 import FilterPopover from "../../../component/FilterPopover";
+import { useFiltersAndUrlSync } from "../../../hook/useUrlFilterManager";
+import { usePageContext } from "../../../renderer/usePageContext";
+import { useSelectedFiltersStore } from "../../../store/filter";
+import Skeleton from "../../../component/Skeleton";
 
 const sortOptions = [
   "Plus récent",
@@ -31,66 +35,150 @@ const sortOptions = [
 
 export default function Page() {
   const { dehydratedState } = useData<Data>();
-  useAuthRedirect();
+  const pageContext = usePageContext();
+  const { urlPathname } = pageContext;
+  const { setSelectedFilters, selectedFilters , setFilter } = useSelectedFiltersStore();
+  useFiltersAndUrlSync([], urlPathname, setSelectedFilters, selectedFilters);
+
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <div className="bg-gradient-to-b from-gray-50 to-white min-h-dvh px-4 py-8 sm:py-12 font-primary">
-      <div className="max-w-5xl mx-auto w-full">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
-          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-0">
-            <BsHeartFill className="text-2xl sm:text-4xl text-red-500 animate-pulse" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Mes Favoris</h1>
+    <div className="min-h-dvh bg-white py-6 px-4 font-primary">
+      <div
+        className={`sticky inset-x-0 bg-white border-gray-200 transition-all w-full duration-300 py-5
+           ${isScrolled ? 'border-b mt-0 top-11 sm:top-15 z-40' : 'top-0 mt-7 z-40'
+          }`}
+        style={{
+          paddingLeft: isScrolled ? '1rem' : '0',
+          paddingRight: isScrolled ? '1rem' : '0',
+        }}
+      >
+
+        <div className="max-w-5xl mx-auto w-full">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-0">
+              <BsHeartFill className="text-2xl sm:text-4xl text-red-500 animate-pulse" />
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Mes Favoris</h1>
+            </div>
+            <FilterPopover
+              setFilter={setFilter}
+              selectedFilters={selectedFilters}
+              defaultOptions={[...defaultOptions]}
+            />
           </div>
-          <FilterPopover  />
         </div>
-        <HydrationBoundary state={dehydratedState}>
+        <HydrationBoundary  state={dehydratedState}>
+        <div className="max-w-5xl mx-auto">
           <ProductList />
+        </div>
         </HydrationBoundary>
       </div>
     </div>
   );
 }
 
-function ProductList() {
-  const {
-    data: favorites,
-    status,
-    error,
-  } = useQuery<ProductFavorite[], Error>({
-    queryKey: ["get_favorites"],
-    queryFn: () => get_favorites({}),
+const ProductList = () => {
+  const observerTarget = useRef<HTMLDivElement>(null);
+  const pageContext = usePageContext();
+  const { selectedFilters } = useSelectedFiltersStore();
+
+  const filterNameToId = useMemo(() => {
+    return filterOptions.reduce((acc, filter) => {
+      acc[filter.name.toLowerCase()] = filter.id;
+      return acc;
+    }, {} as Record<string, string>);
+  }, []);
+
+  const orderText = selectedFilters?.order_by?.[0]?.text || 'date_desc';
+  const order = (filterNameToId[orderText.toLowerCase()] as OrderByType) || 'date_desc';
+  const { order_by, ...restFilters } = selectedFilters;
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useInfiniteQuery({
+    queryKey: ['get_favorites_infinite', order],
+    queryFn: ({ pageParam = 1 }) => get_favorites({ limit: 12, page: pageParam, order_by: order }), 
+    getNextPageParam: (lastPage) => {
+      const currentPage = lastPage.meta.current_page;
+      const lastPageNum = lastPage.meta.last_page;
+      return currentPage < lastPageNum ? currentPage + 1 : undefined;
+    },
+    initialPageParam: 1,
   });
 
-  if (status === "pending") {
-    return <Loading />;
-  }
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
 
-  if (status === "error") {
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  const allFavorites = data?.pages.flatMap(page => page.list) || [];
+
+  if (status === 'pending') {
     return (
-      <div className="text-center py-12 sm:py-16 bg-white rounded-lg shadow">
-        <p className="text-gray-600 text-base sm:text-lg">
-          Erreur : {error.message}
-        </p>
+      <div className="flex justify-center items-center min-h-[50vh]" aria-live="polite">
+        <Skeleton type="product-list" count={8} />
       </div>
     );
   }
 
-  if (!favorites || favorites.length === 0) {
+  if (status === 'error') {
     return (
-      <div className="text-center py-12 sm:py-16 bg-white rounded-lg shadow">
-        <p className="text-gray-600 text-base sm:text-lg">Aucun favori pour le moment</p>
+      <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+        <p className="text-gray-600 text-lg">Une erreur est survenue</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-      {favorites.map((favorite) => (
-        <ProductCard key={favorite.id} favorite={favorite} />
-      ))}
+    <div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {allFavorites.map((favorite) => (
+          <ProductCard key={favorite.id} favorite={favorite} />
+        ))}
+      </div>
+
+      {!allFavorites.length ? (
+        <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+          <p className="text-gray-600 text-lg">Aucun favori pour le moment</p>
+        </div>
+      ) : (
+        <div ref={observerTarget} className="py-4 flex justify-center min-h-[50px]">
+          {isFetchingNextPage ? (
+            <Loading size="medium" className="my-16" />
+          ) : hasNextPage ? (
+            <span className="text-gray-500">Faites défiler pour charger plus...</span>
+          ) : (
+            <p className="text-gray-500 text-sm">Tous les favoris ont été chargés</p>
+          )}
+        </div>
+      )}
     </div>
   );
-}
+};
 
 function ProductCard({ favorite }: { favorite: ProductFavorite }) {
   const { data: feature, status } = useQuery({
@@ -105,7 +193,7 @@ function ProductCard({ favorite }: { favorite: ProductFavorite }) {
   return (
     <div className="group relative bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 w-full">
       <div className="relative aspect-square">
-        <FavoriteButton 
+        <FavoriteButton
           product_id={favorite.product_id}
         />
         {status === "pending" ? (
@@ -120,7 +208,7 @@ function ProductCard({ favorite }: { favorite: ProductFavorite }) {
           />
         )}
       </div>
-      
+
       <div className="p-2 sm:p-3">
         <h1 className="text-base/5 sm:text-lg/5 font-semibold text-gray-800 line-clamp-2 mb-1 sm:mb-2 hover:text-blue-600 transition-colors">
           {favorite.name}

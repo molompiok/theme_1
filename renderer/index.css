@@ -19,6 +19,14 @@
   font-display: swap;
 }
 
+@keyframes zoomInOut {
+  0%, 100% {
+    transform: scale(1); /* Taille normale au début et à la fin */
+  }
+  50% {
+    transform: scale(1.55); /* Zoomé à 115% au milieu (ajustez si besoin) */
+  }
+}
 
  @theme {
     /* font */
@@ -54,9 +62,12 @@
    --breakpoint-img-pdetail-breakpoint-5 : 420px;
    --breakpoint-img-pdetail-breakpoint-6 : 362px;
    --breakpoint-img-pdetail-breakpoint-7 : 300px;
-
    --breakpoint-cart-breakpoint-1: 400px;
    --breakpoint-cart-breakpoint-2: 330px;
+
+
+
+   --animate-zoomInOut: 'zoomInOut 0.2s ease-in-out infinite both';
   }
 
 
@@ -154,32 +165,62 @@
 /******************************PAGE ANIMATION ******************************/
 
 
-body {
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+.page-loader {
+  position: fixed; /* Pour le fixer par-dessus tout */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255); /* Fond semi-transparent (optionnel) */
+  z-index: 9999; /* Assure qu'il est au-dessus des autres contenus */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease-out, visibility 0.3s ease-out; /* Transition douce */
+  /* Empêche les clics à travers quand visible */
+  pointer-events: auto;
 }
 
-/* Style pendant la transition */
-body.page-is-transitioning {
+.page-loader.is-hidden {
   opacity: 0;
-  transform: translateY(10px);
+  visibility: hidden;
+   /* Permet les clics sur le contenu en dessous quand caché */
+  pointer-events: none;
 }
 
-/* Styles pour le contenu principal de la page */
-.page-content {
-  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+/* ----- Spinner CSS (Exemple simple) ----- */
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #09f; /* Choisis une couleur */
+  animation: spin 1s ease infinite;
 }
 
-/* Animations de base */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  100% {
+    transform: rotate(360deg);
   }
 }
+
+/***************************/
+
+@keyframes zoomInOut {
+  0%, 100% {
+    transform: scale(1); /* Taille normale au début et à la fin */
+  }
+  50% {
+    transform: scale(1.15); /* Zoomé à 115% au milieu (ajustez si besoin) */
+  }
+}
+
+/****************************/
 
 /* Classes pour les transitions de page */
 .page-enter {
@@ -259,3 +300,38 @@ body.page-is-transitioning {
 .react-select__option--is-focused {
   background-color: #f3f4f6; /* hover:bg-gray-100 */
 }
+
+
+/*** ReviewModal bounceOnce */***/ 
+
+
+.animate-bounceOnce {
+  animation: bounceOnce 0.3s ease-in-out;
+}
+@keyframes bounceOnce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1.1); }
+}
+
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-pulseOnce {
+  animation: pulseOnce 0.5s ease-in-out;
+}
+@keyframes pulseOnce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+
+
+

@@ -7,6 +7,7 @@ export type ProductType = {
   default_feature_id: string;
   price: number;
   barred_price: number;
+  rating: number;
   slug: string;
   currency: Currency;
   createdAt: Date;
@@ -35,7 +36,7 @@ export type ProductFeature = {
   featureId: string;
   currency: string;
   views: string[];
-  icon: string | null;
+  icon: string[];
   text: string | null;
   min: number | null;
   max: number | null;
@@ -91,22 +92,24 @@ export interface Category {
 
 export type MetaPagination = {
   total: number;
-  perPage: number;
-  currentPage: number;
-  lastPage: number;
-  firstPage: number;
-  firstPageUrl: string;
-  lastPageUrl: string;
-  nextPageUrl: null;
-  previousPageUrl: null;
+  per_page: number;
+  current_page: number;
+  last_page: number;
+  first_page: number;
+  first_page_url: string;
+  last_page_url: string;
+  next_page_url: null;
+  previous_page_url: null;
 };
 type ProductPick =
   | "barred_price"
   | "description"
   | "name"
   | "id"
+  | "categories_id"
   | "price"
   | "currency"
+  | "rating"
   | "default_feature_id"
   | "slug";
 
@@ -114,14 +117,25 @@ export type ProductClient = Pick<ProductType, ProductPick>;
 
 
 
-export const defaultOptions = [
-  "plus recent",
-  "moins recent",
-  "prix eleve",
-  "prix bas",
+// export const defaultOptions = [
+//   "plus recent",
+//   "moins recent",
+//   "prix eleve",
+//   "prix bas",
+// ] as const;
+// export type OrderByType = "date_asc" | "date_desc" | "price_asc" | "price_desc";
+// export type OptionType = (typeof defaultOptions)[number]
+export const filterOptions = [
+  { id: "date_desc", name: "plus recent" },
+  { id: "date_asc", name: "moins recent" },
+  { id: "price_desc", name: "prix eleve" },
+  { id: "price_asc", name: "prix bas" },
+  // { id: "page", name: "1" },
 ] as const;
-export type OrderByType = "date_asc" | "date_desc" | "price_asc" | "price_desc";
-export type OptionType = (typeof defaultOptions)[number]
+
+export type OrderByType = typeof filterOptions[number]['id'];
+export type OptionType = typeof filterOptions[number]['name'];
+export const defaultOptions: ReadonlyArray<OptionType> = filterOptions.map(opt => opt.name);
 
 export enum VariantType {
   ICON_TEXT = 'icon_text',
@@ -136,15 +150,26 @@ export enum VariantType {
   FILE = ' file',
 }
 
-export const filterOptions: {
-  id: OrderByType;
-  name: OptionType;
-}[] = [
+
+
+
+export const filterOptionsOrder = [
   { id: "date_desc", name: "plus recent" },
   { id: "date_asc", name: "moins recent" },
-  { id: "price_desc", name: "prix eleve" },
-  { id: "price_asc", name: "prix bas" },
-];
+  { id: "total_price_desc", name: "prix eleve" },
+  { id: "total_price_asc", name: "prix bas" },
+  {id : "delivery_date_asc", name: "livraison recentes" },
+  {id : "delivery_date_desc", name: "livraison anciennes" },
+] as const;
+
+export type OrderByTypeOrder = typeof filterOptionsOrder[number]['id'];
+export type OptionTypeOrder = typeof filterOptionsOrder[number]['name'];
+export const defaultOptionsOrder: ReadonlyArray<OptionTypeOrder> = filterOptionsOrder.map(opt => opt.name);
+
+
+
+
+
 
 export interface FilterValue {
   text: string;
@@ -304,4 +329,39 @@ export interface UserOrder {
   created_at: string; // ISO date string
   updated_at: string; // ISO date string
   items: UserOrderItem[];
+}
+
+export type User = {
+  id: string;
+  email: string;
+  full_name: string;
+  photo: string[];
+  addresses : Adresse[];
+  phone_numbers : PhoneNumber[]
+} | null;
+
+export type CommentType = {
+  id: string;
+  user_id: string;
+  product_id: string;
+  title: string;
+  description: string;
+  bind_name: Record<string, ProductFeature>;
+  rating: number;
+  views: string[];
+  created_at: string; 
+  updated_at: string;
+  user?: User;
+};
+
+export interface Detail {
+  id: string;
+  product_id: string;
+  title?: string;
+  description?: string;
+  view?: string[];
+  index: number;
+  type?: string;
+  createdAt: string;
+  updatedAt: string;
 }

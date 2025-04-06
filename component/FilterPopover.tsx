@@ -1,18 +1,17 @@
 import { Popover, PopoverTrigger, PopoverContent } from './Popover';
-import { useSelectedFiltersStore } from '../store/filter';
-import { defaultOptions, OptionType } from '../pages/type';
+import { FilterValue } from '../pages/type';
+// import { defaultOptions, OptionType } from '../pages/type';
 
 interface FilterPopoverProps {
   className?: string;
+  setFilter?: (key: string, value: FilterValue[]) => void;
+  selectedFilters?: Record<string, FilterValue[]>;
+  defaultOptions?: string[];
 }
 
-const FilterPopover = ({ className = '' }: FilterPopoverProps) => {
-  const setFilter = useSelectedFiltersStore(state => state.setFilter);
-  const selectedFilters = useSelectedFiltersStore(state => state.selectedFilters);
-
-
-  const handleClick = (option: OptionType) => {
-    setFilter('order_by', [option]);
+const FilterPopover = ({ className = '', setFilter, selectedFilters, defaultOptions = ['plus recent', 'moins recent', 'prix eleve', 'prix bas'] }: FilterPopoverProps) => {
+  const handleClick = (option: string) => {
+    setFilter?.('order_by', [{ text: option, key: option , icon : [] }]);
   };
 
   return (
@@ -22,7 +21,7 @@ const FilterPopover = ({ className = '' }: FilterPopoverProps) => {
           className={`flex items-center gap-2  px-2 py-1 text-sm lg:text-base border-gray-500 bg-white/90 border rounded-sm ${className}`}
         >
           <span className='text-gray-500'>Trier par</span>
-          <span className='text-gray-900'>{selectedFilters['order_by']}</span>
+          <span className='text-gray-900'>{selectedFilters?.['order_by']?.[0]?.text}</span>
         </button>
       </PopoverTrigger>
       <PopoverContent className="z-50 w-48 p-0">

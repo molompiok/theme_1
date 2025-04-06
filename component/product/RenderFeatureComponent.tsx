@@ -12,7 +12,6 @@ export const RenderFeatureComponent = ({
 }) => {
   if (feature.values.length === 0) return null;
 
-  console.log("🚀 ~ Rendering feature:", feature.id, feature.name, feature.type);
 
   const componentProps = {
     features: [feature],
@@ -22,7 +21,7 @@ export const RenderFeatureComponent = ({
 
   return (
     <div className="mb-4">
-      <h3 className="text-sm font-medium text-gray-700 flex items-center gap-1">
+      <h3 className="text-sm uppercase mb-1 font-medium text-gray-700 flex items-center gap-1">
         {feature.name}
         {feature.required && <span className="text-red-500">*</span>}
       </h3>

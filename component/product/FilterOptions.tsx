@@ -104,17 +104,17 @@ const IconFilterOption: React.FC<FilterOptionProps> = ({
   >
     <div
       className={clsx(
-        "size-8 flex items-center justify-center rounded border-2 transition-all duration-200",
+        "size-12 flex items-center justify-center rounded border transition-all duration-200",
         isSelected
           ? "border-black bg-black"
           : "border-gray-300 group-hover:border-gray-500"
       )}
     >
       {Array.isArray(value.icon) && value.icon.length > 0 ? (
-        <img src={BASE_URL + value.icon[0]} alt={value.text} className="size-8" />
+        <img src={BASE_URL + value.icon[0]} alt={value.text} className="size-10" />
       ) : (
         <svg
-          className={clsx("size-8", isSelected ? "text-white" : "text-gray-500 group-hover:text-gray-700")}
+          className={clsx("size-10", isSelected ? "text-white" : "text-gray-500 group-hover:text-gray-700")}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

@@ -298,8 +298,16 @@ export default function SideBarCategories() {
                   }}
                   className="flex underline-animation text-left sm:text-lg mt-4 transition-colors"
                 >
-                  Tout {currentCategory?.name}
-                  <IoMdLink size={20} className="ml-2 text-gray-700 inline" />
+                  {currentCategory.icon?.length > 0 && (
+                    <img
+                      src={BASE_URL + currentCategory.icon[0]}
+                      alt=""
+                      className="mr-2 size-8 rounded-md text-gray-600"
+                    />
+                  )}
+                  <div>
+                    Tout {currentCategory?.name}
+                  </div>
                 </LinkSideBar>
               ) : null}
 

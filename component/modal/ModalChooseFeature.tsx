@@ -22,6 +22,8 @@ import "swiper/css/pagination";
 import { RxReset } from "react-icons/rx";
 import { RenderFeatureComponent } from "../product/RenderFeatureComponent";
 import { getFirstFeatureWithView, getOptions } from "../../utils";
+import FavoriteButton from "../FavoriteButton";
+import { BiShareAlt } from "react-icons/bi";
 
 export default function ModalChooseFeature() {
   const {
@@ -67,15 +69,15 @@ export default function ModalChooseFeature() {
     return ["/img/default_img.gif"];
   }, [features, lastSelectedFeatureId, lastValueId]);
 
-  if (!product || !isVisible) return null;
 
   return (
     <Modal
-      styleContainer="fixed inset-0 flex items-center justify-center p-2 sm:p-1 bg-black/50"
+      styleContainer="flex items-end min-[500px]:items-center justify-center select-none size-full"
       zIndex={100}
       setHide={handleCloseModal}
+      animationName="translateBottom"
       isOpen={isVisible}
-      aria-label={`Sélectionner les options pour ${product.name}`}
+      aria-label={`Sélectionner les options pour ${product?.name || ""}`}
     >
       <div
         className={clsx(
@@ -83,27 +85,35 @@ export default function ModalChooseFeature() {
           "flex flex-col sm:flex-row max-h-[70dvh] min-h-[50dvh]"
         )}
       >
-        <div className="w-full sm:w-7/13 shrink-0 bg-gray-50 p-2 sm:p-4 relative">
-          <Swiper
-            modules={[A11y, Pagination]}
-            spaceBetween={5}
-            slidesPerView={1}
-            pagination={{ clickable: true, dynamicBullets: true }}
-            onSwiper={setSwiperInstance}
-            onSlideChange={(swiper) => setImgIndex(swiper.realIndex)}
-            className="rounded-md overflow-hidden"
-          >
-            {mediaViews.map((view, index) => (
-              <SwiperSlide key={index}>
-                <ProductMedia
-                  mediaList={[view]}
-                  productName={product.name}
-                  className="w-full aspect-[7/5] min-[500px]:aspect-[8/3] sm:aspect-square object-contain bg-white"
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-          <div className="hidden gap-1 sm:flex  justify-center mt-1 overflow-x-auto scrollbar-hidden">
+       <div className="w-full sm:w-7/13 shrink-0 bg-gray-50 p-2 sm:p-4 relative">
+          <FavoriteButton product_id={product?.id || ""} />
+          <BiShareAlt onClick={() => {}} className="text-gray-500 text-2xl absolute z-50 left-2 top-2 cursor-pointer" />
+          {/* Conteneur principal pour le Swiper avec une taille fixe */}
+          <div className="w-full h-auto">
+            <Swiper
+              modules={[A11y, Pagination]}
+              spaceBetween={5}
+              slidesPerView={1}
+              pagination={{ clickable: true, dynamicBullets: true }}
+              onSwiper={setSwiperInstance}
+              onSlideChange={(swiper) => setImgIndex(swiper.realIndex)}
+              className="rounded-md overflow-hidden w-full"
+            >
+              {mediaViews.map((view, index) => (
+                <SwiperSlide key={index} className="w-full">
+                  <div className="w-full aspect-square flex items-center justify-center bg-white">
+                    <ProductMedia
+                      mediaList={[view]}
+                      productName={product?.name || ""}
+                      showFullscreen={true}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+          <div className="hidden gap-1 sm:flex justify-center mt-1 overflow-x-auto scrollbar-hidden">
             {mediaViews.map((view, index) => (
               <button
                 key={index}
@@ -118,7 +128,7 @@ export default function ModalChooseFeature() {
               >
                 <ProductMedia
                   mediaList={[view]}
-                  productName={product.name}
+                  productName={product?.name || ""}
                   className="w-full h-full object-cover rounded-md"
                 />
               </button>
@@ -130,12 +140,12 @@ export default function ModalChooseFeature() {
           <div className="flex items-center justify-between p-2 border-b border-gray-200 shrink-0">
             <div>
               <h1 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-1">
-                {product.name}
+                {product?.name || ""}
               </h1>
               <DisplayPriceDetail
-                currency={product.currency}
-                price={product.price}
-                barred_price={product.barred_price}
+                currency={product?.currency || ""}
+                price={product?.price || 0}
+                barred_price={product?.barred_price || 0}
               />
             </div>
             <button
@@ -168,7 +178,7 @@ export default function ModalChooseFeature() {
               <div className="space-y-1">
                 {features.map((feature) => (
                   <div key={feature.id || feature.name} className="space-y-1">
-                    <RenderFeatureComponent features={features} feature={feature} product_id={product.id} />
+                    <RenderFeatureComponent features={features} feature={feature} product_id={product?.id || ""} />
                   </div>
                 ))}
               </div>
@@ -178,16 +188,6 @@ export default function ModalChooseFeature() {
           <div className="p-2 border-t border-gray-200 shrink-0 bg-gray-50">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
               <ButtonValidCart features={features} product={product} />
-              {/* <button
-                onClick={clear}
-                className={clsx(
-                  "flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800 transition-colors",
-                  selectedFeatures.size === 0 && "opacity-50 pointer-events-none"
-                )}
-              >
-                <RxReset size={16} />
-                Réinitialiser
-              </button> */}
             </div>
             <button
               onClick={handleCloseModal}
@@ -196,30 +196,8 @@ export default function ModalChooseFeature() {
               Continuer les achats
             </button>
           </div>
-        </div>
+        </div> 
       </div>
     </Modal>
   );
 }
-
-// const renderFeatureComponent = (feature: Feature, product_id: string) => {
-//   const componentProps = {
-//     values: feature.values,
-//     feature_name: feature.name,
-//     feature_required: feature.required,
-//     product_id,
-//   };
-
-//   switch (feature.type) {
-//     case "color":
-//       return <ColorComponent {...componentProps} />;
-//     case "text":
-//       return <TextComponent {...componentProps} />;
-//     default:
-//       return (
-//         <p className="text-sm text-gray-500 italic">
-//           Type de caractéristique non pris en charge
-//         </p>
-//       );
-//   }
-// };

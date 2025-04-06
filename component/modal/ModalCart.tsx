@@ -1,36 +1,34 @@
-import { BsCartX, BsHandbag, BsTrash, BsX } from "react-icons/bs";
+import { BsCartX, BsHandbag, BsTrash, BsX, BsArrowRight } from "react-icons/bs";
 import { BASE_URL } from "../../api";
 import {
   CartItem,
   CartResponse,
   GroupProductType,
   ProductClient,
+  ProductFeature,
 } from "../../pages/type";
 import AddRemoveItemCart from "./../AddRemoveItemCart";
 import { CommandButton } from "./../Button";
 import Modal from "./Modal";
 import { get_features_with_values } from "../../api/products.api";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Loading from "./../Loading";
 import { DisplayPriceItemCart } from "./../DisplayPrice";
 import { ProductMedia } from "../ProductMedia";
-import { useproductFeatures } from "../../store/features";
 import { navigate } from "vike/client/router";
-import { formatPrice, getFirstFeatureWithView, getOptions, isEmpty } from "../../utils";
+import { formatPrice, getOptions, isEmpty } from "../../utils";
 import useCart from "../../hook/query/useCart";
 import { useUpdateCart } from "../../hook/query/useUpdateCart";
 import { useModalCart } from "../../store/cart";
-import { useMemo } from "react";
-import { features } from "process";
+import { useMemo, useState } from "react";
 import { useMediaViews } from "../../hook/query/useMediaViews";
-
-
+import BindTags from "../product/BindTags";
+import { MarkdownViewer } from "../MarkdownViewer";
 
 function ItemCart({ product, bind }: { product: ProductClient; bind: Record<string, string> }) {
   const isOpen = useModalCart((state) => state.showCart);
-
   const removeMutation = useUpdateCart();
-  const selections = useproductFeatures((state) => state.selections);
+  const [isHovering, setIsHovering] = useState(false);
 
   const { data: features, isPending } = useQuery({
     queryKey: ["get_features_with_values", product?.id],
@@ -41,110 +39,114 @@ function ItemCart({ product, bind }: { product: ProductClient; bind: Record<stri
     enabled: !!product?.id && isOpen,
   });
 
-  
-  const lastSelectedFeatureId = useproductFeatures((state) => state.lastSelectedFeatureId);
-  const lastValueId = useproductFeatures((state) => state.lastValueId);
-
-  // const bind = useMemo(() => {
-
-  //   const productSelections = selections?.get(product?.id);
-  //   if (!productSelections) return {};
-  //   const bind: Record<string, string> = {};
-  //   productSelections.forEach((value, key) => {
-  //     bind[key] = value.valueFeature;
-  //   });
-  //   return bind;
-
-  // }, [selections, product?.id]);
-
-
-
-
-  // const mediaViews = useMemo(() => {
-  //   if (!features?.length) return ["/img/default_img.gif"];
-  
-  //   // const selectedViews = features?.find(f => f.id === lastSelectedFeatureId)?.values.find(v => v.id === lastValueId)?.views || [];
-  //   // if (selectedViews.length > 0) {
-  //   //   return selectedViews;
-  //   // }
-  
-  //   const defaultFeature = getFirstFeatureWithView(features);
-  //   const defaultViews = defaultFeature?.values[0]?.views || [];
-  //   if (defaultViews.length > 0) {
-  //     return defaultViews;
-  //   }
-  
-  //   return ["/img/default_img.gif"];
-  // }, [features]);
-
-
   const options = useMemo(() => getOptions({ bind, features: features || [], product_id: product.id }), [bind, features, product.id]);
-
-  // console.log("🚀 ~ ItemCart ~ options:", options)
-
-  const { isPendingFeatures , mediaViews } = useMediaViews({ bindNames : options.bindNames ,product_id :  product.id})
+  const { isPendingFeatures, mediaViews } = useMediaViews({ bindNames: options.bindNames, product_id: product.id });
 
   if (isPending) {
-    return <Loading />;
+    return <div className="flex justify-center py-6"><Loading /></div>;
   }
 
-
   return (
-    <div className="flex flex-col items-center p-2">
-      <div className="flex gap-1 justify-center w-full">
-        <ProductMedia
-          mediaList={mediaViews}
-          productName={product.name}
-          className="aspect-square size-[80px] md:size-[100px]"
-        />
-        <div className="relative flex-1">
-          <BsTrash
-            className="text-lg absolute top-0 -right-4 text-gray-400 hover:text-gray-600 cursor-pointer z-10"
-            onClick={(e) => {
-              e.stopPropagation();
-              removeMutation.mutate({
-                product_id: product.id,
-                bind,
-                mode: "clear",
-              });
-            }}
-            size={20}
+    <div 
+      className="flex flex-col p-3 rounded-lg transition-all duration-200 hover:bg-gray-50"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      <div className="flex items-center gap-3 w-full">
+        {/* Conteneur avec une taille fixe pour l'image */}
+        <div className="w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-md overflow-hidden bg-white border border-gray-100">
+          <ProductMedia
+            mediaList={mediaViews}
+            productName={product.name}
+            className="w-full h-full object-contain"
           />
-          <h1 className="text-base md:text-lg mr-2.5 font-bold line-clamp-1">
-            {product.name}
-          </h1>
-          <div className="flex flex-wrap items-center mb-1 gap-1">
-            {Array.from(Object.entries(options?.bindNames || {})).map(([key, value], i) => (
+        </div>
+        <div className="relative flex flex-col justify-between flex-grow">
+          <div>
+            <div className="flex justify-between items-start">
+              <h1 className="text-base md:text-lg font-bold line-clamp-1 pr-6">
+                {product.name}
+              </h1>
+              <button 
+                className={`p-2 rounded-full transition-all duration-200 ${isHovering ? 'bg-red-50 text-red-500' : 'text-gray-400'}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeMutation.mutate({
+                    product_id: product.id,
+                    bind,
+                    mode: "clear",
+                  });
+                }}
+                aria-label="Supprimer du panier"
+              >
+                <BsTrash size={16} />
+              </button>
+            </div>
+            <BindTags tags={options?.bindNames as Record<string, ProductFeature> || {}} />
+            
+            {/* {Object.keys(options?.bindNames || {}).length > 0 && (
+              <div className="flex flex-wrap items-center mt-1 mb-2 gap-1.5">
+                {Array.from(Object.entries(options?.bindNames || {})).map(([key, value], i) => (
                   <span
                     key={`${key}-${i}`}
-                    className="text-[.68rem] rotating-border text-gray-100 border border-gray-300 px-2 py-0.5 rounded-[5px]"
+                    className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full"
                   >
                     {typeof value === 'string' ? value : value?.text || value?.key || 'N/A'}
                   </span>
                 ))}
+              </div>
+            )} */}
+            <MarkdownViewer markdown={product.description.substring(0, 100).trim().split('\n').slice(0, 5).join('\n') || ''} />
+            {
+            // product.description && (
+            //   <p className="text-xs md:text-sm max-w-[300px] overflow-y-auto text-gray-600 line-clamp-2">
+            //     {product.description}
+            //   </p>
+            // )
+            }
           </div>
-          <p className="text-xs/4 md:text-sm/4 mb-2 font-light line-clamp-2">
-            {product.description || "Aucune description"}
-          </p>
         </div>
       </div>
-      <div className="w-full flex justify-between gap-2">
+      
+      <div className="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
         <AddRemoveItemCart
           product={product}
           bind={options.bind} 
-          features={features ??  []}
+          features={features ?? []}
           inList={false}
         />
-        <DisplayPriceItemCart  product={product} bind={bind} features={features ??  []} />
+        <DisplayPriceItemCart product={product} bind={bind} features={features ?? []} />
       </div>
     </div>
   );
 }
 
 function ListItemCart({ cart }: { cart: CartItem[] }) {
+  const toggleCart = useModalCart((state) => state.toggleCart);
+
+  if (!cart || cart.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-4">
+        <BsCartX size={80} className="text-gray-300 mb-4" />
+        <p className="text-xl font-medium text-gray-700 mb-2">
+          Votre panier est vide
+        </p>
+        <p className="text-sm text-gray-500 text-center mb-6">
+          Ajoutez des articles à votre panier pour pouvoir passer commande
+        </p>
+        <button 
+          onClick={() => toggleCart(false)}
+          className="flex items-center gap-2 bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors"
+        >
+          Continuer mes achats
+        </button>
+      </div>
+    );
+  }
+  
   return (
-    <div className="flex flex-col divide-y-2 divide-blue-100 max-h-[60vh] overflow-y-auto scroll-smooth scrollbar-thin pr-2">
-      {cart?.map((item, i) => {
+    <div className="flex flex-col divide-y divide-gray-200 overflow-y-auto scroll-smooth scrollbar-thin pr-1">
+      {cart.map((item, i) => {
         let bind = item.realBind || item.bind;
         
         if (item.realBind && item.bind) { 
@@ -153,7 +155,6 @@ function ListItemCart({ cart }: { cart: CartItem[] }) {
         }
 
         bind = typeof bind === 'string' ? JSON.parse(bind) : bind;
-
         bind = bind || {};
 
         return <ItemCart key={i} product={item.product} bind={bind} />;
@@ -161,17 +162,24 @@ function ListItemCart({ cart }: { cart: CartItem[] }) {
     </div>
   );
 }
+
 export default function ModalCart() {
   const showCart = useModalCart((state) => state.showCart);
   const toggleCart = useModalCart((state) => state.toggleCart);
-  const { data: cart } = useCart();
+  const { data: cart, isLoading ,isPending  } = useCart();
 
   const totalItems = cart?.cart?.items?.reduce((acc: number, item) => acc + item.quantity, 0) || 0;
   const totalPrice = cart?.total || 0;
+  const hasItems = (cart?.cart?.items?.length ?? 0) > 0;
 
   const handleModalCartClose = () => {
     toggleCart(false);
     document.body.style.overflow = "auto";
+  };
+
+  const handleCheckout = () => {
+    handleModalCartClose();
+    navigate("/confirmation");
   };
 
   return (
@@ -183,53 +191,73 @@ export default function ModalCart() {
       isOpen={showCart}
       animationName="translateRight"
     >
-      <div className="font-primary relative bg-white min-h-dvh w-full overflow-auto sm:w-[400px] md:w-[450px] lg:w-[550px] p-4 pt-12">
-        <div className="absolute top-2 right-2">
-          <BsX
-            size={40}
-            className="cursor-pointer text-black z-50"
+      <div className="font-primary relative bg-white flex flex-col h-dvh w-full sm:w-[400px] md:w-[450px] lg:w-[500px]">
+        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="relative">
+            <BsHandbag size={20} className="text-gray-600" />
+            {totalItems > 0 && (
+              <span className="absolute -top-3 -right-5 text-xs  bg-gray-500 text-white  font-medium px-2 p-0.5 rounded-full">
+                {totalItems}
+              </span>
+            )}
+            </div>
+            <span className="ml-5 text-lg font-semibold">Mon panier</span>
+        
+          </div>
+          <button
+            className="rounded-full p-1 hover:bg-gray-100 transition-colors"
             onClick={handleModalCartClose}
             aria-label="Fermer le panier"
-          />
+          >
+            <BsX size={30} className="text-gray-700" />
+          </button>
         </div>
-        <div className="flex flex-col justify-around overflow-auto">
-          <div className="absolute text-black top-0 pt-5 pb-0 pl-4 border-b border-b-gray-300 flex items-center gap-2">
-            <BsHandbag size={20} />
-            <span className="text-lg md:text-xl font-semibold">Mon panier</span>
+        
+        {isPending || isLoading ? (
+          <div className="flex-1 flex justify-center items-center">
+            <Loading />
           </div>
-
-          <ListItemCart cart={cart?.cart.items || []} />
-          {cart?.cart?.items?.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-4 mt-10">
-              <BsCartX size={70} className="text-gray-400 animate-pulse" />
-              <p className="text-lg font-medium text-gray-600">
-                Votre panier est vide
-              </p>
-            </div>
-          ) : (   
-            <div className="flex flex-col gap-2 my-5 overflow-auto">
-              <div className="flex justify-between">
-                <span className="font-light">
-                  Sous-total ({totalItems} articles)
-                </span>
-                <span className="font-light">
-                  {formatPrice(totalPrice , cart?.cart?.items?.[0]?.product?.currency)} 
-                </span>
+        ) : (
+          <div className="flex-1 overflow-auto">
+            <ListItemCart cart={cart?.cart?.items || []} />
+          </div>
+        )}
+        
+        {hasItems && (
+          <div className="border-t border-gray-200 bg-white p-4 pt-3">
+            <div className="space-y-3 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Sous-total</span>
+                <span>{formatPrice(totalPrice, cart?.cart?.items?.[0]?.product?.currency)}</span>
               </div>
-              <span className="text-xs italic text-gray-600">
-                Coût de livraison sera appliqué à la prochaine étape
-              </span>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Livraison</span>
+                <span className="text-gray-600 italic">Calculé à l'étape suivante</span>
+              </div>
+              <div className="flex justify-between font-semibold text-lg pt-2 border-t border-gray-100">
+                <span>Total</span>
+                <span>{formatPrice(totalPrice, cart?.cart?.items?.[0]?.product?.currency)}</span>
+              </div>
             </div>
-          )}
-
-          <CommandButton
-            text="PROCEDER AU PAIEMENT"
-            callBack={() => {
-              handleModalCartClose();
-              navigate("/confirmation");
-            }}
-          />
-        </div>
+            
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleCheckout}
+                className="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+              >
+                Procéder au paiement
+                <BsArrowRight size={18} />
+              </button>
+              <button
+                onClick={handleModalCartClose}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-medium transition-colors"
+              >
+                Continuer mes achats
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </Modal>
   );

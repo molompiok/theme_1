@@ -4,7 +4,7 @@ import { api, BASE_URL } from "../api";
 import { toast } from "react-hot-toast";
 import { BsCheckCircle, BsXCircle } from "react-icons/bs";
 import { BiLogOut } from "react-icons/bi";
-import { Adresse, PhoneNumber } from "../pages/type";
+import { Adresse, PhoneNumber, User } from "../pages/type";
 
 
 interface AxiosError extends Error {
@@ -15,14 +15,7 @@ interface AxiosError extends Error {
 }
 
 
-type User = {
-  id: string;
-  email: string;
-  full_name: string;
-  photo: string[];
-  addresses : Adresse[];
-  phone_numbers : PhoneNumber[]
-} | null;
+
 
 interface AuthState {
   user: User;

@@ -3,32 +3,32 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ColorComponent } from "../../../component/FeatureDetailProduct/ColorComponent";
-import { TextComponent } from "../../../component/FeatureDetailProduct/TextComponent";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useproductFeatures } from "../../../store/features";
 import ReviewsStars from "../../../component/comment/ReviewsStars";
 import { ButtonValidCart } from "../../../component/Button";
-import { useModalCart } from "../../../store/cart";
 import clsx from "clsx";
 import { ProductMedia } from "../../../component/ProductMedia";
 import { Helmet } from "react-helmet";
 import { BASE_URL } from "../../../api";
-import { HydrationBoundary, useQuery } from "@tanstack/react-query";
+import { HydrationBoundary, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useData } from "../../../renderer/useData";
 import {
+  get_details,
   get_features_with_values,
   get_products,
 } from "../../../api/products.api";
 import Loading from "../../../component/Loading";
-import { CommentsProduct } from "../../../S1_data";
 import FavoriteButton from "../../../component/FavoriteButton";
 import type { Data } from "./+data";
 import { Feature, ProductClient } from "../../type";
 import gsap from "gsap";
 import { RenderFeatureComponent } from "../../../component/product/RenderFeatureComponent";
 import { getFirstFeatureWithView } from "../../../utils";
-import { markdownToPlainText, MarkdownViewer } from "../../../component/MarkdownViewer";
+import { MarkdownViewer } from "../../../component/MarkdownViewer";
+import { get_comments } from "../../../api/comment.api";
+import BindTags from "../../../component/product/BindTags";
+import { Breadcrumb } from "../../../component/product/BreadCrumb";
 
 export default function Page() {
   const { dehydratedState } = useData<Data>();
@@ -112,18 +112,31 @@ function ProductPageContent() {
           content={BASE_URL + features?.[0]?.values[0]?.views[0]}
         />
       </Helmet>
-      <main className="container font-primary mx-auto px-4 sm:px-6 lg:px-8">
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-12">
-          <ProductGallery
-            features={features}
-            product={product}
-            imgIndex={imgIndex}
-            setImgIndex={setImgIndex}
-            setSwiperInstance={setSwiperInstance}
-            handleImageClick={handleImageClick}
-          />
-          <ProductDetails product={product} features={features} />
+      <main className="container font-primary mx-auto  sm:px-6 lg:px-8 flex flex-col min-h-screen">
+        <section className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2 mb-12">
+          <div className="md:sticky md:top-14 md:self-start pt-5 px-4">
+            <InfoProduct product={product} className="md:hidden block" />
+            <ProductGallery
+              features={features}
+              product={product}
+              imgIndex={imgIndex}
+              setImgIndex={setImgIndex}
+              setSwiperInstance={setSwiperInstance}
+              handleImageClick={handleImageClick}
+            />
+            <div className="mt-4 md:hidden block">
+              <DisplayPriceDetail
+                currency={product.currency}
+                price={product.price}
+                barred_price={product.barred_price}
+              />
+            </div>
+          </div>
+          <div className="h-auto px-4">
+            <ProductDetails product={product} features={features} />
+          </div>
         </section>
+        <DetailsSection product_id={product.id} />
         <FAQSection expandedFAQ={expandedFAQ} setExpandedFAQ={setExpandedFAQ} />
         <ReviewsSection product={product} />
       </main>
@@ -148,30 +161,37 @@ function ProductGallery({
   handleImageClick,
   setImgIndex,
 }: ProductGalleryProps) {
-  const {lastSelectedFeatureId ,lastValueId} = useproductFeatures();
-
+  const { lastSelectedFeatureId, lastValueId } = useproductFeatures();
+  const previousViewsRef = useRef(getFirstFeatureWithView(features ?? [])?.values[0]?.views || []);
 
   const mediaViews = useMemo(() => {
-    if (!features?.length) return ["/img/default_img.gif"];
-  
+    if (!features?.length) return previousViewsRef.current;
+
     const selectedViews = features.find(f => f.id === lastSelectedFeatureId)?.values.find(v => v.id === lastValueId)?.views || [];
+
     if (selectedViews.length > 0) {
+      previousViewsRef.current = selectedViews;
       return selectedViews;
     }
-  
+
+    if (selectedViews.length === 0) {
+      return previousViewsRef.current;
+    }
+
     const defaultFeature = getFirstFeatureWithView(features);
     const defaultViews = defaultFeature?.values[0]?.views || [];
     if (defaultViews.length > 0) {
+      previousViewsRef.current = defaultViews;
       return defaultViews;
     }
-  
-    return ["/img/default_img.gif"];
+
+    return previousViewsRef.current;
   }, [features, lastSelectedFeatureId, lastValueId]);
 
   return (
-    <div className="relative flex gap-2">
+    <div className="flex gap-2">
       <div className=" min-[600px]:flex hidden flex-col gap-2 overflow-x-auto pb-2 scrollbar-thin">
-        {mediaViews.map((view, index) => (
+        {mediaViews?.map((view, index) => (
           <button
             key={index}
             className={clsx("p-1 border-2 rounded-md flex-shrink-0", {
@@ -183,12 +203,13 @@ function ProductGallery({
             <ProductMedia
               mediaList={[view]}
               productName={product.name}
+              shouldHoverVideo={false}
               className="size-11 md:size-14 object-cover"
             />
           </button>
         ))}
       </div>
-      <div className=" min-[600px]:size-[80%] size-full relative">
+      <div className="min-[600px]:size-[80%] size-full relative">
         <FavoriteButton product_id={product.id} />
         <Swiper
           modules={[A11y, Pagination]}
@@ -202,7 +223,9 @@ function ProductGallery({
           {mediaViews.map((view, index) => (
             <SwiperSlide key={index}>
               <ProductMedia
-                mediaList={[view]}
+                mediaList={[...new Set([view, ...mediaViews])]}
+                showFullscreen={true}
+                shouldHoverVideo={false}
                 productName={product.name}
                 className="w-full aspect-square object-contain"
               />
@@ -219,20 +242,12 @@ interface ProductDetailsProps {
   features: Feature[] | undefined;
 }
 
+
 function ProductDetails({ product, features }: ProductDetailsProps) {
   return (
-    <div className="space-y-3">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold">{product.name}</h1>
-        {/* <MarkdownViewer markdown={product.description} /> */}
-        <p className="text-gray-600 text-base/5 mt-2">{(product.description)}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <ReviewsStars note={4.6} size={20} style="text-orange-500" />
-        <span className="text-sm text-gray-600">(280 avis)</span>
-      </div>
-      <DisplayPriceDetail currency={product.currency} price={product.price} />
-      <div className="space-y-3 max-h-[50dvh] overflow-y-auto scrollbar-thin">
+    <div className="">
+      <InfoProduct product={product} className="md:block hidden " />
+      <div className="space-y-3 max-h-[50dvh] mt-7 overflow-y-auto scrollbar-thin">
         {features?.map((feature) => (
           <div key={feature.id || feature.name} className="space-y-0">
             <RenderFeatureComponent features={features} feature={feature} product_id={product.id} />
@@ -243,54 +258,264 @@ function ProductDetails({ product, features }: ProductDetailsProps) {
     </div>
   );
 }
+interface InfoProductProps {
+  product: ProductClient;
+  className?: string;
+}
+function InfoProduct({ product, className }: InfoProductProps) {
+  const { categories_id, name, description, currency, price } = product;
+
+  return (
+    <div className={clsx(className, 'space-y-4')}>
+      <Breadcrumb categoryId={categories_id[0]} />
+      <div className="space-y-2">
+        <h1 className="text-2xl md:text-3xl font-bold md:mb-1">{name}</h1>
+        <div className="flex items-center gap-2">
+          <ReviewsStars
+            note={4.6}
+            size={20}
+            style="text-orange-500"
+          />
+          <span className="text-sm text-gray-600">(280 avis)</span>
+        </div>
+        <div className="max-h-[50dvh] my-4 overflow-y-auto scrollbar-thin">
+          <MarkdownViewer markdown={description} />
+        </div>
+        <DisplayPriceDetail
+          currency={product.currency}
+          price={product.price}
+          barred_price={product.barred_price}
+          className="md:block hidden"
+        />
+      </div>
+    </div>
+  );
+}
+
+
 
 function ReviewsSection({ product }: { product: ProductClient }) {
-  return (
-    <section className="py-12 border-t">
-      <h2 className="text-4xl font-semibold text-center mb-6">
-        Avis sur{" "}
-        <span className="underline underline-offset-4">{product.name}</span>
-      </h2>
-      <div className="flex justify-center items-center gap-4 mb-8">
-        <span className="text-3xl font-bold">4.3</span>
-        <div>
-          <ReviewsStars note={4.6} size={24} style="text-orange-500" />
-          <span className="text-sm text-gray-600">280 avis</span>
+  const [filterMedia, setFilterMedia] = useState(false);
+  const [expandedComment, setExpandedComment] = useState<number | null>(null);
+
+  const {
+    data,
+    isLoading,
+    error,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    isError
+  } = useInfiniteQuery({
+    queryKey: ['comments', product.id],
+    queryFn: ({ pageParam = 1 }) => get_comments({
+      product_id: product.id,
+      page: pageParam,
+      limit: 2,
+      with_users: true
+    }),
+    getNextPageParam: (lastPage) => {
+      const currentPage = lastPage?.meta?.current_page;
+      const lastPageNum = lastPage?.meta?.last_page;
+      return currentPage && lastPageNum && currentPage < lastPageNum
+        ? currentPage + 1
+        : undefined;
+    },
+    initialPageParam: 1,
+    select: (data) => ({
+      list: data.pages.flatMap(page => page.list || []),
+      meta: data.pages[0]?.meta,
+    }),
+    retry: 3,
+    staleTime: 5 * 60 * 1000
+  });
+
+  const comments = useMemo(() => data?.list || [], [data?.list]);
+
+
+  const filteredComments = useMemo(() =>
+    filterMedia
+      ? comments.filter(comment => comment.views?.length > 0)
+      : comments,
+    [comments, filterMedia]
+  );
+
+  const formatDate = useCallback((dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }, []);
+
+  const toggleExpandedComment = useCallback((index: number) => {
+    setExpandedComment(prev => prev === index ? null : index);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <section className="py-8 md:py-12 border-t">
+        <div className="container mx-auto px-4 max-w-6xl text-center py-12">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-gray-500 border-r-transparent" />
+          <p className="mt-2 text-gray-600">Chargement des avis...</p>
         </div>
-      </div>
-      <div className="flex justify-end mb-4">
-        <button className="text-sm text-gray-600 hover:text-gray-800">
-          Filtrer par: Avec Media
-        </button>
-      </div>
-      <div className="space-y-6 divide-y">
-        {CommentsProduct.map((comment, index) => (
-          <article
-            key={index}
-            className="pt-6 grid md:grid-cols-[2fr_1fr] gap-6"
-          >
-            <div className="space-y-2">
-              <ReviewsStars
-                note={comment.note}
-                size={18}
-                style="text-orange-500"
-              />
-              <h3 className="font-semibold">{comment.title}</h3>
-              <p className="text-gray-600">{comment.description}</p>
+      </section>
+    );
+  }
+
+  if (isError) {
+    return (
+      <section className="py-8 md:py-12 border-t">
+        <div className="container mx-auto px-4 max-w-6xl text-center py-12 text-red-500">
+          Une erreur s'est produite : {error instanceof Error ? error.message : 'Erreur inconnue'}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-8 md:py-12 border-t">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-center mb-4 md:mb-6">
+          Avis sur{" "}
+          <span className="underline underline-offset-4 text-orange-500 decoration-orange-300">
+            {product.name}
+          </span>
+        </h2>
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-6 md:mb-8">
+          <div className="flex items-baseline">
+            <span className="text-2xl md:text-3xl font-bold">{product.rating}</span>
+            <span className="text-sm text-gray-700 ml-1">/5</span>
+          </div>
+          <div className="flex flex-col items-center sm:items-start">
+            <ReviewsStars note={Number(product.rating)} size={25} style="text-orange-500" />
+            <span className="text-sm text-gray-600">{data?.meta?.total || 0} avis vérifiés</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mb-6">
+          <div className="flex gap-2">
+            <button
+              className={`px-3 py-1 text-sm rounded-full transition-colors ${!filterMedia ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                }`}
+              onClick={() => setFilterMedia(false)}
+            >
+              Tous
+            </button>
+            <button
+              className={`px-3 py-1 text-sm rounded-full transition-colors ${filterMedia ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                }`}
+              onClick={() => setFilterMedia(true)}
+            >
+              Avec média
+            </button>
+          </div>
+          <span className="text-sm text-gray-600">{filteredComments.length} avis</span>
+        </div>
+
+        <div className="space-y-6 divide-y-2 divide-gray-100">
+          {filteredComments.length > 0 ? (
+            filteredComments.map((comment, index) => (
+              <article
+                key={`${comment.id}-${index}`}
+                className="pt-7 pb-2 grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4 md:gap-6"
+              >
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <ReviewsStars note={comment.rating} size={22} style="text-orange-500" />
+                    <span className="text-xs text-gray-500">{formatDate(comment.created_at)}</span>
+                  </div>
+                  <h3 className="font-semibold text-lg">{comment.title}</h3>
+                  <div>
+                    {comment?.description?.length > 150 && expandedComment !== index ? (
+                      <>
+                        <p className="text-gray-600">{comment.description.substring(0, 150)}...</p>
+                        <button
+                          className="text-gray-900 text-sm font-bold mt-1 hover:underline"
+                          onClick={() => toggleExpandedComment(index)}
+                        >
+                          Voir plus
+                        </button>
+                      </>
+                    ) : (
+                      <p className="text-gray-600 whitespace-pre-line">{comment.description}</p>
+                    )}
+                    {expandedComment === index && comment.description.length > 150 && (
+                      <button
+                        className="text-gray-900 text-sm font-bold mt-1 hover:underline"
+                        onClick={() => toggleExpandedComment(index)}
+                      >
+                        Voir moins
+                      </button>
+                    )}
+                  </div>
+                  {comment.views?.length > 0 && (
+                    <div className="flex gap-2 mt-2 overflow-x-auto pb-2">
+                      {comment.views.map((viewUrl, idx) => (
+                        <div key={idx} className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden">
+                          <ProductMedia
+                            mediaList={[...new Set([viewUrl, ...(comment?.views || [])])]}
+                            productName={product.name}
+                            showFullscreen={true}
+                            shouldHoverVideo={false}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="bg-gray-50 p-3 md:p-4 rounded-lg border border-gray-100 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600">
+                      {comment.user?.full_name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <span className="font-medium">
+                      {comment.user?.full_name?.substring(0, 8) || 'Inconnu'}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    <div className="flex items-center gap-1 text-green-600 mb-1">
+                      <svg className="size-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53-1.471-1.47a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.137-.089l4-5.5z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-xs">Achat vérifié</span>
+                    </div>
+                    <BindTags tags={comment.bind_name || {}} />
+                  </div>
+                </div>
+              </article>
+            ))
+          ) : (
+            <div className="py-12 text-center text-gray-500">
+              {filterMedia ? "Aucun avis avec média n'a été trouvé." : "Aucun avis n'a été trouvé."}
             </div>
-            <div className="bg-gray-100 p-4 rounded-lg">
-              <span className="font-medium">{comment.user.name}</span>
-              <div className="text-sm text-gray-600 mt-1">
-                <p>{comment.product.name}</p>
-                <p>{comment.product.feature}</p>
-              </div>
-            </div>
-          </article>
-        ))}
+          )}
+          <div className="flex justify-center mt-8">
+            {isFetchingNextPage ? (
+              <div className="my-4 h-8 w-8 animate-spin rounded-full border-4 border-solid border-gray-500 border-r-transparent" />
+            ) : hasNextPage ? (
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="px-4 py-2 bg-gray-100 text-black rounded-md hover:bg-black/10 transition-all duration-500 disabled:opacity-50"
+              >
+                Charger plus de commentaires
+              </button>
+            ) : comments.length > 0 ? (
+              <p className="text-gray-500 text-sm">Tous les commentaires ont été chargés</p>
+            ) : null}
+          </div>
+        </div>
       </div>
     </section>
   );
 }
+
+
+
+
+
 
 type FAQSectionProps = {
   expandedFAQ: number | null;
@@ -305,13 +530,11 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
     },
     {
       question: "Puis-je retourner un produit ?",
-      answer:
-        "Oui, vous avez 30 jours pour retourner un produit non utilisé dans son emballage d'origine.",
+      answer: "Oui, vous avez 30 jours pour retourner un produit non utilisé.",
     },
     {
       question: "Les produits sont-ils garantis ?",
-      answer:
-        "Oui, tous nos produits bénéficient d'une garantie de 1 an contre les défauts de fabrication.",
+      answer: "Oui, garantie de 1 an contre les défauts de fabrication.",
     },
   ];
 
@@ -323,10 +546,8 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
       const isExpanded = expandedFAQ === index;
       gsap.to(el, {
         height: isExpanded ? "auto" : 0,
-        opacity: isExpanded ? 1 : 0,
-        duration: 0.5,
-        ease: "power3.out",
-        overwrite: "auto",
+        duration: 0.3,
+        ease: "power2.out",
       });
     });
   }, [expandedFAQ]);
@@ -336,55 +557,163 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
   };
 
   return (
-    <section className="py-12 border-t">
-      <div className="container mx-auto">
-        <h2 className="min-[400px]:text-3xl text-xl font-bold text-center mb-5 text-gray-800">
+    <section className="pb-12 pt-6">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 text-gray-800">
           Questions Fréquentes
         </h2>
-        <div className="space-y-0 divide-y-1 max-w-4xl mx-auto">
+        <div className="space-y-2">
           {faqs.map((faq, index) => (
-            <div key={index} className="rounded-2xl bg-white overflow-hidden">
+            <div key={index} className="bg-white rounded-md shadow-sm">
               <button
-                className={clsx(
-                  "w-full text-left p-2 flex justify-between items-center transition-colors",
-                  {
-                    "bg-gray-200": expandedFAQ === index,
-                    "hover:bg-gray-100": expandedFAQ !== index,
-                  }
-                )}
+                className="w-full px-4 py-3 text-left flex justify-between items-center hover:bg-gray-50 focus:outline-none"
                 onClick={() => handleToggle(index)}
                 aria-expanded={expandedFAQ === index}
-                aria-controls={`faq-answer-${index}`}
               >
-                <span className="min-[470px]:text-[1.07rem] text-sm font-semibold text-gray-600 pr-4">
+                <span className="text-base md:text-lg font-medium text-gray-700">
                   {faq.question}
                 </span>
-                <span
-                  className={clsx(
-                    "text-4xl font-light text-black/60 transition-transform duration-300",
-                    {
-                      "rotate-45": expandedFAQ === index,
-                    }
-                  )}
+                <svg
+                  className={clsx("w-5 h-5 text-gray-500 transition-transform duration-300", {
+                    "rotate-180": expandedFAQ === index,
+                  })}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  +
-                </span>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
               </button>
               <div
-                ref={(el) => {
-                  faqRefs.current[index] = el;
-                }}
-                id={`faq-answer-${index}`}
-                className="text-gray-600 overflow-hidden"
-                style={{ height: 0, opacity: 0 }}
+                //@ts-ignore
+                ref={(el) => (faqRefs.current[index] = el!)}
+                className="text-gray-600"
+                style={{ height: 0, overflow: "hidden" }}
               >
-                <p className="min-[470px]:text-lg text-base/5 pt-1 pb-4 pl-4">
-                  {faq.answer}
-                </p>
+                <p className="px-4 py-2 text-sm md:text-base">{faq.answer}</p>
               </div>
             </div>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+
+function DetailsSection({ product_id }: { product_id: string }) {
+  const { data: details, isLoading, error } = useQuery({
+    queryKey: ["details", product_id],
+    queryFn: () => get_details({ product_id }),
+    select: (data) => data.list,
+  });
+
+  if (isLoading)
+    return <div className="p-4 text-center text-gray-600">Chargement des détails...</div>;
+  if (error) return null;
+  if (!details || details.length === 0) return null;
+
+  const sortedDetails = details.sort((a, b) => b.index - a.index);
+  const lastIndex = sortedDetails.length - 1;
+  const isEvenCount = sortedDetails.length % 2 === 0;
+
+  return (
+    <section className="container mx-auto mt-4 space-y-2">
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
+        Détails techniques
+      </h2>
+      <div
+        className={clsx(
+          "grid gap-4 grid-cols-1",
+          {
+            "md:grid-cols-1": sortedDetails.length === 1,
+            "md:grid-cols-2": sortedDetails.length >= 2,
+          }
+        )}
+      >
+        {sortedDetails.map((detail, index) => {
+          const isLast = index === lastIndex;
+          const shouldTakeFullWidth = !isEvenCount && isLast;
+
+          return (
+            <div
+              key={detail.id}
+              className={clsx(
+                "rounded-lg p-4 bg-white",
+                {
+                  "md:col-span-2": shouldTakeFullWidth,
+                  "md:col-span-1": !shouldTakeFullWidth,
+                }
+              )}
+            >
+              {shouldTakeFullWidth ? (
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-base sm:text-lg font-medium text-gray-950">
+                        {detail.title || "Détail produit"}sd
+                      </h3>
+                    </div>
+                    {detail.description && (
+                      <div className="text-sm sm:text-base text-gray-600">
+                        <MarkdownViewer markdown={detail.description} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 mt-3 md:mt-0">
+                    <ul className="space-y-2">
+                      {detail?.view?.map((view, i) => (
+                        <li key={i} className="flex items-center text-sm">
+                          <ProductMedia
+                            mediaList={[...new Set([view, ...(detail?.view || [])])]}
+                            productName="détails technique"
+                            showFullscreen={true}
+                            shouldHoverVideo={false}
+                            className="w-full h-auto object-cover rounded-md"
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between items-start ">
+                    <h3 className="text-base sm:text-lg font-medium text-gray-950">
+                      {detail.title || "Détail produit"}
+                    </h3>
+
+                  </div>
+                  {detail.description && (
+                    <div className="text-sm sm:text-base text-gray-600">
+                      <MarkdownViewer markdown={detail.description} />
+                    </div>
+                  )}
+                  <div className="mt-3">
+                    <ul className="space-y-2">
+                      {detail?.view?.map((view, i) => (
+                        <li key={i} className="flex items-center text-sm">
+                          <ProductMedia
+                            mediaList={[...new Set([view, ...(detail?.view || [])])]}
+                            productName="détails technique"
+                            showFullscreen={true}
+                            shouldHoverVideo={false}
+                            className="w-full h-auto object-cover rounded-md"
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
