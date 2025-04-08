@@ -1,9 +1,9 @@
 // https://vike.dev/data
 export { data };
 export type Data = Awaited<ReturnType<typeof data>>;
-import { dehydrate, QueryClient } from "@tanstack/react-query";
+import { dehydrate } from "@tanstack/react-query";
 import { get_products } from "../../api/products.api";
-import { createQueryClient } from "../../utils";
+import { createQueryClient } from "../../renderer/ReactQueryProvider";
 import { PageContextServer } from "vike/types";
 
 const data = async (pageContext: PageContextServer) => {

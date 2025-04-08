@@ -16,22 +16,22 @@ const BindTags: React.FC<BindTagsProps> = ({ tags }) => {
     <div className="flex flex-wrap gap-2 mt-2">
       {Object.entries(tags).map(([_, value]) => (
         <span
-          key={value.id}
+          key={value?.id + value?.text}
           className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition-all duration-200"
         >
-          {value.text}
-          {value.key && (
+          {value?.text}
+          {value?.key && (
             <span
               className="size-3 ml-2 rounded-full inline-block ring-1 ring-white"
-              style={{ background: value.key }}
-              aria-label={`Couleur : ${value.text}`}
+              style={{ background: value?.key }}
+              aria-label={`Couleur : ${value?.text}`}
             />
           )}
-          {value.icon.length > 0 && (
+          {value?.icon?.length > 0 && (
             <span
               className="size-3 ml-2 rounded-full inline-block ring-1 ring-white"
-              style={{ background: `url(${BASE_URL + value.icon[0]})` }}
-              aria-label={`Icone : ${value.text}`}
+              style={{ background: `url(${BASE_URL + value?.icon[0]})` }}
+              aria-label={`Icone : ${value?.text}`}
             />
           )}
         </span>

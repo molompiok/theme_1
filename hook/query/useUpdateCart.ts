@@ -1,8 +1,8 @@
 import { useMutation, QueryClient } from "@tanstack/react-query";
 import { update_cart } from "../../api/cart.api";
 import { CartResponse, Currency, Feature } from "../../pages/type";
-import { createQueryClient, deepEqual, getOptions } from "../../utils";
 import { useAuthStore } from "../../store/user";
+import { createQueryClient } from "../../renderer/ReactQueryProvider";
 
 interface UpdateCartParams {
   product_id: string;
@@ -17,12 +17,11 @@ interface MutationContext {
 
 export const useUpdateCart = () => {
   const user = useAuthStore((state) => state.user?.id || "guest");
-  const queryClient: QueryClient = createQueryClient;
 
   return useMutation({
     mutationFn: update_cart,
     onMutate: async (params) => {
-      await queryClient.cancelQueries({ queryKey: ["cart", user] });
+      await createQueryClient.cancelQueries({ queryKey: ["cart", user] });
 
       // const previousCart = queryClient.getQueryData<CartResponse>(["cart", user]);
 
@@ -91,7 +90,7 @@ export const useUpdateCart = () => {
       // queryClient.setQueryData(["cart", user], context?.previousCart);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart", user] });
+      createQueryClient.invalidateQueries({ queryKey: ["cart", user] });
     },
   });
 };

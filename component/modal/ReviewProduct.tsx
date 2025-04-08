@@ -9,7 +9,7 @@ import ReviewsStars from '../comment/ReviewsStars';
 import { useMutation } from '@tanstack/react-query';
 import { delete_comment } from '../../api/comment.api';
 import toast from 'react-hot-toast';
-import { createQueryClient } from '../../utils';
+import { createQueryClient } from '../../renderer/ReactQueryProvider';
 import BindTags from '../product/BindTags';
 
 const ReviewProduct = () => {

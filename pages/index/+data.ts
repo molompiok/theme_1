@@ -3,9 +3,9 @@ export { data }
 export type Data = Awaited<ReturnType<typeof data>>
 import { dehydrate } from "@tanstack/react-query"
 import { get_filters, get_products } from "../../api/products.api";
-import { createQueryClient } from "../../utils";
 import { PageContextServer } from "vike/types";
 import { get_categories } from "../../api/categories.api";
+import { createQueryClient } from "../../renderer/ReactQueryProvider";
 
 
 

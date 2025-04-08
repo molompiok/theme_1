@@ -31,9 +31,7 @@ export default function LayoutProduct({
             <FilterPopover setFilter={setFilter} selectedFilters={selectedFilters} defaultOptions={[...defaultOptions]} />
           </div>
           <HydrationBoundary state={dehydratedState}>
-            <div>
-              10 products
-            </div>
+         
             <ListProductCard queryKey={queryKey} />
           </HydrationBoundary>
         </section>

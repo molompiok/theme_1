@@ -1,37 +1,22 @@
+import { HydrationBoundary, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BsHeartFill } from "react-icons/bs";
-import clsx from "clsx";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../../../component/Popover";
-import { DisplayPrice } from "../../../component/DisplayPrice";
-import { Data } from "./+data";
-import { useData } from "../../../renderer/useData";
-import { HydrationBoundary, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   get_favorites,
   get_features_with_values,
 } from "../../../api/products.api";
-import Loading from "../../../component/Loading";
+import { DisplayPrice } from "../../../component/DisplayPrice";
 import FavoriteButton from "../../../component/FavoriteButton";
-import { ProductMedia } from "../../../component/ProductMedia";
-import { defaultOptions, defaultOptionsOrder, filterOptions, OrderByType, ProductFavorite } from "../../type";
-import { useAuthRedirect } from "../../../hook/authRedirect";
 import FilterPopover from "../../../component/FilterPopover";
+import Loading from "../../../component/Loading";
+import { ProductMedia } from "../../../component/ProductMedia";
+import Skeleton from "../../../component/Skeleton";
 import { useFiltersAndUrlSync } from "../../../hook/useUrlFilterManager";
+import { useData } from "../../../renderer/useData";
 import { usePageContext } from "../../../renderer/usePageContext";
 import { useSelectedFiltersStore } from "../../../store/filter";
-import Skeleton from "../../../component/Skeleton";
-
-const sortOptions = [
-  "Plus récent",
-  "Plus ancien",
-  "Mieux noté",
-  "Prix élevé",
-  "Prix bas",
-];
+import { defaultOptions, filterOptions, OrderByType, ProductFavorite } from "../../type";
+import { Data } from "./+data";
 
 export default function Page() {
   const { dehydratedState } = useData<Data>();
@@ -53,7 +38,7 @@ export default function Page() {
   }, []);
 
   return (
-    <div className="min-h-dvh bg-white py-6 px-4 font-primary">
+    <div className="container mx-auto min-h-dvh bg-white py-6 px-4 font-primary">
       <div
         className={`sticky inset-x-0 bg-white border-gray-200 transition-all w-full duration-300 py-5
            ${isScrolled ? 'border-b mt-0 top-11 sm:top-15 z-40' : 'top-0 mt-7 z-40'

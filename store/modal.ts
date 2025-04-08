@@ -22,6 +22,7 @@ export const useModalCommentStore = create(
         product_id: string;
         name : string,
         order_item_id: string;
+        user_id: string;
       } | null,
     },
     (set) => ({
@@ -29,6 +30,7 @@ export const useModalCommentStore = create(
         product_id: string;
         name : string,
         order_item_id: string;
+        user_id: string;
       }) => set({ isModalOpen: open , product: open && product ? product : null }),
     })
   )

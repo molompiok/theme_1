@@ -1,28 +1,25 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { BsCartCheck, BsClipboard } from 'react-icons/bs';
 import clsx from 'clsx';
-import FilterPopover from '../../../component/FilterPopover';
-import { get_orders } from '../../../api/cart.api';
-import { useAuthRedirect } from '../../../hook/authRedirect';
-import Loading from '../../../component/Loading';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { filterNameToId, findFirstBindNameWithViews, formatPrice, getFirstFeatureWithView, getOptions, statusStyles } from '../../../utils';
-import { get_features_with_values } from '../../../api/products.api';
+import { BiCheck } from 'react-icons/bi';
+import { BsCartCheck, BsClipboard } from 'react-icons/bs';
+import { MdCheck, MdLocalShipping, MdRateReview, MdStorefront } from 'react-icons/md';
+import { get_orders } from '../../../api/cart.api';
+import { get_comment } from '../../../api/comment.api';
+import FilterPopover from '../../../component/FilterPopover';
+import Loading from '../../../component/Loading';
+import { ReviewModal } from '../../../component/modal/ReviewModal';
+import ReviewProduct from '../../../component/modal/ReviewProduct';
 import { ProductMedia } from '../../../component/ProductMedia';
-import { defaultOptions, defaultOptionsOrder, filterOptions, filterOptionsOrder, OrderByType, OrderByTypeOrder, UserOrder, UserOrderItem } from '../../type';
+import { useAuthRedirect } from '../../../hook/authRedirect';
 import { useMediaViews } from '../../../hook/query/useMediaViews';
 import { useClipboard } from '../../../hook/useClipboard';
-import { BiCheck } from 'react-icons/bi';
-import { usePageContext } from '../../../renderer/usePageContext';
 import { useFiltersAndUrlSync } from '../../../hook/useUrlFilterManager';
+import { usePageContext } from '../../../renderer/usePageContext';
 import { useSelectedFiltersStore } from '../../../store/filter';
-import { MdCheck, MdLocalShipping, MdOutlineRateReview, MdRateReview, MdStorefront } from 'react-icons/md';
-import Modal from '../../../component/modal/Modal';
 import { useModalCommentStore, useModalReview } from '../../../store/modal';
-import ReviewsStars from '../../../component/comment/ReviewsStars';
-import { ReviewModal } from '../../../component/modal/ReviewModal';
-import { get_comment } from '../../../api/comment.api';
-import ReviewProduct from '../../../component/modal/ReviewProduct';
+import { formatPrice, statusStyles } from '../../../utils';
+import { defaultOptionsOrder, filterOptionsOrder, OrderByTypeOrder, UserOrder, UserOrderItem } from '../../type';
 
 export default function OrdersPage() {
   useAuthRedirect();
@@ -45,7 +42,7 @@ export default function OrdersPage() {
   return (
     <>
 
-      <div className="container min-h-dvh bg-white py-6 px-4 font-primary ">
+      <div className="container mx-auto min-h-dvh bg-white py-6 sm:px-4  font-primary ">
         <div
           className={`sticky inset-x-0 bg-white border-gray-200 transition-all w-full duration-300 py-5 ${isScrolled ? 'border-b mt-0 top-11 sm:top-14 z-40' : 'top-0 mt-7 z-40'
             }`}
@@ -296,6 +293,7 @@ const OrderItemProduct = ({ item , order_id }: { item: UserOrderItem , order_id:
       order_item_id: item.id,
       product_id: item.product_id,
       name: item.product?.name || '',
+      user_id: item.user_id
     });
   };
 

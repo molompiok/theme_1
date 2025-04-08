@@ -1,34 +1,34 @@
-import { DisplayPriceDetail } from "../../../component/DisplayPrice";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { A11y, Pagination } from "swiper/modules";
+import { HydrationBoundary, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
+import gsap from "gsap";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Helmet } from "react-helmet";
 import "swiper/css";
 import "swiper/css/pagination";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useproductFeatures } from "../../../store/features";
-import ReviewsStars from "../../../component/comment/ReviewsStars";
-import { ButtonValidCart } from "../../../component/Button";
-import clsx from "clsx";
-import { ProductMedia } from "../../../component/ProductMedia";
-import { Helmet } from "react-helmet";
+import { A11y, Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 import { BASE_URL } from "../../../api";
-import { HydrationBoundary, useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { useData } from "../../../renderer/useData";
+import { get_comments } from "../../../api/comment.api";
 import {
   get_details,
   get_features_with_values,
   get_products,
 } from "../../../api/products.api";
-import Loading from "../../../component/Loading";
+import { ButtonValidCart } from "../../../component/Button";
+import ReviewsStars from "../../../component/comment/ReviewsStars";
+import { DisplayPriceDetail } from "../../../component/DisplayPrice";
 import FavoriteButton from "../../../component/FavoriteButton";
-import type { Data } from "./+data";
-import { Feature, ProductClient } from "../../type";
-import gsap from "gsap";
-import { RenderFeatureComponent } from "../../../component/product/RenderFeatureComponent";
-import { getFirstFeatureWithView } from "../../../utils";
+import Loading from "../../../component/Loading";
 import { MarkdownViewer } from "../../../component/MarkdownViewer";
-import { get_comments } from "../../../api/comment.api";
 import BindTags from "../../../component/product/BindTags";
-import { Breadcrumb } from "../../../component/product/BreadCrumb";
+import { RenderFeatureComponent } from "../../../component/product/RenderFeatureComponent";
+import { ProductMedia } from "../../../component/ProductMedia";
+import { useMedia } from "../../../hook/useMedia";
+import { useData } from "../../../renderer/useData";
+import { Feature, ProductClient } from "../../type";
+import type { Data } from "./+data";
+import { getFirstFeatureWithView } from "../../../utils";
+import { Breadcrumb } from "../../../component/product/Breadcrumb";
 
 export default function Page() {
   const { dehydratedState } = useData<Data>();
@@ -64,6 +64,9 @@ function ProductPageContent() {
     },
   });
 
+
+
+
   const product = useMemo(() => products?.[0] ?? null, [products]);
 
   const { data: features, isPending: isPendingFeatures } = useQuery({
@@ -71,6 +74,17 @@ function ProductPageContent() {
     queryFn: () => get_features_with_values({ product_id: product?.id }),
     enabled: !!product?.id,
   });
+
+
+
+  // SEO Meta Data
+  const canonicalUrl = `${BASE_URL}/products/${slug}`;
+  const mainImage = getFirstFeatureWithView(features || [])?.values[0]?.views[0];
+  const imageUrl = mainImage ? BASE_URL + mainImage : '';
+  const metaDescription = product?.description || `Découvrez ${product?.name} - ${product?.barred_price ? `Ancien prix ${product.barred_price}, ` : ''}Maintenant à ${product?.price}`;
+  const discountPercentage = product?.barred_price
+    ? Math.round(((product.barred_price - product.price) / product.barred_price) * 100)
+    : null;
 
   const handleImageClick = (index: number) => {
     swiperInstance?.slideTo(index);
@@ -95,23 +109,90 @@ function ProductPageContent() {
       </div>
     );
   }
-
   if (!product) {
-    return <div className="text-center py-20">Aucun produit trouvé</div>;
+    return (
+      <div className="text-center py-20">
+        <Helmet>
+          <title>Produit non trouvé | Boutique</title>
+          <meta name="robots" content="noindex" />
+        </Helmet>
+        Aucun produit trouvé
+      </div>
+    );
   }
-
   return (
     <>
-      <Helmet>
-        <title>{product.name}</title>
-        <meta name="description" content={product.description} />
-        <meta property="og:title" content={product.name} />
-        <meta property="og:description" content={product.description} />
-        <meta
-          property="og:image"
-          content={BASE_URL + features?.[0]?.values[0]?.views[0]}
-        />
+      {/* <Helmet>
+        <title>{`${product.name} | Acheter en ligne`}</title>
+        <meta name="description" content={metaDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta name="robots" content="index, follow" />
+
+        <meta property="og:type" content="product" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={`${product.name} | Acheter en ligne`} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:site_name" content="VotreSite.com" /> // TODO put true site
+        {imageUrl && (
+          <>
+            <meta property="og:image" content={imageUrl} />
+            <meta property="og:image:secure_url" content={imageUrl} />
+            <meta property="og:image:alt" content={`Image de ${product.name}`} />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+          </>
+        )}
+
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={canonicalUrl} />
+        <meta property="twitter:title" content={`${product.name} | Acheter en ligne`} />
+        <meta property="twitter:description" content={metaDescription} />
+        {imageUrl && <meta property="twitter:image" content={imageUrl} />}
+
+        <meta property="product:brand" content={product.name || "Boutique"} />
+        <meta property="product:availability" content="in stock" />
+        <meta property="product:condition" content="new" />
+        <meta property="product:price:amount" content={product.price.toString()} />
+        <meta property="product:price:currency" content={product.currency} />
+        {product.barred_price && (
+          <meta property="product:original_price:amount" content={product.barred_price.toString()} />
+        )}
       </Helmet>
+
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": product.name,
+          "image": imageUrl,
+          "description": product.description,
+          "brand": {
+            "@type": "Brand",
+            "name": product.name || "Boutique"
+          },
+          "offers": {
+            "@type": "Offer",
+            "url": canonicalUrl,
+            "priceCurrency": product.currency,
+            "price": product.price,
+            "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            "itemCondition": "https://schema.org/NewCondition",
+            "availability": "https://schema.org/InStock",
+            ...(product.barred_price && {
+              "priceValidUntil": new Date().toISOString().split('T')[0],
+              "hasDiscount": true,
+              "discount": discountPercentage
+            })
+          },
+          ...(product.id && { "sku": product.id }),
+          // ...(product.id && { "mpn": product.id }),
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": product?.rating || 4.5,
+            "reviewCount": product?.comment_count || 10
+          }
+        })}
+      </script> */}
       <main className="container font-primary mx-auto  sm:px-6 lg:px-8 flex flex-col min-h-screen">
         <section className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2 mb-12">
           <div className="md:sticky md:top-14 md:self-start pt-5 px-4">
@@ -161,32 +242,7 @@ function ProductGallery({
   handleImageClick,
   setImgIndex,
 }: ProductGalleryProps) {
-  const { lastSelectedFeatureId, lastValueId } = useproductFeatures();
-  const previousViewsRef = useRef(getFirstFeatureWithView(features ?? [])?.values[0]?.views || []);
-
-  const mediaViews = useMemo(() => {
-    if (!features?.length) return previousViewsRef.current;
-
-    const selectedViews = features.find(f => f.id === lastSelectedFeatureId)?.values.find(v => v.id === lastValueId)?.views || [];
-
-    if (selectedViews.length > 0) {
-      previousViewsRef.current = selectedViews;
-      return selectedViews;
-    }
-
-    if (selectedViews.length === 0) {
-      return previousViewsRef.current;
-    }
-
-    const defaultFeature = getFirstFeatureWithView(features);
-    const defaultViews = defaultFeature?.values[0]?.views || [];
-    if (defaultViews.length > 0) {
-      previousViewsRef.current = defaultViews;
-      return defaultViews;
-    }
-
-    return previousViewsRef.current;
-  }, [features, lastSelectedFeatureId, lastValueId]);
+  const mediaViews = useMedia(features);
 
   return (
     <div className="flex gap-2">
@@ -558,19 +614,19 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
 
   return (
     <section className="pb-12 pt-6">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 text-gray-800">
+      <div className=" mx-auto">
+        {/* <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 text-gray-800">
           Questions Fréquentes
-        </h2>
-        <div className="space-y-2">
+        </h2> */}
+        <div className="space-y-2 divide-y">
           {faqs.map((faq, index) => (
-            <div key={index} className="bg-white rounded-md shadow-sm">
+            <div key={index} className="bg-white">
               <button
-                className="w-full px-4 py-3 text-left flex justify-between items-center hover:bg-gray-50 focus:outline-none"
+                className="w-full px-4 pt-3  text-left flex justify-between items-center hover:bg-gray-50 focus:outline-none"
                 onClick={() => handleToggle(index)}
                 aria-expanded={expandedFAQ === index}
               >
-                <span className="text-base md:text-lg font-medium text-gray-700">
+                <span className="text-base md:text-xl font-bold text-gray-600">
                   {faq.question}
                 </span>
                 <svg
@@ -595,7 +651,7 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
                 className="text-gray-600"
                 style={{ height: 0, overflow: "hidden" }}
               >
-                <p className="px-4 py-2 text-sm md:text-base">{faq.answer}</p>
+                <p className="px-4 py-2 text-base md:text-lg">{faq.answer}</p>
               </div>
             </div>
           ))}

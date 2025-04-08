@@ -16,6 +16,7 @@ import { IoMdLink } from "react-icons/io";
 import gsap from "gsap";
 import { navigate } from "vike/client/router";
 import { BASE_URL } from "../../api";
+import { ProductMedia } from "../ProductMedia";
 
 export default function SideBarCategories() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -164,11 +165,7 @@ export default function SideBarCategories() {
               >
                 <div className="flex gap-2 items-center">
                   {category.icon?.length > 0 && (
-                    <img
-                      src={BASE_URL + category.icon[0]}
-                      className="size-7 rounded-md"
-                      alt={category.name}
-                    />
+                    <ProductMedia mediaList={category.icon} productName={category.name} className="size-7 rounded-md" />
                   )}
                   <div>{category.name}</div>
                 </div>
@@ -298,15 +295,13 @@ export default function SideBarCategories() {
                   }}
                   className="flex underline-animation text-left sm:text-lg mt-4 transition-colors"
                 >
-                  {currentCategory.icon?.length > 0 && (
-                    <img
-                      src={BASE_URL + currentCategory.icon[0]}
-                      alt=""
-                      className="mr-2 size-8 rounded-md text-gray-600"
-                    />
-                  )}
-                  <div>
-                    Tout {currentCategory?.name}
+                  <div className="flex items-center">
+                    {currentCategory.icon?.length > 0 && (
+                      <ProductMedia mediaList={currentCategory.icon} productName={currentCategory.name} className="size-9 rounded-md text-gray-600" />
+                    )}
+                    <span className="text-[1.15rem] ml-4 font-semibold sm:text-lg">
+                      Tous {currentCategory?.name}
+                    </span>
                   </div>
                 </LinkSideBar>
               ) : null}
@@ -342,13 +337,9 @@ export default function SideBarCategories() {
                       className="flex items-center text-base sm:text-lg  transition-colors"
                     >
                       {category.icon?.length > 0 && (
-                        <img
-                          src={BASE_URL + category.icon[0]}
-                          alt=""
-                          className="mr-2 size-8 rounded-md text-gray-600"
-                        />
+                        <ProductMedia mediaList={category.icon} productName={category.name} className="size-8 rounded-md text-gray-600" />
                       )}
-                      <span className="text-[1.15rem] font-semibold sm:text-lg">{category.name}</span>
+                      <span className="text-[1.15rem] ml-3 font-semibold sm:text-lg">{category.name}</span>
                     </LinkSideBar>
                     {hasSubCategories(category.id) && (
                       <button

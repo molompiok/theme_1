@@ -13,10 +13,9 @@ import { BiHeartCircle } from "react-icons/bi";
 import { LuHeartOff } from "react-icons/lu";
 import { IoHeartOutline } from "react-icons/io5";
 import Loading from "./Loading";
-import { createQueryClient } from "../utils";
+import { createQueryClient } from "../renderer/ReactQueryProvider";
 
 export default function FavoriteButton({ product_id }: { product_id: string }) {
-  const queryClient = createQueryClient;
 
   const open = useModalAuth((state) => state.open);
   const user = useAuthStore((state) => state.user);
@@ -36,7 +35,7 @@ export default function FavoriteButton({ product_id }: { product_id: string }) {
   const addFavoriteMutation = useMutation({
     mutationFn: () => create_favorite({ product_id }),
     onSuccess: (data, _, ctx) => {
-      queryClient.invalidateQueries({
+      createQueryClient.invalidateQueries({
         queryKey: ["get_favorites"],
       });
       toast.custom(
@@ -70,7 +69,7 @@ export default function FavoriteButton({ product_id }: { product_id: string }) {
     mutationFn: () =>
       favorite?.id ? delete_favorite(favorite.id) : Promise.resolve(false),
     onSuccess: () => {
-      queryClient.invalidateQueries({
+      createQueryClient.invalidateQueries({
         queryKey: ["get_favorites"],
       });
 

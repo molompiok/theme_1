@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, memo, ChangeEvent } from "rea
 import { useModalCommentStore } from "../../store/modal";
 import { useCreateComment } from "../../hook/query/comment/useCreateComment";
 import toast from "react-hot-toast";
+import { useAuthStore } from "../../store/user";
 
 interface ModalCommentStore {
   isModalOpen: boolean;
@@ -319,7 +320,7 @@ export const ReviewModal = () => {
     setTitle(e.target.value);
     setErrors((prev) => ({ ...prev, title: "" }));
   }, []);
-
+  
   const handleFormAction = useCallback(async () => {
     if (!validateForm() || !product) return toast.error(errors.title || errors.rating || errors.description);
     try {

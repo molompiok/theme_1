@@ -4,12 +4,11 @@ import { PageContextProvider, usePageContext } from "./usePageContext";
 import type { PageContext } from "vike/types";
 import { Toaster } from "react-hot-toast";
 import { LinkIcon } from "../component/LinkIcon";
-import { Link } from "../component/Link";
 import { BsChevronDown, BsHandbag, BsPerson, BsSearch } from "react-icons/bs";
 import { useModalCart } from "../store/cart";
 import { CiMenuBurger } from "react-icons/ci";
 import { navigate } from "vike/client/router";
-import { BiArrowBack, BiSolidUser } from "react-icons/bi";
+import { BiArrowBack } from "react-icons/bi";
 import { Popover, PopoverContent, PopoverTrigger } from "../component/Popover";
 import { FaUserAlt } from "react-icons/fa";
 import { PiXThin } from "react-icons/pi";
@@ -22,38 +21,49 @@ import ModalAuth from "../component/modal/ModalAuth";
 import SideBarCategories from "../component/modal/SideBarCategories";
 import Modal from "../component/modal/Modal";
 import clsx from "clsx";
+import { Footer } from "./Footer";
+import useCart from "../hook/query/useCart";
+import { ProductMedia } from "../component/ProductMedia";
 
 function Layout({
   children,
   pageContext,
 }: {
   children: React.ReactNode;
-  pageContext: PageContext;
+  pageContext: PageContext; // Assurez-vous que PageContext est correctement typé
 }) {
   const toggleCart = useModalCart((state) => state.toggleCart);
   const openModalAuth = useModalAuth((state) => state.open);
   const [isClient, setIsClient] = useState(false);
+  const {data : cart} = useCart();
 
+  const totalItems = cart?.cart.items.reduce((acc, item) => acc + item.quantity, 0);
+
+  // Détecter si on est côté client
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  // Contenu de chargement pour le SSR
+  const loadingContent = (
+    <div className="flex h-dvh w-dvw justify-center items-center animate-pulse">
+      <Logo size="large" />
+    </div>
+  );
+
+  // Ne pas rendre le contenu complet tant qu'on n'est pas côté client
   if (!isClient) {
-    return (
-      <div className="flex h-dvh w-dvw justify-center items-center animate-pulse">
-        <Logo size="large"/>
-      </div>
-    );
+    return loadingContent;
   }
+
 
   return (
     <PageContextProvider pageContext={pageContext}>
-      <div id="page-loader" className="flex flex-col justify-center items-center page-loader is-hidden">
-        {/* <Loading size={'xl'}/> */}
-        <div className="flex h-dvh w-dvw justify-center items-center animate-pulse">
-          <Logo size="large" />
-        </div>
-        {/* <div className="spinner"></div>  */}
+      <div
+        id="page-loader"
+        className="flex flex-col justify-center items-center page-loader is-hidden"
+      >
+        {loadingContent}
       </div>
       <Frame>
         <Header>
@@ -69,14 +79,16 @@ function Layout({
               className="cursor-pointer"
               onClick={() => navigate("/search")}
             />
-            <BsHandbag
-              size={24}
-              className="cursor-pointer"
-              onClick={() => {
-                toggleCart(true);
-                document.body.style.overflow = "hidden";
-              }}
-            />
+            <div className="relative">
+              <span className="text-sm absolute -top-3 -right-2 bg-gray-600 text-white rounded-full px-1">
+                {totalItems}
+              </span>
+              <BsHandbag
+                size={24}
+                className="cursor-pointer"
+                onClick={() => toggleCart(true)}
+              />
+            </div>
             <BsPerson
               size={28}
               className="cursor-pointer"
@@ -86,7 +98,6 @@ function Layout({
                   navigate("/profile");
                 } else {
                   openModalAuth("login");
-                  document.body.style.overflow = "hidden";
                 }
               }}
             />
@@ -96,11 +107,11 @@ function Layout({
         <ModalCart />
         <ModalChooseFeature />
         <ModalAuth />
+        <Footer />
       </Frame>
     </PageContextProvider>
   );
 }
-
 function Frame({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((state) => state.user);
 
@@ -207,7 +218,7 @@ function Header({ children }: { children: React.ReactNode }) {
             </span>
           </button>
           <header ref={headerRef} className={`w-full font-primary flex items-center shadow-md justify-between transition-all duration-300 ease-out
-              ${isScrolled ? 'fixed top-0 left-0 right-0 z-90 bg-white  px-7 py-2' : 'relative px-3 py-2'}`}>
+              ${isScrolled ? 'fixed top-0 left-0 right-0 z-90 bg-white pr-1  sm:px-7 py-2' : 'relative sm:px-3 pr-2 py-2'}`}>
             {children}
           </header>
           {isScrolled && <div className="h-16"></div>}
@@ -240,11 +251,20 @@ function Header({ children }: { children: React.ReactNode }) {
             </div>
             <Popover>
               <PopoverTrigger className="gap-2 justify-center items-center bg-white hidden sm:flex">
-                <FaUserAlt
-                  className="bg-gray-200 p-1 rounded-3xl text-gray-500"
-                  size={35}
-                />
-                <BsChevronDown className="text-xl" />
+                {user ? (
+                  <>
+                    <ProductMedia mediaList={user?.photo || []} productName={user?.full_name || "Utilisateur"} className="size-8 rounded-full" fallbackImage=""  />
+                    <BsChevronDown className="text-xl" />
+                  </>
+                ) : (
+                  <>
+                    <FaUserAlt
+                      className="bg-gray-200 p-1 rounded-3xl text-gray-500"
+                      size={35}
+                    />
+                    <BsChevronDown className="text-xl" />
+                  </>
+                )}
               </PopoverTrigger>
               <PopoverContent className="bg-transparent border border-black/20 z-[99] rounded-2xl overflow-hidden">
                 <div className="font-primary bg-white p-4 text-clamp-base shadow-2xl rounded-2xl">
@@ -373,6 +393,11 @@ export function Logo({
         className // Classes externes pour le bouton
       )}
     >
+      {/* <ProductMedia mediaList={logoUrl} productName={`${brandName} Logo`} className={clsx(
+          "object-contain flex-shrink-0",
+          sizeClasses.image[size] // Applique les classes de taille d'image
+        )}/>
+         */}
       <img
         src={logoUrl}
         className={clsx(

@@ -53,6 +53,7 @@ function ListProductCard({ slug, queryKey }: ListProductCardProps) {
   });
 
   const allProducts = data?.list || [];
+  const totalProducts = data?.meta?.total || 0;
 
   if (status === 'pending') {
     return (
@@ -72,6 +73,11 @@ function ListProductCard({ slug, queryKey }: ListProductCardProps) {
 
   return (
     <div>
+      <div className="text-left py-4">
+        <p className="text-gray-600 text-sm font">
+          {totalProducts} produits disponibles
+        </p>
+      </div>
       <div className="grid grid-cols-2 gap-2  min-[600px]:grid-cols-3  xl:grid-cols-4 lg:grid-cols-3">
         {allProducts.map((product) => (
           <ProductCard key={product.id} product={product} />

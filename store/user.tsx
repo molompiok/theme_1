@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import { BsCheckCircle, BsXCircle } from "react-icons/bs";
 import { BiLogOut } from "react-icons/bi";
 import { Adresse, PhoneNumber, User } from "../pages/type";
+import { ProductMedia } from "../component/ProductMedia";
 
 
 interface AxiosError extends Error {
@@ -70,12 +71,12 @@ export const useAuthStore = create<AuthState>()(
                 (t) => (
                   <div
                     className={`flex items-center gap-3 p-4 bg-white border-l-4 border-green-500 rounded-lg shadow-lg transition-all duration-500 ease-in-out ${
-                      t.visible ? "opacity-100 scale-100 animate-bounce" : "opacity-0 scale-95"
+                      t.visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
                     }`}
                   >
                     <BsCheckCircle className="w-6 h-6 text-green-600" />
                     <div className="flex items-center gap-2 text-green-800 font-medium">
-                      <img className="size-8 rounded-full" src={'https://media.istockphoto.com/id/1437816897/photo/business-woman-manager-or-human-resources-portrait-for-career-success-company-we-are-hiring.jpg?s=612x612&w=0&k=20&c=tyLvtzutRh22j9GqSGI33Z4HpIwv9vL_MZw_xOE19NQ='} />
+                      <ProductMedia mediaList={data?.user?.photo || []} productName={data?.user?.full_name || ""} className="size-8 rounded-full" fallbackImage=""  />
                       Bienvenue {data?.user?.full_name} 👋
                     </div>
                   </div>

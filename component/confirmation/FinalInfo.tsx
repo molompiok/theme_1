@@ -10,8 +10,9 @@ import { useMutation } from "@tanstack/react-query";
 import { create_user_order } from "../../api/cart.api";
 import { navigate } from "vike/client/router";
 import { useAuthStore } from "../../store/user";
-import { createQueryClient, InfoOrderOwner } from "../../utils";
+import { createQueryClient } from "../../renderer/ReactQueryProvider";
 import useCart from "../../hook/query/useCart";
+import { InfoOrderOwner } from "../../utils";
 
 type RecapitulatifStepProps = {
   step: "info" | "livraison" | "Finalisation";
@@ -92,7 +93,7 @@ const {user} = useAuthStore();
                 </p>
                 <p>
                   <span className="font-semibold">Coût :</span>{" "}
-                  {InfoOrderOwner.delivery_price} CFA
+                  {isDelivery ? InfoOrderOwner.delivery_price : 0}{' CFA'}
                 </p>
               </>
             ) : (

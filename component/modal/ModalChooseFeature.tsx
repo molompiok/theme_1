@@ -1,17 +1,14 @@
-import React, { useMemo, useState } from "react";
+import { useState } from "react";
 import { ButtonValidCart } from "./../Button";
-import { TextComponent } from "./../FeatureDetailProduct/TextComponent";
-import { ColorComponent } from "./../FeatureDetailProduct/ColorComponent";
 import { DisplayPriceDetail } from "./../DisplayPrice";
 import Modal from "./Modal";
 import { BsX } from "react-icons/bs";
 import {
-  useproductFeatures,
-  useProductSelectFeature,
+  useProductSelectFeature
 } from "../../store/features";
 import { useQuery } from "@tanstack/react-query";
 import { get_features_with_values } from "../../api/products.api";
-import { Feature, ProductClient } from "../../pages/type";
+import { Feature } from "../../pages/type";
 import Loading from "../Loading";
 import clsx from "clsx";
 import { ProductMedia } from "../ProductMedia";
@@ -19,11 +16,10 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import { RxReset } from "react-icons/rx";
 import { RenderFeatureComponent } from "../product/RenderFeatureComponent";
-import { getFirstFeatureWithView, getOptions } from "../../utils";
 import FavoriteButton from "../FavoriteButton";
 import { BiShareAlt } from "react-icons/bi";
+import { useMedia } from "../../hook/useMedia";
 
 export default function ModalChooseFeature() {
   const {
@@ -31,14 +27,12 @@ export default function ModalChooseFeature() {
     isVisible,
     setFeatureModal,
   } = useProductSelectFeature();
-  const {lastSelectedFeatureId ,lastValueId} = useproductFeatures();
 
   const [imgIndex, setImgIndex] = useState(0);
   const [swiperInstance, setSwiperInstance] = useState<any>(null);
 
   const handleCloseModal = () => {
     setFeatureModal(false);
-    document.body.style.overflow = "auto";
   };
 
   const {
@@ -52,23 +46,7 @@ export default function ModalChooseFeature() {
     placeholderData: (previousData) => previousData,
   });
   
-  const mediaViews = useMemo(() => {
-    if (!features?.length) return ["/img/default_img.gif"];
-  
-    const selectedViews = features.find(f => f.id === lastSelectedFeatureId)?.values.find(v => v.id === lastValueId)?.views || [];
-    if (selectedViews.length > 0) {
-      return selectedViews;
-    }
-  
-    const defaultFeature = getFirstFeatureWithView(features);
-    const defaultViews = defaultFeature?.values[0]?.views || [];
-    if (defaultViews.length > 0) {
-      return defaultViews;
-    }
-  
-    return ["/img/default_img.gif"];
-  }, [features, lastSelectedFeatureId, lastValueId]);
-
+  const mediaViews = useMedia(features);
 
   return (
     <Modal
@@ -88,7 +66,6 @@ export default function ModalChooseFeature() {
        <div className="w-full sm:w-7/13 shrink-0 bg-gray-50 p-2 sm:p-4 relative">
           <FavoriteButton product_id={product?.id || ""} />
           <BiShareAlt onClick={() => {}} className="text-gray-500 text-2xl absolute z-50 left-2 top-2 cursor-pointer" />
-          {/* Conteneur principal pour le Swiper avec une taille fixe */}
           <div className="w-full h-auto">
             <Swiper
               modules={[A11y, Pagination]}
@@ -103,7 +80,7 @@ export default function ModalChooseFeature() {
                 <SwiperSlide key={index} className="w-full">
                   <div className="w-full aspect-square flex items-center justify-center bg-white">
                     <ProductMedia
-                      mediaList={[view]}
+                      mediaList={[...new Set([view, ...mediaViews])]}
                       productName={product?.name || ""}
                       showFullscreen={true}
                       className="w-full h-full object-contain"

@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { Feature, ProductFeature } from "../../pages/type";
 import { getAllOptions } from "../../utils";
 import { BASE_URL } from "../../api";
+import { ProductMedia } from "../ProductMedia";
 
 interface ValueComponentProps {
   value: ProductFeature;
@@ -135,11 +136,11 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       <div className={strikethroughStyles} />
       {/* Icône seule pour "icon" */}
       {isIcon && !isIconText && icon && (
-        <img src={`${BASE_URL}${icon}`} alt={text} className="size-11 object-contain" />
+        <ProductMedia mediaList={icon} productName={text} className="size-11 object-contain" />
       )}
       {/* Icône + texte pour "icon_text" */}
       {isIconText && icon && (
-        <img src={`${BASE_URL}${icon}`} alt={text} className="size-5 object-contain" />
+        <ProductMedia mediaList={icon} productName={text} className="size-5 object-contain" />
       )}
       {/* Texte uniquement pour "text" et "icon_text", pas pour "color" ni "icon" seul */}
       {(!isColor && (!isIcon || isIconText)) && text}

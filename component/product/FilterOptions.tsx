@@ -2,6 +2,7 @@ import React from "react";
 import clsx from "clsx";
 import { FilterValue, VariantType } from "../../pages/type";
 import { BASE_URL } from "../../api";
+import { ProductMedia } from "../ProductMedia";
 
 interface FilterOptionProps {
   filterId: string;
@@ -111,7 +112,7 @@ const IconFilterOption: React.FC<FilterOptionProps> = ({
       )}
     >
       {Array.isArray(value.icon) && value.icon.length > 0 ? (
-        <img src={BASE_URL + value.icon[0]} alt={value.text} className="size-10" />
+      <ProductMedia mediaList={value.icon} productName={value.text} className="size-10" />
       ) : (
         <svg
           className={clsx("size-10", isSelected ? "text-white" : "text-gray-500 group-hover:text-gray-700")}
@@ -169,7 +170,7 @@ const IconTextFilterOption: React.FC<FilterOptionProps> = ({
     <div>
 
     {Array.isArray(value.icon) && value.icon.length > 0 && (
-      <img src={BASE_URL + value.icon[0]} alt={value.text} className="size-7" />
+       <ProductMedia mediaList={value.icon} productName={value.text} className="size-7" />
     )}
     <span className="text-xs capitalize">{value.text}</span>
     </div>

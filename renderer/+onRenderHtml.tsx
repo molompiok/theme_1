@@ -1,32 +1,37 @@
-// https://vike.dev/onRenderHtml
-export { onRenderHtml }
-
 import ReactDOMServer from 'react-dom/server'
 import { Layout } from './Layout'
 import { escapeInject, dangerouslySkipEscape } from 'vike/server'
 import logoUrl from './logo.svg'
+import "./index.css"
 import type { OnRenderHtmlAsync } from 'vike/types'
 import { getPageTitle } from './getPageTitle'
-import { createQueryClient } from '../utils'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryProvider } from './ReactQueryProvider'
-import { useData } from './useData'
+import { dehydrate, QueryClientProvider } from '@tanstack/react-query'
+import { createQueryClient } from './ReactQueryProvider'
 
-const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRenderHtmlAsync> => {
+
+
+const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRenderHtmlAsync> => {
   const { Page } = pageContext
-  // This onRenderHtml() hook only supports SSR, see https://vike.dev/render-modes for how to modify
-  // onRenderHtml() to support SPA
-  if (!Page) throw new Error('My onRenderHtml() hook expects pageContext.Page to be defined')
+  
+  if (!Page) throw new Error('pageContext.Page is not defined')
 
-  // Alternatively, we can use an HTML stream, see https://vike.dev/streaming
+  // Création du QueryClient pour le SSR
+  const queryClient = createQueryClient
+
+  // Rendu du contenu avec QueryClient
   const pageHtml = ReactDOMServer.renderToString(
-    <Layout pageContext={pageContext}>
-      <Page />
-    </Layout>
+    <QueryClientProvider client={queryClient}>
+      <Layout pageContext={pageContext}>
+        <Page />
+      </Layout>
+    </QueryClientProvider>
   )
 
+  // Déshydratation de l'état pour le client
+  const dehydratedState = dehydrate(queryClient)
+
   const title = getPageTitle(pageContext)
-  const desc = pageContext.data?.description || pageContext.config.description || 'Demo of using Vike'
+  const desc = pageContext.data?.description || pageContext.config?.description || 'Demo of using Vike'
 
   const documentHtml = escapeInject`<!DOCTYPE html>
     <html lang="fr">
@@ -35,6 +40,7 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRender
         <link rel="icon" href="${logoUrl}" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content="${desc}" />
+
         <style>
           html {
             scroll-behavior: smooth;
@@ -50,14 +56,16 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext): ReturnType<OnRender
       <body>
         <div id="root">${dangerouslySkipEscape(pageHtml)}</div>
         <div id="modal-root"></div>
+        <script>window.__REACT_QUERY_STATE__ = ${dangerouslySkipEscape(JSON.stringify(dehydratedState))};</script>
       </body>
-
     </html>`
 
   return {
     documentHtml,
     pageContext: {
-      // We can add custom pageContext properties here, see https://vike.dev/pageContext#custom
+      dehydratedState // Passer l'état déshydraté au client
     }
   }
 }
+
+export { onRenderHtml }

@@ -5,23 +5,13 @@ import React, {
 } from "react";
 import {
   BsPerson,
-} from "react-icons/bs"; // Ajout de BsGeoAlt
-import { useAuthRedirect } from "../../hook/authRedirect";
-import axios from "axios";
+} from "react-icons/bs";
 import { AddressSelector } from "../../component/profile/AddressSelector";
 import { PersonalInfo } from "../../component/profile/PersonalInfo";
 import { PhoneNumbers } from "../../component/profile/PhoneNumbers";
+import { useAuthRedirect } from "../../hook/authRedirect";
 
-// Lazy loading des composants Yandex Maps
-const YMaps = React.lazy(() =>
-  import("@pbe/react-yandex-maps").then((mod) => ({ default: mod.YMaps }))
-);
-const Map = React.lazy(() =>
-  import("@pbe/react-yandex-maps").then((mod) => ({ default: mod.Map }))
-);
-const Placemark = React.lazy(() =>
-  import("@pbe/react-yandex-maps").then((mod) => ({ default: mod.Placemark }))
-);
+
 
 // Composant de chargement générique
 const LoadingSpinner = ({ text = "Chargement..." }: { text?: string }) => (
@@ -46,24 +36,9 @@ const LoadingSpinner = ({ text = "Chargement..." }: { text?: string }) => (
   </div>
 );
 
-// function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
-//   let timeoutId: NodeJS.Timeout;
-//   return (...args: Parameters<T>) => {
-//     clearTimeout(timeoutId);
-//     timeoutId = setTimeout(() => func(...args), delay);
-//   };
-// }
 
-interface Address {
-  text: string;
-  subtitle: string;
-  lat: number | null;
-  lng: number | null;
-}
 
-// const YANDEX_API_KEY = "67b74e18-a7a6-40d9-82ae-fb7460a81010";
-// const YANDEX_API_GEOCODER = "21e88d05-cb30-4849-8e1c-dee1bb671c75";
-// const COTE_DIVOIRE_BBOX = "4.19,-8.6~10.74,-2.49";
+
 
 export default function Page(): JSX.Element {
   useAuthRedirect();
@@ -79,7 +54,7 @@ export default function Page(): JSX.Element {
   }, []);
 
   return (
-    <div className="container min-h-dvh font-primary px-2 pb-[100px]">
+    <div className="container mx-auto min-h-dvh font-primary px-2 pb-[100px]">
         <div
           className={`sticky inset-x-0 bg-white border-gray-200 transition-all w-full duration-300 py-5 ${isScrolled ? 'border-b mt-0 top-11 sm:top-14 z-40' : 'top-0 mt-7 z-40'
             }`}

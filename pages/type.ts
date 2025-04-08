@@ -1,6 +1,7 @@
 export type ProductType = {
   id: string;
   store_id: string;
+  comment_count:string,
   categories_id: string[];
   name: string;
   description: string;
@@ -110,6 +111,7 @@ type ProductPick =
   | "price"
   | "currency"
   | "rating"
+  | "comment_count"
   | "default_feature_id"
   | "slug";
 

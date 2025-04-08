@@ -25,11 +25,13 @@ function minimize_product(product: ProductType): ProductClient {
     currency,
     default_feature_id,
     categories_id,
+    comment_count,
     slug,
   } = product;
   return {
     barred_price,
     description,
+    comment_count,
     name,
     id,
     rating,
