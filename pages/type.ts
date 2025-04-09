@@ -44,6 +44,10 @@ export type ProductFeature = {
   minSize: number | null;
   maxSize: number | null;
   multiple: boolean;
+  default_value: string | null;
+  is_default: boolean | null;
+  regex: string;
+  index: number;
   isDouble: boolean;
   key?: string | null; 
   stock?:number |null
@@ -61,7 +65,16 @@ export type Feature = {
   type: VariantType;
   icon: string[];
   required: boolean;
-  default: string | number | null;
+  default_value: string | null;
+  is_default: boolean | null;
+  regex: string;
+  index: number;
+  min: number;
+  max: number;
+  min_size: number;
+  max_size: number;
+  multiple: boolean;
+  is_double: boolean;
   createdAt: string | Date;
   updatedAt: string | Date;
   values: ProductFeature[];

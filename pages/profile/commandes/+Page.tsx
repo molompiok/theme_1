@@ -276,6 +276,8 @@ const OrderItemProduct = ({ item , order_id }: { item: UserOrderItem , order_id:
     product_id: item.product_id
   });
   
+  console.log("🚀 ~ OrderItemProduct ~ mediaViews:", mediaViews)
+  
   const setModalOpen = useModalCommentStore(state => state.setModalOpen);
 
   const {  setModalOpen: setReviewModalOpen } = useModalReview();

@@ -132,7 +132,8 @@ export function findFirstBindNameWithViews({ bindNames }: { bindNames?: Record<s
   if(!bindNames) return null
   const bindNameEntries = Object.entries(bindNames);
   for (const [, feature] of bindNameEntries) {
-    if(typeof feature === 'object' && feature.views.length > 0)
+    // console.log("🚀 ~ findFirstBindNameWithViews ~ feature:", feature)
+    if(typeof feature === 'object' && feature.views.length > 0 && feature.is_default)
       return feature;
   }
   return null;
