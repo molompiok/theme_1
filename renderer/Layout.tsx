@@ -269,10 +269,18 @@ function Header({ children }: { children: React.ReactNode }) {
               <PopoverContent className="bg-transparent border border-black/20 z-[99] rounded-2xl overflow-hidden">
                 <div className="font-primary bg-white p-4 text-clamp-base shadow-2xl rounded-2xl">
                   <div className="flex items-center">
+                  {user ? (
+                  <>
+                    <ProductMedia mediaList={user?.photo || []} productName={user?.full_name || "Utilisateur"} className="size-8 rounded-full" fallbackImage=""  />
+                  </>
+                ) : (
+                  <>
                     <FaUserAlt
-                      className="bg-gray-200 p-1 rounded-3xl text-gray-400"
+                      className="bg-gray-200 p-1 rounded-3xl text-gray-500"
                       size={35}
                     />
+                  </>
+                )}
                     <div className="text-clamp-xs mx-3 flex flex-col">
                       <span>{user?.full_name || "Utilisateur"}</span>
                       <span className="font-light">
