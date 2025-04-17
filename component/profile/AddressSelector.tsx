@@ -95,7 +95,6 @@ const reverseGeocode = async (
   }
 };
 
-// Suggestions avec Nominatim (inchangé)
 const getSuggestions = async (query: string): Promise<SuggestionItem[]> => {
   try {
     const response = await axios.get(
