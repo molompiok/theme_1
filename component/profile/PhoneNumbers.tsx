@@ -392,7 +392,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({
                   <span className="text-sm font-bold text-gray-700">
                     Numéro {i + 1}
                   </span>
-                  <span className="ml-1 text-sm text-gray-700 font-medium text-[1.03rem] break-all">
+                  <span className="ml-1 text-sm text-gray-700 font-medium sm:text-[1.03rem] break-all">
                     {IMask.pipe(item.phone_number, {
                       mask: item.format,
                     })}

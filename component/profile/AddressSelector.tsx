@@ -9,7 +9,7 @@ import React, {
 import { BsSearch, BsGeoAlt, BsTrash } from "react-icons/bs";
 import { FiEdit2 } from "react-icons/fi"; // Simplifié les icônes
 import { CiDeliveryTruck } from "react-icons/ci";
-import { FaMapMarkerAlt } from "react-icons/fa"; // Icône pour suggestions
+import { FaBox, FaMapMarkerAlt } from "react-icons/fa"; // Icône pour suggestions
 import axios from "axios";
 import Loading from "../Loading";
 import { useGeolocationWithIP } from "../../hook/useGeolocationWithIP";
@@ -21,6 +21,8 @@ import {
 } from "../../api/user.api";
 import { useMutation } from "@tanstack/react-query";
 import { debounce } from "../../utils";
+import { renderToString } from "react-dom/server";
+import { FaLocationDot } from "react-icons/fa6";
 
 interface Address {
   id?: string;
@@ -61,7 +63,9 @@ const getCoordinates = async (
     return null;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 429) {
-      console.error("Trop de requêtes à Nominatim. Veuillez réessayer plus tard.");
+      console.error(
+        "Trop de requêtes à Nominatim. Veuillez réessayer plus tard."
+      );
       return null;
     }
     console.error("Erreur de géocodage :", error);
@@ -134,30 +138,48 @@ const MapComponent = React.lazy(async () => {
           address.lat && address.lng
             ? [address.lat, address.lng]
             : userPosition
-              ? [userPosition.lat, userPosition.lng]
-              : [5.3167, -4.0305],
+            ? [userPosition.lat, userPosition.lng]
+            : [5.3167, -4.0305],
           17
         );
-
+        const customIcon = L.divIcon({
+          html: `
+            <div style="position: relative; width: 36px; height: 48px; display: flex; align-items: center; justify-content: center;">
+              <!-- Pin de localisation -->
+              <svg width="36" height="48" viewBox="0 0 36 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 0C8.06 0 0 8.06 0 18C0 28.94 18 48 18 48C18 48 36 28.94 36 18C36 8.06 27.94 0 18 0Z" fill="#2563EB"/>
+                <circle cx="18" cy="18" r="14" fill="white"/>
+              </svg>
+              <div style="position: absolute; top: 10px; color: #2563EB; font-size: 16px;">
+                ${renderToString(<FaLocationDot color="#2563EB" />)}
+              </div>
+              <!-- Ombre -->
+              <div style="position: absolute; bottom: -4px; width: 24px; height: 8px; background: rgba(0,0,0,0.2); border-radius: 50%; z-index: -1;"></div>
+            </div>
+          `,
+          className: "",
+          iconSize: [36, 48], // Taille de l'icône
+          iconAnchor: [18, 48], // Ancrage au bas du pin
+          popupAnchor: [0, -48], // Popup au-dessus
+        });
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: "© OpenStreetMap contributors",
+          // attribution: "© OpenStreetMap contributors",
         }).addTo(map);
 
         const marker = L.marker(
           address.lat && address.lng
             ? [address.lat, address.lng]
             : userPosition
-              ? [userPosition.lat, userPosition.lng]
-              : [5.3167, -4.0305],
-          { draggable: true, title: "Déplacez-moi pour ajuster" }
+            ? [userPosition.lat, userPosition.lng]
+            : [5.3167, -4.0305],
+          { draggable: true,icon: customIcon, title: "Déplacez-moi pour ajuster" }
         ).addTo(map);
 
-        // Popup dynamique
         marker.bindPopup(
-          address.text
-            ? `LIVRAISON ICI : ${address.text}`
-            : "C'est ici qu'on vous livrera"
-        ).openPopup();
+          `<span style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px;">
+             C'est ici qu'on vous livrera
+           </span>`
+        ).openPopup()
 
         marker.on("dragend", async (e: any) => {
           const { lat, lng } = e.target.getLatLng();
@@ -183,7 +205,12 @@ const MapComponent = React.lazy(async () => {
         };
       }, [address, userPosition]);
 
-      return <div ref={mapContainerRef} style={{ height: mapHeight, width: "100%", zIndex: 1 }} />;
+      return (
+        <div
+          ref={mapContainerRef}
+          style={{ height: mapHeight, width: "100%", zIndex: 1 }}
+        />
+      );
     },
   };
 });
@@ -324,7 +351,10 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
       setSuggestions([]);
       setIsSuggestionOpen(false);
     } else {
-      setMessage({ type: "error", text: "Adresse introuvable ou indisponible." });
+      setMessage({
+        type: "error",
+        text: "Adresse introuvable ou indisponible.",
+      });
       setTimeout(() => setMessage(null), 7000);
     }
     setIsGeocoding(false);
@@ -358,7 +388,10 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
   const handleReturnToUserPosition = async () => {
     if (userPosition) {
       setIsGeocoding(true);
-      const newAddress = await reverseGeocode(userPosition.lat, userPosition.lng);
+      const newAddress = await reverseGeocode(
+        userPosition.lat,
+        userPosition.lng
+      );
       if (newAddress) {
         setAddress(newAddress);
         setMapCenter([userPosition.lat, userPosition.lng]);
@@ -372,13 +405,16 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
   };
 
   return (
-    <section className="w-full p-4 bg-gray-50 rounded-lg shadow-sm relative">
+    <section className="w-full py-4 px-2 bg-gray-50 rounded-lg shadow-sm relative">
       <div className="mb-4 flex items-center gap-2">
         <CiDeliveryTruck className="text-2xl text-gray-600" />
-        <h2 className="text-lg font-semibold text-gray-900">Adresse de livraison</h2>
-
+        <h2 className="text-lg font-semibold text-gray-900">
+          Adresse de livraison
+        </h2>
       </div>
-        <span className="text-sm text-gray-600 italic">Vous pouvez deplacer le marqueur pour changer l'adresse de livraison</span>
+      {/* <span className="text-sm text-gray-600 italic">
+        Vous pouvez deplacer le marqueur pour changer l'adresse de livraison
+      </span> */}
 
       <form onSubmit={handleSearch} className="relative mb-6">
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
@@ -391,22 +427,28 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder={address?.text ? "Modifier l'adresse de livraison" : "Rechercher une adresse de livraison"}
-              className={`w-full p-3 text-sm border rounded-md focus:ring-2 focus:outline-none transition-all duration-200 ${isGeocoding
+              placeholder={
+                address?.text
+                  ? "Modifier l'adresse de livraison"
+                  : "Rechercher une adresse de livraison"
+              }
+              className={`w-full p-3 text-sm border rounded-md focus:ring-2 focus:outline-none transition-all duration-200 ${
+                isGeocoding
                   ? "bg-gray-100 border-gray-200 cursor-not-allowed"
                   : "border-gray-300 focus:ring-gray-500"
-                }`}
+              }`}
               disabled={isGeocoding}
               aria-disabled={isGeocoding}
             />
-
           </div>
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={isLoading || isGeocoding}
               className="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-              aria-label={address?.text ? "Modifier l'adresse" : "Ajouter une adresse"}
+              aria-label={
+                address?.text ? "Modifier l'adresse" : "Ajouter une adresse"
+              }
             >
               {isLoading ? (
                 <Loading size="small" />
@@ -441,7 +483,9 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
                 className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors flex items-center gap-2"
               >
                 <FaMapMarkerAlt className="text-gray-500" size={14} />
-                <div className="font-medium truncate">{highlightText(suggestion.display_name)}</div>
+                <div className="font-medium truncate">
+                  {highlightText(suggestion.display_name)}
+                </div>
               </div>
             ))}
           </div>
@@ -451,12 +495,17 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
         <div className="space-y-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className=" font-bold text-gray-900 break-words">{address.text}</p>
+              <p className=" font-bold text-gray-900 break-words">
+                {address.text}
+              </p>
               {address.subtitle && (
-                <p className=" text-gray-600 font-semibold break-words">{address.subtitle}</p>
+                <p className=" text-gray-600 font-semibold break-words">
+                  {address.subtitle}
+                </p>
               )}
               <p className="text-xs text-gray-500">
-                Lat: {address.lat?.toFixed(6) || "N/A"}, Lng: {address.lng?.toFixed(6) || "N/A"}
+                Lat: {address.lat?.toFixed(6) || "N/A"}, Lng:{" "}
+                {address.lng?.toFixed(6) || "N/A"}
               </p>
             </div>
             <div className="flex gap-2">
@@ -501,10 +550,11 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
 
       {message && (
         <div
-          className={`mt-4 p-3 text-sm text-center rounded-md animate-fade-in ${message.type === "success"
+          className={`mt-4 p-3 text-sm text-center rounded-md animate-fade-in ${
+            message.type === "success"
               ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-800"
-            }`}
+          }`}
         >
           {message.text}
         </div>
@@ -514,10 +564,10 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
         createUserAddressMutation.isPending ||
         updateUserAddressMutation.isPending ||
         deleteUserAddressMutation.isPending) && (
-          <div className="absolute top-[40%] inset-x-0 bg-transparent bg-opacity-50 flex items-center justify-center z-20">
-            <Loading size="large" />
-          </div>
-        )}
+        <div className="absolute top-[40%] inset-x-0 bg-transparent bg-opacity-50 flex items-center justify-center z-20">
+          <Loading size="large" />
+        </div>
+      )}
     </section>
   );
 };

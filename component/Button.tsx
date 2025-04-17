@@ -116,6 +116,7 @@ export function CartButton({
   `;
 
   const isOutOfStock = stock === 0 && !hasContinue;
+  
   return (
     <div className="w-full font-secondary group relative mt-auto overflow-hidden inline-block">
       {requiresOptionSelection ? (
@@ -135,7 +136,7 @@ export function CartButton({
               product={product}
               bind={itemInCart?.realBind || {}}
               features={features || []}
-              // stock={stock} //
+              // stock={stock}
               // hasContinueSelling={hasContinue} 
               inList 
             />

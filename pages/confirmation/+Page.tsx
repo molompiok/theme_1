@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { IMask } from "react-imask";
+import React, { useEffect, useState } from "react";
 import { useAuthStore } from "../../store/user";
 import GoogleAuthButton from "../../component/Auth/GoogleAuthButton";
 import { PhoneNumbers } from "../../component/profile/PhoneNumbers";
@@ -7,10 +6,9 @@ import LivraisonStep from "../../component/confirmation/LivraisonStep";
 import { PersonalInfo } from "../../component/profile/PersonalInfo";
 import { OrderSummary } from "../../component/confirmation/OrderSummary";
 import clsx from "clsx";
-import { useOrderInCart } from "../../store/cart";
-import { formatPrice } from "../../utils";
 import useCart from "../../hook/query/useCart";
 import FinalInfo from "../../component/confirmation/FinalInfo";
+import { navigate } from "vike/client/router";
 
 interface DétailsCommande {
   adresse_livraison: string;
@@ -36,42 +34,51 @@ interface ArticlePanier {
 }
 
 export default function PagePaiement() {
-
-  // const [withDelivery, setWithDelivery] = useState<boolean>(false); // true pour livraison, false pour retrait
-  // const [deliveryDate, setDeliveryDate] = useState<string>("25/03/2025"); // Date limite livraison
-  // const [pickupDate, setPickupDate] = useState<string>("26/03/2025"); // Date limite retrait
-  // const [phoneNumber, setPhoneNumber] = useState<string>("+221 77 123 45 67");
-  // const [deliveryAddress, setDeliveryAddress] = useState<string>("123 Rue Exemple, Dakar");
-  // const [pickupAddress, setPickupAddress] = useState<string>("Magasin Central, Dakar");
-  // const [itemsPrice, setItemsPrice] = useState<number>(5000); // Prix des articles
-  // const [deliveryPrice, setDeliveryPrice] = useState<number>(1000); // Prix livraison
-  // const [isPending, setIsPending] = useState<boolean>(false); // État de chargement
-
-  const [step, setStep] = useState<"info" | "livraison" | "Finalisation">("info");
+  const [step, setStep] = useState<"info" | "livraison" | "Finalisation">(
+    "info"
+  );
   const user = useAuthStore((state) => state.user);
 
-  const isPermitToProceed = user?.id && user.phone_numbers?.length > 0 && user.email && user.full_name;
+  const isPermitToProceed =
+    user?.id && user.phone_numbers?.length > 0 && user.email && user.full_name;
+
   const { data: cart } = useCart();
 
-  const totalPrice = cart?.total || 0;
+  useEffect(() => {
+    if ((cart?.cart?.items?.length ?? 0) <= 0) {
+      // navigate("/");
+      history.back();
+
+    }
+  }, [cart?.cart?.items]);
+
   const getInfoErrorMessage = () => {
     if (!user?.id) return "Veuillez vous connecter pour continuer.";
     if (!user.full_name) return "Veuillez renseigner votre nom complet.";
     if (!user.email) return "Veuillez ajouter une adresse email valide.";
-    if (!user.phone_numbers?.length) return "Veuillez ajouter un numéro de téléphone.";
+    if (!user.phone_numbers?.length)
+      return "Veuillez ajouter un numéro de téléphone.";
     return null;
   };
 
   return (
     <div className="bg-white font-primary flex flex-col-reverse lg:flex-row min-h-screen">
-      <div className="w-full lg:w-2/3 p-4 sm:p-6 bg-gray-50 pt-8">
-        <div className="max-w-xl mx-auto">
+      <div className="w-full lg:w-2/3 p-2 sm:p-6 bg-gray-50 pt-8">
+        <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl sm:text-3xl font-light mb-8 text-black border-b border-gray-200 pb-4">
             Confirmation de commande
           </h1>
           <div className="flex flex-col sm:flex-row justify-between mb-10 gap-4">
-            <Step title="Information" active={step === "info"} completed={step !== "info"} />
-            <Step title="Livraison" active={step === "livraison"} completed={step === "Finalisation"} />
+            <Step
+              title="Information"
+              active={step === "info"}
+              completed={step !== "info"}
+            />
+            <Step
+              title="Livraison"
+              active={step === "livraison"}
+              completed={step === "Finalisation"}
+            />
             <Step title="Finalisation" active={step === "Finalisation"} />
           </div>
           <div className="space-y-8">
@@ -142,18 +149,20 @@ const Step: React.FC<StepProps> = ({ title, active, completed }) => (
   <div className="flex-1">
     <div className="flex items-center">
       <div
-        className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${active
+        className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
+          active
             ? "border-black bg-black text-white"
             : completed
-              ? "border-gray- bg-green-500 text-white"
-              : "border-gray-300 bg-white"
-          }`}
+            ? "border-gray- bg-green-500 text-white"
+            : "border-gray-300 bg-white"
+        }`}
       >
         {completed ? "✓" : active ? "●" : "○"}
       </div>
       <p
-        className={`ml-2  ${active ? "font-medium text-black" : "text-gray-500"
-          }`}
+        className={`ml-2  ${
+          active ? "font-medium text-black" : "text-gray-500"
+        }`}
       >
         {title}
       </p>

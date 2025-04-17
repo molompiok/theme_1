@@ -92,8 +92,8 @@ const LivraisonStep = ({
             </span>
           </div>
           {selectedOption === "livraison" && (
-            <div className="p-4 space-y-3">
-              <AddressSelector mapHeight="300px" />
+            <div className="p-1 space-y-3">
+              <AddressSelector mapHeight="400px" />
               <p className="text-sm text-gray-600">
                 Livraison estimée sous 2-3 jours ouvrables.
               </p>

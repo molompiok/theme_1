@@ -41,6 +41,7 @@ function ItemCart({ product, bind }: { product: ProductClient; bind: Record<stri
 
   const options = useMemo(() => getOptions({ bind, features: features || [], product_id: product.id }), [bind, features, product.id]);
   const { isPendingFeatures, mediaViews } = useMediaViews({ bindNames: options.bindNames, product_id: product.id });
+  console.log("🚀 ~ ItemCart ~ options:", options.bindNames)
 
   if (isPending) {
     return <div className="flex justify-center py-6"><Loading /></div>;
