@@ -1,15 +1,18 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import { useAuthStore } from "../store/user";
 
 
-export const BASE_URL = import.meta.env.VITE_BASE_URL;
+// export const BASE_URL = import.meta.env.VITE_BASE_URL;
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-export const api = axios.create({
-  baseURL: BASE_URL,
-  timeout: 5000,
-  withCredentials: true,
-});
+export const BASE_URL = {
+  url:''
+}
+
+export const api = {
+  api:null as AxiosInstance |null,
+  server:null as AxiosInstance |null
+}
 
 interface FilterValue {
   text: string;
@@ -73,7 +76,7 @@ export function build_form_data(params: Record<string, string | number | boolean
   return formData;
 }
 
-api.interceptors.response.use(
+api.api?.interceptors.response.use(
   (response) => response,
   (error) => {
     if (typeof window !== "undefined") {

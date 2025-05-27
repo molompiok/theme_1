@@ -1,3 +1,5 @@
+import { AxiosInstance } from "axios"
+
 // https://vike.dev/pageContext#typescript
 declare global {
   namespace Vike {
@@ -17,6 +19,14 @@ declare global {
       }
       /** https://vike.dev/render */
       abortReason?: string
+
+      
+      // sublymus injection
+      api:AxiosInstance,
+      server:AxiosInstance,
+      apiUrl:string,
+      serverUrl:string,
+      baseUrl:string
     }
   }
 }

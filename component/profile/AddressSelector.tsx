@@ -23,7 +23,7 @@ import { useMutation } from "@tanstack/react-query";
 import { debounce } from "../../utils";
 import { renderToString } from "react-dom/server";
 import { FaLocationDot } from "react-icons/fa6";
-
+export const nominatim_url = import.meta.env.VITE_VITE_NOMINATIM_URL;
 interface Address {
   id?: string;
   text: string;
@@ -48,7 +48,7 @@ const getCoordinates = async (
     : `${address}, Côte d'Ivoire`;
   try {
     const response = await axios.get(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+      `${nominatim_url}/search?q=${encodeURIComponent(
         addressToGeocode
       )}&format=json&addressdetails=1&limit=1&countrycodes=ci`
     );
@@ -80,7 +80,7 @@ const reverseGeocode = async (
 ): Promise<Address | null> => {
   try {
     const response = await axios.get(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`
+      `${nominatim_url}/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`
     );
     const result = response.data;
     if (result) {
@@ -171,14 +171,20 @@ const MapComponent = React.lazy(async () => {
             : userPosition
             ? [userPosition.lat, userPosition.lng]
             : [5.3167, -4.0305],
-          { draggable: true,icon: customIcon, title: "Déplacez-moi pour ajuster" }
+          {
+            draggable: true,
+            icon: customIcon,
+            title: "Déplacez-moi pour ajuster",
+          }
         ).addTo(map);
 
-        marker.bindPopup(
-          `<span style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px;">
+        marker
+          .bindPopup(
+            `<span style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px;">
              C'est ici qu'on vous livrera
            </span>`
-        ).openPopup()
+          )
+          .openPopup();
 
         marker.on("dragend", async (e: any) => {
           const { lat, lng } = e.target.getLatLng();

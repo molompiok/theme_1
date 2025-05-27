@@ -1,5 +1,4 @@
 import { BsCartX, BsHandbag, BsTrash, BsX, BsArrowRight } from "react-icons/bs";
-import { BASE_URL } from "../../api";
 import {
   CartItem,
   CartResponse,
@@ -25,7 +24,13 @@ import { useMediaViews } from "../../hook/query/useMediaViews";
 import BindTags from "../product/BindTags";
 import { MarkdownViewer } from "../MarkdownViewer";
 
-function ItemCart({ product, bind }: { product: ProductClient; bind: Record<string, string> }) {
+function ItemCart({
+  product,
+  bind,
+}: {
+  product: ProductClient;
+  bind: Record<string, string>;
+}) {
   const isOpen = useModalCart((state) => state.showCart);
   const removeMutation = useUpdateCart();
   const [isHovering, setIsHovering] = useState(false);
@@ -39,16 +44,27 @@ function ItemCart({ product, bind }: { product: ProductClient; bind: Record<stri
     enabled: !!product?.id && isOpen,
   });
 
-  const options = useMemo(() => getOptions({ bind, features: features || [], product_id: product.id }), [bind, features, product.id]);
-  const { isPendingFeatures, mediaViews } = useMediaViews({ bindNames: options.bindNames, product_id: product.id });
-  console.log("🚀 ~ ItemCart ~ options:", options.bindNames)
+  const options = useMemo(
+    () =>
+      getOptions({ bind, features: features || [], product_id: product.id }),
+    [bind, features, product.id]
+  );
+  const { isPendingFeatures, mediaViews } = useMediaViews({
+    bindNames: options.bindNames,
+    product_id: product.id,
+  });
+  console.log("🚀 ~ ItemCart ~ options:", options.bindNames);
 
   if (isPending) {
-    return <div className="flex justify-center py-6"><Loading /></div>;
+    return (
+      <div className="flex justify-center py-6">
+        <Loading />
+      </div>
+    );
   }
 
   return (
-    <div 
+    <div
       className="flex flex-col p-3 rounded-lg transition-all duration-200 hover:bg-gray-50"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
@@ -68,8 +84,10 @@ function ItemCart({ product, bind }: { product: ProductClient; bind: Record<stri
               <h1 className="text-base md:text-lg font-bold line-clamp-1 pr-6">
                 {product.name}
               </h1>
-              <button 
-                className={`p-2 rounded-full transition-all duration-200 ${isHovering ? 'bg-red-50 text-red-500' : 'text-gray-400'}`}
+              <button
+                className={`p-2 rounded-full transition-all duration-200 ${
+                  isHovering ? "bg-red-50 text-red-500" : "text-gray-400"
+                }`}
                 onClick={(e) => {
                   e.stopPropagation();
                   removeMutation.mutate({
@@ -83,8 +101,12 @@ function ItemCart({ product, bind }: { product: ProductClient; bind: Record<stri
                 <BsTrash size={16} />
               </button>
             </div>
-            <BindTags tags={options?.bindNames as Record<string, ProductFeature> || {}} />
-            
+            <BindTags
+              tags={
+                (options?.bindNames as Record<string, ProductFeature>) || {}
+              }
+            />
+
             {/* {Object.keys(options?.bindNames || {}).length > 0 && (
               <div className="flex flex-wrap items-center mt-1 mb-2 gap-1.5">
                 {Array.from(Object.entries(options?.bindNames || {})).map(([key, value], i) => (
@@ -97,26 +119,39 @@ function ItemCart({ product, bind }: { product: ProductClient; bind: Record<stri
                 ))}
               </div>
             )} */}
-            <MarkdownViewer markdown={product.description.substring(0, 100).trim().split('\n').slice(0, 5).join('\n') || ''} />
+            <MarkdownViewer
+              markdown={
+                product.description
+                  .substring(0, 100)
+                  .trim()
+                  .split("\n")
+                  .slice(0, 5)
+                  .join("\n") || ""
+              }
+            />
             {
-            // product.description && (
-            //   <p className="text-xs md:text-sm max-w-[300px] overflow-y-auto text-gray-600 line-clamp-2">
-            //     {product.description}
-            //   </p>
-            // )
+              // product.description && (
+              //   <p className="text-xs md:text-sm max-w-[300px] overflow-y-auto text-gray-600 line-clamp-2">
+              //     {product.description}
+              //   </p>
+              // )
             }
           </div>
         </div>
       </div>
-      
+
       <div className="flex justify-between items-center mt-3 pt-2 border-t border-gray-100">
         <AddRemoveItemCart
           product={product}
-          bind={options.bind} 
+          bind={options.bind}
           features={features ?? []}
           inList={false}
         />
-        <DisplayPriceItemCart product={product} bind={bind} features={features ?? []} />
+        <DisplayPriceItemCart
+          product={product}
+          bind={bind}
+          features={features ?? []}
+        />
       </div>
     </div>
   );
@@ -135,7 +170,7 @@ function ListItemCart({ cart }: { cart: CartItem[] }) {
         <p className="text-sm text-gray-500 text-center mb-6">
           Ajoutez des articles à votre panier pour pouvoir passer commande
         </p>
-        <button 
+        <button
           onClick={() => toggleCart(false)}
           className="flex items-center gap-2 bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors"
         >
@@ -144,18 +179,18 @@ function ListItemCart({ cart }: { cart: CartItem[] }) {
       </div>
     );
   }
-  
+
   return (
     <div className="flex flex-col divide-y divide-gray-200 overflow-y-auto scroll-smooth scrollbar-thin pr-1">
       {cart.map((item, i) => {
         let bind = item.realBind || item.bind;
-        
-        if (item.realBind && item.bind) { 
+
+        if (item.realBind && item.bind) {
           //@ts-ignore
           bind = isEmpty(item.realBind) ? item.bind : item.realBind;
         }
 
-        bind = typeof bind === 'string' ? JSON.parse(bind) : bind;
+        bind = typeof bind === "string" ? JSON.parse(bind) : bind;
         bind = bind || {};
 
         return <ItemCart key={i} product={item.product} bind={bind} />;
@@ -167,9 +202,11 @@ function ListItemCart({ cart }: { cart: CartItem[] }) {
 export default function ModalCart() {
   const showCart = useModalCart((state) => state.showCart);
   const toggleCart = useModalCart((state) => state.toggleCart);
-  const { data: cart, isLoading ,isPending  } = useCart();
+  const { data: cart, isLoading, isPending } = useCart();
 
-  const totalItems = cart?.cart?.items?.reduce((acc: number, item) => acc + item.quantity, 0) || 0;
+  const totalItems =
+    cart?.cart?.items?.reduce((acc: number, item) => acc + item.quantity, 0) ||
+    0;
   const totalPrice = cart?.total || 0;
   const hasItems = (cart?.cart?.items?.length ?? 0) > 0;
 
@@ -196,15 +233,14 @@ export default function ModalCart() {
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="relative">
-            <BsHandbag size={20} className="text-gray-600" />
-            {totalItems > 0 && (
-              <span className="absolute -top-3 -right-5 text-xs  bg-gray-500 text-white  font-medium px-2 p-0.5 rounded-full">
-                {totalItems}
-              </span>
-            )}
+              <BsHandbag size={20} className="text-gray-600" />
+              {totalItems > 0 && (
+                <span className="absolute -top-3 -right-5 text-xs  bg-gray-500 text-white  font-medium px-2 p-0.5 rounded-full">
+                  {totalItems}
+                </span>
+              )}
             </div>
             <span className="ml-5 text-lg font-semibold">Mon panier</span>
-        
           </div>
           <button
             className="rounded-full p-1 hover:bg-gray-100 transition-colors"
@@ -214,7 +250,7 @@ export default function ModalCart() {
             <BsX size={30} className="text-gray-700" />
           </button>
         </div>
-        
+
         {isPending || isLoading ? (
           <div className="flex-1 flex justify-center items-center">
             <Loading />
@@ -224,24 +260,36 @@ export default function ModalCart() {
             <ListItemCart cart={cart?.cart?.items || []} />
           </div>
         )}
-        
+
         {hasItems && (
           <div className="border-t border-gray-200 bg-white p-4 pt-3">
             <div className="space-y-3 mb-4">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Sous-total</span>
-                <span>{formatPrice(totalPrice, cart?.cart?.items?.[0]?.product?.currency)}</span>
+                <span>
+                  {formatPrice(
+                    totalPrice,
+                    cart?.cart?.items?.[0]?.product?.currency
+                  )}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Livraison</span>
-                <span className="text-gray-600 italic">Calculé à l'étape suivante</span>
+                <span className="text-gray-600 italic">
+                  Calculé à l'étape suivante
+                </span>
               </div>
               <div className="flex justify-between font-semibold text-lg pt-2 border-t border-gray-100">
                 <span>Total</span>
-                <span>{formatPrice(totalPrice, cart?.cart?.items?.[0]?.product?.currency)}</span>
+                <span>
+                  {formatPrice(
+                    totalPrice,
+                    cart?.cart?.items?.[0]?.product?.currency
+                  )}
+                </span>
               </div>
             </div>
-            
+
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleCheckout}

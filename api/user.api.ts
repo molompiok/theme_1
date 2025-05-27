@@ -1,5 +1,5 @@
 import { api, build_form_data } from ".";
-import { Adresse } from "../pages/type";
+import { Adresse, User } from "../pages/type";
 
 type PhoneNumber = {
   id: string;
@@ -19,11 +19,11 @@ export const create_user_phone = async (params: {
 }) => {
   const formData = build_form_data(params);
   try {
-    const { data: userphone } = await api.post<PhoneNumber>(
-      "/create_user_phone",
+    const response = await api.api?.post<PhoneNumber>(
+      "/v1/user-phones",
       formData
     );
-    return userphone;
+    return response?.data;
   } catch (error) {
     console.error("Erreur lors de l'ajout de favoris :", error);
     return null;
@@ -38,11 +38,11 @@ export const update_user_phone = async (params: {
 }) => {
   const formData = build_form_data(params);
   try {
-    const { data: userphone } = await api.put<PhoneNumber>(
-      "/update_user_phone",
+    const response = await api.api?.put<PhoneNumber>(
+      "/v1/user-phones/" + params.id,
       formData
     );
-    return userphone;
+    return response?.data;
   } catch (error) {
     console.error("Erreur lors de l'ajout de favoris :", error);
     return null;
@@ -51,10 +51,10 @@ export const update_user_phone = async (params: {
 
 export const delete_user_phone = async (params: { id: string }) => {
   try {
-    const { data: userphone } = await api.delete<PhoneNumber>(
-      "/delete_user_phone/" + params.id
+    const response = await api.api?.delete<PhoneNumber>(
+      "/v1/user-phones/" + params.id
     );
-    return userphone;
+    return response?.data;
   } catch (error) {
     console.error("Erreur lors de l'ajout de favoris :", error);
     return null;
@@ -64,9 +64,9 @@ export const delete_user_phone = async (params: { id: string }) => {
 export const update_user = async (params: { full_name: string }) => {
   const formData = build_form_data(params);
   try {
-    const { data: user } = await api.put<PhoneNumber>("/update_user", formData);
+    const response = await api.api?.put<User>("/v1/auth/me", formData);
     // await delay(1000);
-    return user;
+    return response?.data;
   } catch (error) {
     console.error("Erreur lors de l'ajout de favoris :", error);
     return null;
@@ -80,12 +80,12 @@ export const create_user_address = async (params: {
 }) => {
   const formData = build_form_data(params);
   try {
-    const { data: useradsress } = await api.post<Adresse>(
-      "/create_user_address",
+    const response = await api.api?.post<Adresse>(
+      "/v1/user-addresses",
       formData
     );
     // await delay(1000);
-    return useradsress;
+    return response?.data;
   } catch (error) {
     console.error("Erreur lors de l'ajout d'adresse :", error);
     return null;
@@ -100,12 +100,12 @@ export const update_user_address = async (params: {
 }) => {
   const formData = build_form_data(params);
   try {
-    const { data: user_address } = await api.put<Adresse>(
-      "/update_user_address",
+    const response = await api.api?.put<Adresse>(
+      "/v1/user-addresses/" + params.id,
       formData
     );
     // await delay(1000);
-    return user_address;
+    return response?.data;
   } catch (error) {
     console.error("Erreur lors de l'ajout de update_user_address :", error);
     return null;
@@ -115,10 +115,10 @@ export const update_user_address = async (params: {
 
 export const delete_user_address = async (params: { id: string }) => {
   try {
-    const { data: userphone } = await api.delete<Adresse>(
-      "/delete_user_address/" + params.id
+    const response = await api.api?.delete<Adresse>(
+      "/v1/user-addresses/" + params.id
     );
-    return userphone;
+    return response?.data;
   } catch (error) {
     console.error("Erreur lors de l'ajout de favoris :", error);
     return null;

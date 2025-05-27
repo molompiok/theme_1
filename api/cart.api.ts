@@ -12,9 +12,9 @@ export const update_cart = async (params: {
 }) => {
   const formData = build_form_data(params);
     try {
-      const { data } = await api.post<CartUpdateResponse>('/update_cart', formData);
+      const response = await api.api?.post<CartUpdateResponse>('/v1/cart/update', formData);
       await delay(1000); 
-      return data;
+      return response?.data;
     } catch (error) {
       console.error('Erreur lors de update_cart:', error);
       throw error; 
@@ -23,10 +23,10 @@ export const update_cart = async (params: {
 
 export const view_cart = async () => {
   try {
-    const response = await api.get<CartResponse>(
-      "/view_cart"
+    const response = await api.api?.get<CartResponse>(
+      "/v1/cart"
     );
-    return response.data;
+    return response?.data;
   } catch (error) {
     console.error("Error fetching feature details:", error);
     throw error;
@@ -55,9 +55,9 @@ export const create_user_order = async (params: {
 }) => {
   const formData = build_form_data(params);
   try {
-    const response = await api.post('/create_user_order', formData);
+    const response = await api.api?.post('/v1/orders', formData);
 
-    return response.data;
+    return response?.data;
 
   } catch (error) {
     console.error('Erreur lors de la création de la commande:', error);
@@ -80,8 +80,8 @@ export const get_orders = async (params : { order_by : OrderByTypeOrder , page :
   const searchParams = build_search_params(params);
   await delay(1000);
   try {
-    const response = await api.get<{list : UserOrder[] , meta : MetaPagination}>('/get_orders?' + searchParams.toString());
-    return response.data
+    const response = await api.api?.get<{list : UserOrder[] , meta : MetaPagination}>('/v1/orders?' + searchParams.toString());
+    return response?.data
   } catch (error) {
     console.error('Erreur lors de la récupération des commandes:', error);
     throw error;

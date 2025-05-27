@@ -15,7 +15,7 @@ export function CartButton({
   product,
 }: {
   text?: string;
-  product: ProductClient;
+  product: ProductClient | undefined;
 }) {
   const setFeatureModal = useProductSelectFeature(
     (state) => state.setFeatureModal
@@ -66,6 +66,7 @@ export function CartButton({
     setFeatureModal(true, product);
   };
   const handleDirectAddToCart = (e: React.MouseEvent) => {
+    if (!product_id) return;
     e.stopPropagation();
     if (stock <= 0 && !hasContinue) return; 
     toggleCart(true); 

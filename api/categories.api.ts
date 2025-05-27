@@ -30,12 +30,12 @@ export const get_categories = async ({
   });
 
   try {
-    const { data: categories } = await api.get<{
+    const response = await api.api?.get<{
       list: Category[];
       meta: MetaPagination;
-    }>("/get_categories?" + searchParams.toString());
+    }>("/v1/categories?" + searchParams.toString());
 
-    return categories;
+    return response?.data;
   } catch (error) {
     console.error("Erreur lors de la récupération des produits :" + error);
     return {

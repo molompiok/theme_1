@@ -4,27 +4,32 @@ import { GroupProductType, ProductClient } from "../../pages/type";
 import { navigate } from "vike/client/router";
 import { formatSlug, getFirstFeatureWithView } from "../../utils";
 import { useQuery } from "@tanstack/react-query";
-import {
-  get_features_with_values,
-} from "../../api/products.api";
+import { get_features_with_values } from "../../api/products.api";
 import Loading from "../Loading";
 import { ProductMedia } from "../ProductMedia";
 import FavoriteButton from "../FavoriteButton";
 import ReviewsStars from "../comment/ReviewsStars";
 import { DisplayPrice } from "../DisplayPrice";
 
-export default function ProductCard({ product  }: { product: ProductClient }) {
+export default function ProductCard({
+  product,
+}: {
+  product: ProductClient | undefined;
+}) {
   const handleGo = () => {
+    if (!product) return;
     navigate(`/${formatSlug(product.slug)}`, { keepScrollPosition: false });
   };
 
   const { data: feature, status } = useQuery({
-    queryKey: ["get_features_with_values", product.default_feature_id],
+    queryKey: ["get_features_with_values", product?.default_feature_id],
     queryFn: () =>
-      get_features_with_values({ feature_id: product.default_feature_id }),
+      get_features_with_values({ feature_id: product?.default_feature_id }),
+    enabled: !!product,
   });
 
-  const mediaList = getFirstFeatureWithView(feature || [])?.values[0].views || [];
+  const mediaList =
+    getFirstFeatureWithView(feature || [])?.values[0].views || [];
   return (
     <article
       onClick={handleGo}
@@ -39,16 +44,16 @@ export default function ProductCard({ product  }: { product: ProductClient }) {
         ) : (
           <ProductMedia
             mediaList={mediaList}
-            productName={product.name}
+            productName={product?.name || ""}
             className="w-full h-full object-cover group-hover:scale-[1.02]  transition-transform duration-300"
           />
         )}
-        <FavoriteButton key={product.id} product_id={product.id} />
+        {product && <FavoriteButton key={product.id} product_id={product.id} />}
       </div>
       <div className="p-3 sm:p-4 flex flex-col flex-1">
         <div className="mb-2">
           <h1 className="text-sm group-hover:text-gray-950  text-gray-800  sm:text-base/5 font-semibold line-clamp-2 mb-1">
-            {product.name}
+            {product?.name}
           </h1>
           <div className="flex items-center gap-1">
             <ReviewsStars note={4.6} size={14} style="text-orange-500" />
@@ -60,9 +65,9 @@ export default function ProductCard({ product  }: { product: ProductClient }) {
 
         <div className="">
           <DisplayPrice
-            currency={product.currency}
-            price={product.price ?? 0}
-            barred_price={product.barred_price}
+            currency={product?.currency || ""}
+            price={product?.price || 0}
+            barred_price={product?.barred_price}
           />
         </div>
 

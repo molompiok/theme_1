@@ -80,7 +80,7 @@ function ListProductCard({ slug, queryKey }: ListProductCardProps) {
       </div>
       <div className="grid grid-cols-2 gap-2  min-[600px]:grid-cols-3  xl:grid-cols-4 lg:grid-cols-3">
         {allProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product?.id} product={product} />
         ))}
       </div>
 

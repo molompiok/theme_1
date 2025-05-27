@@ -16,7 +16,7 @@ export default function AddRemoveItemCart({
   bind,
   features
 }: {
-  product: ProductClient | null;
+  product: ProductClient | undefined;
   inList: boolean;
   bind: Record<string, string>;
   features : Feature[]

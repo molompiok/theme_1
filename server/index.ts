@@ -83,9 +83,10 @@ async function startServer() {
     res.send(httpResponse.body);
   });
 
-  const port = process.env.PORT || 3000;
-  app.listen(port);
-  console.warn(`Server running at http://localhost:${port}`);
+  const port = Number(process.env.PORT || 3000);
+  app.listen(port, '0.0.0.0', () => {
+    console.warn(`Server running at http://localhost:${port}`);
+  });
 }
 
 function getCookieValue(cookieHeader: string, cookieName: string) {

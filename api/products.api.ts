@@ -56,17 +56,16 @@ export const get_products = async (params: {
   filters?: Record<string, FilterValue[]>;
 }) => {
   const searchParams = build_search_params(params);
-  await delay(3000);
   try {
-    const { data } = await api.get<{
+    const response = await api.api?.get<{
       list: ProductType[];
       category?: { id: string; name: string; description: string , view : string[] };
       meta: MetaPagination;
-    }>("/get_products?" + searchParams.toString());
+    }>("/v1/products?" + searchParams.toString());
     return {
-      list: data.list.map(minimize_product),
-      meta: data.meta,
-      category: data.category,
+      list: response?.data.list.map(minimize_product),
+      meta: response?.data.meta,
+      category: response?.data.category,
     };
   } catch (error : any) {
     console.error("Erreur lors de la récupération des produits :", error.message );
@@ -83,11 +82,14 @@ export const get_features_with_values = async (params: {
 }) => {
   
   const searchParams = build_search_params(params);
+
+  console.log("🔗 URL finale :", '/v1/features/with-values?' + searchParams.toString())
+
   try {
-    const { data } = await api.get<Feature[]>(
-      "/get_features_with_values?" + searchParams.toString()
+    const response = await api.api?.get<Feature[]>(
+      "/v1/features/with-values?" + searchParams.toString()
     );
-    return data;
+    return response?.data;
   } catch (error) {
     throw new Error("Erreur lors de la récupération des features :" + error);
   }
@@ -102,14 +104,13 @@ export const get_products_by_category = async (params: {
   const searchParams = build_search_params(params);
 
   try {
-    const { data } = await api.get<{
-      list: {
+    const response = await api.api?.get<{list : {
         products: ProductType[];
         category: { id: string; name: string; description: string };
       };
       meta: MetaPagination;
-    }>("/get_products_by_category?" + searchParams.toString());
-    return data.list;
+    }>('/v1/products?' + searchParams.toString());
+    return response?.data.list;
   } catch (error) {
     console.error("Erreur lors de la récupération des produits :", error);
     throw new Error("Erreur lors de la récupération des produits :" + error);
@@ -136,12 +137,12 @@ export const create_favorite = async (data: { product_id: string }) => {
   formData.append("product_id", data.product_id);
 
   try {
-    const { data: favorite } = await api.post<{
+    const response = await api.api?.post<{
       favorite_id: string;
       product_name: string;
-    }>("/create_favorite", formData);
+    }>("/v1/favorites", formData);
     await delay(1000);
-    return favorite;
+    return response?.data;
   } catch (error) {
     console.error("Erreur lors de l'ajout de favoris :", error);
     return {} as { favorite_id: string; product_name: string };
@@ -150,11 +151,11 @@ export const create_favorite = async (data: { product_id: string }) => {
 
 export const delete_favorite = async (id: string) => {
   try {
-    const { data: favorite } = await api.delete<{ isDeleted: boolean }>(
-      "/delete_favorite/" + id
+    const response = await api.api?.delete<{ isDeleted: boolean }>(
+      "/v1/favorites/" + id
     );
     await delay(1000);
-    return favorite.isDeleted;
+    return response?.data.isDeleted;
   } catch (error) {
     console.error("Erreur lors du retrait du favoris :", error);
     return false;
@@ -172,11 +173,11 @@ export const get_favorites = async (params: {
   const searchParams = build_search_params(params);
 
   try {
-    const response = await api.get<{ list: ProductFavorite[] , meta : MetaPagination }>(
-      `/get_favorites?${searchParams.toString()}`
+    const response = await api.api?.get<{ list: ProductFavorite[] , meta : MetaPagination }>(
+      `/v1/favorites?${searchParams.toString()}`
     );
     await delay(3000);
-    return response.data;
+    return response?.data;
   } catch (error) {
     console.error("Erreur lors de la récupération des favoris :", error);
     throw error;
@@ -205,10 +206,10 @@ export const get_filters = async (params: { slug?: string }) => {
   const searchParams = build_search_params(params);
 
   try {
-    const response = await api.get<Filter[]>(
-      "/get_filters?" + searchParams.toString()
+    const response = await api.api?.get<Filter[]>(
+      "/v1/categories/filters?" + searchParams.toString()
     );
-    return response.data;
+    return response?.data;
   } catch (error) {
     console.error("Error fetching feature details:", error);
     throw error;
@@ -220,10 +221,10 @@ export const get_filters = async (params: { slug?: string }) => {
 export const get_details = async (params: { product_id?: string  }) => {
   const searchParams = build_search_params(params);
   try {
-    const response = await api.get<{list : Detail[] , meta : MetaPagination}>(
-      "/get_details?" + searchParams.toString()
+    const response = await api.api?.get<{list : Detail[] , meta : MetaPagination}>(
+      "/v1/details?" + searchParams.toString()
     );
-    return response.data;
+    return response?.data;
   } catch (error) {
     console.error("Error fetching feature details:", error);
     throw error;

@@ -5,6 +5,7 @@ export default {
   // https://vike.dev/clientRouting
   clientRouting: true,
   // https://vike.dev/meta
+  passToClient: ['pageProps', 'baseUrl', 'lang', 'apiUrl', 'serverUrl'],
   meta: {
     // Define new setting 'title'
     title: {
