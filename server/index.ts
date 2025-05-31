@@ -23,7 +23,7 @@ import { LoadMonitorService } from "../api/Scalling/loadMonitorClient.js";
 import logger from "../api/Logger.js";
 
 
-const SERVICE_ID = process.env.SERVICE_ID;
+const SERVICE_ID = process.env.SERVICE_ID||'s_theme1';
 const isProduction = process.env.NODE_ENV === "production";
 
 startServer();
@@ -101,7 +101,7 @@ async function startServer() {
     bullmqQueue: getServerQueue(),
     logger: logger,
     serviceId: SERVICE_ID || 'SERVICE-xxxid',
-    serviceType: 'SERVICE',
+    serviceType: 'theme',
   });
 
   loadMonitoring.startMonitoring()
