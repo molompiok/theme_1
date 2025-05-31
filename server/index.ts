@@ -1,3 +1,4 @@
+
 // This file isn't processed by Vite, see https://github.com/vikejs/vike/issues/562
 // Consequently:
 //  - When changing this file, you needed to manually restart your server for your changes to take effect.
@@ -16,6 +17,13 @@ import express from "express";
 import compression from "compression";
 import { renderPage, createDevMiddleware } from "vike/server";
 import { localDir, root } from "./root.js";
+
+import { closeQueue, getServerQueue } from "../api/Scalling/bullmqClient.js";
+import { LoadMonitorService } from "../api/Scalling/loadMonitorClient.js";
+import logger from "../api/Logger.js";
+
+
+const SERVICE_ID = process.env.SERVICE_ID;
 const isProduction = process.env.NODE_ENV === "production";
 
 startServer();
@@ -36,9 +44,11 @@ async function startServer() {
     app.use(devMiddleware);
   }
 
-  // ...
-  // Other middlewares (e.g. some RPC middleware such as Telefunc)
-  // ...
+  app.get('/health', async (_req, res) => {
+    res.status(200).json({ok:true});
+    return
+  });
+
 
   // Vike middleware. It should always be our last middleware (because it's a
   // catch-all middleware superseding any middleware placed after it).
@@ -83,10 +93,36 @@ async function startServer() {
     res.send(httpResponse.body);
   });
 
-  const port = Number(process.env.PORT || 3000);
-  app.listen(port, '0.0.0.0', () => {
-    console.warn(`Server running at http://localhost:${port}`);
+  const port = process.env.PORT || 3000
+  const server = app.listen(port)
+  console.log(`Server running at http://localhost:${port}`)
+
+  const loadMonitoring = new LoadMonitorService({
+    bullmqQueue: getServerQueue(),
+    logger: logger,
+    serviceId: SERVICE_ID || 'SERVICE-xxxid',
+    serviceType: 'SERVICE',
   });
+
+  loadMonitoring.startMonitoring()
+  const shutdown = async () => {
+    console.log(`[SERVICE Server ${SERVICE_ID}] Arrêt demandé...`);
+    server.close(async () => {
+      console.log(`[SERVICE Server ${SERVICE_ID}] Serveur HTTP fermé.`);
+      await closeQueue(); // Fermer la connexion BullMQ/Redis
+      process.exit(0);
+    });
+    // Forcer la fermeture après un délai si le serveur ne se ferme pas
+    setTimeout(async () => {
+      console.error(`[SERVICE Server ${SERVICE_ID}] Arrêt forcé après timeout.`);
+      await closeQueue();
+      process.exit(1);
+    }, 10000); // 10 secondes timeout
+  };
+
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+  console.warn(`Server running at http://localhost:${port}`);
 }
 
 function getCookieValue(cookieHeader: string, cookieName: string) {

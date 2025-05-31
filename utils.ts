@@ -1,11 +1,12 @@
 import limax from "limax";
 import { Feature, OrderStatus, ProductFeature, ProductType, VariantType } from "./pages/type";
+import { BASE_URL } from "./api";
 
 export const formatSlug = (name: string) => limax(name, { maintainCase: true });
 
 export const formatPrice = (price?: string | number , currency?: string): string => {
   if (!price) return "0";
-  return price.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " " +(currency || "CFA");
+  return price.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " " +(currency || "CFA".toLocaleLowerCase());
 };
 
 export const filterIdToName = (filters: Array<{ id: string; name: string }>) =>
@@ -237,7 +238,11 @@ export const InfoOrderOwner = {
   country_code: "ci_225",
 }
 
-
+export const safeParsePrice = (value: string | number | undefined | null): number => {
+  if (value === undefined || value === null) return 0;
+  const parsed = parseFloat(String(value));
+  return isNaN(parsed) ? 0 : Math.max(0, parsed);
+};
 
 export function getOptions({bind, features, product_id} : {bind: Record<string, string> , features: Feature[] , product_id: string}) {
   let additionalPrice = 0;
@@ -292,6 +297,9 @@ export function getOptions({bind, features, product_id} : {bind: Record<string, 
     stock = null;
   }
 
+
+
+
   const options = {
     bind,
     bindNames,
@@ -305,3 +313,17 @@ export function getOptions({bind, features, product_id} : {bind: Record<string, 
 
   return options;
 }
+
+
+
+
+
+export const googleLogin = () => {
+    // navigate("/auth/google");
+    const storeId = BASE_URL.apiUrl.split("/")[3];
+    const originalUrl = window.location.origin;
+    const clientSuccess = originalUrl+"/auth/success";
+    const clientError = originalUrl+"/auth/error";
+    const url = `http://server.sublymus-server.com/auth/store/google/redirect?store_id=${storeId}&client_success=${clientSuccess}&client_error=${clientError}`;
+    window.open(url, "_self");
+  };

@@ -10,6 +10,7 @@ import { ProductMedia } from "../ProductMedia";
 import FavoriteButton from "../FavoriteButton";
 import ReviewsStars from "../comment/ReviewsStars";
 import { DisplayPrice } from "../DisplayPrice";
+import { useThemeSettingsStore } from "../../store/themeSettingsStore";
 
 export default function ProductCard({
   product,
@@ -28,13 +29,19 @@ export default function ProductCard({
     enabled: !!product,
   });
 
+  const { setSettings, resetSettings, ...settings } = useThemeSettingsStore();
+
   const mediaList =
     getFirstFeatureWithView(feature || [])?.values[0].views || [];
   return (
     <article
       onClick={handleGo}
-      className="group bg-white border border-gray-50 hover:border-gray-100  rounded-md
+      className="group border border-gray-50 hover:border-gray-100  rounded-md
             transition-all duration-300 flex flex-col h-full cursor-pointer overflow-hidden max-w-md"
+      style={{
+        backgroundColor: settings?.productCardBackgroundColor,
+        color: settings?.productCardTextColor,
+      }}
     >
       <div className="relative w-full aspect-square overflow-hidden">
         {status === "pending" ? (
@@ -50,32 +57,35 @@ export default function ProductCard({
         )}
         {product && <FavoriteButton key={product.id} product_id={product.id} />}
       </div>
-      <div className="p-3 sm:p-4 flex flex-col flex-1">
-        <div className="mb-2">
-          <h1 className="text-sm group-hover:text-gray-950  text-gray-800  sm:text-base/5 font-semibold line-clamp-2 mb-1">
+      <div className="px-3 py-1 sm:p-4 flex flex-col flex-1">
+        <div className="my-1">
+          <h1
+            className="text-sm group-hover:text-gray-950  text-gray-800  sm:text-base/5 font-semibold line-clamp-2"
+            style={{
+              color: settings?.productCardTextColor,
+            }}
+          >
             {product?.name}
           </h1>
-          <div className="flex items-center gap-1">
-            <ReviewsStars note={4.6} size={14} style="text-orange-500" />
-            <span className="text-xs hidden min-[370px]:inline text-gray-600">
-              (280 avis)
-            </span>
-          </div>
+          {settings?.showRatingInList && (
+            <div className="flex items-center gap-1 mt-1">
+              <ReviewsStars note={product?.rating || 0} size={14} style="text-orange-500" />
+              <span className="text-xs hidden min-[370px]:inline text-gray-600">
+                ({product?.comment_count} avis)
+              </span>
+            </div>
+          )}
         </div>
-
-        <div className="">
-          <DisplayPrice
-            currency={product?.currency || ""}
-            price={product?.price || 0}
-            barred_price={product?.barred_price}
-          />
-        </div>
-
-        <div className="mt-auto">
+        <DisplayPrice
+          product_id={product?.id || ""}
+          currency={product?.currency || ""}
+          price={product?.price || 0}
+          barred_price={product?.barred_price}
+        />
+        <div className="mt-2">
           <CartButton
             text="Ajouter au panier"
             product={product}
-            // group_product={group_product}
           />
         </div>
       </div>

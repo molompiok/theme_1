@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import Modal from "./Modal";
 import { useModalAuth } from "../../store/user";
-import GoogleAuthButton from "../Auth/GoogleAuthButton";
+// import GoogleAuthButton from "../Auth/GoogleAuthButton";
 import { twMerge } from "tailwind-merge";
 import { BsX } from "react-icons/bs";
+import { navigate } from "vike/client/router";
+import { BASE_URL } from "../../api";
+import { FcGoogle } from "react-icons/fc";
+import { googleLogin } from "../../utils";
 
 export default function ModalAuth() {
   const { close, isOpen, message, type } = useModalAuth((state) => state);
@@ -139,7 +143,15 @@ export default function ModalAuth() {
           <span className="w-full border-t border-gray-300"></span>
         </div>
         <div className="w-full flex justify-center">
-          <GoogleAuthButton />
+          <button
+            onClick={googleLogin}
+            className="flex items-center gap-3 px-6 py-2 rounded-xl border border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 bg-white hover:bg-gray-50"
+          >
+            <FcGoogle size={20} />
+            <span className="text-sm font-medium text-gray-700">
+              Continuer avec Google
+            </span>
+          </button>
         </div>
 
         <p className="text-center mt-4 text-sm">

@@ -5,9 +5,12 @@ import { view_cart } from '../../api/cart.api';
 
 
 const useCart = () => {
-    const user = useAuthStore((state) => state.user?.id || 'guest');
+  const authUser = useAuthStore((state) => state.user);
+  // La clé ici sera 'guest' si non connecté, ou l'ID de l'utilisateur si connecté.
+  // view_cart_api saura utiliser le guest_cart_id du localStorage si 'guest'.
+  const cartKeyUserIdentifier = authUser?.id || 'guest';
   const  query = useQuery({
-    queryKey: ['cart', user],
+    queryKey: ['cart', cartKeyUserIdentifier],
     queryFn: view_cart,
   });
 

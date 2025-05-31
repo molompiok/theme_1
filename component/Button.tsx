@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useproductFeatures, useProductSelectFeature } from "../store/features";
 import clsx from "clsx";
 import { useModalCart } from "../store/cart";
@@ -9,7 +9,14 @@ import AddRemoveItemCart from "./AddRemoveItemCart";
 import Loading from "./Loading";
 import { useUpdateCart } from "../hook/query/useUpdateCart";
 import useCart from "../hook/query/useCart";
-import { getFeatureValuePairs, getMinimumStock, getOptions, hasContinueSelling } from "../utils";
+import {
+  formatPrice,
+  getFeatureValuePairs,
+  getMinimumStock,
+  getOptions,
+  hasContinueSelling,
+} from "../utils";
+import { useThemeSettingsStore } from "../store/themeSettingsStore";
 export function CartButton({
   text = "Ajouter au panier",
   product,
@@ -35,42 +42,38 @@ export function CartButton({
     enabled: !!product_id,
   });
 
-
-
-  // const featureValuePairs = useMemo(
-  //   () => features ? getFeatureValuePairs(features) : {},
-  //   [features]
-  // );
-
   const requiresOptionSelection = useMemo(
     () => features?.some((feature) => feature.values.length >= 2) ?? false,
     [features]
   );
-  
+
   const hasContinue = useMemo(
     () => (features ? hasContinueSelling({ features }) : false),
     [features]
   );
   const stock = useMemo(
-    () => (features ? getMinimumStock({ features, ignoreStock: hasContinue }) : 0),
+    () =>
+      features ? getMinimumStock({ features, ignoreStock: hasContinue }) : 0,
     [features, hasContinue]
   );
 
-  const itemInCart = useMemo(() =>
-    cart?.cart?.items?.find((item) => item?.product?.id === product_id),
+const { setSettings, resetSettings, ...settings } = useThemeSettingsStore();  
+  const itemInCart = useMemo(
+    () => cart?.cart?.items?.find((item) => item?.product?.id === product_id),
     [cart, product_id]
   );
+  const [isHovered, setIsHovered] = useState(false);
   const handleOpenFeatureModal = (e: React.MouseEvent) => {
     e.stopPropagation();
-    document.body.style.overflow = "hidden"; 
+    document.body.style.overflow = "hidden";
     setFeatureModal(true, product);
   };
   const handleDirectAddToCart = (e: React.MouseEvent) => {
     if (!product_id) return;
     e.stopPropagation();
-    if (stock <= 0 && !hasContinue) return; 
-    toggleCart(true); 
-    document.body.style.overflow = "hidden"; 
+    if (stock <= 0 && !hasContinue) return;
+    toggleCart(true);
+    document.body.style.overflow = "hidden";
     updateCartMutation.mutate({
       product_id: product_id,
       mode: "increment",
@@ -83,7 +86,7 @@ export function CartButton({
     return (
       <div className="w-full font-secondary group relative mt-auto inline-block">
         <div className="flex justify-center items-center w-full border border-gray-300 py-1 px-2 rounded-xs bg-gray-100 min-h-[34px]">
-          <Loading size="small" />  
+          <Loading size="small" />
         </div>
       </div>
     );
@@ -102,22 +105,21 @@ export function CartButton({
     );
   }
   const buttonClasses = clsx(
-    `flex justify-center items-center w-full border py-1 px-2
-     border-gray-500 rounded-xs relative z-10
-     bg-white overflow-hidden transition-colors duration-300`,
+    `w-full ml-auto px-2.5 py-1.5 flex items-center justify-center gap-2 border rounded-lg  hover:shadow-sm cursor-pointer transition-all duration-150`,
     {
       "cursor-pointer group-hover:bg-gray-100": stock > 0 || hasContinue,
-      "cursor-not-allowed bg-gray-200 text-gray-500": stock === 0 && !hasContinue,
+      "cursor-not-allowed bg-gray-200 text-gray-500":
+        stock === 0 && !hasContinue,
     }
   );
   const textClasses = `
-    whitespace-nowrap z-20 group-hover:text-black
+    whitespace-nowrap z-20
     transition-all duration-300
     text-clamp-base
   `;
 
   const isOutOfStock = stock === 0 && !hasContinue;
-  
+
   return (
     <div className="w-full font-secondary group relative mt-auto overflow-hidden inline-block">
       {requiresOptionSelection ? (
@@ -125,8 +127,13 @@ export function CartButton({
           disabled={isOutOfStock}
           onClick={handleOpenFeatureModal}
           className={buttonClasses}
+          style={{
+            backgroundColor : settings?.productAddToCartBackgroundColor,
+            color : settings?.productAddToCartTextColor,
+            borderColor : settings?.productAddToCartBorderColor
+          }}
         >
-          <div className={textClasses}>
+          <div className={textClasses} >
             <span>{isOutOfStock ? "Indisponible" : "Choisir options"}</span>
           </div>
         </button>
@@ -137,9 +144,7 @@ export function CartButton({
               product={product}
               bind={itemInCart?.realBind || {}}
               features={features || []}
-              // stock={stock}
-              // hasContinueSelling={hasContinue} 
-              inList 
+              inList
             />
           ) : (
             <button
@@ -147,7 +152,11 @@ export function CartButton({
               onClick={handleDirectAddToCart}
               className={buttonClasses}
             >
-              <div className={textClasses}>
+              <div className={textClasses} style={{
+                backgroundColor : settings?.productAddToCartBackgroundColor,
+                color : settings?.productAddToCartTextColor,
+                borderColor : settings?.productAddToCartBorderColor
+              }}>
                 <span>{isOutOfStock ? "Indisponible" : text}</span>
               </div>
             </button>
@@ -160,7 +169,7 @@ export function CartButton({
 export function CommandButton({
   text,
   callBack,
-  disabled = false, 
+  disabled = false,
 }: {
   text: string;
   callBack?: () => void;
@@ -168,14 +177,12 @@ export function CommandButton({
 }) {
   const toggleCart = useModalCart((state) => state.toggleCart);
   const { data: cart } = useCart();
-  const totalItems = cart?.cart?.items?.reduce(
-      (acc, item) => acc + item.quantity,
-      0
-    ) || 0;
+  const totalItems =
+    cart?.cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
   const isEmpty = totalItems === 0;
   const handleModalCartClose = () => {
     toggleCart(false);
-    document.body.style.overflow = "auto"; 
+    document.body.style.overflow = "auto";
   };
   const handleClick = () => {
     if (isEmpty) {
@@ -211,9 +218,7 @@ export function CommandButton({
         aria-disabled={isEmpty || disabled}
         className={buttonClasses}
       >
-        <span className={textClasses}>
-          {isEmpty ? "Panier vide" : text}
-        </span>
+        <span className={textClasses}>{isEmpty ? "Panier vide" : text}</span>
         <div className={hoverEffectClasses}></div>
       </button>
     </div>
@@ -238,9 +243,10 @@ function SingleValuedFeaturesButton({
       onClick={handleAddToCart}
       disabled={isOutOfStock}
       className={clsx(
-        "mx-auto text-center text-clamp-base uppercase w-full py-3 px-4  min-h-[48px] transition-colors duration-300 rounded", 
+        "mx-auto text-center text-clamp-base uppercase w-full py-3 px-4  min-h-[48px] transition-colors duration-300 rounded",
         {
-          "bg-black text-gray-50 cursor-pointer hover:bg-gray-800": !isOutOfStock,
+          "bg-black text-gray-50 cursor-pointer hover:bg-gray-800":
+            !isOutOfStock,
           "bg-gray-400 text-gray-700 cursor-not-allowed": isOutOfStock,
         }
       )}
@@ -253,15 +259,34 @@ function MultiValuedFeaturesButton({
   missingRequiredFeature,
   handleAddToCart,
   matchingGroup,
+  product_id,
+  currency,
+  price,
   stock,
   hasContinue,
 }: {
   missingRequiredFeature: Feature | undefined;
   handleAddToCart: () => void;
+  product_id: string;
+  currency: string;
   matchingGroup: GroupProductType | undefined;
+  price: number;
   stock: number;
   hasContinue: boolean;
 }) {
+  const { selections } = useproductFeatures();
+  const getTotalPriceValue = useCallback(() => {
+    const productSelections = selections.get(product_id);
+    if (!productSelections) return 0;
+  
+    let total = 0;
+    for (const variant of productSelections.values()) {
+      total += variant.priceValue;
+    }
+  
+    return total + price;
+  }, [selections, product_id, price]);
+
   const isDisabled = !!missingRequiredFeature || !matchingGroup;
   const isOutOfStock = stock <= 0 && !hasContinue;
   let buttonText = "Ajouter au panier";
@@ -279,12 +304,14 @@ function MultiValuedFeaturesButton({
       className={clsx(
         "mx-auto text-center text-clamp-base uppercase w-full py-3 px-4  min-h-[48px] transition-colors duration-300 rounded",
         {
-          "bg-black text-gray-50 cursor-pointer hover:bg-gray-900": !isDisabled && !isOutOfStock,
-          "bg-gray-400 text-gray-700 cursor-not-allowed": isDisabled || isOutOfStock,
+          "bg-black text-gray-50 cursor-pointer hover:bg-gray-900":
+            !isDisabled && !isOutOfStock,
+          "bg-gray-400 text-gray-700 cursor-not-allowed":
+            isDisabled || isOutOfStock,
         }
       )}
     >
-      {buttonText}
+      {buttonText} <span className="text-sm">{getTotalPriceValue() ? " - " + formatPrice(getTotalPriceValue(), currency) : price ? " - " + formatPrice(price, currency) : ""}</span>
     </button>
   );
 }
@@ -311,9 +338,9 @@ export function ButtonValidCart({
     });
     return bind;
   }, [selections, product.id]);
-  
-  const matchingGroup = useMemo(() =>
-    getOptions({ bind, features, product_id: product.id }),
+
+  const matchingGroup = useMemo(
+    () => getOptions({ bind, features, product_id: product.id }),
     [bind, features, product.id]
   );
   const missingRequiredFeature = useMemo(() => {
@@ -322,7 +349,10 @@ export function ButtonValidCart({
       (feature) => feature.required && !productSelectionsMap?.has(feature.id)
     );
   }, [features, selections, product.id]);
-  const hasContinue = useMemo(() => hasContinueSelling({ features }), [features]);
+  const hasContinue = useMemo(
+    () => hasContinueSelling({ features }),
+    [features]
+  );
   const stock = useMemo(() => {
     if (matchingGroup?.stock !== undefined && matchingGroup.stock !== null) {
       return matchingGroup.continue_selling ? Infinity : matchingGroup.stock;
@@ -331,10 +361,14 @@ export function ButtonValidCart({
   }, [matchingGroup, features, hasContinue]);
 
   const handleAddToCart = () => {
-    if (missingRequiredFeature || (!allFeaturesAreSingleValued && !matchingGroup)) return;
+    if (
+      missingRequiredFeature ||
+      (!allFeaturesAreSingleValued && !matchingGroup)
+    )
+      return;
     if (stock <= 0 && !hasContinue) return;
-    setFeatureModal(false); 
-    toggleCart(true); 
+    setFeatureModal(false);
+    toggleCart(true);
     document.body.style.overflow = "hidden";
     updateCartMutation.mutate({
       product_id: product.id,
@@ -351,6 +385,9 @@ export function ButtonValidCart({
     />
   ) : (
     <MultiValuedFeaturesButton
+      product_id={product.id}
+      currency={product.currency}
+      price={product.price}
       missingRequiredFeature={missingRequiredFeature}
       handleAddToCart={handleAddToCart}
       matchingGroup={matchingGroup}

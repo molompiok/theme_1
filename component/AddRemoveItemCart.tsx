@@ -104,13 +104,13 @@ export default function AddRemoveItemCart({
         }
       )}
     >
-       <span
+       <span  
         className={clsx("text-[.7rem]/4 mt-0.5 italic font-light", {
           hidden: inList,
           block: !inList,
         })}
       >
-        disponible {group_product.stock}
+        disponible {(group_product.stock || 0) - (itemInPanier?.quantity || 0)}
       </span>
       <div
         className={clsx("flex items-center", {

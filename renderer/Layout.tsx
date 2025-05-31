@@ -12,7 +12,6 @@ import { BiArrowBack } from "react-icons/bi";
 import { Popover, PopoverContent, PopoverTrigger } from "../component/Popover";
 import { FaUserAlt } from "react-icons/fa";
 import { PiXThin } from "react-icons/pi";
-import { useGoogleOneTapLogin } from "@react-oauth/google";
 import { api } from "../api";
 import { useAuthStore, useModalAuth } from "../store/user";
 import ModalCart from "../component/modal/ModalCart";
@@ -24,35 +23,23 @@ import clsx from "clsx";
 import { Footer } from "./Footer";
 import useCart from "../hook/query/useCart";
 import { ProductMedia } from "../component/ProductMedia";
-
-interface ThemeSettings {
-  primaryColor?: string;
-  secondaryColor?: string;
-  bodyFont?: string;
-  headingFont?: string;
-  layoutType?: "grid" | "list";
-  showHeader?: boolean;
-  showFooter?: boolean;
-  // Ajouter toutes les autres options de personnalisation possibles ici
-  // Exemple:
-  // bannerImage?: string;
-  // bannerText?: string;
-  // productsPerPage?: number;
-  // showCategoriesInHeader?: boolean;
-}
+import VerticalBanner from "../component/VerticalBanner";
+import {
+  ThemeSettings,
+  useThemeSettingsStore,
+} from "../store/themeSettingsStore";
 
 const parseThemeSettingsFromQuery = (
   searchParams: URLSearchParams
 ): Partial<ThemeSettings> => {
   const settings: Partial<ThemeSettings> = {};
-  // Exemple: Lire primaryColor depuis l'URL (préfixer avec 'setting_')
   const primaryColor = searchParams.get("setting_primaryColor");
-  if (primaryColor) settings.primaryColor = `#${primaryColor}`; // Assumer format hex sans #
+  if (primaryColor) settings.primaryColor = `#${primaryColor}`;
 
   const bodyFont = searchParams.get("setting_bodyFont");
+
   if (bodyFont) settings.bodyFont = decodeURIComponent(bodyFont);
 
-  // Ajouter le parsing pour les autres paramètres d'URL...
   return settings;
 };
 
@@ -60,18 +47,6 @@ function getQueryParams() {
   if (typeof window === "undefined") return {};
   return Object.fromEntries(new URLSearchParams(window.location.search));
 }
-
-const DEFAULT_SETTINGS: ThemeSettings = {
-  primaryColor: "#3B82F6", // Default blue-600
-  secondaryColor: "#6B7280", // Default gray-500
-  bodyFont:
-    'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
-  headingFont:
-    'Poppins, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"', // Exemple Poppins
-  layoutType: "grid",
-  showHeader: true,
-  showFooter: true,
-};
 
 interface PostMessageData {
   type: "UPDATE_THEME_SETTINGS" | "GET_CURRENT_SETTINGS"; // Ajouter d'autres types si besoin
@@ -83,42 +58,32 @@ function Layout({
   pageContext,
 }: {
   children: React.ReactNode;
-  pageContext: PageContext; // Assurez-vous que PageContext est correctement typé
+  pageContext: PageContext;
 }) {
   const toggleCart = useModalCart((state) => state.toggleCart);
   const openModalAuth = useModalAuth((state) => state.open);
   const [isClient, setIsClient] = useState(false);
   const { data: cart } = useCart();
 
-  const [settings, setSettings] = useState<ThemeSettings>(DEFAULT_SETTINGS);
+  const { setSettings, resetSettings, ...settings } = useThemeSettingsStore();
 
   const urlParsed = getQueryParams();
 
-  // console.log({urlParsed})
   useEffect(() => {
-    // 1. Parser les settings initiaux depuis l'URL (si présents)
     const initialSettingsFromQuery = parseThemeSettingsFromQuery(
       new URLSearchParams(urlParsed)
     );
-    setSettings((prev) => ({
-      ...DEFAULT_SETTINGS,
-      ...prev,
+    setSettings({
+      ...settings,
       ...initialSettingsFromQuery,
-    })); // Fusionner avec défauts
+    });
 
-    // 2. Mettre en place l'écouteur postMessage
     const handleMessage = (event: MessageEvent<PostMessageData>) => {
-      // TODO: Vérifier event.origin pour la sécurité !
-      // if (event.origin !== 'URL_DU_DASHBOARD') return;
-
       const { type, payload } = event.data;
 
       if (type === "UPDATE_THEME_SETTINGS" && payload) {
-        console.log("Received settings update via postMessage", payload);
-        // Mettre à jour l'état local avec les nouvelles valeurs reçues
-        setSettings((prev) => ({ ...prev, ...payload }));
+        setSettings({ ...settings, ...payload });
       } else if (type === "GET_CURRENT_SETTINGS") {
-        // Renvoyer les settings actuels si demandés par le parent
         event.source?.postMessage(
           { type: "CURRENT_SETTINGS", payload: settings },
           event.origin as any
@@ -127,42 +92,28 @@ function Layout({
     };
 
     window.addEventListener("message", handleMessage);
-    console.log("Preview page ready and listening for postMessages.");
+    window.parent.postMessage({ type: "PREVIEW_IFRAME_READY" }, "*");
 
-    // 3. Informer le parent que l'iframe est prête (optionnel)
-    window.parent.postMessage({ type: "PREVIEW_IFRAME_READY" }, "*"); // Envoyer au parent
-
-    // Nettoyage de l'écouteur
     return () => {
       window.removeEventListener("message", handleMessage);
     };
   }, [urlParsed.search]);
-
-  // const primaryColorStyle = useMemo(
-  //   () => ({
-  //     color: settings.primaryColor ?? DEFAULT_SETTINGS.primaryColor,
-  //   }),
-  //   [settings.primaryColor]
-  // );
 
   const totalItems = cart?.cart.items.reduce(
     (acc, item) => acc + item.quantity,
     0
   );
 
-  // Détecter si on est côté client
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Contenu de chargement pour le SSR
   const loadingContent = (
     <div className="flex h-dvh w-dvw justify-center items-center animate-pulse">
       <Logo size="large" />
     </div>
   );
 
-  // Ne pas rendre le contenu complet tant qu'on n'est pas côté client
   if (!isClient) {
     return loadingContent;
   }
@@ -175,10 +126,8 @@ function Layout({
       >
         {loadingContent}
       </div>
-      <Frame style={{ background: '' }}>
-        <div className="flex justify-end items-center w-full">
-          {/* {JSON.stringify(primaryColorStyle)} */}
-        </div>
+      <Frame style={{ background: settings.siteBackgroundColor }}>
+        <div className="flex justify-end items-center w-full"></div>
         <Header>
           <SideBarCategories />
           <Logo />
@@ -232,26 +181,6 @@ function Frame({
   children: React.ReactNode;
   style?: React.CSSProperties;
 }) {
-  const user = useAuthStore((state) => state.user);
-
-  useGoogleOneTapLogin({
-    cancel_on_tap_outside: true,
-    use_fedcm_for_prompt: true,
-    auto_select: false,
-    disabled: Boolean(user),
-    onSuccess: async (response) => {
-      try {
-        await api.api?.post("/google_callback", { token: response.credential });
-        useAuthStore.getState().fetchUser();
-      } catch (error) {
-        console.error("Google login error:", error);
-      }
-    },
-    onError: () => {
-      console.error("Google One Tap login failed");
-    },
-  });
-
   const toasterStyles = {
     success: {
       icon: "✅",
@@ -323,29 +252,27 @@ function Header({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isScrolled]);
 
-  const bannerClasses =
-    "relative w-full top-0 z-40 bg-gray-700 text-white flex justify-center items-center";
+
+  const headerTextColor = useThemeSettingsStore(state => state.headerTextColor);
+  const headerBackgroundColor = useThemeSettingsStore(state => state.headerBackgroundColor);
 
   return (
     <>
       {!urlPathname.startsWith("/profile") ? (
         <>
-          <button
-            onClick={() => navigate("/dev/icons")}
-            className={bannerClasses}
-          >
-            <span className="text-clamp-base font-medium text-white py-2 font-primary">
-              Livraison gratuite en Côte d'Ivoire
-            </span>
-          </button>
+          <VerticalBanner />
           <header
             ref={headerRef}
             className={`w-full font-primary flex items-center shadow-md justify-between transition-all duration-300 ease-out
               ${
                 isScrolled
-                  ? "fixed top-0 left-0 right-0 z-90 bg-white pr-1  sm:px-7 py-2"
+                  ? "fixed top-0 left-0 right-0 z-90 pr-1  sm:px-7 py-2"
                   : "relative sm:px-3 pr-2 py-2"
               }`}
+              style={{
+                backgroundColor: headerBackgroundColor,
+                color: headerTextColor,
+              }}
           >
             {children}
           </header>
@@ -358,14 +285,18 @@ function Header({ children }: { children: React.ReactNode }) {
             className={`w-full font-primary flex items-center justify-between shadow-md transition-all duration-300 ease-out
               ${
                 isScrolled
-                  ? "fixed top-0 left-0 right-0 z-90 bg-white  px-7 py-2"
+                  ? "fixed top-0 left-0 right-0 z-90  px-7 py-2"
                   : "relative px-3 py-2"
               }`}
+              style={{
+                backgroundColor: headerBackgroundColor,
+                color: headerTextColor,
+              }}
           >
             <CiMenuBurger
-              className="flex sm:hidden cursor-pointer"
+              className="flex sm:hidden  cursor-pointer"
               size={35}
-              color="black"
+              // color="black"
               onClick={handleModalOpen}
             />
             <div className="mx-auto block sm:hidden">

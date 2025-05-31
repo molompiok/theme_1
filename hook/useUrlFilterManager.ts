@@ -5,6 +5,8 @@ import { useSelectedFiltersStore } from "../store/filter";
 const SPECIAL_PARAMS = {
   order_by: { isValueBased: true },
   s: { isValueBased: true },
+  min_price: { isValueBased: true },
+  max_price: { isValueBased: true },
 };
 export const useFiltersAndUrlSync = (
   filters: Filter[], 

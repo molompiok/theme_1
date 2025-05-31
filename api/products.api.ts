@@ -51,6 +51,8 @@ export const get_products = async (params: {
   search?: string;
   order_by?: OrderByType;
   categories_id?: string[];
+  min_price?: number;
+  max_price?: number;
   page?: number;
   limit?: number;
   filters?: Record<string, FilterValue[]>;
@@ -59,7 +61,7 @@ export const get_products = async (params: {
   try {
     const response = await api.api?.get<{
       list: ProductType[];
-      category?: { id: string; name: string; description: string , view : string[] };
+      category?: { id: string; name: string; description: string, view: string[] };
       meta: MetaPagination;
     }>("/v1/products?" + searchParams.toString());
     return {
@@ -67,8 +69,8 @@ export const get_products = async (params: {
       meta: response?.data.meta,
       category: response?.data.category,
     };
-  } catch (error : any) {
-    console.error("Erreur lors de la récupération des produits :", error.message );
+  } catch (error: any) {
+    console.error("Erreur lors de la récupération des produits :", error.message);
     return {
       list: [],
       category: null,
@@ -80,10 +82,8 @@ export const get_features_with_values = async (params: {
   product_id?: string;
   feature_id?: string;
 }) => {
-  
-  const searchParams = build_search_params(params);
 
-  console.log("🔗 URL finale :", '/v1/features/with-values?' + searchParams.toString())
+  const searchParams = build_search_params(params);
 
   try {
     const response = await api.api?.get<Feature[]>(
@@ -104,7 +104,8 @@ export const get_products_by_category = async (params: {
   const searchParams = build_search_params(params);
 
   try {
-    const response = await api.api?.get<{list : {
+    const response = await api.api?.get<{
+      list: {
         products: ProductType[];
         category: { id: string; name: string; description: string };
       };
@@ -137,12 +138,8 @@ export const create_favorite = async (data: { product_id: string }) => {
   formData.append("product_id", data.product_id);
 
   try {
-    const response = await api.api?.post<{
-      favorite_id: string;
-      product_name: string;
-    }>("/v1/favorites", formData);
-    await delay(1000);
-    return response?.data;
+    const response = await api.api?.post<{ favorite: { favorite_id: string; product_name: string }, message: string }>("/v1/favorites", formData);
+    return response?.data.favorite;
   } catch (error) {
     console.error("Erreur lors de l'ajout de favoris :", error);
     return {} as { favorite_id: string; product_name: string };
@@ -154,7 +151,6 @@ export const delete_favorite = async (id: string) => {
     const response = await api.api?.delete<{ isDeleted: boolean }>(
       "/v1/favorites/" + id
     );
-    await delay(1000);
     return response?.data.isDeleted;
   } catch (error) {
     console.error("Erreur lors du retrait du favoris :", error);
@@ -167,16 +163,16 @@ export const get_favorites = async (params: {
   label?: string;
   product_id?: string;
   order_by?: "date_asc" | "date_desc" | "price_asc" | "price_desc";
+  min_price?: number;
+  max_price?: number;
   page?: number;
   limit?: number;
 }) => {
   const searchParams = build_search_params(params);
 
   try {
-    const response = await api.api?.get<{ list: ProductFavorite[] , meta : MetaPagination }>(
-      `/v1/favorites?${searchParams.toString()}`
-    );
-    await delay(3000);
+    const response = await api.api?.get<{ list: ProductFavorite[], meta: MetaPagination }>(
+      `/v1/favorites?${searchParams.toString()}`);
     return response?.data;
   } catch (error) {
     console.error("Erreur lors de la récupération des favoris :", error);
@@ -218,10 +214,10 @@ export const get_filters = async (params: { slug?: string }) => {
 
 
 
-export const get_details = async (params: { product_id?: string  }) => {
+export const get_details = async (params: { product_id?: string }) => {
   const searchParams = build_search_params(params);
   try {
-    const response = await api.api?.get<{list : Detail[] , meta : MetaPagination}>(
+    const response = await api.api?.get<{ list: Detail[], meta: MetaPagination }>(
       "/v1/details?" + searchParams.toString()
     );
     return response?.data;

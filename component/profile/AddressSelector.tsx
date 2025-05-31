@@ -7,9 +7,11 @@ import React, {
   useRef,
 } from "react";
 import { BsSearch, BsGeoAlt, BsTrash } from "react-icons/bs";
-import { FiEdit2 } from "react-icons/fi"; // Simplifié les icônes
+import { FiEdit2, FiMapPin } from "react-icons/fi";
 import { CiDeliveryTruck } from "react-icons/ci";
-import { FaBox, FaMapMarkerAlt } from "react-icons/fa"; // Icône pour suggestions
+import { FaMapMarkerAlt, FaCheckCircle } from "react-icons/fa";
+import { FaLocationDot } from "react-icons/fa6";
+import { HiOutlineLocationMarker } from "react-icons/hi";
 import axios from "axios";
 import Loading from "../Loading";
 import { useGeolocationWithIP } from "../../hook/useGeolocationWithIP";
@@ -22,8 +24,9 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { debounce } from "../../utils";
 import { renderToString } from "react-dom/server";
-import { FaLocationDot } from "react-icons/fa6";
-export const nominatim_url = import.meta.env.VITE_VITE_NOMINATIM_URL;
+
+export const nominatim_url = import.meta.env.VITE_NOMINATIM_URL;
+
 interface Address {
   id?: string;
   text: string;
@@ -38,18 +41,15 @@ interface SuggestionItem {
   lon: string;
 }
 
-// Géocodage avec Nominatim (inchangé)
+// Fonctions de géocodage inchangées
 const getCoordinates = async (
   address: string,
   fallbackText?: string
 ): Promise<Address | null> => {
-  const addressToGeocode = address.toLowerCase().includes("côte d'ivoire")
-    ? address
-    : `${address}, Côte d'Ivoire`;
   try {
     const response = await axios.get(
       `${nominatim_url}/search?q=${encodeURIComponent(
-        addressToGeocode
+        address
       )}&format=json&addressdetails=1&limit=1&countrycodes=ci`
     );
     const result = response.data[0];
@@ -63,9 +63,7 @@ const getCoordinates = async (
     return null;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 429) {
-      console.error(
-        "Trop de requêtes à Nominatim. Veuillez réessayer plus tard."
-      );
+      console.error("Trop de requêtes à Nominatim. Veuillez réessayer plus tard.");
       return null;
     }
     console.error("Erreur de géocodage :", error);
@@ -73,7 +71,6 @@ const getCoordinates = async (
   }
 };
 
-// Géocodage inverse avec Nominatim (inchangé)
 const reverseGeocode = async (
   lat: number,
   lng: number
@@ -98,9 +95,9 @@ const reverseGeocode = async (
 const getSuggestions = async (query: string): Promise<SuggestionItem[]> => {
   try {
     const response = await axios.get(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+      `${nominatim_url}/search?q=${encodeURIComponent(
         query
-      )}&format=json&addressdetails=1&limit=15&countrycodes=ci`
+      )}&format=json&addressdetails=1&limit=10&countrycodes=ci`
     );
     return response.data.map((item: any) => ({
       display_name: item.display_name,
@@ -113,11 +110,24 @@ const getSuggestions = async (query: string): Promise<SuggestionItem[]> => {
   }
 };
 
-const highlightText = (text: string): JSX.Element => {
-  return <span className="truncate">{text}</span>; // Troncature pour longues suggestions
+const highlightText = (text: string, query: string): JSX.Element => {
+  const parts = text.split(new RegExp(`(${query})`, "gi"));
+  return (
+    <span className="truncate">
+      {parts.map((part, i) =>
+        part.toLowerCase() === query.toLowerCase() ? (
+          <strong key={i} className="font-semibold text-blue-600 bg-blue-50 px-1 rounded">
+            {part}
+          </strong>
+        ) : (
+          part
+        )
+      )}
+    </span>
+  );
 };
 
-// Composant Map avec améliorations UX
+// Composant Map modernisé avec icône améliorée
 const MapComponent = React.lazy(async () => {
   if (typeof window === "undefined") {
     return { default: () => <div>Chargement de la carte...</div> };
@@ -133,7 +143,10 @@ const MapComponent = React.lazy(async () => {
       useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) return;
 
-        const map = L.map(mapContainerRef.current).setView(
+        const map = L.map(mapContainerRef.current, {
+          zoomControl: true,
+          scrollWheelZoom: false,
+        }).setView(
           address.lat && address.lng
             ? [address.lat, address.lng]
             : userPosition
@@ -141,29 +154,25 @@ const MapComponent = React.lazy(async () => {
             : [5.3167, -4.0305],
           17
         );
+
         const customIcon = L.divIcon({
           html: `
-            <div style="position: relative; width: 36px; height: 48px; display: flex; align-items: center; justify-content: center;">
-              <!-- Pin de localisation -->
-              <svg width="36" height="48" viewBox="0 0 36 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 0C8.06 0 0 8.06 0 18C0 28.94 18 48 18 48C18 48 36 28.94 36 18C36 8.06 27.94 0 18 0Z" fill="#2563EB"/>
-                <circle cx="18" cy="18" r="14" fill="white"/>
-              </svg>
-              <div style="position: absolute; top: 10px; color: #2563EB; font-size: 16px;">
-                ${renderToString(<FaLocationDot color="#2563EB" />)}
+            <div class="relative flex items-center justify-center animate-bounce">
+              <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                </svg>
               </div>
-              <!-- Ombre -->
-              <div style="position: absolute; bottom: -4px; width: 24px; height: 8px; background: rgba(0,0,0,0.2); border-radius: 50%; z-index: -1;"></div>
+              <div class="absolute -bottom-1 w-6 h-2 bg-blue-900 opacity-20 rounded-full blur-sm"></div>
             </div>
           `,
           className: "",
-          iconSize: [36, 48], // Taille de l'icône
-          iconAnchor: [18, 48], // Ancrage au bas du pin
-          popupAnchor: [0, -48], // Popup au-dessus
+          iconSize: [32, 40],
+          iconAnchor: [16, 40],
+          popupAnchor: [0, -40],
         });
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          // attribution: "© OpenStreetMap contributors",
-        }).addTo(map);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {}).addTo(map);
 
         const marker = L.marker(
           address.lat && address.lng
@@ -174,15 +183,21 @@ const MapComponent = React.lazy(async () => {
           {
             draggable: true,
             icon: customIcon,
-            title: "Déplacez-moi pour ajuster",
+            title: "Déplacez-moi pour ajuster l'adresse",
           }
         ).addTo(map);
 
         marker
           .bindPopup(
-            `<span style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px;">
-             C'est ici qu'on vous livrera
-           </span>`
+            `<div class="p-2 text-center">
+              <div class="flex items-center justify-center gap-2 mb-1">
+                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                </svg>
+                <span class="font-semibold text-gray-900">Lieu de livraison</span>
+              </div>
+              <p class="text-sm text-gray-600">Déplacez le marqueur pour ajuster</p>
+            </div>`
           )
           .openPopup();
 
@@ -198,7 +213,7 @@ const MapComponent = React.lazy(async () => {
         if (address.lat && address.lng) {
           map.setView([address.lat, address.lng], 17, {
             animate: true,
-            duration: 1,
+            duration: 0.5,
           });
         }
 
@@ -213,7 +228,10 @@ const MapComponent = React.lazy(async () => {
       return (
         <div
           ref={mapContainerRef}
-          style={{ height: mapHeight, width: "100%", zIndex: 1 }}
+          style={{ height: mapHeight, width: "100%" }}
+          className="rounded-2xl overflow-hidden shadow-lg border border-gray-200 z-10"
+          role="region"
+          aria-label="Carte interactive pour sélectionner l'adresse de livraison"
         />
       );
     },
@@ -221,7 +239,7 @@ const MapComponent = React.lazy(async () => {
 });
 
 export const AddressSelector: React.FC<{ mapHeight: string }> = ({
-  mapHeight = "300px",
+  mapHeight = "350px",
 }) => {
   const user = useAuthStore((state) => state.user);
   const fetchUser = useAuthStore((state) => state.fetchUser);
@@ -236,7 +254,7 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
       lng: userAddress?.longitude ? parseFloat(userAddress.longitude) : null,
     };
   });
-  const [searchInput, setSearchInput] = useState<string>("");
+  const [searchInput, setSearchInput] = useState<string>(address?.text || "");
   const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isGeocoding, setIsGeocoding] = useState<boolean>(false);
@@ -246,46 +264,48 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
   } | null>(null);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState<boolean>(false);
   const suggestionRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { userPosition, setMapCenter } = useGeolocationWithIP();
 
   const createUserAddressMutation = useMutation({
     mutationFn: create_user_address,
     onSuccess: (newAddress) => {
-      fetchUser();
+      fetchUser({ token: useAuthStore.getState().token || undefined });
       setAddress({ ...address, id: newAddress?.id });
-      setMessage({ type: "success", text: "Adresse créée avec succès !" });
-      setTimeout(() => setMessage(null), 7000);
+      setMessage({ type: "success", text: "Adresse enregistrée avec succès !" });
+      setTimeout(() => setMessage(null), 5000);
     },
     onError: () => {
-      setMessage({ type: "error", text: "Erreur lors de la création." });
-      setTimeout(() => setMessage(null), 7000);
+      setMessage({ type: "error", text: "Erreur lors de l'enregistrement." });
+      setTimeout(() => setMessage(null), 5000);
     },
   });
 
   const updateUserAddressMutation = useMutation({
     mutationFn: update_user_address,
     onSuccess: () => {
-      fetchUser();
-      setMessage({ type: "success", text: "Adresse mise à jour !" });
-      setTimeout(() => setMessage(null), 7000);
+      fetchUser({ token: useAuthStore.getState().token || undefined });
+      setMessage({ type: "success", text: "Adresse mise à jour avec succès !" });
+      setTimeout(() => setMessage(null), 5000);
     },
     onError: () => {
       setMessage({ type: "error", text: "Erreur lors de la mise à jour." });
-      setTimeout(() => setMessage(null), 7000);
+      setTimeout(() => setMessage(null), 5000);
     },
   });
 
   const deleteUserAddressMutation = useMutation({
     mutationFn: delete_user_address,
     onSuccess: () => {
-      fetchUser();
+      fetchUser({ token: useAuthStore.getState().token || undefined });
       setAddress({ text: "", subtitle: "", lat: null, lng: null });
-      setMessage({ type: "success", text: "Adresse supprimée !" });
-      setTimeout(() => setMessage(null), 7000);
+      setSearchInput("");
+      setMessage({ type: "success", text: "Adresse supprimée avec succès !" });
+      setTimeout(() => setMessage(null), 5000);
     },
     onError: () => {
       setMessage({ type: "error", text: "Erreur lors de la suppression." });
-      setTimeout(() => setMessage(null), 7000);
+      setTimeout(() => setMessage(null), 5000);
     },
   });
 
@@ -300,7 +320,7 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
       setSuggestions([]);
       setIsSuggestionOpen(false);
     }
-  }, 1090);
+  }, 400);
 
   useEffect(() => {
     fetchSuggestions();
@@ -310,7 +330,9 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (
         suggestionRef.current &&
-        !suggestionRef.current.contains(event.target as Node)
+        !suggestionRef.current.contains(event.target as Node) &&
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target as Node)
       ) {
         setIsSuggestionOpen(false);
       }
@@ -325,13 +347,13 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
       return;
     }
     const addressData = {
+      id: address?.id || "",
       name: `${newAddress.text}/${newAddress.subtitle}`,
       longitude: newAddress.lng?.toString() || "",
       latitude: newAddress.lat?.toString() || "",
       ...(address?.id && { id: address.id }),
     };
     if (address?.id) {
-      // @ts-ignore
       updateUserAddressMutation.mutate(addressData);
     } else {
       const { id, ...createAddressData } = addressData;
@@ -343,8 +365,8 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
     if (!searchInput.trim()) {
-      setMessage({ type: "error", text: "Entrez une adresse valide." });
-      setTimeout(() => setMessage(null), 7000);
+      setMessage({ type: "error", text: "Veuillez entrer une adresse valide." });
+      setTimeout(() => setMessage(null), 5000);
       return;
     }
     setIsGeocoding(true);
@@ -358,9 +380,9 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
     } else {
       setMessage({
         type: "error",
-        text: "Adresse introuvable ou indisponible.",
+        text: "Adresse introuvable. Essayez une autre adresse.",
       });
-      setTimeout(() => setMessage(null), 7000);
+      setTimeout(() => setMessage(null), 5000);
     }
     setIsGeocoding(false);
   };
@@ -402,166 +424,230 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
         setMapCenter([userPosition.lat, userPosition.lng]);
         saveAddress(newAddress);
       } else {
-        setMessage({ type: "error", text: "Position introuvable." });
-        setTimeout(() => setMessage(null), 7000);
+        setMessage({
+          type: "error",
+          text: "Impossible de récupérer votre position.",
+        });
+        setTimeout(() => setMessage(null), 5000);
       }
       setIsGeocoding(false);
     }
   };
 
   return (
-    <section className="w-full py-4 px-2 bg-gray-50 rounded-lg shadow-sm relative">
-      <div className="mb-4 flex items-center gap-2">
-        <CiDeliveryTruck className="text-2xl text-gray-600" />
-        <h2 className="text-lg font-semibold text-gray-900">
-          Adresse de livraison
-        </h2>
-      </div>
-      {/* <span className="text-sm text-gray-600 italic">
-        Vous pouvez deplacer le marqueur pour changer l'adresse de livraison
-      </span> */}
-
-      <form onSubmit={handleSearch} className="relative mb-6">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center">
-          <div className="flex-1 relative">
-            <label htmlFor="address-search" className="sr-only">
-              Rechercher une adresse
-            </label>
-            <input
-              id="address-search"
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder={
-                address?.text
-                  ? "Modifier l'adresse de livraison"
-                  : "Rechercher une adresse de livraison"
-              }
-              className={`w-full p-3 text-sm border rounded-md focus:ring-2 focus:outline-none transition-all duration-200 ${
-                isGeocoding
-                  ? "bg-gray-100 border-gray-200 cursor-not-allowed"
-                  : "border-gray-300 focus:ring-gray-500"
-              }`}
-              disabled={isGeocoding}
-              aria-disabled={isGeocoding}
-            />
+    <div className="w-full bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-600 to-gray-600 p-6 text-white">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+            <HiOutlineLocationMarker className="text-2xl" />
           </div>
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={isLoading || isGeocoding}
-              className="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-              aria-label={
-                address?.text ? "Modifier l'adresse" : "Ajouter une adresse"
-              }
-            >
-              {isLoading ? (
-                <Loading size="small" />
-              ) : (
-                <>
-                  <BsSearch size={16} />
-                  {address?.text ? "Modifier" : "Ajouter"}
-                </>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={handleReturnToUserPosition}
-              disabled={isGeocoding || !userPosition}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-100 disabled:bg-gray-200 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-              aria-label="Utiliser ma position actuelle"
-            >
-              <BsGeoAlt size={16} />
-              <span className="hidden md:inline">Ma position</span>
-            </button>
+          <div>
+            <h2 className="text-xl font-bold">Adresse de livraison</h2>
+            <p className="text-blue-100 text-sm">Où souhaitez-vous être livré ?</p>
           </div>
         </div>
-        {isSuggestionOpen && suggestions.length > 0 && (
-          <div
-            ref={suggestionRef}
-            className="absolute z-50 w-full bg-white border border-gray-200 rounded-md mt-2 shadow-lg max-h-60 overflow-y-auto animate-fade-in"
-          >
-            {suggestions.map((suggestion, index) => (
-              <div
-                key={index}
-                onClick={() => handleSuggestionClick(suggestion)}
-                className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors flex items-center gap-2"
+      </div>
+
+      <div className="p-6 space-y-6">
+        {/* Formulaire de recherche moderne */}
+        <form onSubmit={handleSearch} className="relative">
+          <div className="space-y-4">
+            <div className="relative">
+              <label htmlFor="address-search" className="block text-sm font-semibold text-gray-700 mb-2">
+                Rechercher une adresse
+              </label>
+              <div className="relative group">
+                <input
+                  id="address-search"
+                  type="text"
+                  ref={searchInputRef}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder={
+                    address?.text
+                      ? "Modifier l'adresse de livraison"
+                      : "Tapez votre adresse..."
+                  }
+                  className={`w-full px-4 py-4 pl-12 text-gray-900 placeholder-gray-500 bg-white border-2 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 ${
+                    isGeocoding
+                      ? "bg-gray-50 border-gray-200 cursor-not-allowed"
+                      : "border-gray-200 hover:border-gray-300 group-hover:shadow-md"
+                  }`}
+                  disabled={isGeocoding}
+                />
+                <BsSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                {isLoading && (
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                    <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                disabled={isLoading || isGeocoding}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-slate-600 to-slate-600 text-white font-semibold rounded-xl hover:from-slate-700 hover:to-slate-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg flex items-center justify-center gap-2"
               >
-                <FaMapMarkerAlt className="text-gray-500" size={14} />
-                <div className="font-medium truncate">
-                  {highlightText(suggestion.display_name)}
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    <BsSearch size={18} />
+                    {address?.text ? "Modifier" : "Ajouter"}
+                  </>
+                )}
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleReturnToUserPosition}
+                disabled={isGeocoding || !userPosition}
+                className="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] flex items-center gap-2"
+              >
+                <BsGeoAlt size={18} />
+                <span className="hidden sm:inline">Ma position</span>
+              </button>
+            </div>
+          </div>
+
+          {isSuggestionOpen && suggestions.length > 0 && (
+            <div
+              ref={suggestionRef}
+              className="absolute z-50 w-full bg-white border border-gray-200 rounded-2xl mt-2 shadow-2xl max-h-64 overflow-y-auto animate-fadeIn"
+            >
+              {suggestions.map((suggestion, index) => (
+                <div
+                  key={index}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 group"
+                >
+                  <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                    <FiMapPin className="text-blue-600" size={16} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    {highlightText(suggestion.display_name, searchInput)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </form>
+
+        {address?.text ? (
+          <div className="space-y-6">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-green-100 rounded-xl">
+                    <FaCheckCircle className="text-green-600" size={20} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-gray-900 text-lg mb-1">Adresse confirmée</h3>
+                    <p className="text-gray-800 font-medium break-words leading-relaxed">
+                      {address.text}
+                    </p>
+                    {address.subtitle && (
+                      <p className="text-gray-600 font-medium mt-1">
+                        {address.subtitle}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-2 font-mono">
+                      📍 {address.lat?.toFixed(6) || "N/A"}, {address.lng?.toFixed(6) || "N/A"}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSearchInput(address.text)}
+                    className="p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 transform hover:scale-110"
+                    title="Modifier l'adresse"
+                  >
+                    <FiEdit2 size={18} />
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="p-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 transform hover:scale-110"
+                    title="Supprimer l'adresse"
+                  >
+                    <BsTrash size={18} />
+                  </button>
                 </div>
               </div>
-            ))}
+            </div>
+
+            <div className="relative">
+              <Suspense fallback={
+                <div className="h-80 bg-gray-100 rounded-2xl flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <p className="text-gray-600">Chargement de la carte...</p>
+                  </div>
+                </div>
+              }>
+                <MapComponent
+                  mapHeight={mapHeight}
+                  address={address}
+                  userPosition={userPosition}
+                  onAddressChange={handleAddressChange}
+                />
+              </Suspense>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <HiOutlineLocationMarker className="text-blue-600 text-3xl" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Définissez votre adresse</h3>
+              <p className="text-gray-600 max-w-md mx-auto">
+                Recherchez une adresse ou déplacez le marqueur sur la carte pour définir votre lieu de livraison.
+              </p>
+            </div>
+            
+            <div className="relative">
+              <Suspense fallback={
+                <div className="h-80 bg-gray-100 rounded-2xl flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <p className="text-gray-600">Chargement de la carte...</p>
+                  </div>
+                </div>
+              }>
+                <MapComponent
+                  mapHeight={mapHeight}
+                  address={address}
+                  userPosition={userPosition}
+                  onAddressChange={handleAddressChange}
+                />
+              </Suspense>
+            </div>
           </div>
         )}
-      </form>
-      {address?.text ? (
-        <div className="space-y-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div>
-              <p className=" font-bold text-gray-900 break-words">
-                {address.text}
-              </p>
-              {address.subtitle && (
-                <p className=" text-gray-600 font-semibold break-words">
-                  {address.subtitle}
-                </p>
-              )}
-              <p className="text-xs text-gray-500">
-                Lat: {address.lat?.toFixed(6) || "N/A"}, Lng:{" "}
-                {address.lng?.toFixed(6) || "N/A"}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setSearchInput(address.text)}
-                className="p-2 text-gray-600 hover:text-gray-600 transition-colors"
-                aria-label="Modifier l'adresse"
-              >
-                <FiEdit2 size={18} />
-              </button>
-              <button
-                onClick={handleDelete}
-                className="p-2 text-gray-600 hover:text-red-600 transition-colors"
-                aria-label="Supprimer l'adresse"
-              >
-                <BsTrash size={18} />
-              </button>
-            </div>
-          </div>
-          <Suspense fallback={<Loading size="medium" />}>
-            <MapComponent
-              mapHeight={mapHeight}
-              address={address}
-              userPosition={userPosition}
-              onAddressChange={handleAddressChange}
-            />
-          </Suspense>
-        </div>
-      ) : (
-        <div className="text-center text-gray-600">
-          <p className="text-sm mb-4">Définissez une adresse de livraison.</p>
-          <Suspense fallback={<Loading size="medium" />}>
-            <MapComponent
-              mapHeight={mapHeight}
-              address={address}
-              userPosition={userPosition}
-              onAddressChange={handleAddressChange}
-            />
-          </Suspense>
-        </div>
-      )}
+      </div>
 
+      {/* Messages de feedback avec toast moderne */}
       {message && (
-        <div
-          className={`mt-4 p-3 text-sm text-center rounded-md animate-fade-in ${
-            message.type === "success"
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {message.text}
+        <div className={`fixed top-6 right-6 p-4 rounded-2xl shadow-2xl transition-all duration-500 transform z-50 max-w-sm ${
+          message.type === "success"
+            ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+            : "bg-gradient-to-r from-red-500 to-pink-500 text-white"
+        } animate-slideIn`}>
+          <div className="flex items-center gap-3">
+            <div className="p-1 bg-white/20 rounded-full">
+              {message.type === "success" ? (
+                <FaCheckCircle size={16} />
+              ) : (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              )}
+            </div>
+            <p className="font-medium">{message.text}</p>
+          </div>
         </div>
       )}
 
@@ -569,12 +655,13 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
         createUserAddressMutation.isPending ||
         updateUserAddressMutation.isPending ||
         deleteUserAddressMutation.isPending) && (
-        <div className="absolute top-[40%] inset-x-0 bg-transparent bg-opacity-50 flex items-center justify-center z-20">
-          <Loading size="large" />
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-30">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-700 font-medium">Traitement en cours...</p>
+          </div>
         </div>
       )}
-    </section>
+    </div>
   );
 };
-
-export default AddressSelector;

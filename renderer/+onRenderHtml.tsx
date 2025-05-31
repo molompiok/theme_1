@@ -7,23 +7,44 @@ import type { OnRenderHtmlAsync } from 'vike/types'
 import { getPageTitle } from './getPageTitle'
 import { dehydrate, QueryClientProvider } from '@tanstack/react-query'
 import { createQueryClient } from './ReactQueryProvider'
-import axios from 'axios'
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { BASE_URL, api as globalApi } from "../api/index";
 import { useAuthStore } from "../store/user"
-
+import { parse as parseCookie } from 'cookie';
 
 const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRenderHtmlAsync> => {
-  const { Page } = pageContext
+  const { Page, headers: pageContextHeaders } = pageContext
   
   if (!Page) throw new Error('pageContext.Page is not defined')
 
     
     const host = (process.env.NODE_ENV == 'production' ? 'https://' : 'http://') ;
     
-  const headersOriginal = pageContext.headers as Record<string, string> || {};
+  const headersOriginal = pageContextHeaders as Record<string, string> || {};
   // const baseUrlFromHeader = host + headersOriginal['x-base-url'] || '';
-  const apiUrlFromHeader = host + headersOriginal['x-store-api-url'] || '';
-  const serverUrlFromHeader = host + headersOriginal['x-server-url'] || '';
+  const originalHeaders = pageContextHeaders as Record<string, string> || {};
+  const apiUrlFromHeader = host + (headersOriginal['x-store-api-url'] || 'api.sublymus-server.com/70b321f3-0eab-49da-8f09-5a4f1afe505b');
+  const serverUrlFromHeader = host + (headersOriginal['x-server-url'] || 'server.sublymus-server.com/70b321f3-0eab-49da-8f09-5a4f1afe505b');
+
+   // --- START: Auth Token Handling for SSR ---
+  //  const cookieHeader = originalHeaders.cookie || '';
+  //  const cookies = parseCookie(cookieHeader);
+  //  const serverSideToken = cookies.authToken; // <<< ADJUST 'authToken' if your cookie has a different name
+
+   // Temporarily set the token for this SSR request.
+   // This ensures that API calls made during this server render use the token.
+   // We also reset it after rendering or if no token, to prevent state leakage between requests.
+   // A more robust solution for complex apps might involve request-scoped stores,
+   // but direct manipulation is common for simpler Vike setups.
+  //  if (serverSideToken) {
+  //    useAuthStore.setState({ token: serverSideToken, wasLoggedIn: true }); // Assume wasLoggedIn if token exists
+  //    console.log("🚀 ~ SSR: Token from cookie found and set in store:", serverSideToken);
+  //  } else {
+  //    // Ensure store is reset if no token from cookie
+  //    useAuthStore.setState({ token: null, user: null, wasLoggedIn: false });
+  //    console.log("🚀 ~ SSR: No auth token cookie found.");
+  //  }
+   // --- END: Auth Token Handling for SSR ---
 
 
   const api = axios.create({
@@ -41,38 +62,56 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRende
   pageContext.api = api;
   pageContext.server = server;
 
-  BASE_URL.url = pageContext.apiUrl;
+  BASE_URL.apiUrl = apiUrlFromHeader;
+  BASE_URL.serverUrl = serverUrlFromHeader;
   globalApi.api = api;
   globalApi.server = server;
 
-  api.interceptors.request.use(request => {
-    return request;
-  })
-  api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      if (typeof window !== "undefined") {
-        const status = error.response?.status;
-        const { wasLoggedIn, logout } = useAuthStore.getState();
-        if (status === 401 && wasLoggedIn) {
-          console.warn("Session expirée, déconnexion automatique");
-          logout();
-          // if (!localStorage.getItem("hasShownSessionExpired")) {
-          //   toast.custom((t) => (
-          //     <div className="flex items-center gap-3 p-4 bg-red-100 border-l-4 border-red-500 rounded-lg shadow-lg">
-          //       <BsXCircle className="w-6 h-6 text-red-600" />
-          //       <p className="text-red-800 font-medium">
-          //         Deconexion reussie
-          //       </p>
-          //     </div>
-          //   ));
-          //   localStorage.setItem("hasShownSessionExpired", "true");
-          // }
-        }
+  api.interceptors.request.use(
+    (config: InternalAxiosRequestConfig) => {
+      // Get token directly from store. It should be populated by the cookie logic above for SSR.
+      const token = useAuthStore.getState().token;
+      console.log("🚀 ~ SSR Interceptor - Token:", token);
+      if (token && config.headers) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+      } else {
+        console.log("SSR Interceptor Request: No token found or no headers object.");
       }
+      return config;
+    },
+    (error: AxiosError) => {
+      console.error("SSR Interceptor Request Error:", error);
       return Promise.reject(error);
     }
-  );
+  )
+  
+  // api.interceptors.response.use(
+  //   (response) => response,
+  //   (error: AxiosError) => {
+  //     if (error.code === "ERR_NETWORK" || error.code === "ECONNABORTED") {
+  //       console.error("SSR Interceptor Response: Network or Timeout Error", error.message);
+  //       return Promise.reject(new Error("Erreur Réseau ou Timeout"));
+  //     }
+  //     console.error(
+  //       "SSR Interceptor Response Error:",
+  //       error.response?.status,
+  //       error.response?.data || error.message,
+  //       error.config?.url
+  //     );
+  //     const status = error.response?.status;
+  //     // The logout logic based on wasLoggedIn is more of a client-side concern.
+  //     // On SSR, a 401 usually means the token from cookie is invalid/expired.
+  //     // We've already reset the store if no token was found.
+  //     // If a token *was* found and led to a 401, the client will handle login upon hydration.
+  //     if (status === 401) {
+  //       console.warn("SSR: Received 401. Token might be invalid or expired.");
+  //       // Optionally clear the token in store again if an API call with it failed
+  //       useAuthStore.getState().logout();
+  //     }
+  //     return Promise.reject(error);
+  //   }
+  // );
+  
 
   // Création du QueryClient pour le SSR
   const queryClient = createQueryClient
@@ -97,7 +136,7 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRende
       <head>
         <meta charset="UTF-8" />
         <link rel="icon" href="${logoUrl}" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <meta name="description" content="${desc}" />
 
         <style>
@@ -115,7 +154,14 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRende
       <body>
         <div id="root">${dangerouslySkipEscape(pageHtml)}</div>
         <div id="modal-root"></div>
-        <script>window.__REACT_QUERY_STATE__ = ${dangerouslySkipEscape(JSON.stringify(dehydratedState))};</script>
+        <script>
+          window.__REACT_QUERY_STATE__ = ${dangerouslySkipEscape(JSON.stringify(dehydratedState))};
+          window.__INITIAL_AUTH_STATE__ = ${dangerouslySkipEscape(JSON.stringify({ // Pass initial auth state for client
+            user: useAuthStore.getState().user,
+            token: useAuthStore.getState().token, // This might be the server-side token
+            wasLoggedIn: useAuthStore.getState().wasLoggedIn,
+          }))};
+        </script>
       </body>
     </html>`
 

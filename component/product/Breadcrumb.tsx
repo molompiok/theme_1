@@ -1,8 +1,8 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { get_categories } from '../../api/categories.api';
-import { Link } from '../Link';
-import { Category } from '../../pages/type';
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { get_categories } from "../../api/categories.api";
+import { Link } from "../Link";
+import { Category } from "../../pages/type";
 
 const useMediaQuery = (query: string) => {
   const [matches, setMatches] = React.useState(false);
@@ -12,8 +12,8 @@ const useMediaQuery = (query: string) => {
     setMatches(media.matches);
 
     const listener = (e: MediaQueryListEvent) => setMatches(e.matches);
-    media.addEventListener('change', listener);
-    return () => media.removeEventListener('change', listener);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
   }, [query]);
 
   return matches;
@@ -24,41 +24,38 @@ interface BreadcrumbProps {
 }
 
 function getParentCategories(
-    categoryId: string,
-    allCategories: Category[]
+  categoryId: string,
+  allCategories: Category[]
 ): Category[] {
-    const map = new Map(allCategories.map((cat) => [cat.id, cat]))
-    const result: Category[] = []
+  const map = new Map(allCategories.map((cat) => [cat.id, cat]));
+  const result: Category[] = [];
 
-    let current = map.get(categoryId)
+  let current = map.get(categoryId);
 
-    while (current) {
-        result.push(current)
-        current = current.parent_category_id
-            ? map.get(current.parent_category_id)
-            : undefined
-    }
+  while (current) {
+    result.push(current);
+    current = current.parent_category_id
+      ? map.get(current.parent_category_id)
+      : undefined;
+  }
 
-    return result
+  return result;
 }
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({ categoryId }) => {
-  console.log("🚀 ~ categoryId:", categoryId)
+  console.log("🚀 ~ categoryId:", categoryId);
   const storeId = "d3d8dfcf-b84b-49ed-976d-9889e79e6306";
 
-  const isMobile = useMediaQuery('(max-width: 767px)');
+  const isMobile = useMediaQuery("(max-width: 767px)");
   const maxItems = isMobile ? 2 : 3;
 
-  const {
-    data: categories = [],
-    isPending,
-} = useQuery({
+  const { data: categories = [], isPending } = useQuery({
     queryKey: ["get_categories", storeId],
     queryFn: () => get_categories({ store_id: storeId }),
-    select: (data) => (data.list ? data.list : []),
+    select: (data) => (data?.list ? data.list : []),
   });
 
-  console.log("🚀 ~ categories:", categories)
+  console.log("🚀 ~ categories:", categories);
   if (isPending) {
     return <div className="text-gray-600 text-sm">Loading...</div>;
   }
@@ -68,7 +65,10 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ categoryId }) => {
       <nav aria-label="Breadcrumb">
         <ol className="flex items-center text-gray-600 text-sm">
           <li>
-            <Link href="/" className="hover:text-primary font-semibold hover:font-bold">
+            <Link
+              href="/"
+              className="hover:text-primary font-semibold hover:font-bold"
+            >
               Accueil
             </Link>
           </li>
@@ -78,7 +78,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ categoryId }) => {
   }
 
   const parentCategories = getParentCategories(categoryId, categories);
-  console.log("🚀 ~ parentCategories:", parentCategories)
+  console.log("🚀 ~ parentCategories:", parentCategories);
   const reversedCategories = [...parentCategories].reverse();
   const shouldTruncate = reversedCategories.length > maxItems;
 
@@ -86,7 +86,10 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ categoryId }) => {
     <nav aria-label="Breadcrumb" className="text-gray-600 text-sm">
       <ol className="flex items-center flex-wrap gap-1 max-w-full">
         <li>
-          <Link href="/" className="hover:text-primary font-semibold hover:font-bold">
+          <Link
+            href="/"
+            className="hover:text-primary font-semibold hover:font-bold"
+          >
             Accueil
           </Link>
         </li>

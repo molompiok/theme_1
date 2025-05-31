@@ -2,33 +2,69 @@ import { AxiosError } from "axios";
 import { api, build_form_data, build_search_params } from ".";
 import { CartResponse, CartUpdateResponse, MetaPagination, OrderByType, OrderByTypeOrder, UserOrder } from "../pages/type";
 import { delay } from "../utils";
+import { getGuestCartId, setGuestCartId } from "../utils/storeCart";
+import { useAuthStore } from "../store/user";
 
 export const update_cart = async (params: {
   product_id: string;
   mode: 'increment' | 'decrement' | 'set' | 'clear' | 'max';
   value?: number;
-  ignoreStock?: boolean;
-  bind: Record<string, string>;
+  ignoreStock?: boolean; // Note: le backend attend `ignore_stock`
+  bind: Record<string, any>; // `bind` peut être plus complexe que Record<string, string>
 }) => {
-  const formData = build_form_data(params);
-    try {
-      const response = await api.api?.post<CartUpdateResponse>('/v1/cart/update', formData);
-      await delay(1000); 
-      return response?.data;
-    } catch (error) {
-      console.error('Erreur lors de update_cart:', error);
-      throw error; 
-    }
-  };
+  const user = useAuthStore.getState().user; // Obtenir l'état actuel de l'utilisateur
+  const payload: any = { ...params };
 
-export const view_cart = async () => {
+  if (params.ignoreStock !== undefined) {
+    payload.ignore_stock = params.ignoreStock; // Assurer la bonne casse pour le backend
+    delete payload.ignoreStock;
+  }
+
+
+  if (!user) {
+    const guestCartId = getGuestCartId();
+    if (guestCartId) {
+      payload.guest_cart_id = guestCartId;
+    }
+  }
+
+  const formData = build_form_data(payload); // build_form_data doit gérer la structure de payload
+  
   try {
-    const response = await api.api?.get<CartResponse>(
-      "/v1/cart"
-    );
+    console.log('Updating cart with payload:', Object.fromEntries(formData.entries()));
+    const response = await api.api?.post<CartUpdateResponse>('/v1/cart/update', formData);
+    
+    if (response?.data && !user && response.data.new_guest_cart_id) {
+      setGuestCartId(response.data.new_guest_cart_id);
+      console.log('New guest cart ID set from response:', response.data.new_guest_cart_id);
+    }
+    
+    // await delay(1000); // Vous pouvez le garder si nécessaire pour le débogage
     return response?.data;
   } catch (error) {
-    console.error("Error fetching feature details:", error);
+    console.error('Erreur lors de update_cart_api:', error);
+    // Gérer l'erreur, par exemple la logger, la transformer, ou la rejeter pour que useMutation la gère
+    throw error;
+  }
+};
+
+export const view_cart = async () => {
+  const user = useAuthStore.getState().user;
+  let url = "/v1/cart";
+
+  if (!user) {
+    const guestCartId = getGuestCartId();
+    if (guestCartId) {
+      url += `?guest_cart_id=${guestCartId}`;
+    }
+  }
+  
+  try {
+    console.log('Fetching cart from URL:', url);
+    const response = await api.api?.get<CartResponse>(url);
+    return response?.data;
+  } catch (error) {
+    console.error("Error fetching cart details:", error);
     throw error;
   }
 };
@@ -80,7 +116,7 @@ export const get_orders = async (params : { order_by : OrderByTypeOrder , page :
   const searchParams = build_search_params(params);
   await delay(1000);
   try {
-    const response = await api.api?.get<{list : UserOrder[] , meta : MetaPagination}>('/v1/orders?' + searchParams.toString());
+    const response = await api.api?.get<{list : UserOrder[] , meta : MetaPagination}>('/v1/orders/my-orders?' + searchParams.toString());
     return response?.data
   } catch (error) {
     console.error('Erreur lors de la récupération des commandes:', error);

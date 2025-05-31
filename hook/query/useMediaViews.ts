@@ -6,8 +6,6 @@ import { ProductFeature } from "../../pages/type";
 
 
 export const useMediaViews = ({product_id , bindNames} : {product_id : string , bindNames : Record<string, ProductFeature | string>}) => {
-console.log("🚀 ~ useMediaViews ~ bindNames:", bindNames)
-
 
     const { data: features, isPending: isPendingFeatures } = useQuery({
         queryKey: ["get_features_with_values", product_id],
@@ -17,7 +15,6 @@ console.log("🚀 ~ useMediaViews ~ bindNames:", bindNames)
             : Promise.resolve(null),
         enabled: !!product_id,
       });
-    console.log("🚀 ~ useMediaViews ~ features:", features)
     
       const mediaViews = useMemo(() => {
         if (!features?.length) return ["/img/default_img.gif"];
@@ -26,7 +23,6 @@ console.log("🚀 ~ useMediaViews ~ bindNames:", bindNames)
             if (default1) {
               return default1.views;
             }
-            console.log("🚀 ~ mediaViews ~ default1:", default1)
         }
         const default2 = getFirstFeatureWithView(features);
         const defaultViews = default2?.values[0]?.views || [];

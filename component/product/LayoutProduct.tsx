@@ -6,6 +6,8 @@ import FilterPopover from "../FilterPopover";
 import { usePageContext } from "../../renderer/usePageContext";
 import { useSelectedFiltersStore } from "../../store/filter";
 import { defaultOptions } from "../../pages/type";
+import PriceRangeFilter from "../PriceRangeFilter";
+import { useFiltersAndUrlSync } from "../../hook/useUrlFilterManager";
 
 interface LayoutProductProps {
   dehydratedState: DehydratedState;
@@ -16,27 +18,34 @@ export default function LayoutProduct({
   dehydratedState,
   queryKey,
 }: PropsWithChildren<LayoutProductProps>) {
-  const { setFilter, selectedFilters } = useSelectedFiltersStore();
+   const pageContext = usePageContext();
+  
+    const { urlPathname } = pageContext;
+  const { setSelectedFilters, selectedFilters , setFilter } = useSelectedFiltersStore();
+
   return (
     <main className="container font-primary mx-auto py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-1 lg:gap-8">
         <aside className="hidden lg:block lg:sticky lg:top-7 self-start">
           <FilterPanel />
         </aside>
-        <section className="space-y-6 ">
+        <section className="space-y-6">
           <div className="flex justify-start flex-row-reverse gap-2">
             <div className="lg:hidden flex   gap-2">
               <FilterPanel />
             </div>
-            <FilterPopover setFilter={setFilter} selectedFilters={selectedFilters} defaultOptions={[...defaultOptions]} />
+            <FilterPopover
+              setFilter={setFilter}
+              selectedFilters={selectedFilters}
+              // defaultOptions={[...defaultOptions]}
+            />
+           
           </div>
           <HydrationBoundary state={dehydratedState}>
-         
             <ListProductCard queryKey={queryKey} />
           </HydrationBoundary>
         </section>
       </div>
     </main>
   );
-
 }

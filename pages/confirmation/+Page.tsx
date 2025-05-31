@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useAuthStore } from "../../store/user";
-import GoogleAuthButton from "../../component/Auth/GoogleAuthButton";
 import { PhoneNumbers } from "../../component/profile/PhoneNumbers";
 import LivraisonStep from "../../component/confirmation/LivraisonStep";
 import { PersonalInfo } from "../../component/profile/PersonalInfo";
@@ -9,6 +8,8 @@ import clsx from "clsx";
 import useCart from "../../hook/query/useCart";
 import FinalInfo from "../../component/confirmation/FinalInfo";
 import { navigate } from "vike/client/router";
+import { googleLogin } from "../../utils";
+import { FcGoogle } from "react-icons/fc";
 
 interface DétailsCommande {
   adresse_livraison: string;
@@ -48,7 +49,6 @@ export default function PagePaiement() {
     if ((cart?.cart?.items?.length ?? 0) <= 0) {
       // navigate("/");
       history.back();
-
     }
   }, [cart?.cart?.items]);
 
@@ -88,7 +88,7 @@ export default function PagePaiement() {
                   <>
                     <div className="space-y-4">
                       <PersonalInfo />
-                      <PhoneNumbers style="bg-white" />
+                      <PhoneNumbers  />
                     </div>
                     {!isPermitToProceed && (
                       <p className="text-sm text-red-500 font-semibold bg-red-100 p-3 rounded-md">
@@ -116,7 +116,15 @@ export default function PagePaiement() {
                     <p className="text-lg text-center font-medium text-gray-800">
                       Vous devez être connecté pour passer une commande.
                     </p>
-                    <GoogleAuthButton />
+                    <button
+                      onClick={googleLogin}
+                      className="flex items-center gap-3 px-6 py-2 rounded-xl border border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 bg-white hover:bg-gray-50"
+                    >
+                      <FcGoogle size={20} />
+                      <span className="text-sm font-medium text-gray-700">
+                        Continuer avec Google
+                      </span>
+                    </button>
                     <p className="text-sm text-gray-600 text-center">
                       Connectez-vous rapidement avec Google pour continuer.
                     </p>

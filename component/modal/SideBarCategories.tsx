@@ -1,84 +1,85 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useAuthStore } from "../../store/user";
+import React, { useEffect, useRef, useState } from "react";
+// import { useAuthStore } from "../../store/user"; // Supposé non utilisé ici pour la démo
 import { useQuery } from "@tanstack/react-query";
-import { get_categories } from "../../api/categories.api";
-import { Link, LinkSideBar } from "../Link";
+import { get_categories } from "../../api/categories.api"; // Assurez-vous que le chemin est correct
+import { Link } from "../Link"; // LinkSideBar n'est plus utilisé, Link suffit
 import {
   BsChevronDown,
   BsChevronLeft,
   BsChevronRight,
   BsX,
 } from "react-icons/bs";
-import { CiMenuBurger } from "react-icons/ci";
-import Modal from "./Modal";
-import { Logo } from "../../renderer/Layout";
-import { IoMdLink } from "react-icons/io";
+import { CiMenuFries } from "react-icons/ci"; // Alternative à CiMenuBurger
+import Modal from "./Modal"; // Assurez-vous que le chemin est correct
+import { Logo } from "../../renderer/Layout"; // Assurez-vous que le chemin est correct
+// import { IoMdLink } from "react-icons/io"; // Non utilisé
 import gsap from "gsap";
 import { navigate } from "vike/client/router";
-import { BASE_URL } from "../../api";
-import { ProductMedia } from "../ProductMedia";
+// import { BASE_URL } from "../../api"; // Non utilisé
+import { ProductMedia } from "../ProductMedia"; // Assurez-vous que le chemin est correct
+import { useThemeSettingsStore } from "../../store/themeSettingsStore";
+
+// MOCK DATA for get_categories if API is not available for demo
+// const mockCategories = [
+//   { id: '1', name: 'Électronique', slug: 'electronique', parent_category_id: null, icon: [{ url: 'icon_tv.svg', alt: 'TV' }] },
+//   { id: '2', name: 'Livres', slug: 'livres', parent_category_id: null, icon: [{ url: 'icon_book.svg', alt: 'Book' }] },
+//   { id: '3', name: 'Vêtements', slug: 'vetements', parent_category_id: null, icon: [{ url: 'icon_shirt.svg', alt: 'Shirt' }] },
+//   { id: '1-1', name: 'Télévisions', slug: 'televisions', parent_category_id: '1', icon: [] },
+//   { id: '1-2', name: 'Smartphones', slug: 'smartphones', parent_category_id: '1', icon: [] },
+//   { id: '3-1', name: 'Hommes', slug: 'hommes', parent_category_id: '3', icon: [] },
+//   { id: '3-2', name: 'Femmes', slug: 'femmes', parent_category_id: '3', icon: [] },
+// ];
 
 export default function SideBarCategories() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentCategoryId, setCurrentCategoryId] = useState<string | null>(
-    null
-  );
-  const [history, setHistory] = useState<string[]>([]);
+  const [currentCategoryId, setCurrentCategoryId] = useState<string | null>(null);
+  const [history, setHistory] = useState<string[]>([]); // Stores parent category IDs
   const listRef = useRef<HTMLUListElement>(null);
-  const backButtonRef = useRef<HTMLButtonElement>(null);
-  const user = useAuthStore((state) => state.user);
+  const modalContentRef = useRef<HTMLDivElement>(null);
+const filterSideBackgroundColor = useThemeSettingsStore(state => state.filterSideBackgroundColor);
+const filterSideTextColor = useThemeSettingsStore(state => state.filterSideTextColor);
+  // const user = useAuthStore((state) => state.user); // Supposé non utilisé
+
+  // Animation GSAP pour la liste des catégories
   useEffect(() => {
     if (listRef.current && isModalOpen) {
       gsap.fromTo(
         listRef.current.children,
-        { opacity: 0, x: 20 },
+        { opacity: 0, x: 30 },
         {
           opacity: 1,
           x: 0,
-          duration: 0.6,
-          stagger: 0.3,
-          ease: "power2.out",
+          duration: 0.4, // Légèrement plus rapide
+          stagger: 0.07, // Stagger plus subtil
+          ease: "power3.out",
         }
       );
     }
   }, [currentCategoryId, isModalOpen]);
 
-  useEffect(() => {
-    if (backButtonRef.current) {
-      if (history.length > 0) {
-        gsap.fromTo(
-          backButtonRef.current,
-          { opacity: 0, scale: 0.4 },
-          { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.7)" }
-        );
-      } else {
-        gsap.to(backButtonRef.current, {
-          opacity: 0,
-          scale: 0.8,
-          duration: 0.3,
-          ease: "back.in(1.7)",
-        });
-      }
-    }
-  }, [history]);
-
+  // Query pour les catégories
   const {
     data: categories,
     isError,
     isPending,
   } = useQuery({
     queryKey: ["get_categories"],
-    queryFn: () =>
-      get_categories({ store_id: "d3d8dfcf-b84b-49ed-976d-9889e79e6306" }),
-    select: (data) => (data.list ? data.list : []),
+    queryFn: () => get_categories({ store_id: "d3d8dfcf-b84b-49ed-976d-9889e79e6306" }),
+    // queryFn: () => Promise.resolve({ list: mockCategories }), // Pour démo sans API
+    select: (data) => (data?.list ? data.list : []),
   });
 
   if (isPending) {
-    return <p>chargement...</p>;
+    return (
+      <div className="px-4">
+        <div className="h-8 w-24 bg-neutral-200 dark:bg-neutral-700 rounded animate-pulse"></div>
+      </div>
+    );
   }
 
   if (isError || !categories) {
-    return <></>;
+    // Peut-être afficher un message d'erreur plus explicite ou un composant d'erreur
+    return <div className="px-4 text-red-500">Erreur de chargement des catégories.</div>;
   }
 
   const handleModalOpen = () => {
@@ -96,8 +97,8 @@ export default function SideBarCategories() {
   const getCurrentCategories = () => {
     return categories?.filter((cat) =>
       currentCategoryId === null
-        ? !cat.parent_category_id
-        : cat.parent_category_id === currentCategoryId
+        ? !cat.parent_category_id // Root categories
+        : cat.parent_category_id === currentCategoryId // Subcategories
     );
   };
 
@@ -105,273 +106,232 @@ export default function SideBarCategories() {
     return categories?.some((cat) => cat.parent_category_id === categoryId);
   };
 
-  const handleForward = (categoryId: string) => {
+  const animateAndChangeCategory = (newCategoryId: string | null, direction: 'forward' | 'back') => {
     if (listRef.current) {
+      const xDirection = direction === 'forward' ? -30 : 30;
       gsap.to(listRef.current.children, {
         opacity: 0,
-        x: -20,
+        x: xDirection,
         duration: 0.2,
-        stagger: 0.1,
+        stagger: direction === 'forward' ? 0.05 : -0.05, // Stagger inversé pour le retour
+        ease: "power2.in",
         onComplete: () => {
-          setHistory((prev) => [...prev, currentCategoryId || "root"]);
-          setCurrentCategoryId(categoryId);
+          if (direction === 'forward' && newCategoryId !== null) {
+            setHistory((prev) => [...prev, currentCategoryId === null ? "root" : currentCategoryId]);
+            setCurrentCategoryId(newCategoryId);
+          } else if (direction === 'back') {
+            const newHistory = [...history];
+            const previousId = newHistory.pop();
+            setHistory(newHistory);
+            setCurrentCategoryId(previousId === "root" ? null : previousId || null);
+          }
+          // Scroll to top of modal content
+          if (modalContentRef.current) {
+            modalContentRef.current.scrollTop = 0;
+          }
         },
       });
     }
+  };
+
+  const handleForward = (categoryId: string) => {
+    animateAndChangeCategory(categoryId, 'forward');
   };
 
   const handleBack = () => {
-    if (listRef.current) {
-      gsap.to(listRef.current.children, {
-        opacity: 0,
-        x: 20,
-        duration: 0.2,
-        stagger: 0.1,
-        onComplete: () => {
-          const newHistory = [...history];
-          const previousId = newHistory.pop();
-          setHistory(newHistory);
-          setCurrentCategoryId(
-            previousId === "root" ? null : previousId || null
-          );
-        },
-      });
-    }
+    animateAndChangeCategory(null, 'back');
   };
-  const currentCategory = categories.find(
+
+  const currentCategoryData = categories.find(
     (cat) => cat.id === currentCategoryId
   );
+  const parentCategoryOfCurrent = history.length > 0
+    ? categories.find(cat => cat.id === history[history.length -1])
+    : null;
+
 
   const parentCategories = categories?.filter((cat) => !cat.parent_category_id);
-  const shouldShowModal = parentCategories?.length ?? 0 > 2;
+  const MAX_DESKTOP_CATEGORIES = 4;
+  const shouldShowModalButton = parentCategories?.length > MAX_DESKTOP_CATEGORIES;
+
+  const { setSettings, resetSettings, ...settings } = useThemeSettingsStore();
+
   return (
     <>
-      <ul className="hidden lg:flex flex-wrap gap-1 px-4">
+      {/* Desktop Horizontal Menu */}
+      <nav className="hidden lg:flex items-center gap-1 px-4" aria-label="Catégories principales" style={{ backgroundColor: filterSideBackgroundColor }}>
         {parentCategories
-          ?.slice(0, shouldShowModal ? 2 : parentCategories?.length)
+          ?.slice(0, shouldShowModalButton ? MAX_DESKTOP_CATEGORIES : parentCategories?.length)
           .map((category) => (
-            <li
+            <button
               key={category.id}
-              onMouseEnter={(e) =>
-                gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 })
-              }
-              onMouseLeave={(e) =>
-                gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })
-              }
+              // href={`/categorie/${category.slug}`}
+              onClick={() => navigate(`/categorie/${category.slug}`)}
+              className="group px-3 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-md transition-colors duration-150 ease-in-out"
+              // onMouseEnter={(e) => gsap.to(e.currentTarget, { y: -2, duration: 0.2 })}
+              // onMouseLeave={(e) => gsap.to(e.currentTarget, { y: 0, duration: 0.2 })}
             >
-              <Link
-                href={`/categorie/${category.slug}`}
-                className=" px-3 py-2 font-semibold transition-colors"
-              >
-                <div className="flex gap-2 items-center">
-                  {category.icon?.length > 0 && (
-                    <ProductMedia mediaList={category.icon} productName={category.name} className="size-7 rounded-md" />
-                  )}
-                  <div>{category.name}</div>
-                </div>
-              </Link>
-            </li>
-          ))}
-        {shouldShowModal ? (
-          <li
-            className="hidden lg:block"
-            onMouseEnter={(e) =>
-              gsap.to(e.currentTarget, {
-                scale: 1.1,
-                y : 8,
-                // rotate: 90,
-                duration: 0.4,
-              })
-            }
-            onMouseLeave={(e) =>
-              gsap.to(e.currentTarget, { scale: 1, y : 0 , duration: 0.4})
-            }
-          >
-            <button onClick={handleModalOpen} className="px-2 pt-2 cursor-pointer">
-              <BsChevronDown size={24} color="black" className="" />
+              <div className="flex items-center gap-2">
+                {category.icon?.length > 0 && (
+                  <ProductMedia mediaList={category.icon} productName={category.name} className="size-5 text-neutral-500 dark:text-neutral-400 group-hover:text-slate-600 dark:group-hover:text-slate-400 transition-colors" />
+                )}
+                <span>{category.name}</span>
+              </div>
             </button>
-          </li>
-        ) : null}
-      </ul>
-      <div
-        className="lg:hidden px-4"
-        onMouseEnter={(e) =>
-          gsap.to(e.currentTarget, { scale: 1.1, duration: 0.2 })
-        }
-        onMouseLeave={(e) =>
-          gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })
-        }
-      >
-        <CiMenuBurger
-          className="cursor-pointer"
-          size={35}
-          color="black"
+          ))}
+        {shouldShowModalButton && (
+          <button
+            onClick={handleModalOpen}
+            className="px-3 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-md transition-colors duration-150 ease-in-out"
+            aria-label="Plus de catégories"
+            onMouseEnter={(e) => gsap.to(e.currentTarget, { y: -2, duration: 0.2 })}
+            onMouseLeave={(e) => gsap.to(e.currentTarget, { y: 0, duration: 0.2 })}
+            style={{
+              color: settings?.headerTextColor,
+            }}
+          >
+            <BsChevronDown size={18} className="opacity-75" />
+          </button>
+        )}
+      </nav>
+
+      <div className="lg:hidden px-4">
+        <button
           onClick={handleModalOpen}
-        />
+          className="p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-md transition-colors"
+          aria-label="Ouvrir le menu des catégories"
+               style={{
+              color: settings?.headerTextColor,
+            }}
+        >
+          <CiMenuFries size={28} />
+        </button>
       </div>
 
       <Modal
-        styleContainer="flex items-center select-none size-full justify-start"
+        styleContainer="fixed inset-0 flex justify-start items-center"
         position="start"
         zIndex={100}
         setHide={handleModalClose}
         isOpen={isModalOpen}
-        animationName="translateBottom"
+        animationName="translateLeft"
       >
-        <div className="font-primary relative bg-white min-h-dvh w-full overflow-auto sm:w-[400px] md:w-[450px] p-4 pt-12">
-          <div className="w-full flex text-base flex-col items-center sm:text-lg gap-4 justify-center">
-            <Logo />
-            <div className="flex gap-5 justify-center flex-wrap text-sm">
+        <div
+          ref={modalContentRef}
+          className="font-primary relative h-dvh w-full max-w-md sm:max-w-sm md:max-w-md shadow-2xl flex flex-col overflow-y-auto"
+          style={{ backgroundColor: filterSideBackgroundColor , color: filterSideTextColor }}
+        >
+          <div className="sticky top-0 z-10 backdrop-blur-md p-4 flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700" style={{ backgroundColor: filterSideBackgroundColor }}  >
+            {history.length > 0 ? (
+              <button
+                onClick={handleBack}
+                className="flex items-center gap-2 text-sm font-medium transition-colors p-2 -ml-2 rounded-md hover:bg-slate-50 dark:hover:bg-slate-900/50"
+              >
+                <BsChevronLeft size={20} />
+                <span style={{ color: filterSideTextColor }}>{parentCategoryOfCurrent?.name || "Retour"}</span>
+              </button>
+            ) : (
+              <Link href="/" onClick={handleModalClose} className="block">
+                <Logo className="h-8 w-auto" />
+              </Link>
+            )}
+            <button
+              onClick={handleModalClose}
+              className="p-2 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-100 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-all duration-300 ease-in-out"
+              aria-label="Fermer le menu"
+              onMouseEnter={(e) => gsap.to(e.currentTarget, { rotate: 90, scale: 1.1, duration: 0.3 })}
+              onMouseLeave={(e) => gsap.to(e.currentTarget, { rotate: 0, scale: 1, duration: 0.3 })}
+            >
+              <BsX size={28} />
+            </button>
+          </div>
+
+          <div className="flex-grow p-4 sm:p-6">
+            {currentCategoryData ? (
+              <div className="mb-4 pb-3 border-b border-neutral-200 dark:border-neutral-700">
+                <Link
+                  href={`/categorie/${currentCategoryData.slug}`}
+                  onClick={() => {
+                    handleModalClose();
+                  }}
+                  className="flex items-center gap-3 p-2 -mx-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 group"
+                >
+                  {currentCategoryData.icon?.length > 0 && (
+                     <ProductMedia mediaList={currentCategoryData.icon} productName={currentCategoryData.name} className="size-7 text-neutral-500 dark:text-neutral-400 group-hover:text-slate-600 dark:group-hover:text-slate-400 transition-colors" />
+                  )}
+                  <span className="text-lg font-semibold group-hover:text-slate-600 dark:group-hover:text-slate-400 transition-colors" style={{ color: filterSideTextColor }}>
+                    Tous les {currentCategoryData.name.toLowerCase()}
+                  </span>
+                </Link>
+              </div>
+            ) : (
+              <h2 className="text-xl font-semibold mb-4" style={{ color: filterSideTextColor }}>
+                Toutes les catégories
+              </h2>
+            )}
+
+            <ul ref={listRef} className="space-y-1">
+              {getCurrentCategories().map((category) => (
+                <li key={category.id}>
+                  <div
+                    className="group flex items-center justify-between p-3 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-150 ease-in-out cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (hasSubCategories(category.id)) {
+                        handleForward(category.id);
+                      } else {
+                        navigate(`/categorie/${category.slug}`);
+                        handleModalClose();
+                      }
+                    }}
+                    onMouseEnter={(e) => gsap.to(e.currentTarget, { x: 5, duration: 0.2, ease: "power2.out" })}
+                    onMouseLeave={(e) => gsap.to(e.currentTarget, { x: 0, duration: 0.2, ease: "power2.out" })}
+                  >
+                    <div className="flex items-center gap-3">
+                       {category.icon?.length > 0 && (
+                         <ProductMedia mediaList={category.icon} productName={category.name} className="size-6 text-neutral-500 dark:text-neutral-400 group-hover:text-slate-600 dark:group-hover:text-slate-400 transition-colors" />
+                       )}
+                      <span className="text-base font-medium group-hover:text-slate-600 dark:group-hover:text-slate-400 transition-colors" style={{ color: filterSideTextColor }}>
+                        {category.name}
+                      </span>
+                    </div>
+                    {hasSubCategories(category.id) && (
+                      <BsChevronRight
+                        size={18}
+                        className="group-hover:text-slate-500 dark:group-hover:text-slate-400 transition-colors"
+                        style={{ color: filterSideTextColor }}
+                      />
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-auto p-4 border-t border-neutral-200 dark:border-neutral-700" style={{ backgroundColor: filterSideBackgroundColor }}>
+            <div className="flex justify-around items-center text-sm" style={{ color: filterSideTextColor }}>
               <Link
                 onClick={handleModalClose}
                 href="/"
-                className="hover:font-semibold"
+                className="hover:text-slate-600 dark:hover:text-slate-400 transition-colors font-medium"
               >
                 Boutique
               </Link>
               <Link
                 onClick={handleModalClose}
                 href="/profile/"
-                className="hover:font-semibold"
+                className="hover:text-slate-600 dark:hover:text-slate-400 transition-colors font-medium"
               >
                 Mon compte
               </Link>
               <Link
                 onClick={handleModalClose}
                 href="/about/"
-                className="hover:font-semibold"
+                className="hover:text-slate-600 dark:hover:text-slate-400 transition-colors font-medium"
               >
-                A propos
+                À propos
               </Link>
             </div>
-          </div>
-          <BsX
-            size={37}
-            onClick={handleModalClose}
-            className="absolute top-3 right-4 cursor-pointer"
-            onMouseEnter={(e) =>
-              gsap.to(e.currentTarget, {
-                rotate: 0,
-                duration: 0.3,
-                color: "black",
-              })
-            }
-            onMouseLeave={(e) =>
-              gsap.to(e.currentTarget, {
-                rotate: -180,
-                duration: 0.3,
-                color: "gray",
-              })
-            }
-          />
-          <div className="mt-8">
-            <div className="flex items-center gap-4 mb-2">
-              {history.length > 0 && (
-                <button
-                  ref={backButtonRef}
-                  onClick={handleBack}
-                  className="flex items-center gap-2 text-gray-600 hover:text-black"
-                  onMouseEnter={(e) =>
-                    gsap.to(e.currentTarget, { scale: 1.1, duration: 0.2 })
-                  }
-                  onMouseLeave={(e) =>
-                    gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })
-                  }
-                >
-                  <BsChevronLeft size={24} />
-                  <span className="hidden cursor-pointer text-xs sm:inline">
-                    Retour
-                  </span>
-                </button>
-              )}
-            </div>
-
-            <ul ref={listRef} className="flex flex-col gap-4">
-              {currentCategory ? (
-                <LinkSideBar
-                  onClick={() => {
-                    navigate(`/categorie/${currentCategory?.slug}`);
-                    handleModalClose();
-                  }}
-                  className="flex underline-animation text-left sm:text-lg mt-4 transition-colors"
-                >
-                  <div className="flex items-center">
-                    {currentCategory.icon?.length > 0 && (
-                      <ProductMedia mediaList={currentCategory.icon} productName={currentCategory.name} className="size-9 rounded-md text-gray-600" />
-                    )}
-                    <span className="text-[1.15rem] ml-4 font-semibold sm:text-lg">
-                      Tous {currentCategory?.name}
-                    </span>
-                  </div>
-                </LinkSideBar>
-              ) : null}
-
-              {getCurrentCategories().map((category) => (
-                <li
-                  key={category.id}
-                  className="border-b border-b-black/40 pb-3"
-                  onMouseEnter={(e) =>
-                    gsap.to(e.currentTarget, { x: 3, duration: 0.4 })
-                  }
-                  onMouseLeave={(e) =>
-                    gsap.to(e.currentTarget, { x: 0, duration: 0.4 })
-                  }
-                >
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      hasSubCategories(category.id) &&
-                        handleForward(category.id);
-                    }}
-                    className="flex cursor-pointer items-center justify-between"
-                  >
-                    <LinkSideBar
-                      onClick={() => {
-                        if (!hasSubCategories(category.id)) {
-                          navigate(`/categorie/${category.slug}`);
-                          handleModalClose();
-                        } else {
-                          handleForward(category.id);
-                        }
-                      }}
-                      className="flex items-center text-base sm:text-lg  transition-colors"
-                    >
-                      {category.icon?.length > 0 && (
-                        <ProductMedia mediaList={category.icon} productName={category.name} className="size-8 rounded-md text-gray-600" />
-                      )}
-                      <span className="text-[1.15rem] ml-3 font-semibold sm:text-lg">{category.name}</span>
-                    </LinkSideBar>
-                    {hasSubCategories(category.id) && (
-                      <button
-                        onClick={() => handleForward(category.id)}
-                        className="cursor-pointer"
-                        onMouseEnter={(e) =>
-                          gsap.to(e.currentTarget, {
-                            scale: 1.1,
-                            x: 5,
-                            duration: 0.2,
-                          })
-                        }
-                        onMouseLeave={(e) =>
-                          gsap.to(e.currentTarget, {
-                            scale: 1,
-                            x: 0,
-                            duration: 0.2,
-                          })
-                        }
-                      >
-                        <BsChevronRight size={20} color="black" />
-                      </button>
-                    )}
-                  </div>
-                  {/* {category.description && (
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                      {category.description}
-                    </p>
-                  )} */}
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
       </Modal>

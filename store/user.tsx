@@ -7,29 +7,12 @@ import { BiLogOut } from "react-icons/bi";
 import { Adresse, PhoneNumber, User } from "../pages/type";
 import { ProductMedia } from "../component/ProductMedia";
 
-
 interface AxiosError extends Error {
   response?: {
     status: number;
     data: any;
   };
 }
-
-
-
-
-interface AuthState {
-  user: User;
-  wasLoggedIn: boolean;
-  fetchUser: () => Promise<void>;
-  register_mdp: (info: {
-    email: string;
-    password: string;
-    full_name: string;
-  }) => Promise<void>;
-  logout: () => Promise<void>;
-}
-
 
 const getModalAuth = () => {
   if (typeof useModalAuth === "undefined") {
@@ -39,7 +22,6 @@ const getModalAuth = () => {
   return useModalAuth;
 };
 
-
 const toastOptions = {
   duration: 4000,
   style: {
@@ -47,23 +29,34 @@ const toastOptions = {
   },
 };
 
-export const useAuthStore = create<AuthState>()(
+export const useAuthStore = create(
   persist(
     combine(
       {
-        user: null as User,
+        user: null as User | null,
+        token: null as string | null,
         wasLoggedIn: false,
-        fetchUser: async () => {},
-        register_mdp: async () => {},
-        logout: async () => {},
       },
-      (set) => ({
-        fetchUser: async () => {
+      (set , get) => ({
+        fetchUser: async (data?: { token?: string }) => {
+          if(typeof window === "undefined") return;
+          const { token } = data || {};
+
+          const tk = token || get().token;
+          console.log("🚀 ~ fetchUser: ~ get().token:", get().token)
+          console.log("🚀 ~ fetchUser: ~ tk:", tk)
           try {
-            const { data } = (await api.get("/me")) as { data: { user: User } };
+            const { data } = (await api.api?.get("/v1/auth/me", {
+              ...(tk
+                ? { headers: { Authorization: `Bearer ${tk}` } }
+                : {}),
+            })) as {
+              data: { user: User; token: string | null };
+            };
+    
             if (!data?.user) throw new Error("No user data received");
 
-            set({ user: data.user, wasLoggedIn: true });
+            set({ user: data.user, wasLoggedIn: true, token: token });
             getModalAuth().getState().close();
 
             if (!localStorage.getItem("hasShownWelcome")) {
@@ -76,7 +69,12 @@ export const useAuthStore = create<AuthState>()(
                   >
                     <BsCheckCircle className="w-6 h-6 text-green-600" />
                     <div className="flex items-center gap-2 text-green-800 font-medium">
-                      <ProductMedia mediaList={data?.user?.photo || []} productName={data?.user?.full_name || ""} className="size-8 rounded-full" fallbackImage=""  />
+                      <ProductMedia
+                        mediaList={data?.user?.photo || []}
+                        productName={data?.user?.full_name || ""}
+                        className="size-8 rounded-full"
+                        fallbackImage=""
+                      />
                       Bienvenue {data?.user?.full_name} 👋
                     </div>
                   </div>
@@ -87,7 +85,7 @@ export const useAuthStore = create<AuthState>()(
               localStorage.removeItem("hasShownLogout");
             }
           } catch (error) {
-            set({ user: null });
+            set({ user: null, token: null });
             const err = error as AxiosError;
             const message =
               err.response?.status === 401
@@ -111,15 +109,20 @@ export const useAuthStore = create<AuthState>()(
           password: string;
           full_name: string;
         }) => {
+          if(typeof window === "undefined") return;
           try {
             if (!info.email || !info.password || !info.full_name) {
               throw new Error("Missing required fields");
             }
 
-            const { data } = await api.post("/register", info);
-            if (!data?.user) throw new Error("No user data received");
+            const response = await api.api?.post("/v1/auth/register", info);
+            if (!response?.data?.user) throw new Error("No user data received");
 
-            set({ user: data.user, wasLoggedIn: true });
+            set({
+              user: response.data.user,
+              wasLoggedIn: true,
+              token: response.data.token,
+            });
             getModalAuth().getState().close();
 
             toast.custom(
@@ -127,7 +130,8 @@ export const useAuthStore = create<AuthState>()(
                 <div className="flex items-center animate-bounce gap-3 p-4 bg-blue-100 border-l-4 border-blue-500 rounded-lg shadow-lg">
                   <BsCheckCircle className="w-6 h-6 text-blue-600" />
                   <p className="text-blue-800 font-medium">
-                    Inscription réussie 🎉 Bienvenue {data.user.full_name} !
+                    Inscription réussie 🎉 Bienvenue{" "}
+                    {response?.data.user.full_name} !
                   </p>
                 </div>
               ),
@@ -153,8 +157,7 @@ export const useAuthStore = create<AuthState>()(
 
         logout: async () => {
           try {
-            await api.post("/logout");
-            set({ user: null });
+            set({ user: null, token: null, wasLoggedIn: false });
             localStorage.removeItem("hasShownWelcome");
 
             if (!localStorage.getItem("hasShownLogout")) {
@@ -167,11 +170,12 @@ export const useAuthStore = create<AuthState>()(
                     </p>
                   </div>
                 ),
-                { ...toastOptions, id: "logout-success" ,duration: 6000 }
+                { ...toastOptions, id: "logout-success", duration: 6000 }
               );
               localStorage.setItem("hasShownLogout", "true");
             }
           } catch (error) {
+            console.log("🚀 ~ logout: ~ error:", error);
             const err = error as AxiosError;
             toast.custom(
               (t) => (
@@ -184,7 +188,7 @@ export const useAuthStore = create<AuthState>()(
               ),
               { ...toastOptions, id: "logout-error" }
             );
-            throw err; 
+            throw err;
           }
         },
       })
@@ -204,6 +208,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         wasLoggedIn: state.wasLoggedIn,
+        token: state.token, // Include token in persisted state
       }),
     }
   )

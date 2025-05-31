@@ -36,6 +36,7 @@ export const update_user_phone = async (params: {
   format: string;
   country_code: string;
 }) => {
+  console.log("🚀 ~ phone_number:", params.phone_number)
   const formData = build_form_data(params);
   try {
     const response = await api.api?.put<PhoneNumber>(

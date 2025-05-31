@@ -29,7 +29,7 @@ export default function FavoriteButton({ product_id }: { product_id: string }) {
     queryFn: () => get_favorites({ product_id }),
     enabled: !!product_id && !!user,
     select: (data) =>
-      data.list.length > 0 ? { id: data.list[0].id, name: data.list[0].name } : null,
+      data?.list?.length ?? 0 > 0 ? { id: data?.list[0].id, name: data?.list[0].product.name } : null,  
   });
 
   const addFavoriteMutation = useMutation({

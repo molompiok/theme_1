@@ -18,7 +18,7 @@ const FilterPopover = ({ className = '', setFilter, selectedFilters, defaultOpti
     <Popover>
       <PopoverTrigger asChild>
         <button 
-          className={`flex items-center gap-2  px-2 py-1 text-sm lg:text-base border-gray-500 bg-white/90 border rounded-sm ${className}`}
+          className={`w-fit ml-auto px-2.5 py-1.5 flex items-center max-h-10 justify-center gap-2 border rounded-lg hover:bg-gray-100/80 hover:shadow-sm text-gray-800 border-gray-300 cursor-pointer transition-all duration-150 ${className}`}
         >
           <span className='text-gray-500'>Trier par</span>
           <span className='text-gray-900'>{selectedFilters?.['order_by']?.[0]?.text}</span>

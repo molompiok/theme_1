@@ -23,6 +23,7 @@ import { useMemo, useState } from "react";
 import { useMediaViews } from "../../hook/query/useMediaViews";
 import BindTags from "../product/BindTags";
 import { MarkdownViewer } from "../MarkdownViewer";
+import { useThemeSettingsStore } from "../../store/themeSettingsStore";
 
 function ItemCart({
   product,
@@ -34,7 +35,8 @@ function ItemCart({
   const isOpen = useModalCart((state) => state.showCart);
   const removeMutation = useUpdateCart();
   const [isHovering, setIsHovering] = useState(false);
-
+  const filterSideTextColor = useThemeSettingsStore((state) => state.filterSideTextColor);
+  const filterSideBackgroundColor = useThemeSettingsStore((state) => state.filterSideBackgroundColor);
   const { data: features, isPending } = useQuery({
     queryKey: ["get_features_with_values", product?.id],
     queryFn: () =>
@@ -53,7 +55,6 @@ function ItemCart({
     bindNames: options.bindNames,
     product_id: product.id,
   });
-  console.log("🚀 ~ ItemCart ~ options:", options.bindNames);
 
   if (isPending) {
     return (
@@ -68,10 +69,16 @@ function ItemCart({
       className="flex flex-col p-3 rounded-lg transition-all duration-200 hover:bg-gray-50"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
+      style={{
+        backgroundColor: filterSideBackgroundColor,
+        color: filterSideTextColor,
+      }}
     >
       <div className="flex items-center gap-3 w-full">
-        {/* Conteneur avec une taille fixe pour l'image */}
-        <div className="w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-md overflow-hidden bg-white border border-gray-100">
+        <div className="w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-md overflow-hidden bg-white border border-gray-100" style={{
+          backgroundColor: filterSideBackgroundColor,
+          color: filterSideTextColor,
+        }}>
           <ProductMedia
             mediaList={mediaViews}
             productName={product.name}
@@ -106,19 +113,6 @@ function ItemCart({
                 (options?.bindNames as Record<string, ProductFeature>) || {}
               }
             />
-
-            {/* {Object.keys(options?.bindNames || {}).length > 0 && (
-              <div className="flex flex-wrap items-center mt-1 mb-2 gap-1.5">
-                {Array.from(Object.entries(options?.bindNames || {})).map(([key, value], i) => (
-                  <span
-                    key={`${key}-${i}`}
-                    className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full"
-                  >
-                    {typeof value === 'string' ? value : value?.text || value?.key || 'N/A'}
-                  </span>
-                ))}
-              </div>
-            )} */}
             <MarkdownViewer
               markdown={
                 product.description
@@ -159,15 +153,20 @@ function ItemCart({
 
 function ListItemCart({ cart }: { cart: CartItem[] }) {
   const toggleCart = useModalCart((state) => state.toggleCart);
+  const filterSideTextColor = useThemeSettingsStore((state) => state.filterSideTextColor);
 
   if (!cart || cart.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
         <BsCartX size={80} className="text-gray-300 mb-4" />
-        <p className="text-xl font-medium text-gray-700 mb-2">
+        <p className="text-xl font-medium text-gray-700 mb-2" style={{
+          color: filterSideTextColor,
+        }}>
           Votre panier est vide
         </p>
-        <p className="text-sm text-gray-500 text-center mb-6">
+        <p className="text-sm text-gray-500 text-center mb-6" style={{
+          color: filterSideTextColor,
+        }}>
           Ajoutez des articles à votre panier pour pouvoir passer commande
         </p>
         <button
@@ -202,6 +201,8 @@ function ListItemCart({ cart }: { cart: CartItem[] }) {
 export default function ModalCart() {
   const showCart = useModalCart((state) => state.showCart);
   const toggleCart = useModalCart((state) => state.toggleCart);
+  const filterSideTextColor = useThemeSettingsStore((state) => state.filterSideTextColor);
+  const filterSideBackgroundColor = useThemeSettingsStore((state) => state.filterSideBackgroundColor);
   const { data: cart, isLoading, isPending } = useCart();
 
   const totalItems =
@@ -229,7 +230,10 @@ export default function ModalCart() {
       isOpen={showCart}
       animationName="translateRight"
     >
-      <div className="font-primary relative bg-white flex flex-col h-dvh w-full sm:w-[400px] md:w-[450px] lg:w-[500px]">
+      <div className="font-primary relative flex flex-col h-dvh w-full sm:w-[400px] md:w-[450px] lg:w-[500px]" style={{
+        backgroundColor: filterSideBackgroundColor,
+        color: filterSideTextColor,
+      }}>
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="relative">
@@ -262,10 +266,13 @@ export default function ModalCart() {
         )}
 
         {hasItems && (
-          <div className="border-t border-gray-200 bg-white p-4 pt-3">
+          <div className="border-t border-gray-200 p-4 pt-3" style={{
+            backgroundColor: filterSideBackgroundColor,
+            color: filterSideTextColor,
+          }}>
             <div className="space-y-3 mb-4">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Sous-total</span>
+                <span>Sous-total</span>
                 <span>
                   {formatPrice(
                     totalPrice,
@@ -274,8 +281,8 @@ export default function ModalCart() {
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Livraison</span>
-                <span className="text-gray-600 italic">
+                <span>Livraison</span>
+                <span className="italic">
                   Calculé à l'étape suivante
                 </span>
               </div>
@@ -293,14 +300,22 @@ export default function ModalCart() {
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleCheckout}
-                className="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+                className="w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+                style={{
+                  backgroundColor: filterSideBackgroundColor,
+                  color: filterSideTextColor,
+                }}
               >
                 Procéder au paiement
                 <BsArrowRight size={18} />
               </button>
               <button
                 onClick={handleModalCartClose}
-                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-medium transition-colors"
+                className="w-full py-3 px-4 rounded-lg font-medium transition-colors"
+                style={{
+                  backgroundColor: filterSideBackgroundColor,
+                  color: filterSideTextColor,
+                }}
               >
                 Continuer mes achats
               </button>

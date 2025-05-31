@@ -40,7 +40,10 @@ export default function Page() {
 
   useEffect(() => {
     debouncedSearch();
-    return () => debouncedSearch();
+    return () => {
+      debouncedSearch()
+      setFilter("s", []);
+    };
   }, [searchText, debouncedSearch]);
 
   return (
@@ -76,7 +79,9 @@ function ListProductSearchCard() {
     queryKey: ["get_products", selectedFilters],
     queryFn: async () => {
       const response = await get_products({ 
-        search: selectedFilters["s"]?.[0]?.text || "" ,
+        search: selectedFilters["s"]?.[0]?.text ? selectedFilters["s"]?.[0]?.text : "",
+        max_price: selectedFilters["max_price"]?.[0]?.text ? parseFloat(selectedFilters["max_price"]?.[0]?.text) : undefined,
+        min_price: selectedFilters["min_price"]?.[0]?.text ? parseFloat(selectedFilters["min_price"]?.[0]?.text) : undefined,
         limit:3
       });
       return response.list;
@@ -159,6 +164,7 @@ function ProductCard({ product }: { product: ProductClient }) {
           <DisplayPrice
             currency={product.currency}
             price={product.price ?? 0}
+            product_id={product.id}
             barred_price={product.barred_price}
           />
         </div>

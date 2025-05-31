@@ -195,7 +195,7 @@ export function ProductMedia({
         onClick={!isFullscreen ? toggleFullscreen : undefined}
         onError={() => handleMediaError(index)}
         onLoad={() => handleMediaLoad(index)}
-        className={isFullscreen ? "max-h-[80vh] w-auto object-contain" : `w-full h-full object-cover`}
+        className={isFullscreen ? "max-h-[80vh] w-auto object-contain bg-contain" : `w-full h-full object-contain bg-contain`}
         alt={`${productName} - ${index + 1}`}
         loading="lazy"
       />

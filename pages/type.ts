@@ -17,19 +17,12 @@ export type ProductType = {
 
 export type ProductFavorite = {
   id: string;
-  store_id: string;
-  categories_id: string[] | null;
-  name: string;
-  default_feature_id: string;
-  description: string;
-  barred_price: number | null;
-  price: number;
-  currency: string;
-  created_at: string;
-  updated_at: string;
   user_id: string;
   label: string;
   product_id: string;
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
+  product : ProductType
 };
 
 export type ProductFeature = {
@@ -148,9 +141,19 @@ export const filterOptions = [
   // { id: "page", name: "1" },
 ] as const;
 
+export const rangePrice = [{
+  id : "min_price",
+  name : "prix bas",
+} , {
+  id : "max_price",
+  name : "prix eleve",
+}]
+
 export type OrderByType = typeof filterOptions[number]['id'];
 export type OptionType = typeof filterOptions[number]['name'];
+export type RangePriceType = typeof rangePrice[number]['id'];
 export const defaultOptions: ReadonlyArray<OptionType> = filterOptions.map(opt => opt.name);
+export const defaultRangePrice: ReadonlyArray<RangePriceType> = rangePrice.map(opt => opt.id);
 
 export enum VariantType {
   ICON_TEXT = 'icon_text',
@@ -192,9 +195,24 @@ export interface FilterValue {
   key: string | null;
 }
 
+export enum FilterDisplayLayout {
+  LIST = "list",       // Affichage en colonne (par défaut pour la plupart)
+  GRID = "grid",       // Affichage en grille configurable
+  ICON_GRID = "icon_grid", // Affichage en grille flexible optimisé pour les icônes (wrap)
+  // Vous pourriez ajouter BENTO ou d'autres layouts ici plus tard
+}
+
 export interface Filter {
   id: string;
   name: string;
+  displayLayout?: FilterDisplayLayout;
+  gridColumns?: {
+    default: number;         // Nombre de colonnes par défaut (mobile-first)
+    sm?: number;             // Nombre de colonnes pour breakpoint 'sm' et plus
+    md?: number;             // Nombre de colonnes pour breakpoint 'md' et plus
+    lg?: number;             // Nombre de colonnes pour breakpoint 'lg' et plus
+    xl?: number;             // Nombre de colonnes pour breakpoint 'xl' et plus
+  };
   values: FilterValue[];
   type?: VariantType;
 }
@@ -261,6 +279,7 @@ export type CartUpdateResponse = {
   updatedItem: CartItem;
   total: number;
   action: "added" | "removed" | "updated";
+  new_guest_cart_id?: string;
 };
 
 
