@@ -23,15 +23,6 @@ export default function AddRemoveItemCart({
 }) {
 
   const { data: serverCart, isLoading: isCartLoading } = useCart()
-  // let bind = item.realBind || item.bind;
-        
-  // if (item.realBind && item.bind) {
-  //   //@ts-ignore
-  //   bind = isEmpty(item.realBind) ? item.bind : item.realBind;
-  // }
-  // bind = typeof bind === 'string' ? JSON.parse(bind) : bind;
-
-  // bind = bind || {};
 
   const itemInPanier = useMemo(
     () =>

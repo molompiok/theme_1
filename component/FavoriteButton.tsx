@@ -13,7 +13,7 @@ import { LuHeartOff } from "react-icons/lu";
 import Loading from "./Loading";
 import { createQueryClient } from "../renderer/ReactQueryProvider";
 
-export default function FavoriteButton({ product_id ,style , className }: { product_id: string ,style?: React.CSSProperties , className?: string}) {
+export default function FavoriteButton({ product_id ,style , className , size }: { product_id: string ,style?: React.CSSProperties , className?: string , size?: number}) {
 
   const open = useModalAuth((state) => state.open);
   const user = useAuthStore((state) => state.user);
@@ -135,8 +135,9 @@ export default function FavoriteButton({ product_id ,style , className }: { prod
       <div className="w-5 h-5 rounded-full border-2 border-t-transparent border-r-black animate-spin"></div>
     ) : (
       <BsHeartFill
+        size={size}
         className={clsx(
-          "cursor-pointer text-2xl transition-all duration-300",
+          "cursor-pointer transition-all duration-300",
           favorite?.id
             ? "text-orange-600 font-extrabold"
             : "text-gray-400 font-light"
