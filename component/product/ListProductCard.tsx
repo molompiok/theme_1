@@ -66,10 +66,7 @@ function ListProductCard({ slug, queryKey }: ListProductCardProps) {
       return currentPage && lastPageNum && currentPage < lastPageNum ? currentPage + 1 : undefined;
     },
     initialPageParam: 1,
-    // select: (data) => ({ // This select is fine, but often not needed if backend structure is good
-    //   list: data.pages.flatMap(page => page.list),
-    //   meta: data.pages[data.pages.length - 1]?.meta, // Get meta from the last fetched page
-    // }),
+
     retry: 1, // Standard retry, can be adjusted
   });
 

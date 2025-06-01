@@ -38,6 +38,7 @@ export interface ThemeSettings {
   showRatingInList?: boolean;
   showRatingInProduct?: boolean;
   reductionDisplay?: "barred-price" | "percent-reduction";
+  favoriteIconPosition?: "top-right" | "bottom-right" | "bottom-left" | "top-left";
   productListView?: "grid" | "row" | "bento" ;
   baseFontSize?: string;
   productAddToCartBorderColor?: string;
@@ -88,6 +89,7 @@ const DEFAULT_SETTINGS: ThemeSettings = {
   "showRatingInList": true,
   "showRatingInProduct": true,
   "reductionDisplay": "barred-price",
+  "favoriteIconPosition": "bottom-right",
   "productListView": "grid",
   "baseFontSize": "16px"
 };

@@ -9,13 +9,11 @@ import {
 } from "../api/products.api";
 import { useAuthStore, useModalAuth } from "../store/user";
 import toast from "react-hot-toast";
-import { BiHeartCircle } from "react-icons/bi";
 import { LuHeartOff } from "react-icons/lu";
-import { IoHeartOutline } from "react-icons/io5";
 import Loading from "./Loading";
 import { createQueryClient } from "../renderer/ReactQueryProvider";
 
-export default function FavoriteButton({ product_id }: { product_id: string }) {
+export default function FavoriteButton({ product_id ,style , className }: { product_id: string ,style?: React.CSSProperties , className?: string}) {
 
   const open = useModalAuth((state) => state.open);
   const user = useAuthStore((state) => state.user);
@@ -44,6 +42,7 @@ export default function FavoriteButton({ product_id }: { product_id: string }) {
             className={`flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-md transition-all duration-300 ${
               t.visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
             }`}
+
           >
             <BsHeartFill className="w-5 h-5 text-orange-600" />
             {isLoading ? (
@@ -128,23 +127,23 @@ export default function FavoriteButton({ product_id }: { product_id: string }) {
   };
 
   return (
-    <div className="absolute top-3 right-4 z-10">
-      {isLoading ||
-      isFetching ||
-      addFavoriteMutation.isPending ||
-      removeFavoriteMutation.isPending ? (
-        <div className="w-5 h-5 rounded-full border-2 border-t-transparent border-r-black animate-spin"></div>
-      ) : (
-        <BsHeartFill
-          className={clsx(
-            "cursor-pointer text-2xl transition-all duration-300",
-            favorite?.id
-              ? "text-orange-600 font-extrabold"
-              : "text-gray-400 font-light"
-          )}
-          onClick={toggleFavorite}
-        />
-      )}
-    </div>
+    <div className={clsx("absolute z-10", className)} style={style}>
+    {isLoading ||
+    isFetching ||
+    addFavoriteMutation.isPending ||
+    removeFavoriteMutation.isPending ? (
+      <div className="w-5 h-5 rounded-full border-2 border-t-transparent border-r-black animate-spin"></div>
+    ) : (
+      <BsHeartFill
+        className={clsx(
+          "cursor-pointer text-2xl transition-all duration-300",
+          favorite?.id
+            ? "text-orange-600 font-extrabold"
+            : "text-gray-400 font-light"
+        )}
+        onClick={toggleFavorite}
+      />
+    )}
+  </div>
   );
 }

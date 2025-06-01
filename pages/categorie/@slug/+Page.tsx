@@ -11,16 +11,8 @@ function Page() {
   return (
     <div className="min-h-dvh  antialiased">
       <header className="relative h-80 md:h-96 bg-gray-950 overflow-hidden">
-        <ProductMedia className="w-full h-full object-cover absolute inset-0" mediaList={view ?? [] } productName={title ?? ''}/>
-        {/* <picture> */}
-          {/* <img
-            src={view[0]}
-            alt={`${title} category banner`}
-            className="w-full h-full object-cover absolute inset-0"
-            loading="eager"
-            decoding="async"
-          /> */}
-        {/* </picture> */}
+        {/*grande image*/}
+        <ProductMedia className="w-full h-full object-contain absolute inset-0" mediaList={view ?? [] } productName={title ?? ''}/>
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
           <div className="text-center px-4">
             <h1 className="text-3xl md:text-4xl text-white font-bold mb-2">

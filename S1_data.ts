@@ -1977,4 +1977,149 @@ const categoriesData: CategoryType[] = [
   //      </>
   //    );
   //  }
+    // if (!product || !seoData) {
+    //   return (
+    //     <div className="text-center py-20">
+    //       <Helmet>
+    //         <title>Produit non trouvé | {META_SITE_NAME}</title>
+    //         <meta name="robots" content="noindex" /> {/* Good for non-existent products */}
+    //       </Helmet>
+    //       Aucun produit trouvé.
+    //     </div>
+    //   );
+    // }
+    //  const seoData = useMemo(() => {
+    //    if (!product) return null;
    
+    //    const canonicalUrl = `${BASE_URL}/${slug}`;
+    //    const firstFeatureWithValue = getFirstFeatureWithView(features || []);
+    //    const mainImage = firstFeatureWithValue?.values[0]?.views[0];
+    //    const imageUrl = mainImage ? `${BASE_URL}${mainImage}` : "";
+   
+    //    const metaDescription =
+    //      product.description?.substring(0, 160) || // Truncate for meta description length
+    //      `Découvrez ${product.name} - ${
+    //        product.barred_price ? `Ancien prix ${product.barred_price}, ` : ""
+    //      }Maintenant à ${product.price}`;
+   
+    //    const discountPercentage =
+    //      product.barred_price && product.price
+    //        ? Math.round(
+    //            ((product.barred_price - product.price) / product.barred_price) *
+    //              100
+    //          )
+    //        : null;
+   
+    //    // Ensure currency and price are numbers for schema
+    //    const productPrice = Number(product.price);
+    //    const productBarredPrice = product.barred_price ? Number(product.barred_price) : undefined;
+   
+   
+    //    return {
+    //      canonicalUrl,
+    //      imageUrl,
+    //      metaDescription,
+    //      discountPercentage,
+    //      productPrice,
+    //      productBarredPrice,
+    //      currency: product.currency || "EUR", // Default currency if not provided
+    //      productName: product.name,
+    //      productDescription: product.description,
+    //      productId: product.id,
+    //      rating: product.rating ?? 4.5, // Default rating
+    //      commentCount: product.comment_count ?? 10, // Default review count
+    //    };
+    //  }, [product, features, slug]);
+
+
+        // <Helmet>
+        //     <title>{`${seoData.productName} | Acheter en ligne | ${META_SITE_NAME}`}</title>
+        //     <meta name="description" content={seoData.metaDescription} />
+        //     <link rel="canonical" href={seoData.canonicalUrl} />
+        //     <meta name="robots" content="index, follow" />
+    
+        //     {/* Open Graph Data */}
+        //     <meta property="og:type" content="product" />
+        //     <meta property="og:url" content={seoData.canonicalUrl} />
+        //     <meta property="og:title" content={`${seoData.productName} | Acheter en ligne`} />
+        //     <meta property="og:description" content={seoData.metaDescription} />
+        //     <meta property="og:site_name" content={META_SITE_NAME} />
+        //     {seoData.imageUrl && 
+        //       <meta property="og:image" content={seoData.imageUrl} />
+        //     }
+        //     {seoData.imageUrl && 
+        //       <meta property="og:image:secure_url" content={seoData.imageUrl} />
+        //     }
+        //     {seoData.imageUrl && 
+        //       <meta property="og:image:alt" content={`Image de ${seoData.productName}`} />
+        //     }
+        //     {seoData.imageUrl && 
+        //       <meta property="og:image:width" content="1200" />
+        //     }
+        //     {seoData.imageUrl && 
+        //       <meta property="og:image:height" content="630" />
+        //     }
+    
+        //     {/* Twitter Card Data */}
+        //     <meta name="twitter:card" content="summary_large_image" />
+        //     <meta name="twitter:url" content={seoData.canonicalUrl} />
+        //     <meta name="twitter:title" content={`${seoData.productName} | Acheter en ligne`} />
+        //     <meta name="twitter:description" content={seoData.metaDescription} />
+        //     {seoData.imageUrl && <meta name="twitter:image" content={seoData.imageUrl} />}
+        //     {/* <meta name="twitter:site" content="@VotreTwitterHandle" /> Optional */}
+        //     {/* <meta name="twitter:creator" content="@VotreTwitterHandle" /> Optional */}
+    
+        //     {/* Open Graph Product Specific */}
+        //     <meta property="product:brand" content={seoData.productName || META_SITE_NAME} />
+        //     <meta property="product:availability" content="in stock" /> {/* Or "out of stock", "preorder" */}
+        //     <meta property="product:condition" content="new" />
+        //     <meta property="product:price:amount" content={String(seoData.productPrice)} />
+        //     <meta property="product:price:currency" content={seoData.currency} />
+        //     {seoData.productBarredPrice && (
+        //       <meta
+        //         property="product:original_price:amount"
+        //         content={String(seoData.productBarredPrice)}
+        //       />
+        //     )}
+        //   </Helmet>
+    
+        //   <script type="application/ld+json">
+        //     {JSON.stringify({
+        //       "@context": "https://schema.org",
+        //       "@type": "Product",
+        //       name: seoData.productName,
+        //       image: seoData.imageUrl || undefined, // Omit if no image
+        //       description: seoData.productDescription,
+        //       brand: {
+        //         "@type": "Brand",
+        //         name: seoData.productName || META_SITE_NAME, // Or a specific brand name if available
+        //       },
+        //       offers: {
+        //         "@type": "Offer",
+        //         url: seoData.canonicalUrl,
+        //         priceCurrency: seoData.currency,
+        //         price: seoData.productPrice,
+        //         priceValidUntil: priceValidUntil, // Use a real date if available
+        //         itemCondition: "https://schema.org/NewCondition",
+        //         availability: "https://schema.org/InStock", // Match product:availability
+        //         ...(seoData.productBarredPrice && { // Add discount info only if applicable
+        //           priceSpecification: {
+        //             "@type": "PriceSpecification",
+        //             price: seoData.productBarredPrice,
+        //             priceCurrency: seoData.currency,
+        //             valueAddedTaxIncluded: true, // Assuming VAT is included
+        //           },
+        //           // Consider adding discount information if significant
+        //           // "hasMerchantReturnPolicy": { ... } // If you have a clear return policy
+        //         }),
+        //       },
+        //       sku: seoData.productId || undefined, // Stock Keeping Unit
+        //       // mpn: seoData.productId, // Manufacturer Part Number (if applicable)
+        //       aggregateRating: {
+        //         "@type": "AggregateRating",
+        //         ratingValue: seoData.rating,
+        //         reviewCount: seoData.commentCount,
+        //       },
+        //       // "review": [ { "@type": "Review", "author": "...", "reviewBody": "..." } ] // Could add a few top reviews
+        //     })}
+        //   </script>

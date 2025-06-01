@@ -81,12 +81,16 @@ export const DisplayPrice: React.FC<DisplayPriceProps> = React.memo(
         {barred_price !== undefined && settings?.reductionDisplay === "percent-reduction" &&
           displayBarredPrice > displayPrice && (
             <span
-              className="text-sm whitespace-nowrap"
+              className="text-xs whitespace-nowrap"
               aria-label={`Réduction de ${Math.round(
                 ((displayBarredPrice - displayPrice) / displayBarredPrice) * 100
               )}%`}
               style={{
                 color: settings?.productPriceColor,
+                fontWeight: "bold",
+                backgroundColor : settings?.productPriceColor + "44",
+                borderRadius : "5px",
+                padding : "1px 2px",
               }}
             >
               -
@@ -172,6 +176,10 @@ export const DisplayPriceDetail: React.FC<DisplayPriceProps> = React.memo(
               )}%`}
               style={{
                 color: settings?.productPriceColor,
+                fontWeight: "bold",
+                backgroundColor : settings?.productPriceColor + "44",
+                borderRadius : "5px",
+                padding : "1px 2px",
               }}
             >
               -

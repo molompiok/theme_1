@@ -115,7 +115,7 @@ const { setSettings, resetSettings, ...settings } = useThemeSettingsStore();
   const textClasses = `
     whitespace-nowrap z-20
     transition-all duration-300
-    text-clamp-base
+    text-clamp-base text-center font-medium
   `;
 
   const isOutOfStock = stock === 0 && !hasContinue;

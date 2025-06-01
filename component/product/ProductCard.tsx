@@ -11,6 +11,7 @@ import FavoriteButton from "../FavoriteButton";
 import ReviewsStars from "../comment/ReviewsStars";
 import { DisplayPrice } from "../DisplayPrice";
 import { useThemeSettingsStore } from "../../store/themeSettingsStore";
+import clsx from "clsx";
 
 export default function ProductCard({
   product,
@@ -33,17 +34,18 @@ export default function ProductCard({
 
   const mediaList =
     getFirstFeatureWithView(feature || [])?.values[0].views || [];
+
   return (
     <article
       onClick={handleGo}
-      className="group border border-gray-50 hover:border-gray-100  rounded-md
-            transition-all duration-300 flex flex-col h-full cursor-pointer overflow-hidden max-w-md"
+      className="group border border-gray-50 hover:border-gray-100 rounded-md
+            transition-all duration-300 flex flex-col h-full cursor-pointer max-w-md"
       style={{
         backgroundColor: settings?.productCardBackgroundColor,
         color: settings?.productCardTextColor,
       }}
     >
-      <div className="relative w-full aspect-square overflow-hidden">
+      <div className="relative w-full h-full aspect-square overflow-hidden">
         {status === "pending" ? (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
             <Loading />
@@ -52,15 +54,37 @@ export default function ProductCard({
           <ProductMedia
             mediaList={mediaList}
             productName={product?.name || ""}
-            className="w-full h-full object-cover group-hover:scale-[1.02]  transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
           />
         )}
-        {product && <FavoriteButton key={product.id} product_id={product.id} />}
+        {product && (
+          <FavoriteButton
+            key={product.id}
+            product_id={product.id}
+            className={clsx(
+              "absolute z-10",
+              settings.favoriteIconPosition === "top-right" && "top-2 right-2",
+              settings.favoriteIconPosition === "bottom-right" &&
+                "bottom-2 right-2",
+              settings.favoriteIconPosition === "bottom-left" &&
+                "bottom-2 left-2",
+              settings.favoriteIconPosition === "top-left" && "top-2 left-2"
+            )}
+          />
+        )}
       </div>
       <div className="px-3 py-1 sm:p-4 flex flex-col flex-1">
+        {settings.priceBeforeName && (
+          <DisplayPrice
+            product_id={product?.id || ""}
+            currency={product?.currency || ""}
+            price={product?.price || 0}
+            barred_price={product?.barred_price}
+          />
+        )}
         <div className="my-1">
           <h1
-            className="text-sm group-hover:text-gray-950  text-gray-800  sm:text-base/5 font-semibold line-clamp-2"
+            className="text-sm group-hover:text-gray-950 text-gray-800 sm:text-base/5 font-semibold line-clamp-2"
             style={{
               color: settings?.productCardTextColor,
             }}
@@ -69,24 +93,27 @@ export default function ProductCard({
           </h1>
           {settings?.showRatingInList && (
             <div className="flex items-center gap-1 mt-1">
-              <ReviewsStars note={product?.rating || 0} size={14} style="text-orange-500" />
+              <ReviewsStars
+                note={product?.rating || 0}
+                size={14}
+                style="text-orange-500"
+              />
               <span className="text-xs hidden min-[370px]:inline text-gray-600">
                 ({product?.comment_count} avis)
               </span>
             </div>
           )}
         </div>
-        <DisplayPrice
-          product_id={product?.id || ""}
-          currency={product?.currency || ""}
-          price={product?.price || 0}
-          barred_price={product?.barred_price}
-        />
-        <div className="mt-2">
-          <CartButton
-            text="Ajouter au panier"
-            product={product}
+        {!settings.priceBeforeName && (
+          <DisplayPrice
+            product_id={product?.id || ""}
+            currency={product?.currency || ""}
+            price={product?.price || 0}
+            barred_price={product?.barred_price}
           />
+        )}
+        <div className="mt-2">
+          <CartButton text="Ajouter au panier" product={product} />
         </div>
       </div>
     </article>
