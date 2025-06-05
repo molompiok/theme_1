@@ -222,7 +222,7 @@ export function getFeatureValuePairs(features: Feature[]) {
 const pickupDeadline = new Date();
 pickupDeadline.setDate(pickupDeadline.getDate() + 3);
 export const InfoOrderOwner = {
-  pickup_maps_link: `geo:5.308844,-4.013481?q=Koumassi+Remblais,+Abidjan`,
+  pickup_maps_link: `geo:5.308845,-4.013481?q=Koumassi+Remblais,+Abidjan`,
   pickup_phone: "+2250707631861",
   formatted_phone: "+225 00 00 000 000",
   pickup_date: pickupDeadline.toLocaleDateString("fr-FR", {
