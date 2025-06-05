@@ -1,41 +1,46 @@
-import ReactDOMServer from 'react-dom/server'
-import { Layout } from './Layout'
-import { escapeInject, dangerouslySkipEscape } from 'vike/server'
-import logoUrl from './logo.svg'
-import "./index.css"
-import type { OnRenderHtmlAsync } from 'vike/types'
-import { getPageTitle } from './getPageTitle'
-import { dehydrate, QueryClientProvider } from '@tanstack/react-query'
-import { createQueryClient } from './ReactQueryProvider'
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
+import ReactDOMServer from "react-dom/server";
+import { Layout } from "./Layout";
+import { escapeInject, dangerouslySkipEscape } from "vike/server";
+import logoUrl from "./logo.svg";
+import "./index.css";
+import type { OnRenderHtmlAsync } from "vike/types";
+import { getPageTitle } from "./getPageTitle";
+import { dehydrate, QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClient } from "./ReactQueryProvider";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { BASE_URL, api as globalApi } from "../api/index";
-import { useAuthStore } from "../store/user"
-import { parse as parseCookie } from 'cookie';
+import { useAuthStore } from "../store/user";
+import { parse as parseCookie } from "cookie";
 
-const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRenderHtmlAsync> => {
-  const { Page, headers: pageContextHeaders } = pageContext
-  
-  if (!Page) throw new Error('pageContext.Page is not defined')
+const onRenderHtml: OnRenderHtmlAsync = async (
+  pageContext
+): ReturnType<OnRenderHtmlAsync> => {
+  const { Page, headers: pageContextHeaders } = pageContext;
 
-    
-    const host = (process.env.NODE_ENV == 'production' ? 'https://' : 'http://') ;
-    
-  const headersOriginal = pageContextHeaders as Record<string, string> || {};
+  if (!Page) throw new Error("pageContext.Page is not defined");
+
+  const host = process.env.NODE_ENV == "production" ? "https://" : "http://";
+
+  const headersOriginal = (pageContextHeaders as Record<string, string>) || {};
   // const baseUrlFromHeader = host + headersOriginal['x-base-url'] || '';
-  const originalHeaders = pageContextHeaders as Record<string, string> || {};
-  const apiUrlFromHeader = host + (headersOriginal['x-store-api-url'] || 'api.sublymus-server.com/70b321f3-0eab-49da-8f09-5a4f1afe505b');
-  const serverUrlFromHeader = host + (headersOriginal['x-server-url'] || 'server.sublymus-server.com/70b321f3-0eab-49da-8f09-5a4f1afe505b');
+  const originalHeaders = (pageContextHeaders as Record<string, string>) || {};
+  const apiUrlFromHeader =
+    host +
+    (headersOriginal["x-store-api-url"] ||
+      "api.sublymus-server.com/70b321f3-0eab-49da-8f09-5a4f1afe505b");
+  const serverUrlFromHeader =
+    host + (headersOriginal["x-server-url"] || "server.sublymus-server.com");
 
-   // --- START: Auth Token Handling for SSR ---
+  // --- START: Auth Token Handling for SSR ---
   //  const cookieHeader = originalHeaders.cookie || '';
   //  const cookies = parseCookie(cookieHeader);
   //  const serverSideToken = cookies.authToken; // <<< ADJUST 'authToken' if your cookie has a different name
 
-   // Temporarily set the token for this SSR request.
-   // This ensures that API calls made during this server render use the token.
-   // We also reset it after rendering or if no token, to prevent state leakage between requests.
-   // A more robust solution for complex apps might involve request-scoped stores,
-   // but direct manipulation is common for simpler Vike setups.
+  // Temporarily set the token for this SSR request.
+  // This ensures that API calls made during this server render use the token.
+  // We also reset it after rendering or if no token, to prevent state leakage between requests.
+  // A more robust solution for complex apps might involve request-scoped stores,
+  // but direct manipulation is common for simpler Vike setups.
   //  if (serverSideToken) {
   //    useAuthStore.setState({ token: serverSideToken, wasLoggedIn: true }); // Assume wasLoggedIn if token exists
   //    console.log("🚀 ~ SSR: Token from cookie found and set in store:", serverSideToken);
@@ -44,8 +49,7 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRende
   //    useAuthStore.setState({ token: null, user: null, wasLoggedIn: false });
   //    console.log("🚀 ~ SSR: No auth token cookie found.");
   //  }
-   // --- END: Auth Token Handling for SSR ---
-
+  // --- END: Auth Token Handling for SSR ---
 
   const api = axios.create({
     baseURL: apiUrlFromHeader,
@@ -67,6 +71,11 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRende
   globalApi.api = api;
   globalApi.server = server;
 
+  console.log({
+    apiUrl: apiUrlFromHeader,
+    serverUrl: serverUrlFromHeader,
+  });
+
   api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
       // Get token directly from store. It should be populated by the cookie logic above for SSR.
@@ -75,7 +84,9 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRende
       if (token && config.headers) {
         config.headers["Authorization"] = `Bearer ${token}`;
       } else {
-        console.log("SSR Interceptor Request: No token found or no headers object.");
+        console.log(
+          "SSR Interceptor Request: No token found or no headers object."
+        );
       }
       return config;
     },
@@ -83,8 +94,8 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRende
       console.error("SSR Interceptor Request Error:", error);
       return Promise.reject(error);
     }
-  )
-  
+  );
+
   // api.interceptors.response.use(
   //   (response) => response,
   //   (error: AxiosError) => {
@@ -111,10 +122,9 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRende
   //     return Promise.reject(error);
   //   }
   // );
-  
 
   // Création du QueryClient pour le SSR
-  const queryClient = createQueryClient
+  const queryClient = createQueryClient;
 
   // Rendu du contenu avec QueryClient
   const pageHtml = ReactDOMServer.renderToString(
@@ -123,13 +133,16 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRende
         <Page />
       </Layout>
     </QueryClientProvider>
-  )
+  );
 
   // Déshydratation de l'état pour le client
-  const dehydratedState = dehydrate(queryClient)
+  const dehydratedState = dehydrate(queryClient);
 
-  const title = getPageTitle(pageContext)
-  const desc = pageContext.data?.description || pageContext.config?.description || 'Demo of using Vike'
+  const title = getPageTitle(pageContext);
+  const desc =
+    pageContext.data?.description ||
+    pageContext.config?.description ||
+    "Demo of using Vike";
 
   const documentHtml = escapeInject`<!DOCTYPE html>
     <html lang="fr">
@@ -155,15 +168,20 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRende
         <div id="root">${dangerouslySkipEscape(pageHtml)}</div>
         <div id="modal-root"></div>
         <script>
-          window.__REACT_QUERY_STATE__ = ${dangerouslySkipEscape(JSON.stringify(dehydratedState))};
-          window.__INITIAL_AUTH_STATE__ = ${dangerouslySkipEscape(JSON.stringify({ // Pass initial auth state for client
-            user: useAuthStore.getState().user,
-            token: useAuthStore.getState().token, // This might be the server-side token
-            wasLoggedIn: useAuthStore.getState().wasLoggedIn,
-          }))};
+          window.__REACT_QUERY_STATE__ = ${dangerouslySkipEscape(
+            JSON.stringify(dehydratedState)
+          )};
+          window.__INITIAL_AUTH_STATE__ = ${dangerouslySkipEscape(
+            JSON.stringify({
+              // Pass initial auth state for client
+              user: useAuthStore.getState().user,
+              token: useAuthStore.getState().token, // This might be the server-side token
+              wasLoggedIn: useAuthStore.getState().wasLoggedIn,
+            })
+          )};
         </script>
       </body>
-    </html>`
+    </html>`;
 
   return {
     documentHtml,
@@ -174,8 +192,8 @@ const onRenderHtml: OnRenderHtmlAsync = async (pageContext) : ReturnType<OnRende
       apiUrl: apiUrlFromHeader,
       serverUrl: serverUrlFromHeader,
       // baseUrl: baseUrlFromHeader,
-    }
-  }
-}
+    },
+  };
+};
 
-export { onRenderHtml }
+export { onRenderHtml };
