@@ -183,7 +183,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       <div
         className="inline-flex items-center justify-center w-12 h-12 text-gray-400 rounded-xl border border-gray-200 bg-gray-50"
         role="alert"
-        aria-label={`${text} indisponible `}
+        aria-label={`${text} indisponible`}
       >
         <span className="text-lg">×</span>
       </div>
