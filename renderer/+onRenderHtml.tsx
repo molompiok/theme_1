@@ -12,6 +12,8 @@ import { BASE_URL, api as globalApi } from "../api/index";
 import { useAuthStore } from "../store/user";
 import { parse as parseCookie } from "cookie";
 
+const isProd = process.env.NODE_ENV == "production";
+
 const onRenderHtml: OnRenderHtmlAsync = async (
   pageContext
 ): ReturnType<OnRenderHtmlAsync> => {
@@ -19,7 +21,7 @@ const onRenderHtml: OnRenderHtmlAsync = async (
 
   if (!Page) throw new Error("pageContext.Page is not defined");
 
-  const host = process.env.NODE_ENV == "production" ? "https://" : "http://";
+  const host = isProd ? "https://" : "http://";
 
   const headersOriginal = (pageContextHeaders as Record<string, string>) || {};
   // const baseUrlFromHeader = host + headersOriginal['x-base-url'] || '';
@@ -27,9 +29,12 @@ const onRenderHtml: OnRenderHtmlAsync = async (
   const apiUrlFromHeader =
     host +
     (headersOriginal["x-store-api-url"] ||
-      "api.sublymus-server.com/70b321f3-0eab-49da-8f09-5a4f1afe505b");
+      "api.sublymus-server.com/---id----local-store-api");
   const serverUrlFromHeader =
-    host + (headersOriginal["x-server-url"] || "server.sublymus-server.com");
+    host +
+    (headersOriginal["x-server-api-url"] || isProd
+      ? "server.sublymus.com"
+      : "server.sublymus-server.com");
 
   // --- START: Auth Token Handling for SSR ---
   //  const cookieHeader = originalHeaders.cookie || '';

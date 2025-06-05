@@ -10,7 +10,6 @@ import { useAuthStore } from "../store/user";
 import { User } from "../pages/type";
 let root: ReactDOM.Root;
 
-
 declare global {
   interface Window {
     __INITIAL_AUTH_STATE__?: {
@@ -26,7 +25,6 @@ const onRenderClient: OnRenderClientAsync = async (pageContext) => {
 
   if (!Page) throw new Error("pageContext.Page is not defined");
 
-
   if (typeof window !== "undefined" && window.__INITIAL_AUTH_STATE__) {
     const initialAuth = window.__INITIAL_AUTH_STATE__;
     const currentStoreToken = useAuthStore.getState().token;
@@ -35,17 +33,19 @@ const onRenderClient: OnRenderClientAsync = async (pageContext) => {
     // and server provided a token.
     // Persist middleware might overwrite this if localStorage has a different token.
     if (!currentStoreToken && initialAuth.token) {
-        console.log("🚀 ~ Client: Hydrating auth store from server state", initialAuth);
-        useAuthStore.setState({
-            user: initialAuth.user,
-            token: initialAuth.token,
-            wasLoggedIn: initialAuth.wasLoggedIn,
-        });
+      console.log(
+        "🚀 ~ Client: Hydrating auth store from server state",
+        initialAuth
+      );
+      useAuthStore.setState({
+        user: initialAuth.user,
+        token: initialAuth.token,
+        wasLoggedIn: initialAuth.wasLoggedIn,
+      });
     }
     // Clean up global variable
     delete window.__INITIAL_AUTH_STATE__;
   }
-
 
   let apiUrl = "";
   if (pageContext.apiUrl) {
@@ -83,6 +83,10 @@ const onRenderClient: OnRenderClientAsync = async (pageContext) => {
   globalApi.api = api;
   globalApi.server = server;
 
+  console.log({
+    apiUrl: apiUrl,
+    serverUrl: serverUrl,
+  });
 
   api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
@@ -90,7 +94,9 @@ const onRenderClient: OnRenderClientAsync = async (pageContext) => {
       if (token && config.headers) {
         config.headers["Authorization"] = `Bearer ${token}`;
       } else {
-        console.log("Client Interceptor Request: No token found or no headers object.");
+        console.log(
+          "Client Interceptor Request: No token found or no headers object."
+        );
       }
       return config;
     },
@@ -99,12 +105,15 @@ const onRenderClient: OnRenderClientAsync = async (pageContext) => {
       return Promise.reject(error);
     }
   );
-  
+
   api.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
       if (error.code === "ERR_NETWORK" || error.code === "ECONNABORTED") {
-        console.error("Client Interceptor Response: Network or Timeout Error", error.message);
+        console.error(
+          "Client Interceptor Response: Network or Timeout Error",
+          error.message
+        );
         return Promise.reject(new Error("Erreur Réseau ou Timeout"));
       }
       console.error(
@@ -116,11 +125,16 @@ const onRenderClient: OnRenderClientAsync = async (pageContext) => {
       const status = error.response?.status;
       if (status === 401 && typeof window !== "undefined") {
         const { wasLoggedIn, logout, token } = useAuthStore.getState();
-        if (token && wasLoggedIn) { // Check if wasLoggedIn is true. Or simply if token exists.
-          console.warn("Client: Session expirée ou invalide (401), déconnexion automatique.");
+        if (token && wasLoggedIn) {
+          // Check if wasLoggedIn is true. Or simply if token exists.
+          console.warn(
+            "Client: Session expirée ou invalide (401), déconnexion automatique."
+          );
           logout(); // This will clear the token and user
         } else if (token && !useAuthStore.getState().user) {
-          console.warn("Client: Stale token found without user (401), clearing token.");
+          console.warn(
+            "Client: Stale token found without user (401), clearing token."
+          );
           logout(); // Or just useAuthStore.setState({ token: null, user: null, wasLoggedIn: false });
         }
       }
@@ -133,9 +147,9 @@ const onRenderClient: OnRenderClientAsync = async (pageContext) => {
 
   const page = (
     <ReactQueryProvider dehydratedState={dehydratedState}>
-        <Layout pageContext={pageContext}>
-          <Page />
-        </Layout>
+      <Layout pageContext={pageContext}>
+        <Page />
+      </Layout>
     </ReactQueryProvider>
   );
 
