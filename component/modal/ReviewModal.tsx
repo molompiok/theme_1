@@ -8,7 +8,7 @@ import { useAuthStore } from "../../store/user";
 
 interface ModalCommentStore {
   isModalOpen: boolean;
-  product: { product_id: string; name: string } | null;
+  product: { product_id: string; name: string; order_item_id: string } | null;
   setModalOpen: (open: boolean) => void;
 }
 
@@ -29,8 +29,8 @@ const StarRating = memo(({
   error,
   feedback
 }: StarRatingProps) => (
-  <div className="flex flex-col items-center gap-2">
-    <div className="flex gap-2">
+  <div className="flex flex-col items-center gap-4 py-6">
+    <div className="flex gap-1 p-2">
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
@@ -40,26 +40,50 @@ const StarRating = memo(({
           onMouseLeave={() => onStarHover(0)}
           aria-label={`Noter ${star} sur 5`}
           className={clsx(
-            "text-3xl focus:outline-none transition-all duration-200 transform",
-            (hoverRating >= star || rating >= star) ? "text-orange-500" : "text-gray-400",
-            "hover:text-orange-400 hover:scale-110",
-            rating === star && "animate-bounceOnce"
+            "text-4xl focus:outline-none transition-all duration-300 transform",
+            "hover:scale-125 focus:scale-125 active:scale-110",
+            "relative group",
+            (hoverRating >= star || rating >= star) 
+              ? "text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" 
+              : "text-slate-300 hover:text-amber-300"
           )}
         >
-          ★
+          <span className="relative z-10">★</span>
+          <div className={clsx(
+            "absolute inset-0 rounded-full blur-sm transition-all duration-300",
+            (hoverRating >= star || rating >= star) 
+              ? "bg-amber-400/30 scale-150" 
+              : "bg-transparent"
+          )} />
         </button>
       ))}
     </div>
     <input type="hidden" name="rating" value={rating} />
-    <p
-      className={clsx(
-        "text-sm font-medium transition-opacity duration-200 animate-fadeIn",
-        rating === 0 ? "text-gray-500 text-xs" : "text-orange-500"
+    <div className="text-center space-y-2">
+      <p className={clsx(
+        "text-base font-semibold transition-all duration-300",
+        rating === 0 ? "text-slate-500" : "text-amber-600"
+      )}>
+        {feedback}
+      </p>
+      {rating > 0 && (
+        <div className="flex items-center justify-center gap-1 text-sm text-amber-600">
+          <span>{rating}</span>
+          <span>/</span>
+          <span>5</span>
+        </div>
       )}
-    >
-      {feedback}
-    </p>
-    {error && <p className="text-red-500 text-xs animate-fadeIn">{error}</p>}
+    </div>
+    {error && (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-3 animate-in slide-in-from-top-2">
+        <p className="text-red-600 text-sm font-medium flex items-center gap-2">
+          <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+          {error}
+        </p>
+      </div>
+    )}
   </div>
 ));
 
@@ -82,13 +106,21 @@ const ImageUploader = memo(({
   maxImages,
   maxImageSize
 }: ImageUploaderProps) => (
-  <div className="space-y-2">
+  <div className="space-y-4">
     <div className="flex justify-between items-center">
-      <label className="block text-sm font-medium text-gray-700">
-        Photos de votre expérience (optionnel)
+      <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+        <svg className="w-4 h-4 text-slate-500" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+        </svg>
+        Photos de votre expérience
       </label>
-      <span className="text-xs text-gray-500">{imagePreviews.length}/{maxImages}</span>
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
+          {imagePreviews.length}/{maxImages}
+        </span>
+      </div>
     </div>
+    
     <input
       type="file"
       name="views"
@@ -101,83 +133,71 @@ const ImageUploader = memo(({
       aria-label="Ajouter des photos"
     />
 
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 gap-3">
       {imagePreviews.map((preview, index) => (
-        <div key={index} className="relative aspect-square">
+        <div key={index} className="relative group aspect-square">
           <img
             src={preview}
             alt={`Aperçu ${index + 1}`}
-            className="object-cover w-full h-full rounded-md border border-gray-200"
+            className="object-cover w-full h-full rounded-xl border-2 border-slate-200 transition-transform duration-200 group-hover:scale-105"
           />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 rounded-xl" />
           <button
             type="button"
             onClick={() => onRemoveImage(index)}
-            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors"
+            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 shadow-lg hover:bg-red-600 transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
             aria-label="Supprimer cette image"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
+            <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>
           </button>
         </div>
       ))}
+      
       {imagePreviews.length < maxImages && (
         <button
           type="button"
           onClick={onTriggerFileInput}
-          className={clsx(
-            "border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center p-4",
-            "transition-colors duration-200 hover:border-orange-500 aspect-square",
-            "focus:outline-none focus:border-orange-500"
-          )}
+          className="border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center p-4 aspect-square transition-all duration-200 hover:border-amber-400 hover:bg-amber-50 focus:outline-none focus:border-amber-500 focus:bg-amber-50 group"
           aria-label="Ajouter des photos"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-gray-400"
-          >
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-            <polyline points="21 15 16 10 5 21"></polyline>
-          </svg>
-          <span className="text-xs text-gray-500 mt-2">Ajouter</span>
+          <div className="bg-slate-100 group-hover:bg-amber-100 p-3 rounded-full transition-colors duration-200">
+            <svg className="w-6 h-6 text-slate-400 group-hover:text-amber-500 transition-colors duration-200" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <span className="text-xs text-slate-500 group-hover:text-amber-600 mt-2 font-medium transition-colors duration-200">
+            Ajouter
+          </span>
         </button>
       )}
     </div>
-    <p className="text-xs text-gray-500">
-      Formats acceptés: * • Max {maxImageSize}MB par image
+    
+    <p className="text-xs text-slate-500 bg-slate-50 p-2 rounded-lg">
+      <span className="font-medium">Formats acceptés:</span> JPG, PNG, WEBP • <span className="font-medium">Taille max:</span> {maxImageSize}MB par image
     </p>
   </div>
 ));
 
 const ThankYouMessage = memo(() => (
-  <div className="flex flex-col items-center justify-center p-8 h-64">
-    <div className="text-green-500 text-6xl mb-4 animate-bounceOnce">✓</div>
-    <h3 className="text-xl font-semibold text-gray-800 mb-2">
+  <div className="flex flex-col items-center justify-center p-12 min-h-[400px]">
+    <div className="relative">
+      <div className="absolute inset-0 bg-emerald-400 rounded-full blur-xl opacity-30 animate-pulse" />
+      <div className="relative bg-gradient-to-r from-emerald-400 to-emerald-500 text-white text-6xl p-6 rounded-full shadow-2xl animate-in zoom-in-50 duration-500">
+        ✓
+      </div>
+    </div>
+    <h3 className="text-2xl font-bold text-slate-800 mt-6 mb-3 animate-in slide-in-from-bottom-4 duration-700">
       Merci pour votre avis !
     </h3>
-    <p className="text-gray-600 text-center">
-      Votre contribution aide la communauté
+    <p className="text-slate-600 text-center max-w-sm animate-in slide-in-from-bottom-4 duration-700 delay-100">
+      Votre contribution précieuse aide notre communauté à faire de meilleurs choix
     </p>
+    <div className="mt-6 flex items-center gap-2 text-sm text-emerald-600 animate-in slide-in-from-bottom-4 duration-700 delay-200">
+      <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+      <span>Avis publié avec succès</span>
+    </div>
   </div>
 ));
 
@@ -188,7 +208,7 @@ export const ReviewModal = () => {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>(""); 
   const [errors, setErrors] = useState<{ title: string; rating: string; description: string }>({ title: "", rating: "", description: "" });
-  const [ratingFeedback, setRatingFeedback] = useState<string>("Veuillez definir une note");
+  const [ratingFeedback, setRatingFeedback] = useState<string>("Cliquez sur une étoile pour évaluer");
   const [showThankYou, setShowThankYou] = useState<boolean>(false);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -202,7 +222,6 @@ export const ReviewModal = () => {
     if (isModalOpen) {
       setErrors({ title: "", rating: "", description: "" });
       setShowThankYou(false);
-      // setDescription(""); 
     }
   }, [isModalOpen]);
 
@@ -216,12 +235,12 @@ export const ReviewModal = () => {
 
   const getRatingFeedback = useCallback((value: number): string => {
     switch (value) {
-      case 1: return "Pas satisfait du tout";
-      case 2: return "Quelques points à améliorer";
+      case 1: return "Pas du tout satisfait";
+      case 2: return "Quelques améliorations nécessaires";
       case 3: return "Globalement satisfait";
-      case 4: return "Très satisfait !";
-      case 5: return "Excellent, je recommande !";
-      default: return "Veuillez definir une note";
+      case 4: return "Très satisfait, je recommande";
+      case 5: return "Excellent, parfait en tous points !";
+      default: return "Cliquez sur une étoile pour évaluer";
     }
   }, []);
 
@@ -240,7 +259,7 @@ export const ReviewModal = () => {
     setErrors(prev => ({
       ...prev,
       description: value.length > 0 && (value.length < 24 || value.length > 512)
-        ? "Merci d'ajouter une description valide (entre 24 et 512 caractères, ou laisser vide)"
+        ? "Description entre 24 et 512 caractères, ou laissez vide"
         : ""
     }));
   }, []);
@@ -250,22 +269,22 @@ export const ReviewModal = () => {
     const newErrors = { title: "", rating: "", description: "" };
 
     if (!title.trim() || title.length > 124) {
-      newErrors.title = "Merci d'ajouter un titre pour résumer votre avis";
+      newErrors.title = "Un titre est requis pour résumer votre avis";
       isValid = false;
     }
 
     if (description.length > 0 && (description.length < 5 || description.length > 512)) {
-      newErrors.description = "Merci d'ajouter une description valide (entre 5 et 512 caractères, ou laisser vide)";
+      newErrors.description = "Description entre 5 et 512 caractères, ou laissez vide";
       isValid = false;
     }
     
     if (!product) {
-      newErrors.title = "Merci de selectionner un produit";
+      newErrors.title = "Produit non sélectionné";
       isValid = false;
     }
     
     if (!rating) {
-      newErrors.rating = "Votre évaluation est importante pour nous";
+      newErrors.rating = "Votre évaluation est essentielle pour nous aider";
       isValid = false;
     }
 
@@ -278,7 +297,7 @@ export const ReviewModal = () => {
     if (!files) return;
 
     if (imagePreviews.length + files.length > MAX_IMAGES) {
-      alert(`Vous pouvez ajouter un maximum de ${MAX_IMAGES} images`);
+      toast.error(`Maximum ${MAX_IMAGES} images autorisées`);
       return;
     }
 
@@ -287,12 +306,12 @@ export const ReviewModal = () => {
 
     Array.from(files).forEach(file => {
       if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
-        alert(`L'image ${file.name} dépasse la taille limite de ${MAX_IMAGE_SIZE_MB}MB`);
+        toast.error(`${file.name} dépasse ${MAX_IMAGE_SIZE_MB}MB`);
         return;
       }
 
       if (!file.type.startsWith('image/')) {
-        alert(`Le fichier ${file.name} n'est pas une image valide`);
+        toast.error(`${file.name} n'est pas une image valide`);
         return;
       }
 
@@ -302,7 +321,7 @@ export const ReviewModal = () => {
 
     setSelectedFiles(prev => [...prev, ...newFiles]);
     setImagePreviews(prev => [...prev, ...newPreviews]);
-  }, []);
+  }, [imagePreviews.length]);
 
   const removeImage = useCallback((index: number) => {
     URL.revokeObjectURL(imagePreviews[index]);
@@ -311,9 +330,7 @@ export const ReviewModal = () => {
   }, [imagePreviews]);
 
   const triggerFileInput = useCallback(() => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+    fileInputRef.current?.click();
   }, []);
 
   const handleTitleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -322,7 +339,12 @@ export const ReviewModal = () => {
   }, []);
   
   const handleFormAction = useCallback(async () => {
-    if (!validateForm() || !product) return toast.error(errors.title || errors.rating || errors.description);
+    if (!validateForm() || !product) {
+      const firstError = errors.title || errors.rating || errors.description;
+      if (firstError) toast.error(firstError);
+      return;
+    }
+    
     try {
       const formData = new FormData();
       formData.append('order_item_id', product.order_item_id);
@@ -345,13 +367,16 @@ export const ReviewModal = () => {
       setSelectedFiles([]);
       setTimeout(() => {
         setModalOpen(false);
-      }, 1500);
+      }, 2500);
     } catch (error) {
       console.error("Erreur lors de la soumission:", error);
+      toast.error("Une erreur est survenue");
     }
-  }, [product, rating, title, description, selectedFiles, validateForm, setModalOpen]);
+  }, [product, rating, title, description, selectedFiles, validateForm, setModalOpen, createComment, errors]);
 
   const closeModal = useCallback(() => setModalOpen(false), [setModalOpen]);
+
+  const isFormValid = title.trim() && rating && product && !errors.description;
 
   return (
     <Modal
@@ -360,49 +385,42 @@ export const ReviewModal = () => {
       setHide={closeModal}
       animationName="translateBottom"
       isOpen={isModalOpen}
-      aria-label={`Laisser un avis sur le ${product?.name}`}
+      aria-label={`Laisser un avis sur ${product?.name}`}
     >
-      <div
-        className={clsx(
-          "bg-white rounded-lg overflow-hidden shadow-xl w-full max-w-[95vw] sm:max-w-lg",
-          "flex flex-col max-h-[90vh] overflow-y-auto",
-          "transition-all duration-300 ease-in-out"
-        )}
-      >
+      <div className={clsx(
+        "bg-white rounded-2xl overflow-hidden shadow-2xl w-full max-w-[95vw] sm:max-w-2xl",
+        "flex flex-col max-h-[90vh] overflow-y-auto backdrop-blur-sm",
+        "transition-all duration-500 ease-out border border-slate-200"
+      )}>
         {showThankYou ? (
           <ThankYouMessage />
         ) : (
           <form onSubmit={(e) => { e.preventDefault(); handleFormAction(); }} className="flex flex-col">
-            <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 border-b border-orange-200">
-              <div className="flex items-center space-x-3">
-                <div className="bg-orange-500 text-white p-2 rounded-full">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+            {/* Header modernisé */}
+            <div className="relative bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 p-6 border-b border-amber-100">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-400/5 via-orange-400/5 to-amber-400/5" />
+              <div className="relative flex items-center space-x-4">
+                <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-3 rounded-2xl shadow-lg">
+                  <svg className="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-800 animate-fadeIn">
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold text-slate-800 mb-1">
                     Votre avis compte
                   </h2>
-                  <p className="text-sm text-gray-600">
-                    Comment évaluez-vous{" "}
-                    <span className="font-medium">{product?.name}</span> ?
+                  <p className="text-slate-600">
+                    Partagez votre expérience avec{" "}
+                    <span className="font-semibold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-lg">
+                      {product?.name}
+                    </span>
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="p-3 space-y-3">
+            <div className="p-6 space-y-8">
+              {/* Rating Section */}
               <StarRating
                 rating={rating}
                 hoverRating={hoverRating}
@@ -412,72 +430,89 @@ export const ReviewModal = () => {
                 feedback={ratingFeedback}
               />
 
-              <div className="space-y-2">
-                <label
-                  htmlFor="review-title"
-                  className="block text-sm font-medium text-gray-700"
-                >
+              {/* Title Input */}
+              <div className="space-y-3">
+                <label htmlFor="review-title" className="block text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <svg className="w-4 h-4 text-slate-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clipRule="evenodd" />
+                  </svg>
                   Titre de votre avis
                 </label>
-                <input
-                  id="review-title"
-                  name="title"
-                  type="text"
-                  value={title}
-                  onChange={handleTitleChange}
-                  placeholder="En quelques mots, resumez votre avis ?"
-                  className={clsx(
-                    "w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50 text-gray-700",
-                    "transition-all duration-200",
-                    errors.title ? "border-red-500" : "border-gray-300"
-                  )}
-                  maxLength={124}
-                />
-                <div className="flex justify-between items-center">
-                  {errors.title && (
-                    <p className="text-red-500 text-xs animate-fadeIn">
+                <div className="relative">
+                  <input
+                    id="review-title"
+                    name="title"
+                    type="text"
+                    value={title}
+                    onChange={handleTitleChange}
+                    placeholder="Résumez votre expérience en quelques mots..."
+                    className={clsx(
+                      "w-full p-4 border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500",
+                      "bg-slate-50 text-slate-700 placeholder-slate-400 transition-all duration-200",
+                      "hover:bg-white hover:border-slate-300",
+                      errors.title ? "border-red-300 bg-red-50" : "border-slate-200"
+                    )}
+                    maxLength={124}
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 bg-white px-2 py-1 rounded-full">
+                    {title.length}/124
+                  </div>
+                </div>
+                {errors.title && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 animate-in slide-in-from-top-2">
+                    <p className="text-red-600 text-sm font-medium flex items-center gap-2">
+                      <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
                       {errors.title}
                     </p>
-                  )}
-                  <span className="text-xs text-gray-500 ml-auto">
-                    {title.length}/52
-                  </span>
-                </div>
+                  </div>
+                )}
               </div>
 
-              <div className="space-y-2">
-                <label
-                  htmlFor="review-message"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Votre expérience détaillée (optionnel)
+              {/* Description Textarea */}
+              <div className="space-y-3">
+                <label htmlFor="review-message" className="block text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <svg className="w-4 h-4 text-slate-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                  </svg>
+                  Détaillez votre expérience
+                  <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full ml-auto">
+                    Optionnel
+                  </span>
                 </label>
-                <textarea
-                  id="review-message"
-                  name="description"
-                  value={description}
-                  onChange={handleDescriptionChange}
-                  placeholder="Partagez votre expérience pour aider les autres clients"
-                  className={clsx(
-                    "w-full p-3 border rounded-md resize-none h-32 bg-gray-50",
-                    "focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-700",
-                    "transition-all duration-200",
-                    errors.description ? "border-red-500" : "border-gray-300"
-                  )}
-                  maxLength={512}
-                />
-                <div className="flex justify-between items-center">
-                  {errors.description && (
-                    <p className="text-red-500 text-xs animate-fadeIn">
+                <div className="relative">
+                  <textarea
+                    id="review-message"
+                    name="description"
+                    value={description}
+                    onChange={handleDescriptionChange}
+                    placeholder="Partagez les détails de votre expérience pour aider la communauté..."
+                    className={clsx(
+                      "w-full p-4 border-2 rounded-xl resize-none h-32 focus:outline-none focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500",
+                      "bg-slate-50 text-slate-700 placeholder-slate-400 transition-all duration-200",
+                      "hover:bg-white hover:border-slate-300",
+                      errors.description ? "border-red-300 bg-red-50" : "border-slate-200"
+                    )}
+                    maxLength={512}
+                  />
+                  <div className="absolute right-3 bottom-3 text-xs text-slate-400 bg-white px-2 py-1 rounded-full">
+                    {description.length}/512
+                  </div>
+                </div>
+                {errors.description && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 animate-in slide-in-from-top-2">
+                    <p className="text-red-600 text-sm font-medium flex items-center gap-2">
+                      <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
                       {errors.description}
                     </p>
-                  )}
-                  <span className="text-xs text-gray-500 ml-auto">
-                    {description.length}/512
-                  </span>
-                </div>
+                  </div>
+                )}
               </div>
 
+              {/* Image Uploader */}
               <ImageUploader
                 imagePreviews={imagePreviews}
                 onImageUpload={handleImageUpload}
@@ -489,25 +524,28 @@ export const ReviewModal = () => {
               />
             </div>
 
-            <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
+            {/* Footer modernisé */}
+            <div className="p-6 border-t border-slate-200 bg-gradient-to-r from-slate-50 to-slate-50/50 flex justify-between items-center gap-4">
               <button
                 type="button"
                 onClick={closeModal}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200 rounded-md hover:bg-gray-100"
+                className="px-6 py-3 text-slate-600 hover:text-slate-800 transition-all duration-200 rounded-xl hover:bg-slate-100 font-medium"
                 aria-label="Annuler"
               >
                 Annuler
               </button>
               <button
                 type="submit"
-                disabled={isCreatingComment}
+                disabled={!isFormValid || isCreatingComment}
                 className={clsx(
-                  "px-6 py-2 rounded-md text-white transition-all duration-200 flex items-center gap-2",
-                  !title || !rating || !product || errors.description || isCreatingComment
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-orange-500 hover:bg-orange-600 hover:shadow-md"
+                  "px-8 py-3 rounded-xl text-white font-semibold transition-all duration-200 flex items-center gap-3 shadow-lg",
+                  "relative overflow-hidden group",
+                  isFormValid && !isCreatingComment
+                    ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 hover:shadow-xl hover:scale-105 active:scale-95"
+                    : "bg-slate-300 cursor-not-allowed"
                 )}
               >
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                 {isCreatingComment ? (
                   <>
                     <svg

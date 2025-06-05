@@ -41,10 +41,10 @@ const LoadingSpinner = ({ text = "Chargement..." }: { text?: string }) => (
 );
 
 const ProfileSectionCard = ({ title, icon, children }: { title: string, icon: JSX.Element, children: React.ReactNode }) => (
-  <section className="bg-white dark:bg-neutral-800 shadow-xl dark:shadow-neutral-900/50 rounded-xl overflow-hidden">
-    <header className="flex items-center gap-3 p-5 sm:p-6 border-b border-neutral-200 dark:border-neutral-700">
-      {React.cloneElement(icon, { className: "text-xl sm:text-2xl text-slate-600 dark:text-slate-400" })}
-      <h2 className="text-lg sm:text-xl font-semibold text-neutral-800 dark:text-neutral-100">
+  <section className="bg-white shadow-xl  rounded-xl overflow-hidden">
+    <header className="flex items-center gap-3 p-5 sm:p-6 border-b border-neutral-200">
+      {React.cloneElement(icon, { className: "text-xl sm:text-2xl text-slate-600" })}
+      <h2 className="text-lg sm:text-xl font-semibold text-neutral-800">
         {title}
       </h2>
     </header>
@@ -70,31 +70,31 @@ export default function ProfilePage(): JSX.Element {
   }, []);
 
   return (
-    <div className="bg-neutral-100 dark:bg-neutral-900 min-h-screen font-primary text-neutral-700 dark:text-neutral-300">
+    <div className="bg-neutral-100 min-h-screen font-primary text-neutral-700">
       <header
         className={`sticky top-0 inset-x-0 z-40 transition-all duration-300 ease-in-out
           ${isScrolled
-            ? 'bg-white/80 dark:bg-neutral-800/80 backdrop-blur-lg shadow-lg py-4 mt-0 top-11 sm:top-15 z-40'
+            ? 'bg-white/80 backdrop-blur-lg shadow-lg py-4 mt-0 top-11 sm:top-15 z-40'
             : 'bg-transparent py-6 top-0 mt-7 z-40'
           }`}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 pt-4">
           <div className="max-w-5xl mx-auto flex items-center gap-3 sm:gap-4">
             <div className={`p-2 sm:p-3 rounded-full transition-colors duration-300
-              ${isScrolled ? 'bg-slate-100 dark:bg-slate-900/50' : 'bg-white dark:bg-neutral-800 shadow-md'}`}>
+              ${isScrolled ? 'bg-slate-100' : 'bg-white shadow-md'}`}>
               <BsPersonFill
                 className={`text-2xl sm:text-3xl transition-colors duration-300
-                ${isScrolled ? 'text-slate-600 dark:text-slate-400' : 'text-neutral-700 dark:text-neutral-200'}`}
+                ${isScrolled ? 'text-slate-600' : 'text-neutral-700'}`}
               />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-800">
               Mon Profil
             </h1>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 sm:py-12">
+      <main className="container mx-auto px-1 py-8 sm:py-12">
         <div className="max-w-5xl mx-auto flex flex-col gap-8 sm:gap-10">
           <Suspense fallback={<LoadingSpinner text="Chargement des informations..." />}>
             <ProfileSectionCard title="Informations personnelles" icon={<BsPersonFill />}>

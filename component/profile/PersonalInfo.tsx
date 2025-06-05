@@ -82,23 +82,23 @@ export const PersonalInfo = () => {
     <div className="space-y-8">
       {/* Nom Complet - Design Card Moderne */}
       <div className="group relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-100/50 to-slate-50/30 dark:from-slate-800/30 dark:to-slate-700/20 rounded-2xl blur-xl transition-all duration-500 group-hover:blur-2xl opacity-0 group-hover:opacity-100"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-100/50 to-slate-50/30 rounded-2xl blur-xl transition-all duration-500 group-hover:blur-2xl opacity-0 group-hover:opacity-100"></div>
         
         <div 
-          className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/60 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/20 dark:hover:shadow-slate-900/20 hover:border-slate-300/80 dark:hover:border-slate-600/80"
+          className="relative bg-white/80 backdrop-blur-xl border border-slate-200/60 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/20 hover:border-slate-300/80"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-700 rounded-xl">
-                <FiUser className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              <div className="p-2.5 bg-gradient-to-br from-slate-100 to-slate-50 rounded-xl">
+                <FiUser className="w-5 h-5 text-slate-600" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
                   Nom complet
                 </label>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-slate-500">
                   Votre nom d'affichage public
                 </p>
               </div>
@@ -109,8 +109,8 @@ export const PersonalInfo = () => {
                 onClick={handleEditStart}
                 className={`p-2.5 rounded-xl transition-all duration-300 ${
                   isHovered 
-                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 scale-105' 
-                    : 'bg-transparent text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    ? 'bg-slate-100 text-slate-700 scale-105' 
+                    : 'bg-transparent text-slate-400 hover:bg-slate-50'
                 }`}
                 aria-label="Modifier le nom complet"
               >
@@ -128,13 +128,13 @@ export const PersonalInfo = () => {
                   onChange={handleEditChange}
                   autoFocus
                   placeholder="Entrez votre nom complet"
-                  className={`w-full px-4 py-3.5 text-base bg-slate-50/50 dark:bg-slate-800/50 border-2 rounded-xl
-                              text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
-                              focus:ring-0 focus:border-slate-400 dark:focus:border-slate-500 outline-none
+                  className={`w-full px-4 py-3.5 text-base bg-slate-50/50 border-2 rounded-xl
+                              text-slate-900 placeholder-slate-400
+                              focus:ring-0 focus:border-slate-400 outline-none
                               transition-all duration-300 backdrop-blur-sm
                               ${errorMessage 
-                                ? 'border-red-400 dark:border-red-500 bg-red-50/50 dark:bg-red-900/20' 
-                                : 'border-slate-200 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-800'
+                                ? 'border-red-400 bg-red-50/50' 
+                                : 'border-slate-200 focus:bg-white'
                               }`}
                   aria-invalid={!!errorMessage}
                   aria-describedby={errorMessage ? "fullName-error" : undefined}
@@ -143,16 +143,16 @@ export const PersonalInfo = () => {
                 {updateUserMutation.isPending && (
                   <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                     <div className="relative">
-                      <div className="w-5 h-5 border-2 border-slate-300 dark:border-slate-600 border-t-slate-600 dark:border-t-slate-300 rounded-full animate-spin"></div>
+                      <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
                     </div>
                   </div>
                 )}
               </div>
 
               {errorMessage && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
                   <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
-                  <p className="text-sm text-red-700 dark:text-red-300">{errorMessage}</p>
+                  <p className="text-sm text-red-700">{errorMessage}</p>
                 </div>
               )}
 
@@ -161,7 +161,7 @@ export const PersonalInfo = () => {
                   type="button"
                   onClick={handleEditCancel}
                   disabled={updateUserMutation.isPending}
-                  className="px-6 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-6 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Annuler
                 </button>
@@ -186,15 +186,15 @@ export const PersonalInfo = () => {
           ) : (
             <div className="space-y-2">
               {updateUserMutation.isPending ? (
-                <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <div className="w-4 h-4 border-2 border-slate-400 dark:border-slate-500 border-t-slate-600 dark:border-t-slate-300 rounded-full animate-spin"></div>
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">Mise à jour en cours...</span>
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                  <div className="w-4 h-4 border-2 border-slate-400 border-t-slate-600 rounded-full animate-spin"></div>
+                  <span className="text-slate-600 font-medium">Mise à jour en cours...</span>
                 </div>
               ) : (
-                <div className="p-3 bg-slate-50/50 dark:bg-slate-800/50 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
-                  <p className="text-base font-medium text-slate-800 dark:text-slate-200">
+                <div className="p-3 bg-slate-50/50 rounded-xl border border-slate-200/50">
+                  <p className="text-base font-medium text-slate-800">
                     {fullName || (
-                      <span className="italic text-slate-500 dark:text-slate-400 font-normal">
+                      <span className="italic text-slate-500 font-normal">
                         Nom non défini - Cliquez pour ajouter
                       </span>
                     )}
@@ -205,30 +205,28 @@ export const PersonalInfo = () => {
           )}
         </div>
       </div>
-
-      {/* Email - Design Card Moderne */}
       <div className="group relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-100/30 to-indigo-50/20 dark:from-blue-900/20 dark:to-indigo-800/10 rounded-2xl blur-xl transition-all duration-500 opacity-0 group-hover:opacity-100"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-100/30 to-indigo-50/20 rounded-2xl blur-xl transition-all duration-500 opacity-0 group-hover:opacity-100"></div>
         
-        <div className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/60 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:shadow-blue-200/10 dark:hover:shadow-blue-900/10 hover:border-blue-300/60 dark:hover:border-blue-600/40">
+        <div className="relative bg-white/80 backdrop-blur-xl border border-slate-200/60 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:shadow-blue-200/10 hover:border-blue-300/60">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900 dark:to-blue-800 rounded-xl">
-              <FiMail className="w-5 h-5 text-blue-600 dark:text-blue-300" />
+            <div className="p-2.5 bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl">
+              <FiMail className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
                 Adresse e-mail
               </label>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-500">
                 Votre email de connexion (non modifiable)
               </p>
             </div>
           </div>
           
-          <div className="p-3 bg-gradient-to-r from-slate-50 to-blue-50/30 dark:from-slate-800 dark:to-blue-900/20 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
-            <p className="text-base font-medium text-slate-700 dark:text-slate-300 break-all">
+          <div className="p-3 bg-gradient-to-r from-slate-50 to-blue-50/30 rounded-xl border border-slate-200/50">
+            <p className="text-base font-medium text-slate-700 break-all">
               {user?.email || (
-                <span className="italic text-slate-500 dark:text-slate-400 font-normal">
+                <span className="italic text-slate-500 font-normal">
                   Email non défini
                 </span>
               )}

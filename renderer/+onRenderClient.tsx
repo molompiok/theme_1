@@ -87,7 +87,6 @@ const onRenderClient: OnRenderClientAsync = async (pageContext) => {
   api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
       const token = useAuthStore.getState().token; // This will be from localStorage via persist
-      console.log("🚀 ~ constonRenderClient:OnRenderClientAsync= ~ token:", token)
       if (token && config.headers) {
         config.headers["Authorization"] = `Bearer ${token}`;
       } else {

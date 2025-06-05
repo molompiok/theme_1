@@ -24,6 +24,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { debounce } from "../../utils";
 import { renderToString } from "react-dom/server";
+import { api } from "../../api";
 
 export const nominatim_url = import.meta.env.VITE_NOMINATIM_URL;
 
@@ -63,7 +64,9 @@ const getCoordinates = async (
     return null;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 429) {
-      console.error("Trop de requêtes à Nominatim. Veuillez réessayer plus tard.");
+      console.error(
+        "Trop de requêtes à Nominatim. Veuillez réessayer plus tard."
+      );
       return null;
     }
     console.error("Erreur de géocodage :", error);
@@ -71,26 +74,34 @@ const getCoordinates = async (
   }
 };
 
-const reverseGeocode = async (
+export const reverseGeocode = async (
   lat: number,
   lng: number
 ): Promise<Address | null> => {
   try {
-    const response = await axios.get(
-      `${nominatim_url}/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`
-    );
-    const result = response.data;
-    if (result) {
-      const text = result.display_name;
-      const subtitle = result.address?.city || result.address?.suburb || "";
-      return { text, subtitle, lat, lng };
+    const response = await api.api?.get('/api/reverse', {
+      params: {
+        lat,
+        lon: lng, // attention à bien envoyer `lon` et non `lng`
+      },
+    })
+
+    const result = response?.data
+
+    if (result && result.display_name) {
+      const text = result.display_name
+      const subtitle = result.address?.city || result.address?.suburb || ""
+      return { text, subtitle, lat, lng }
     }
-    return null;
+
+    return null
   } catch (error) {
-    console.error("Erreur de géocodage inverse :", error);
-    return null;
+    console.error('Erreur reverseGeocode côté client :', error)
+    return null
   }
-};
+}
+
+
 
 const getSuggestions = async (query: string): Promise<SuggestionItem[]> => {
   try {
@@ -116,7 +127,10 @@ const highlightText = (text: string, query: string): JSX.Element => {
     <span className="truncate">
       {parts.map((part, i) =>
         part.toLowerCase() === query.toLowerCase() ? (
-          <strong key={i} className="font-semibold text-blue-600 bg-blue-50 px-1 rounded">
+          <strong
+            key={i}
+            className="font-semibold text-blue-400 underline bg-blue-50 px-1 rounded"
+          >
             {part}
           </strong>
         ) : (
@@ -172,7 +186,10 @@ const MapComponent = React.lazy(async () => {
           popupAnchor: [0, -40],
         });
 
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {}).addTo(map);
+        L.tileLayer(
+          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          {}
+        ).addTo(map);
 
         const marker = L.marker(
           address.lat && address.lng
@@ -191,7 +208,7 @@ const MapComponent = React.lazy(async () => {
           .bindPopup(
             `<div class="p-2 text-center">
               <div class="flex items-center justify-center gap-2 mb-1">
-                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="size-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
                 </svg>
                 <span class="font-semibold text-gray-900">Lieu de livraison</span>
@@ -203,6 +220,7 @@ const MapComponent = React.lazy(async () => {
 
         marker.on("dragend", async (e: any) => {
           const { lat, lng } = e.target.getLatLng();
+          console.log("🚀 ~ marker.on ~ { lat, lng }:", { lat, lng })
           const newAddress = await reverseGeocode(lat, lng);
           if (newAddress) onAddressChange(newAddress);
         });
@@ -272,7 +290,10 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
     onSuccess: (newAddress) => {
       fetchUser({ token: useAuthStore.getState().token || undefined });
       setAddress({ ...address, id: newAddress?.id });
-      setMessage({ type: "success", text: "Adresse enregistrée avec succès !" });
+      setMessage({
+        type: "success",
+        text: "Adresse enregistrée avec succès !",
+      });
       setTimeout(() => setMessage(null), 5000);
     },
     onError: () => {
@@ -285,7 +306,10 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
     mutationFn: update_user_address,
     onSuccess: () => {
       fetchUser({ token: useAuthStore.getState().token || undefined });
-      setMessage({ type: "success", text: "Adresse mise à jour avec succès !" });
+      setMessage({
+        type: "success",
+        text: "Adresse mise à jour avec succès !",
+      });
       setTimeout(() => setMessage(null), 5000);
     },
     onError: () => {
@@ -365,7 +389,10 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
     if (!searchInput.trim()) {
-      setMessage({ type: "error", text: "Veuillez entrer une adresse valide." });
+      setMessage({
+        type: "error",
+        text: "Veuillez entrer une adresse valide.",
+      });
       setTimeout(() => setMessage(null), 5000);
       return;
     }
@@ -419,6 +446,7 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
         userPosition.lat,
         userPosition.lng
       );
+      console.log("🚀 ~ handleReturnToUserPosition ~ newAddress:", newAddress)
       if (newAddress) {
         setAddress(newAddress);
         setMapCenter([userPosition.lat, userPosition.lng]);
@@ -435,25 +463,30 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
   };
 
   return (
-    <div className="w-full bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-      <div className="bg-gradient-to-r from-slate-600 to-gray-600 p-6 text-white">
+    <div className="w-full bg-transparent overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-600 to-gray-600 p-6 rounded-2xl text-white">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
             <HiOutlineLocationMarker className="text-2xl" />
           </div>
           <div>
             <h2 className="text-xl font-bold">Adresse de livraison</h2>
-            <p className="text-blue-100 text-sm">Où souhaitez-vous être livré ?</p>
+            <p className="text-blue-100 text-sm">
+              Où souhaitez-vous être livré ?
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="p-6 space-y-6">
+      <div className="py-6 space-y-6">
         {/* Formulaire de recherche moderne */}
         <form onSubmit={handleSearch} className="relative">
           <div className="space-y-4">
             <div className="relative">
-              <label htmlFor="address-search" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label
+                htmlFor="address-search"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
                 Rechercher une adresse
               </label>
               <div className="relative group">
@@ -475,7 +508,10 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
                   }`}
                   disabled={isGeocoding}
                 />
-                <BsSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                <BsSearch
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors"
+                  size={20}
+                />
                 {isLoading && (
                   <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
                     <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -499,7 +535,7 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
                   </>
                 )}
               </button>
-              
+
               <button
                 type="button"
                 onClick={handleReturnToUserPosition}
@@ -536,57 +572,64 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
         </form>
 
         {address?.text ? (
-          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-green-100 rounded-xl">
-                    <FaCheckCircle className="text-green-600" size={20} />
+          <div className="space-y-4 sm:space-y-6">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl sm:rounded-2xl p-1 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-0 mb-4">
+                <div className="flex items-start gap-3 sm:gap-4 flex-1">
+                  <div className="p-2 sm:p-3 bg-green-100 rounded-lg sm:rounded-xl flex-shrink-0">
+                    <FaCheckCircle className="text-green-600" size={18} />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 text-lg mb-1">Adresse confirmée</h3>
-                    <p className="text-gray-800 font-medium break-words leading-relaxed">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-1">
+                      Adresse confirmée
+                    </h3>
+                    <p className="text-sm sm:text-base text-gray-800 font-medium break-words leading-relaxed">
                       {address.text}
                     </p>
                     {address.subtitle && (
-                      <p className="text-gray-600 font-medium mt-1">
+                      <p className="text-sm text-gray-600 font-medium mt-1">
                         {address.subtitle}
                       </p>
                     )}
-                    <p className="text-xs text-gray-500 mt-2 font-mono">
-                      📍 {address.lat?.toFixed(6) || "N/A"}, {address.lng?.toFixed(6) || "N/A"}
+                    <p className="text-xs text-gray-500 mt-2 font-mono break-all">
+                      📍 {address.lat?.toFixed(6) || "N/A"},{" "}
+                      {address.lng?.toFixed(6) || "N/A"}
                     </p>
                   </div>
                 </div>
-                
-                <div className="flex gap-2">
+
+                <div className="flex gap-2 justify-end sm:justify-start flex-shrink-0">
                   <button
                     onClick={() => setSearchInput(address.text)}
-                    className="p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 transform hover:scale-110"
+                    className="p-2 sm:p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg sm:rounded-xl transition-all duration-200 transform hover:scale-110"
                     title="Modifier l'adresse"
                   >
-                    <FiEdit2 size={18} />
+                    <FiEdit2 size={16} className="sm:w-[18px] sm:h-[18px]" />
                   </button>
                   <button
                     onClick={handleDelete}
-                    className="p-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 transform hover:scale-110"
+                    className="p-2 sm:p-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg sm:rounded-xl transition-all duration-200 transform hover:scale-110"
                     title="Supprimer l'adresse"
                   >
-                    <BsTrash size={18} />
+                    <BsTrash size={16} className="sm:w-[18px] sm:h-[18px]" />
                   </button>
                 </div>
               </div>
             </div>
 
             <div className="relative">
-              <Suspense fallback={
-                <div className="h-80 bg-gray-100 rounded-2xl flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    <p className="text-gray-600">Chargement de la carte...</p>
+              <Suspense
+                fallback={
+                  <div className="h-64 sm:h-80 bg-gray-100 rounded-xl sm:rounded-2xl flex items-center justify-center">
+                    <div className="text-center px-4">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-sm sm:text-base text-gray-600">
+                        Chargement de la carte...
+                      </p>
+                    </div>
                   </div>
-                </div>
-              }>
+                }
+              >
                 <MapComponent
                   mapHeight={mapHeight}
                   address={address}
@@ -602,21 +645,26 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
               <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <HiOutlineLocationMarker className="text-blue-600 text-3xl" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Définissez votre adresse</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Définissez votre adresse
+              </h3>
               <p className="text-gray-600 max-w-md mx-auto">
-                Recherchez une adresse ou déplacez le marqueur sur la carte pour définir votre lieu de livraison.
+                Recherchez une adresse ou déplacez le marqueur sur la carte pour
+                définir votre lieu de livraison.
               </p>
             </div>
-            
+
             <div className="relative">
-              <Suspense fallback={
-                <div className="h-80 bg-gray-100 rounded-2xl flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    <p className="text-gray-600">Chargement de la carte...</p>
+              <Suspense
+                fallback={
+                  <div className="h-80 bg-gray-100 rounded-2xl flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-gray-600">Chargement de la carte...</p>
+                    </div>
                   </div>
-                </div>
-              }>
+                }
+              >
                 <MapComponent
                   mapHeight={mapHeight}
                   address={address}
@@ -628,21 +676,29 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
           </div>
         )}
       </div>
-
-      {/* Messages de feedback avec toast moderne */}
       {message && (
-        <div className={`fixed top-6 right-6 p-4 rounded-2xl shadow-2xl transition-all duration-500 transform z-50 max-w-sm ${
-          message.type === "success"
-            ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
-            : "bg-gradient-to-r from-red-500 to-pink-500 text-white"
-        } animate-slideIn`}>
+        <div
+          className={`fixed top-20 right-6 p-4 rounded-2xl shadow-2xl transition-all duration-500 transform z-50 max-w-sm ${
+            message.type === "success"
+              ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+              : "bg-gradient-to-r from-red-500 to-pink-500 text-white"
+          } animate-slideIn`}
+        >
           <div className="flex items-center gap-3">
             <div className="p-1 bg-white/20 rounded-full">
               {message.type === "success" ? (
                 <FaCheckCircle size={16} />
               ) : (
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               )}
             </div>

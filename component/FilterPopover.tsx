@@ -75,8 +75,6 @@ const FilterDropdown = ({
         <span className="text-gray-900 truncate max-w-[80px] sm:max-w-none">
           {selectedOption || "Sélectionner"}
         </span>
-
-        {/* Chevron Icon */}
         <svg
           className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
@@ -135,7 +133,6 @@ const FilterDropdown = ({
               >
                 <span className="capitalize">{option}</span>
 
-                {/* Check Icon pour l'option sélectionnée */}
                 {isSelected && (
                   <svg
                     className="w-4 h-4 text-slate-600"

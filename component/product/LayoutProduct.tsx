@@ -37,7 +37,6 @@ export default function LayoutProduct({
             <FilterPopover
               setFilter={setFilter}
               selectedFilters={selectedFilters}
-              // defaultOptions={[...defaultOptions]}
             />
            
           </div>

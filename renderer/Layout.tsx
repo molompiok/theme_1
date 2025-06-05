@@ -4,7 +4,13 @@ import { PageContextProvider, usePageContext } from "./usePageContext";
 import type { PageContext } from "vike/types";
 import { Toaster } from "react-hot-toast";
 import { LinkIcon } from "../component/LinkIcon";
-import { BsChevronDown, BsHandbag, BsPerson, BsSearch } from "react-icons/bs";
+import {
+  BsChevronDown,
+  BsHandbag,
+  BsHeart,
+  BsPerson,
+  BsSearch,
+} from "react-icons/bs";
 import { useModalCart } from "../store/cart";
 import { CiMenuBurger } from "react-icons/ci";
 import { navigate } from "vike/client/router";
@@ -49,7 +55,7 @@ function getQueryParams() {
 }
 
 interface PostMessageData {
-  type: "UPDATE_THEME_SETTINGS" | "GET_CURRENT_SETTINGS"; // Ajouter d'autres types si besoin
+  type: "UPDATE_THEME_SETTINGS" | "GET_CURRENT_SETTINGS";
   payload?: any;
 }
 
@@ -131,29 +137,39 @@ function Layout({
         <Header>
           <SideBarCategories />
           <Logo />
-          <nav className="flex items-center gap-5">
-            <div className="hidden font-semibold uppercase lg:flex lg:gap-5 lg:justify-center">
-              <LinkIcon href="/">Boutique</LinkIcon>
-              <LinkIcon href="/About">About</LinkIcon>
+          <nav className="flex items-center gap-6">
+            <div className="hidden font-medium uppercase lg:flex lg:gap-6 lg:justify-center">
+              <LinkIcon
+                href="/"
+                className="hover:text-primary transition-colors duration-200"
+              >
+                Boutique
+              </LinkIcon>
+              <LinkIcon
+                href="/About"
+                className="hover:text-primary transition-colors duration-200"
+              >
+                About
+              </LinkIcon>
             </div>
-            <BsSearch
-              size={24}
-              className="cursor-pointer"
+            <button
               onClick={() => navigate("/search")}
-            />
-            <div className="relative">
-              <span className="text-sm absolute -top-3 -right-2 bg-gray-600 text-white rounded-full px-1">
-                {totalItems}
+              className="p-2 hover:bg-gray-100 rounded-full transition-all duration-200 hover:scale-105"
+              aria-label="Rechercher"
+            >
+              <BsSearch size={20} />
+            </button>
+            <button
+              onClick={() => toggleCart(true)}
+              className="relative p-2 hover:bg-gray-100 rounded-full transition-all duration-200 hover:scale-105"
+              aria-label={`Panier (${totalItems} articles)`}
+            >
+              <BsHandbag size={20} />
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 animate-pulse">
+                {(totalItems ?? 0) > 9 ? "9+" : totalItems}
               </span>
-              <BsHandbag
-                size={24}
-                className="cursor-pointer"
-                onClick={() => toggleCart(true)}
-              />
-            </div>
-            <BsPerson
-              size={28}
-              className="cursor-pointer"
+            </button>
+            <button
               onClick={() => {
                 const user = useAuthStore.getState().user;
                 if (user) {
@@ -162,7 +178,11 @@ function Layout({
                   openModalAuth("login");
                 }
               }}
-            />
+              className="p-2 hover:bg-gray-100 rounded-full transition-all duration-200 hover:scale-105"
+              aria-label="Profil utilisateur"
+            >
+              <BsPerson size={24} />
+            </button>
           </nav>
         </Header>
         {children}
@@ -174,6 +194,7 @@ function Layout({
     </PageContextProvider>
   );
 }
+
 function Frame({
   children,
   style,
@@ -190,8 +211,10 @@ function Frame({
         borderLeft: "4px solid #10B981",
         fontSize: "16px",
         padding: "12px",
-        borderRadius: "8px",
-        fontWeight: "bold",
+        borderRadius: "12px",
+        fontWeight: "500",
+        boxShadow:
+          "0 10px 25px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
       },
     },
     error: {
@@ -201,8 +224,10 @@ function Frame({
         color: "#991B1B",
         fontSize: "16px",
         padding: "12px",
-        borderRadius: "8px",
+        borderRadius: "12px",
         borderLeft: "4px solid #EF4444",
+        boxShadow:
+          "0 10px 25px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
       },
     },
   };
@@ -214,7 +239,7 @@ function Frame({
       </div>
       <Toaster
         position="top-center"
-        toastOptions={{ duration: 5000, ...toasterStyles }}
+        toastOptions={{ duration: 4000, ...toasterStyles }}
       />
     </>
   );
@@ -224,7 +249,7 @@ function Header({ children }: { children: React.ReactNode }) {
   const { urlPathname } = usePageContext();
   const user = useAuthStore((state) => state.user);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const headerRef = useRef<HTMLElement>(null); // Référence pour l’élément header
+  const headerRef = useRef<HTMLElement>(null);
   const [isScrolled, setIsScrolled] = useState(false);
 
   const handleModalOpen = () => {
@@ -252,9 +277,12 @@ function Header({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isScrolled]);
 
-
-  const headerTextColor = useThemeSettingsStore(state => state.headerTextColor);
-  const headerBackgroundColor = useThemeSettingsStore(state => state.headerBackgroundColor);
+  const headerTextColor = useThemeSettingsStore(
+    (state) => state.headerTextColor
+  );
+  const headerBackgroundColor = useThemeSettingsStore(
+    (state) => state.headerBackgroundColor
+  );
 
   return (
     <>
@@ -263,121 +291,196 @@ function Header({ children }: { children: React.ReactNode }) {
           <VerticalBanner />
           <header
             ref={headerRef}
-            className={`w-full font-primary flex items-center shadow-md justify-between transition-all duration-300 ease-out
+            className={`w-full font-primary flex items-center justify-between transition-all duration-300 ease-out backdrop-blur-md border-b border-gray-100/20
               ${
                 isScrolled
-                  ? "fixed top-0 left-0 right-0 z-90 pr-1  sm:px-7 py-2"
-                  : "relative sm:px-3 pr-2 py-2"
+                  ? "fixed top-0 left-0 right-0 z-[100] px-4 sm:px-6 lg:px-8 py-1 shadow-lg bg-white/95"
+                  : "relative px-4 sm:px-6 lg:px-8 py-2 bg-white"
               }`}
-              style={{
-                backgroundColor: headerBackgroundColor,
-                color: headerTextColor,
-              }}
+            style={{
+              backgroundColor: isScrolled
+                ? `${headerBackgroundColor}f5`
+                : headerBackgroundColor,
+              color: headerTextColor,
+            }}
           >
             {children}
           </header>
-          {isScrolled && <div className="h-16"></div>}
+          {isScrolled && <div className="h-[60px]"></div>}
         </>
       ) : (
         <>
           <header
             ref={headerRef}
-            className={`w-full font-primary flex items-center justify-between shadow-md transition-all duration-300 ease-out
+            className={`w-full font-primary flex items-center justify-between transition-all duration-300 ease-out backdrop-blur-md border-b border-gray-100/20
               ${
                 isScrolled
-                  ? "fixed top-0 left-0 right-0 z-90  px-7 py-2"
-                  : "relative px-3 py-2"
+                  ? "fixed top-0 left-0 right-0 z-[100] px-4 sm:px-6 lg:px-8 py-3 shadow-lg bg-white/95"
+                  : "relative px-4 sm:px-6 lg:px-8 py-4 bg-white"
               }`}
-              style={{
-                backgroundColor: headerBackgroundColor,
-                color: headerTextColor,
-              }}
+            style={{
+              backgroundColor: isScrolled
+                ? `${headerBackgroundColor}f5`
+                : headerBackgroundColor,
+              color: headerTextColor,
+            }}
           >
-            <CiMenuBurger
-              className="flex sm:hidden  cursor-pointer"
-              size={35}
-              // color="black"
+            {/* Mobile Menu Button */}
+            <button
+              className="flex sm:hidden p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
               onClick={handleModalOpen}
-            />
+              aria-label="Ouvrir le menu"
+            >
+              <CiMenuBurger size={24} />
+            </button>
+
+            {/* Mobile Logo */}
             <div className="mx-auto block sm:hidden">
               <Logo />
             </div>
-            <div className="hidden uppercase font-semibold sm:flex gap-5 justify-center">
-              <LinkIcon href="/">
-                <BiArrowBack className="text-2xl" />
-              </LinkIcon>
+
+            {/* Desktop Navigation */}
+            <div className="hidden uppercase font-medium sm:flex gap-6 items-center">
+              <button
+                onClick={() => navigate("/")}
+                className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-full transition-all duration-200"
+                aria-label="Retour à l'accueil"
+              >
+                <BiArrowBack className="text-xl" />
+              </button>
               <Logo />
-              <LinkIcon href="/profile/commandes">Mes commandes</LinkIcon>
-              <LinkIcon isSimple={true} href="/profile/favoris">
+              <LinkIcon
+                href="/profile/commandes"
+                className="hover:text-primary transition-colors duration-200"
+              >
+                Mes commandes
+              </LinkIcon>
+              <LinkIcon
+                isSimple={true}
+                href="/profile/favoris"
+                className="hover:text-primary transition-colors duration-200"
+              >
                 Mes favoris
               </LinkIcon>
             </div>
             <Popover>
-              <PopoverTrigger className="gap-2 justify-center items-center bg-white hidden sm:flex">
+              <PopoverTrigger className="gap-3 justify-center items-center hidden sm:flex p-2 hover:bg-gray-50 rounded-xl transition-all duration-200 border border-gray-200/50">
                 {user ? (
                   <>
-                    <ProductMedia
-                      mediaList={user?.photo || []}
-                      productName={user?.full_name || "Utilisateur"}
-                      className="size-8 rounded-full"
-                      fallbackImage=""
-                    />
-                    <BsChevronDown className="text-xl" />
+                    {user?.photo ? (
+                      <ProductMedia
+                        mediaList={user?.photo || []}
+                        productName={user?.full_name || "Utilisateur"}
+                        className="w-8 h-8 rounded-full"
+                        fallbackImage=""
+                      />
+                    ) : (
+                      <span className="bg-gray-700 p-3 text-white rounded-full text-lg">
+                        {user?.full_name.split(" ")[0]}
+                      </span>
+                    )}
+                    <span className="text-sm font-medium hidden md:block max-w-24 truncate">
+                      {user?.full_name || "Utilisateur"}
+                    </span>
+                    <BsChevronDown className="text-sm text-gray-500" />
                   </>
                 ) : (
                   <>
-                    <FaUserAlt
-                      className="bg-gray-200 p-1 rounded-3xl text-gray-500"
-                      size={35}
-                    />
-                    <BsChevronDown className="text-xl" />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                      <FaUserAlt className="text-gray-500 text-sm" />
+                    </div>
+                    <span className="text-sm font-medium hidden md:block">
+                      Se connecter
+                    </span>
+                    <BsChevronDown className="text-sm text-gray-500" />
                   </>
                 )}
               </PopoverTrigger>
-              <PopoverContent className="bg-transparent border border-black/20 z-[99] rounded-2xl overflow-hidden">
-                <div className="font-primary bg-white p-4 text-clamp-base shadow-2xl rounded-2xl">
-                  <div className="flex items-center">
-                    {user ? (
-                      <>
+
+              <PopoverContent className="bg-white border border-gray-200/50 shadow-xl z-[99] rounded-2xl overflow-hidden backdrop-blur-sm w-64">
+                <div className="font-primary bg-white/95 backdrop-blur-sm">
+                  {/* User Info Section */}
+                  <div className="p-4 border-b border-gray-100">
+                    <div className="flex items-center gap-3">
+                      {user ? (
                         <ProductMedia
                           mediaList={user?.photo || []}
                           productName={user?.full_name || "Utilisateur"}
-                          className="size-8 rounded-full"
+                          className="w-10 h-10 rounded-full"
                           fallbackImage=""
                         />
-                      </>
-                    ) : (
-                      <>
-                        <FaUserAlt
-                          className="bg-gray-200 p-1 rounded-3xl text-gray-500"
-                          size={35}
-                        />
-                      </>
-                    )}
-                    <div className="text-clamp-xs mx-3 flex flex-col">
-                      <span>{user?.full_name || "Utilisateur"}</span>
-                      <span className="font-light">
-                        {user?.phone_numbers?.[0]?.phone_number
-                          ? `+${user.phone_numbers[0].phone_number}`
-                          : "N/A"}
-                      </span>
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                          <FaUserAlt className="text-gray-500" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {user?.full_name || "Utilisateur"}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {user?.phone_numbers?.[0]?.phone_number
+                            ? `${user.phone_numbers[0].format.split(" ")[0]} ${
+                                user.phone_numbers[0].phone_number
+                              }`
+                            : "Aucun numéro"}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex flex-col text-clamp-base gap-y-2.5 mt-5">
-                    <LinkIcon href="/profile">Profil</LinkIcon>
-                    <LinkIcon href="/profile/commandes">Paramètres</LinkIcon>
+
+                  {/* Menu Items */}
+                  <div className="p-2">
+                    <LinkIcon
+                      href="/profile"
+                      className="flex items-center w-full p-3 text-sm  rounded-lg transition-colors duration-200"
+                    >
+                      <BsPerson className="mr-3 text-gray-400" />
+                      <span className="hover:bg-gray-50">Mon Profil</span>
+                    </LinkIcon>
+                    <LinkIcon
+                      href="/profile/commandes"
+                      className="flex items-center w-full p-3 text-sm rounded-lg transition-colors duration-200"
+                    >
+                      <BsHandbag className="mr-3 text-gray-400" />
+                      <span className="hover:bg-gray-50">Mes Commandes</span>
+                    </LinkIcon>
+                    <LinkIcon
+                      isSimple={true}
+                      href="/profile/favoris"
+                      className="flex items-center w-full p-3 text-sm rounded-lg transition-colors duration-200"
+                    >
+                      <BsHeart className="mr-3 text-gray-400" />
+                      <span className="hover:bg-gray-50">Mes Favoris</span>
+                    </LinkIcon>
+                  </div>
+                  <div className="p-2 border-t border-gray-100">
                     <button
-                      className="text-red-500 cursor-pointer mt-4 text-left"
+                      className="flex items-center w-full p-3 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
                       onClick={() => useAuthStore.getState().logout()}
                     >
-                      Déconnexion
+                      <svg
+                        className="mr-3 w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                        />
+                      </svg>
+                      Déconnexions
                     </button>
                   </div>
                 </div>
               </PopoverContent>
             </Popover>
           </header>
-          {isScrolled && <div className="h-16"></div>}
+          {isScrolled && <div className="h-[60px]"></div>}
+
           <Modal
             styleContainer="flex items-center select-none size-full justify-start"
             position="start"
@@ -386,41 +489,114 @@ function Header({ children }: { children: React.ReactNode }) {
             isOpen={isModalOpen}
             animationName="translateLeft"
           >
-            <div className="relative font-primary bg-white min-h-dvh w-sm pl-8 pr-28 pt-10">
-              <PiXThin
-                size={50}
-                className="absolute top-8 left-2 cursor-pointer text-black"
+            <div className="relative font-primary bg-white/95 backdrop-blur-md min-h-dvh w-80 shadow-2xl">
+              <button
                 onClick={handleModalClose}
-              />
-              <div className="flex flex-col text-clamp-md gap-4 justify-center mt-16 items-start">
-                <div className="flex items-center">
-                  <FaUserAlt
-                    className="bg-gray-200 p-1 rounded-3xl text-gray-500"
-                    size={40}
-                  />
-                  <div className="text-clamp-sm mx-3 flex flex-col">
-                    <span>{user?.full_name || "Utilisateur"}</span>
-                    <span className="font-light">
+                className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+                aria-label="Fermer le menu"
+              >
+                <PiXThin size={24} className="text-gray-600" />
+              </button>
+
+              <div className="p-6 border-b border-gray-100">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                    <FaUserAlt className="text-gray-500 text-lg" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-medium text-gray-900 truncate">
+                      {user?.full_name || "Utilisateur"}
+                    </p>
+                    <p className="text-sm text-gray-500 truncate">
                       {user?.phone_numbers?.[0]?.phone_number
-                        ? `+${user.phone_numbers[0].phone_number}`
-                        : "N/A"}
-                    </span>
+                        ? `${user.phone_numbers[0].format.split(" ")[0]} ${
+                            user.phone_numbers[0].phone_number
+                          }`
+                        : "Aucun numéro"}
+                    </p>
                   </div>
                 </div>
-                <div className="text-clamp-md uppercase flex items-start gap-3.5 flex-col">
-                  <LinkIcon href="/profile">Mon profil</LinkIcon>
-                  <LinkIcon href="/profile/commandes">Mes commandes</LinkIcon>
-                  <LinkIcon isSimple={true} href="/profile/favoris">
-                    Mes favoris
-                  </LinkIcon>
-                </div>
               </div>
-              <div className="flex flex-col text-clamp-md gap-y-2.5 justify-center items-start absolute bottom-8">
-                <LinkIcon href="/profile/commandes">Paramètres</LinkIcon>
+              <div className="p-4 space-y-2">
+                <LinkIcon
+                  href="/profile"
+                  className="flex items-center w-full p-4 text-base hover:bg-gray-50 rounded-xl transition-colors duration-200"
+                >
+                  <BsPerson className="mr-4 text-gray-400 text-lg" />
+                  Mon profil
+                </LinkIcon>
+                <LinkIcon
+                  href="/profile/commandes"
+                  className="flex items-center w-full p-4 text-base hover:bg-gray-50 rounded-xl transition-colors duration-200"
+                >
+                  <BsHandbag className="mr-4 text-gray-400 text-lg" />
+                  Mes commandes
+                </LinkIcon>
+                <LinkIcon
+                  isSimple={true}
+                  href="/profile/favoris"
+                  className="flex items-center w-full p-4 text-base hover:bg-gray-50 rounded-xl transition-colors duration-200"
+                >
+                  <svg
+                    className="mr-4 text-gray-400 text-lg w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                  Mes favoris
+                </LinkIcon>
+              </div>
+
+              <div className="absolute bottom-6 left-4 right-4 space-y-2 border-t border-gray-100 pt-4">
+                <LinkIcon
+                  href="/profile/commandes"
+                  className="flex items-center w-full p-3 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                >
+                  <svg
+                    className="mr-3 w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  Paramètres
+                </LinkIcon>
                 <button
-                  className="text-red-500"
+                  className="flex items-center w-full p-3 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
                   onClick={() => useAuthStore.getState().logout()}
                 >
+                  <svg
+                    className="mr-3 w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
+                  </svg>
                   Déconnexion
                 </button>
               </div>
@@ -444,21 +620,19 @@ export function Logo({ size = "small", className }: LogoProps) {
   const href = "/";
   const sizeClasses = {
     image: {
-      small: "size-6 sm:size-8 md:size-10", // Plus petit
-      medium: "size-8 sm:size-10 md:size-12 lg:size-14", // Taille standard (comme avant)
-      large: "size-10 sm:size-12 md:size-14 lg:size-16 xl:size-18", // Plus grand
+      small: "w-8 h-8 sm:w-10 sm:h-10",
+      medium: "w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14",
+      large: "w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-18 lg:h-18",
     },
     text: {
-      small: "hidden sm:block text-xs sm:text-sm md:text-base", // Texte plus petit, apparaît sur sm
-      medium:
-        "hidden xs:block text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl", // Standard (comme avant)
-      large:
-        "hidden xs:block text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl", // Texte plus grand
+      small: "hidden sm:block text-lg sm:text-xl font-bold",
+      medium: "hidden xs:block text-xl sm:text-2xl md:text-3xl font-bold",
+      large: "hidden xs:block text-2xl sm:text-3xl md:text-4xl font-bold",
     },
     gap: {
-      small: "gap-1 sm:gap-1.5",
-      medium: "gap-1 sm:gap-1.5 md:gap-2",
-      large: "gap-1.5 sm:gap-2 md:gap-2.5",
+      small: "gap-2 sm:gap-3",
+      medium: "gap-2 sm:gap-3 md:gap-4",
+      large: "gap-3 sm:gap-4 md:gap-5",
     },
   };
 
@@ -466,30 +640,26 @@ export function Logo({ size = "small", className }: LogoProps) {
     <button
       onClick={() => navigate(href)}
       className={clsx(
-        "flex items-center",
-        sizeClasses.gap[size], // Applique le gap correspondant à la taille
-        "transition-all duration-300",
-        className // Classes externes pour le bouton
+        "flex items-center group",
+        sizeClasses.gap[size],
+        "transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-lg p-1",
+        className
       )}
+      aria-label={`Retour à l'accueil - ${brandName}`}
     >
-      {/* <ProductMedia mediaList={logoUrl} productName={`${brandName} Logo`} className={clsx(
-          "object-contain flex-shrink-0",
-          sizeClasses.image[size] // Applique les classes de taille d'image
-        )}/>
-         */}
       <img
         src={logoUrl}
         className={clsx(
-          "object-contain flex-shrink-0",
-          sizeClasses.image[size] // Applique les classes de taille d'image
+          "object-contain flex-shrink-0 transition-transform duration-300 group-hover:rotate-3",
+          sizeClasses.image[size]
         )}
         alt={`${brandName} Logo`}
       />
       <h1
         className={clsx(
-          "font-primary text-black whitespace-nowrap",
-          "transition-all duration-300",
-          sizeClasses.text[size] // Applique les classes de visibilité/taille de texte
+          "font-primary text-gray-900 whitespace-nowrap tracking-tight",
+          "transition-all duration-300 group-hover:text-primary",
+          sizeClasses.text[size]
         )}
       >
         {brandName}
@@ -497,4 +667,5 @@ export function Logo({ size = "small", className }: LogoProps) {
     </button>
   );
 }
+
 export { Layout };

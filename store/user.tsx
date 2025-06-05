@@ -43,8 +43,6 @@ export const useAuthStore = create(
           const { token } = data || {};
 
           const tk = token || get().token;
-          console.log("🚀 ~ fetchUser: ~ get().token:", get().token)
-          console.log("🚀 ~ fetchUser: ~ tk:", tk)
           try {
             const { data } = (await api.api?.get("/v1/auth/me", {
               ...(tk

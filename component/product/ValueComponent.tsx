@@ -51,6 +51,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
   }, [group_products, feature_id, value.id, product_id, selections]);
 
   const isDisabled = totalStock === 0;
+  const isLowStock = totalStock > 0 && totalStock <= 5;
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -68,56 +69,114 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
     [toggleSelection, isDisabled, group_products, feature_id, value.id, mainGroupProduct]
   );
 
-  const baseButtonStyles = clsx(
-    "relative transition-all duration-300 mx-2 ease-out focus:outline-none shadow-lg",
-    "focus:ring-1 focus:ring-blue-300 focus:ring-offset-1",
-    isDisabled && "opacity-50 cursor-not-allowed border-gray-300"
+  // Classes de base modernes et épurées
+  const baseStyles = clsx(
+    "group relative inline-flex items-center justify-center",
+    "transition-all duration-200 ease-out",
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
+    "disabled:cursor-not-allowed",
+    // Responsivité améliorée
+    "text-sm sm:text-base"
   );
 
+  // Styles spécifiques par type - design minimaliste
   const typeStyles = clsx({
-    // Color
-    "sm:size-10 size-9 rounded-lg": isColor,
-    // Icon
-    "md:size-10 size-9 overflow-hidden flex items-center justify-center rounded-md": isIcon && !isIconText,
-    // IconText ou Text
-    "border text-clamp-xs flex items-center px-3  rounded-md": isIconText || (!isColor && !isIcon),
+    // Couleur - design circulaire moderne
+    "w-7 h-7 sm:w-9 sm:h-9 rounded-full border-2": isColor,
+    
+    // Icône seule - carré arrondi épuré
+    "w-8 h-8 sm:w-10 sm:h-10 rounded-xl border-2 overflow-hidden": isIcon && !isIconText,
+    
+    // Texte et icône+texte - pilules modernes
+    "px-2 py-1 sm:px-3 sm:py-2 rounded-full border min-h-[44px] gap-2": 
+      isIconText || (!isColor && !isIcon),
   });
 
-  // Styles  (sélectionné ou non)
+  // États visuels - noir et blanc épuré
   const stateStyles = clsx({
-    // Color
-    "border border-black scale-125 shadow-xl": isColor && isSelected && !isDisabled,
-    "hover:scale-105": isColor && !isSelected && !isDisabled,
-    // Icon
-    "border-black scale-125 shadow-xl border border-black": isIcon && isSelected && !isDisabled,
-    "hover:border-gray-500 scale-95 border-gray-300": isIcon && !isSelected && !isDisabled,
-    // Text ou IconText
-    "bg-black text-white py-1 border-black shadow-sm": !isColor && !isIcon && isSelected && !isDisabled,
-    "bg-white text-gray-800 py-1 hover:bg-gray-100 border-gray-300": !isColor && !isIcon && !isSelected && !isDisabled,
+    // Couleur
+    "border-black ring-2 ring-black ring-offset-2 scale-110": 
+      isColor && isSelected && !isDisabled,
+    "border-gray-300 hover:border-gray-500 hover:scale-105": 
+      isColor && !isSelected && !isDisabled,
+    "border-gray-200 opacity-40": 
+      isColor && isDisabled,
+
+    // Icône
+    "border-black bg-black": 
+      isIcon && isSelected && !isDisabled,
+    "border-gray-300 hover:border-gray-500 hover:bg-gray-50": 
+      isIcon && !isSelected && !isDisabled,
+    "border-gray-200 bg-gray-50 opacity-40": 
+      isIcon && isDisabled,
+
+    // Texte
+    "bg-black text-white border-black font-medium": 
+      !isColor && !isIcon && isSelected && !isDisabled,
+    "bg-white text-gray-900 border-gray-300 hover:border-gray-900 hover:bg-gray-50 font-normal": 
+      !isColor && !isIcon && !isSelected && !isDisabled,
+    "bg-gray-50 text-gray-400 border-gray-200": 
+      !isColor && !isIcon && isDisabled,
   });
 
-  const strikethroughStyles = clsx(
-    "absolute inset-0 flex items-center justify-center overflow-hidden",
-    isDisabled && "after:content-[''] after:absolute after:w-[99%] after:h-[1px] after:bg-gray-400 after:transform after:-rotate-16"
-  );
+  // Indicateur de stock moderne et discret
+  const StockIndicator = () => {
+    if (totalStock > 5) return null;
 
-  const stockIndicatorStyles = clsx(
-    isColor || isIcon
-      ? "absolute -top-1 bg-white border -right-1 text-xs rounded-full size-4 flex items-center justify-center"
-      : "ml-2 text-xs",
-    {
-      "text-orange-500": totalStock > 0 && totalStock <= 5,
-      "bg-white text-red-500": totalStock === 0 && (isColor || isIcon),
-      "text-red-500": totalStock === 0 && !isColor && !isIcon,
-      "text-gray-500": totalStock > 5,
+    const stockBadgeStyles = clsx(
+      "absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5",
+      "flex items-center justify-center",
+      "text-xs font-medium rounded-full",
+      "border bg-white",
+      {
+        "text-orange-600 border-orange-200": isLowStock,
+        "text-red-600 border-red-200": isDisabled,
+      }
+    );
+
+    const inlineStockStyles = clsx(
+      "text-xs font-normal ml-1 opacity-75",
+      {
+        "text-orange-600": isLowStock,
+        "text-red-600": isDisabled,
+      }
+    );
+
+    if (isColor || isIcon) {
+      return (
+        <span className={stockBadgeStyles} aria-hidden="true">
+          {totalStock}
+        </span>
+      );
     }
-  );
+
+    return (
+      <span className={inlineStockStyles} aria-hidden="true">
+        ({totalStock})
+      </span>
+    );
+  };
+
+  // Effet de désactivation moderne
+  const DisabledOverlay = () => {
+    if (!isDisabled) return null;
+    
+    return (
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-full h-0.5 bg-gray-400 rotate-12 opacity-60" />
+      </div>
+    );
+  };
 
   if (!group_products) {
     return (
-      <span className="text-red-500 text-lg italic" role="alert" aria-label={`${text} indisponible`}>
-        👻
-      </span>
+      <div 
+        className="inline-flex items-center justify-center w-12 h-12 text-gray-400 rounded-xl border border-gray-200 bg-gray-50"
+        role="alert" 
+        aria-label={`${text} indisponible`}
+      >
+        <span className="text-lg">×</span>
+      </div>
     );
   }
 
@@ -126,30 +185,53 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       type="button"
       disabled={isDisabled}
       onClick={handleClick}
-      className={clsx(baseButtonStyles, typeStyles, stateStyles)}
+      className={clsx(baseStyles, typeStyles, stateStyles)}
       aria-selected={isSelected}
-      aria-label={`Sélectionner ${text}${isDisabled ? " (indisponible)" : ""}`}
+      aria-label={`${isSelected ? 'Sélectionné' : 'Sélectionner'} ${text}${isDisabled ? ' (indisponible)' : ''}`}
       aria-disabled={isDisabled}
-      style={{ backgroundColor: isColor ? value.key || "" : undefined }}
-      title={isDisabled ? `${text} est indisponible (restant: ${totalStock})` : `${feature_name} ${text} : ${totalStock} restant`}
+      style={{ 
+        backgroundColor: isColor ? value.key || "#f3f4f6" : undefined,
+        color: isColor ? (isSelected ? "white" : "transparent") : undefined 
+      }}
+      title={
+        isDisabled 
+          ? `${text} - Indisponible` 
+          : `${feature_name}: ${text}${totalStock <= 5 ? ` (${totalStock} restant${totalStock > 1 ? 's' : ''})` : ''}`
+      }
     >
-      <div className={strikethroughStyles} />
-      {/* Icône seule pour "icon" */}
+      {/* Overlay de désactivation */}
+      <DisabledOverlay />
+
+      {/* Icône seule */}
       {isIcon && !isIconText && icon && (
-        <ProductMedia mediaList={icon} productName={text} className="size-11 object-contain" />
+        <ProductMedia 
+          mediaList={icon} 
+          productName={text} 
+          className={clsx(
+            "w-8 h-8 sm:w-10 sm:h-10 object-contain transition-colors",
+            isSelected && !isDisabled && "brightness-0 invert"
+          )} 
+        />
       )}
-      {/* Icône + texte pour "icon_text" */}
+
+      {/* Icône avec texte */}
       {isIconText && icon && (
-        <ProductMedia mediaList={icon} productName={text} className="size-5 object-contain" />
+        <ProductMedia 
+          mediaList={icon} 
+          productName={text} 
+          className="w-5 h-5 object-contain flex-shrink-0" 
+        />
       )}
-      {/* Texte uniquement pour "text" et "icon_text", pas pour "color" ni "icon" seul */}
-      {(!isColor && (!isIcon || isIconText)) && text}
-      {/* Indicateur de stock */}
-      {totalStock <= 5 && (
-        <span className={stockIndicatorStyles} aria-hidden="true">
-          {(isColor || isIcon) ? totalStock : `(${totalStock})`}
+
+      {/* Texte */}
+      {(!isColor && (!isIcon || isIconText)) && (
+        <span className="truncate">
+          {text}
         </span>
       )}
+
+      {/* Indicateur de stock */}
+      <StockIndicator />
     </button>
   );
 };

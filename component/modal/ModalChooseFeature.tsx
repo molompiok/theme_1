@@ -114,7 +114,7 @@ export default function ModalChooseFeature() {
               aria-label="Partager le produit"
               role="button"
               size={25}
-              className="text-gray-500 bg-gray-200 p-1 text-2xl absolute z-10 left-3 top-3 sm:left-4 sm:top-4 cursor-pointer rounded-full hover:bg-gray-200"
+              className="text-gray-500 bg-gray-200 p-1 text-2xl absolute z-10 right-3 top-3 sm:right-4 sm:top-4 cursor-pointer rounded-full hover:bg-gray-200"
             />
 
             <div className="w-full h-auto max-h-[20vh] min-[410px]:max-h-[25vh] overflow-hidden flex items-center justify-center">

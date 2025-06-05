@@ -43,7 +43,12 @@ export interface ThemeSettings {
   baseFontSize?: string;
   productAddToCartBorderColor?: string;
   productAddToCartBackgroundColor?: string;
+  showInfoPromotion?: boolean;
   productAddToCartTextColor?: string;
+  promotionText?: string;
+  promotionTextColor?: string;
+  promotionTextBackgroundColor?: string;
+  promotionTextPosition?: string;
   // Ajouter d'autres options ici si besoin
 }
 
@@ -91,7 +96,11 @@ const DEFAULT_SETTINGS: ThemeSettings = {
   "reductionDisplay": "barred-price",
   "favoriteIconPosition": "bottom-right",
   "productListView": "grid",
-  "baseFontSize": "16px"
+  "baseFontSize": "16px",
+  "promotionText": "Texte de la promotion",
+  "promotionTextColor": "Couleur du texte de la promotion",
+  "promotionTextBackgroundColor": "Couleur de fond de la promotion",
+  "promotionTextPosition": "Position de la promotion"
 };
 
 export const useThemeSettingsStore = create(

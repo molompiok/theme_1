@@ -72,6 +72,25 @@ export default function ProductCard({
             )}
           />
         )}
+        {product?.barred_price && settings.showInfoPromotion && (
+          <div
+            className={clsx(
+              `absolute  z-10 py-1 px-2 rounded-full text-xs sm:p-2 sm:text-sm font-semibold shadow-lg`,
+              settings.promotionTextPosition === "top-left" && "top-2 left-2",
+              settings.promotionTextPosition === "bottom-left" &&
+                "bottom-2 left-2",
+              settings.promotionTextPosition === "bottom-right" &&
+                "bottom-2 right-2",
+              settings.promotionTextPosition === "top-right" && "top-2 right-2"
+            )}
+            style={{
+              backgroundColor: settings.promotionTextBackgroundColor,
+              color: settings.promotionTextColor,
+            }}
+          >
+            {settings.promotionText}
+          </div>
+        )}
       </div>
       <div className="px-3 py-1 sm:p-4 flex flex-col flex-1">
         {settings.priceBeforeName && (

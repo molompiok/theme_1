@@ -8,6 +8,7 @@ import {
   MdLocalShipping,
   MdRateReview,
   MdStorefront,
+  MdFilterList,
 } from "react-icons/md";
 import { get_orders } from "../../../api/cart.api";
 import { get_comment } from "../../../api/comment.api";
@@ -53,37 +54,54 @@ export default function OrdersPage() {
 
   return (
     <>
-      <div className="container mx-auto min-h-dvh bg-white py-6 sm:px-4  font-primary ">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 font-primary">
+        {/* Header moderne avec effet glassmorphism */}
         <div
-          className={`sticky inset-x-0 bg-white border-gray-200 transition-all w-full duration-300 py-5 ${
+          className={`sticky inset-x-0 transition-all duration-500 ease-out z-50 ${
             isScrolled
-              ? "border-b mt-0 top-11 sm:top-14 z-40"
-              : "top-0 mt-7 z-40"
+              ? "backdrop-blur-xl bg-white/80 border-b border-gray-200/50 shadow-lg shadow-gray-200/20"
+              : "bg-transparent"
           }`}
           style={{
-            paddingLeft: isScrolled ? "1rem" : "0",
-            paddingRight: isScrolled ? "1rem" : "0",
+            top: isScrolled ? "44px" : "0px",
           }}
         >
-          <div className="max-w-5xl mx-auto ">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-3">
-                <BsCartCheck className="text-3xl sm:text-4xl text-gray-900" />
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                  Mes Commandes
-                </h1>
+          <div className="container mx-auto px-4 pb-2 pt-7">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2">
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur opacity-20"></div>
+                    <div className="relative bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-2xl">
+                      <BsCartCheck className="text-xl sm:text-2xl text-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
+                      Mes Commandes
+                    </h1>
+                    <p className="text-gray-600 text-sm mt-1">
+                      Suivez et gérez vos commandes
+                    </p>
+                  </div>
+                </div>
+                <div className="relative ml-auto">
+                  <FilterPopover
+                    setFilter={setFilter}
+                    selectedFilters={selectedFilters}
+                    defaultOptions={[...defaultOptionsOrder]}
+                  />
+                </div>
               </div>
-              <FilterPopover
-                setFilter={setFilter}
-                selectedFilters={selectedFilters}
-                defaultOptions={[...defaultOptionsOrder]}
-              />
             </div>
           </div>
         </div>
-        <div className="h-6"></div>
-        <div className="max-w-5xl mx-auto">
-          <WrapOrderList />
+
+        {/* Contenu principal */}
+        <div className="container mx-auto px-4 pb-12">
+          <div className="max-w-6xl mx-auto">
+            <WrapOrderList />
+          </div>
         </div>
       </div>
       <ReviewModal />
@@ -93,9 +111,15 @@ export default function OrdersPage() {
 }
 
 const EmptyState = ({ message }: { message: string }) => (
-  <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-    <BsCartCheck className="mx-auto text-4xl text-gray-400 mb-4" />
-    <p className="text-gray-600 text-lg">{message}</p>
+  <div className="text-center py-16 bg-white/60 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl shadow-gray-200/20">
+    <div className="relative inline-block mb-6">
+      <div className="absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-400 rounded-full blur opacity-20"></div>
+      <div className="relative bg-gradient-to-r from-gray-300 to-gray-400 p-4 rounded-full">
+        <BsCartCheck className="text-2xl text-white" />
+      </div>
+    </div>
+    <p className="text-gray-600 text-xl font-medium">{message}</p>
+    <p className="text-gray-500 text-sm mt-2">Vos futures commandes apparaîtront ici</p>
   </div>
 );
 
@@ -156,18 +180,32 @@ const WrapOrderList = () => {
   const allOrders = data?.pages.flatMap((page) => page?.list) || [];
 
   if (status === "pending") {
-    return <Loading size="large" color="bg-neutral-500" className="mt-28" />;
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur opacity-20 animate-pulse"></div>
+          <Loading size="large" color="bg-gradient-to-r from-blue-500 to-purple-600" className="relative" />
+        </div>
+      </div>
+    );
   }
 
   if (status === "error") {
-    return <EmptyState message="Une erreur est survenue" />;
+    return <EmptyState message="Une erreur est survenue lors du chargement" />;
   }
 
   return (
-    <div>
-      <div className="grid gap-6">
-        {allOrders.map((order) => (
-          <OrderList order={order} key={order?.id} />
+    <div className="space-y-8">
+      {/* Grille des commandes avec animation */}
+      <div className="space-y-6">
+        {allOrders.map((order, index) => (
+          <div
+            key={order?.id}
+            className="animate-fade-in-up"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <OrderList order={order} />
+          </div>
         ))}
       </div>
 
@@ -176,18 +214,31 @@ const WrapOrderList = () => {
       ) : (
         <div
           ref={observerTarget}
-          className="py-4 flex justify-center min-h-[50px]"
+          className="py-8 flex justify-center min-h-[100px]"
         >
           {isFetchingNextPage ? (
-            <Loading size="medium" className="my-16" />
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur opacity-20 animate-pulse"></div>
+              <Loading size="medium" className="relative" />
+            </div>
           ) : hasNextPage ? (
-            <span className="text-gray-500">
-              Faites défiler pour charger plus...
-            </span>
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm border border-gray-200/50 shadow-lg">
+                <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
+                <span className="text-gray-600 font-medium">
+                  Faites défiler pour charger plus...
+                </span>
+              </div>
+            </div>
           ) : (
-            <p className="text-gray-500 text-sm">
-              Toutes les commandes ont été chargées
-            </p>
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 border border-green-200 shadow-sm">
+                <MdCheck className="text-green-600" />
+                <span className="text-green-700 font-medium text-sm">
+                  Toutes les commandes ont été chargées
+                </span>
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -198,7 +249,6 @@ const WrapOrderList = () => {
 const OrderList = ({ order }: { order: UserOrder | undefined }) => {
   const { isCopied, copyToClipboard } = useClipboard();
 
-  // Fonction pour obtenir le texte du statut en français
   const getStatusText = (status: string) => {
     switch (status) {
       case "pending":
@@ -216,6 +266,18 @@ const OrderList = ({ order }: { order: UserOrder | undefined }) => {
     }
   };
 
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "delivered":
+      case "picked_up":
+        return <MdCheck className="w-4 h-4" />;
+      case "pending":
+        return <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>;
+      default:
+        return null;
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR", {
       day: "numeric",
@@ -226,106 +288,133 @@ const OrderList = ({ order }: { order: UserOrder | undefined }) => {
 
   if (!order)
     return (
-      <div>
-        <h1>Commande non trouvée</h1>
+      <div className="text-center py-8 bg-red-50 rounded-3xl border border-red-200">
+        <h1 className="text-red-600 font-semibold">Commande non trouvée</h1>
       </div>
     );
 
   return (
-    <div className="relative mb-4 bg-white border border-gray-300 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
-      <div className="border-b border-gray-200 p-4 sm:p-5">
-        <div className="flex flex-col sm:flex-row justify-between gap-3">
-          <div className="space-y-2">
+    <div className="group relative bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-3xl overflow-hidden shadow-xl shadow-gray-200/20 hover:shadow-2xl hover:shadow-gray-300/25 transition-all duration-500 hover:-translate-y-1">
+      {/* Gradient de fond subtil */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      
+      {/* Header de la commande */}
+      <div className="relative border-b border-gray-200/50 p-6 bg-gradient-to-r from-gray-50/50 to-transparent">
+        <div className="flex flex-col lg:flex-row justify-between gap-4">
+          <div className="space-y-3">
+            {/* Référence avec copie */}
             <div
               onClick={() => copyToClipboard(order.reference)}
-              className="inline-flex items-center gap-1.5 px-2 py-1 rounded hover:bg-gray-100 transition-colors cursor-pointer group"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:border-gray-300/50 transition-all duration-300 cursor-pointer group/ref shadow-sm hover:shadow-md"
               title="Cliquez pour copier la référence"
             >
-              <span className="text-xs font-mono text-gray-700">
-                {order.reference}
+              <span className="text-sm font-mono text-gray-700 font-medium">
+                #{order.reference}
               </span>
               <BsClipboard
                 size={14}
-                className="text-gray-500 group-hover:text-gray-700"
+                className="text-gray-500 group-hover/ref:text-gray-700 transition-colors"
               />
               {isCopied && (
-                <span className="text-xs font-medium text-green-600 animate-fadeIn flex items-center">
-                  Copié
-                  <BiCheck className="ml-0.5" />
+                <span className="text-sm font-medium text-green-600 animate-fade-in flex items-center">
+                  <BiCheck className="w-4 h-4" />
                 </span>
               )}
             </div>
 
-            <div className="inline-flex items-center px-2.5 py-1 bg-gray-800 text-gray-100 text-xs rounded">
-              Passée le {formatDate(order.created_at)}
+            {/* Date */}
+            <div className="inline-flex items-center gap-2 px-3 py-2 bg-gray-900/90 backdrop-blur-sm text-white text-sm rounded-xl shadow-lg">
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+              Commandé le {formatDate(order.created_at)}
             </div>
           </div>
 
-          <span
-            className={clsx(
-              "self-start px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap",
-              statusStyles[order.status]
-            )}
-          >
-            {getStatusText(order.status)}
-          </span>
+          {/* Statut modernisé */}
+          <div className="self-start">
+            <span
+              className={clsx(
+                "inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold whitespace-nowrap shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105",
+                statusStyles[order.status]
+              )}
+            >
+              {getStatusIcon(order.status)}
+              {getStatusText(order.status)}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="px-4 sm:px-5">
-        <div className="divide-y divide-gray-100">
-          {order?.items?.map((item: any) => (
-            <OrderItemProduct key={item.id} item={item} order_id={order.id} />
+      {/* Items de la commande */}
+      <div className="relative p-6">
+        <div className="space-y-6">
+          {order?.items?.map((item: any, index: number) => (
+            <div
+              key={item.id}
+              className="animate-fade-in-up"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <OrderItemProduct item={item} order_id={order.id} />
+            </div>
           ))}
         </div>
       </div>
 
-      <div className="mt-3 p-4 sm:p-5 pt-3 sm:pt-4 bg-gray-50 border-t border-gray-200">
-        <div className="flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
-          <div className="text-xs sm:text-sm text-gray-600">
-            {order.with_delivery ? (
-              <div className="flex items-center">
-                <MdLocalShipping className="mr-1.5 text-gray-500" size={16} />
-                <span>
-                  Livraison :{" "}
-                  <span className="font-medium">
-                    {order.delivery_address_name}
-                  </span>
-                </span>
-              </div>
-            ) : (
-              <div className="flex items-center">
-                <MdStorefront className="mr-1.5 text-gray-500" size={16} />
-                <span>
-                  Retrait :{" "}
-                  <span className="font-medium">
-                    {order.pickup_address_name}
-                  </span>
-                  {order.pickup_date && (
-                    <>
-                      {" "}
-                      - avant le{" "}
-                      <span className="font-medium">
-                        {formatDate(order.pickup_date)}
-                      </span>
-                    </>
-                  )}
-                </span>
-              </div>
-            )}
-          </div>
+      {/* Footer avec informations de livraison et total */}
+      <div className="relative p-6 pt-0">
+        <div className="bg-gradient-to-r from-gray-50/80 to-blue-50/50 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50">
+          <div className="flex flex-col lg:flex-row justify-between gap-4 lg:items-center">
+            {/* Informations de livraison */}
+            <div className="text-sm text-gray-700">
+              {order.with_delivery ? (
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-blue-100 rounded-xl">
+                    <MdLocalShipping className="text-blue-600" size={18} />
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-900">Livraison</span>
+                    <p className="text-gray-600 mt-0.5">
+                      {order.delivery_address_name}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-green-100 rounded-xl">
+                    <MdStorefront className="text-green-600" size={18} />
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-900">Retrait en magasin</span>
+                    <p className="text-gray-600 mt-0.5">
+                      {order.pickup_address_name}
+                      {order.pickup_date && (
+                        <span className="block">
+                          Avant le {formatDate(order.pickup_date)}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
 
-          <div className="text-right">
-            <p className="text-sm text-gray-600">Total <span className="text-gray-400 text-xs">(livraison incluse)</span></p>
-            <p className="font-semibold text-base text-gray-900">
-              {formatPrice(order.total_price + order.delivery_price)}
-            </p>
+            {/* Total */}
+            <div className="text-right lg:text-left">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 shadow-sm">
+                <p className="text-sm text-gray-600 mb-1">
+                  Total <span className="text-gray-400 text-xs">(livraison incluse)</span>
+                </p>
+                <p className="font-bold text-2xl bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  {formatPrice(order.total_price + order.delivery_price)}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 };
+
 const OrderItemProduct = ({
   item,
   order_id,
@@ -339,7 +428,6 @@ const OrderItemProduct = ({
   });
 
   const setModalOpen = useModalCommentStore((state) => state.setModalOpen);
-
   const { setModalOpen: setReviewModalOpen } = useModalReview();
 
   const { data: comment, isLoading } = useQuery({
@@ -360,77 +448,90 @@ const OrderItemProduct = ({
   };
 
   return (
-    <div
-      key={item.id}
-      className="flex flex-col sm:flex-row justify-between items-start gap-4 py-4 border-b border-gray-100 last:border-0"
-    >
-      <div className="flex space-x-3 flex-1 min-w-0">
-        <ProductMedia
-          mediaList={mediaViews}
-          productName={item.product?.name}
-          showFullscreen={true}
-          // showNavigation={true}
-          className="size-[80px] sm:size-[100px] md:size-[120px] object-cover rounded-lg border border-gray-200 flex-shrink-0 transition-all duration-200"
-        />
+    <div className="group/item flex flex-col lg:flex-row justify-between items-start gap-6 p-4 rounded-2xl hover:bg-white/50 transition-all duration-300">
+      <div className="flex gap-4 flex-1 min-w-0">
+        {/* Image du produit avec effet hover */}
+        <div className="relative group/image">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-200 to-purple-200 rounded-2xl blur opacity-0 group-hover/image:opacity-20 transition-all duration-300"></div>
+          <ProductMedia
+            mediaList={mediaViews}
+            productName={item.product?.name}
+            showFullscreen={true}
+            className="relative size-[100px] sm:size-[120px] lg:size-[140px] object-cover rounded-2xl border-2 border-gray-200/50 flex-shrink-0 transition-all duration-300 group-hover/image:border-gray-300/70 group-hover/image:shadow-xl"
+          />
+        </div>
 
-        <div className="flex flex-col min-w-0">
-          <h3 className="font-medium text-gray-900 text-sm sm:text-base md:text-lg truncate">
-            {item.product?.name}
-          </h3>
+        {/* Informations du produit */}
+        <div className="flex flex-col justify-between min-w-0 flex-1">
+          <div>
+            <h3 className="font-semibold text-gray-900 text-base lg:text-lg mb-2 group-hover/item:text-blue-600 transition-colors duration-300">
+              {item.product?.name}
+            </h3>
 
-          {item.bind_name && Object.entries(item.bind_name).length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-1.5">
-              {Object.entries(item.bind_name).map(([_, value]) => (
-                <span
-                  key={value.id}
-                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                >
-                  {value.text}
-                  {value.key && (
-                    <span
-                      className="size-3 ml-1 rounded-full inline-block"
-                      style={{ background: value.key }}
-                      aria-label={`Color: ${value.text}`}
-                    />
-                  )}
-                </span>
-              ))}
+            {/* Variants/Options */}
+            {item.bind_name && Object.entries(item.bind_name).length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {Object.entries(item.bind_name).map(([_, value]) => (
+                  <span
+                    key={value.id}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r from-gray-100 to-gray-50 text-gray-800 border border-gray-200/50 shadow-sm"
+                  >
+                    {value.text}
+                    {value.key && (
+                      <span
+                        className="w-3 h-3 rounded-full border border-white shadow-sm"
+                        style={{ background: value.key }}
+                        aria-label={`Color: ${value.text}`}
+                      />
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Quantité */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm">
+              <span className="text-sm text-gray-600">Quantité:</span>
+              <span className="font-semibold text-gray-900">{item.quantity}</span>
             </div>
-          )}
-          <p className="text-sm text-gray-600 mt-2">
-            Quantité: <span className="font-medium">{item.quantity}</span>
-          </p>
+          </div>
 
-          {canReview && !hasReviewed && (
-            <button
-              className="mt-3 inline-flex cursor-pointer bg-gray-200 py-1 px-2 hover:bg-gray-100 rounded-md items-center text-xs md:text-sm text-gray-600 hover:text-gray-500 transition-colors font-medium"
-              onClick={handleOpenModal}
-              aria-label="Laisser un avis"
-            >
-              <MdRateReview className="mr-1 text-gray-600" size={16} />
-              Laisser un avis
-            </button>
-          )}
+          {/* Boutons d'action pour les avis */}
+          <div className="mt-4">
+            {canReview && !hasReviewed && (
+              <button
+                className="group/btn inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium text-sm transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95"
+                onClick={handleOpenModal}
+                aria-label="Laisser un avis"
+              >
+                <MdRateReview className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
+                Laisser un avis
+              </button>
+            )}
 
-          {canReview && hasReviewed && (
-            <div
-              onClick={() => setReviewModalOpen(true, comment)}
-              className="mt-3 inline-flex items-center text-xs md:text-sm text-green-600"
-            >
-              <MdCheck className="mr-1 text-green-600" size={16} />
-              Avis publié - affichez
-            </div>
-          )}
+            {canReview && hasReviewed && (
+              <button
+                onClick={() => setReviewModalOpen(true, comment)}
+                className="group/btn inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-medium text-sm transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95"
+              >
+                <MdCheck className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-300" />
+                Avis publié
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-col items-end ml-auto sm:ml-0 mt-2 sm:mt-0">
-        <p className="text-sm md:text-base font-semibold text-gray-900">
-          {formatPrice(item.quantity * item.price_unit)}
-        </p>
-        <p className="text-xs md:text-sm text-gray-600 mt-1">
-          {formatPrice(item.price_unit)} × {item.quantity}
-        </p>
+      {/* Prix */}
+      <div className="flex flex-col items-end lg:items-start mt-4 lg:mt-0 lg:ml-4">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 shadow-sm text-right lg:text-left">
+          <p className="font-bold text-xl text-gray-900 mb-1">
+            {formatPrice(item.quantity * item.price_unit)}
+          </p>
+          <p className="text-sm text-gray-600">
+            {formatPrice(item.price_unit)} × {item.quantity}
+          </p>
+        </div>
       </div>
     </div>
   );
