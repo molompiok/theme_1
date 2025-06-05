@@ -4,9 +4,9 @@ import { BASE_URL } from "./api";
 
 export const formatSlug = (name: string) => limax(name, { maintainCase: true });
 
-export const formatPrice = (price?: string | number , currency?: string): string => {
+export const formatPrice = (price?: string | number, currency?: string): string => {
   if (!price) return "0";
-  return price.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " " +(currency || "CFA".toLocaleLowerCase());
+  return price.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " " + (currency || "CFA".toLocaleLowerCase());
 };
 
 export const filterIdToName = (filters: Array<{ id: string; name: string }>) =>
@@ -27,13 +27,13 @@ export function delay(ms: number): Promise<void> {
 
 
 export const getFirstFeatureWithView = (features: Feature[]) => {
-const feature =  features.find((feature) =>
+  const feature = features.find((feature) =>
     feature.values.some((value) => value.views.length > 0)
   );
   return feature;
 };
 
-export function getAllOptions({features, product_id} : {features: Feature[] , product_id: string}) {
+export function getAllOptions({ features, product_id }: { features: Feature[], product_id: string }) {
 
   if (!features) return [];
 
@@ -51,7 +51,7 @@ export function getAllOptions({features, product_id} : {features: Feature[] , pr
     if (arr.length === 0) return []; // 🔥 Si aucune feature avec valeurs, retourner []
     return arr.reduce((acc: any, values: any) =>
       acc.map((comb: any) => values.map((val: any) => [...comb, val])).flat()
-    , [[]]);
+      , [[]]);
   }
 
   // Générer toutes les combinaisons possibles
@@ -66,7 +66,7 @@ export function getAllOptions({features, product_id} : {features: Feature[] , pr
   });
 
   // Générer tous les group_products
-  return allBinds.map((bind: any) => getOptions({bind, features, product_id})) as (ReturnType<typeof getOptions>)[];
+  return allBinds.map((bind: any) => getOptions({ bind, features, product_id })) as (ReturnType<typeof getOptions>)[];
 }
 
 
@@ -130,11 +130,11 @@ export const debounce = <T extends (...args: any[]) => void>(
 };
 
 export function findFirstBindNameWithViews({ bindNames }: { bindNames?: Record<string, ProductFeature | string> }): ProductFeature | null {
-  if(!bindNames) return null
+  if (!bindNames) return null
   const bindNameEntries = Object.entries(bindNames);
   for (const [, feature] of bindNameEntries) {
     // console.log("🚀 ~ findFirstBindNameWithViews ~ feature:", feature)
-    if(typeof feature === 'object' && feature.views.length > 0 && feature.is_default)
+    if (typeof feature === 'object' && feature.views.length > 0 && feature.is_default)
       return feature;
   }
   return null;
@@ -154,46 +154,46 @@ export const statusStyles: Record<OrderStatus, string> = {
   [OrderStatus.WAITING_PICKED_UP]: 'bg-orange-100 text-orange-800',
 };
 
-export function getMinimumStock({features , ignoreStock}: {features: Feature[] , ignoreStock?: boolean}) {
+export function getMinimumStock({ features, ignoreStock }: { features: Feature[], ignoreStock?: boolean }) {
 
   if (ignoreStock) return Infinity;
 
   if (!features || features.length === 0) {
-      return 0;
+    return 0;
   }
 
   let minStock = Infinity;
 
   features.forEach(feature => {
-      if (feature.values && feature.values.length > 0) {
-          feature.values.forEach(value => {
-              if (typeof value.stock === 'number') {
-                if(value.stock === 0 || value.stock === null || value.stock === undefined) return;
-                  minStock = Math.min(minStock, value.stock);
-              }
-          });
-      }
+    if (feature.values && feature.values.length > 0) {
+      feature.values.forEach(value => {
+        if (typeof value.stock === 'number') {
+          if (value.stock === 0 || value.stock === null || value.stock === undefined) return;
+          minStock = Math.min(minStock, value.stock);
+        }
+      });
+    }
   });
 
   return minStock === Infinity ? 0 : minStock;
 }
 
 
-export function hasContinueSelling({features}: {features: Feature[]}) {
+export function hasContinueSelling({ features }: { features: Feature[] }) {
   if (!features || features.length === 0) {
-      return false;
+    return false;
   }
 
   for (const feature of features) {
-      if (feature.values && feature.values.length > 0) {
-          for (const value of feature.values) {
-              if (value.continue_selling === true) {
-                  return true;
-              }
-          }
+    if (feature.values && feature.values.length > 0) {
+      for (const value of feature.values) {
+        if (value.continue_selling === true) {
+          return true;
+        }
       }
+    }
   }
-  
+
   return false;
 }
 
@@ -209,11 +209,11 @@ export function getFeatureValuePairs(features: Feature[]) {
   const result: Record<string, string> = {};
 
   features.forEach(feature => {
-      if (feature.values && feature.values.length > 0) {
-          feature.values.forEach(value => {
-              if(value.id) result[feature.id] = value.id;
-          });
-      }
+    if (feature.values && feature.values.length > 0) {
+      feature.values.forEach(value => {
+        if (value.id) result[feature.id] = value.id;
+      });
+    }
   });
 
   return result;
@@ -244,7 +244,7 @@ export const safeParsePrice = (value: string | number | undefined | null): numbe
   return isNaN(parsed) ? 0 : Math.max(0, parsed);
 };
 
-export function getOptions({bind, features, product_id} : {bind: Record<string, string> , features: Feature[] , product_id: string}) {
+export function getOptions({ bind, features, product_id }: { bind: Record<string, string>, features: Feature[], product_id: string }) {
   let additionalPrice = 0;
   let stock: number | null = Infinity; // On prend le minimum donc on part d'un grand nombre
   let decreasesStock = false;
@@ -306,7 +306,7 @@ export function getOptions({bind, features, product_id} : {bind: Record<string, 
     bindIds,
     additional_price: additionalPrice,
     stock: stock,
-    product_id : product_id,
+    product_id: product_id,
     decreases_stock: decreasesStock,
     continue_selling: continueSelling
   };
@@ -319,11 +319,11 @@ export function getOptions({bind, features, product_id} : {bind: Record<string, 
 
 
 export const googleLogin = () => {
-    // navigate("/auth/google");
-    const storeId = BASE_URL.apiUrl.split("/")[3];
-    const originalUrl = window.location.origin;
-    const clientSuccess = originalUrl+"/auth/success";
-    const clientError = originalUrl+"/auth/error";
-    const url = `http://server.sublymus-server.com/auth/store/google/redirect?store_id=${storeId}&client_success=${clientSuccess}&client_error=${clientError}`;
-    window.open(url, "_self");
-  };
+  // navigate("/auth/google");
+  const storeId = BASE_URL.apiUrl.split("/")[3];
+  const originalUrl = window.location.origin;
+  const clientSuccess = originalUrl + "/auth/success";
+  const clientError = originalUrl + "/auth/error";
+  const url = `${BASE_URL.serverUrl}/auth/store/google/redirect?store_id=${storeId}&client_success=${clientSuccess}&client_error=${clientError}`;
+  window.open(url, "_self");
+};
