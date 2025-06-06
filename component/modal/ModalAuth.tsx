@@ -1,172 +1,146 @@
-import React, { useState } from "react";
+import React from "react";
 import Modal from "./Modal";
 import { useModalAuth } from "../../store/user";
-// import GoogleAuthButton from "../Auth/GoogleAuthButton";
 import { twMerge } from "tailwind-merge";
 import { BsX } from "react-icons/bs";
-import { navigate } from "vike/client/router";
-import { BASE_URL } from "../../api";
 import { FcGoogle } from "react-icons/fc";
 import { googleLogin } from "../../utils";
 
 export default function ModalAuth() {
   const { close, isOpen, message, type } = useModalAuth((state) => state);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
-
-    if (type === "register" && password !== confirmPassword) {
-      setError("Les mots de passe ne correspondent pas.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      close();
-    } catch (err) {
-      setError("Une erreur est survenue. Veuillez réessayer.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleModalClose = () => {
     close();
     document.body.style.overflow = "auto";
   };
 
+  const handleGoogleAuth = async () => {
+    try {
+      await googleLogin();
+      close();
+    } catch (error) {
+      console.error("Erreur d'authentification Google:", error);
+    }
+  };
+
   return (
     <Modal
-      styleContainer="flex items-end min-[500px]:items-center justify-center select-none size-full"
+      styleContainer="flex items-center justify-center select-none size-full backdrop-blur-sm"
       zIndex={100}
       setHide={handleModalClose}
       isOpen={isOpen}
       animationName="translateBottom"
     >
-      <div className="relative w-full max-w-md p-6 bg-white rounded-lg shadow-lg max-h-[80dvh] md:max-w-[600px] overflow-auto">
-        <button
-          onClick={handleModalClose}
-          className="absolute top-2 right-2 p-1 text-gray-600 hover:text-gray-800"
-          aria-label="Fermer la fenêtre"
-        >
-          <BsX size={24} />
-        </button>
-
-        <h2 className="text-xl font-semibold text-center mb-2">
-          {type === "login" ? "Connexion" : "Créer un compte"}
-        </h2>
-        <p className="text-sm text-gray-600 text-center mb-5">{message}</p>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-300 focus:outline-none"
-              required
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label htmlFor="password" className="text-sm font-medium">
-              Mot de passe
-            </label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Mot de passe"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-300 focus:outline-none"
-              required
-            />
-          </div>
-
-          {type === "register" && (
-            <div className="flex flex-col gap-1">
-              <label htmlFor="confirm-password" className="text-sm font-medium">
-                Confirmer le mot de passe
-              </label>
-              <input
-                id="confirm-password"
-                type="password"
-                placeholder="Confirmation mot de passe"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-300 focus:outline-none"
-                required
-              />
-            </div>
-          )}
-
-          {error && <p className="text-sm text-red-500 text-center">{error}</p>}
-
+      <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+        {/* Header avec fermeture */}
+        <div className="relative p-6 pb-4">
           <button
-            type="submit"
-            disabled={isSubmitting}
-            className={twMerge(
-              "w-full py-2.5 bg-black/70 text-white rounded-md transition-colors duration-300",
-              isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:bg-black"
-            )}
+            onClick={handleModalClose}
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-full transition-all duration-200"
+            aria-label="Fermer la fenêtre"
           >
-            {isSubmitting
-              ? "Chargement..."
-              : type === "login"
-              ? "Se connecter"
-              : "S'inscrire"}
+            <BsX size={20} />
           </button>
-        </form>
+        </div>
 
-        {type === "login" && (
-          <p className="text-center mt-3 text-sm">
-            <button className="text-black underline hover:text-gray-700">
-              Mot de passe oublié ?
+        {/* Contenu principal */}
+        <div className="px-6 pb-8">
+          {/* Logo ou icône */}
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-white rounded-full"></div>
+            </div>
+          </div>
+
+          {/* Titre et message */}
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {type === "login" ? "Bienvenue" : "Créer un compte"}
+            </h2>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              {message || "Connectez-vous facilement avec votre compte Google"}
+            </p>
+          </div>
+
+          {/* Bouton Google Auth */}
+          <div className="space-y-4">
+            <button
+              onClick={handleGoogleAuth}
+              className="group w-full flex items-center justify-center gap-4 px-6 py-4 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <div className="flex-shrink-0">
+                <FcGoogle size={24} />
+              </div>
+              <span className="text-gray-700 font-medium text-base">
+                Continuer avec Google
+              </span>
+              <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
+            </button>
+
+            {/* Divider décoratif */}
+            <div className="relative py-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-white px-4 text-xs text-gray-500 uppercase tracking-wide">
+                  Authentification sécurisée
+                </span>
+              </div>
+            </div>
+
+            {/* Informations de sécurité */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    Vos données sont protégées par Google. Nous ne stockons
+                    aucune information d'authentification.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="bg-gray-50 px-6 py-4 border-t border-gray-100">
+          <p className="text-center text-xs text-gray-500">
+            En continuant, vous acceptez nos{" "}
+            <button className="text-gray-700 hover:text-black font-medium underline">
+              conditions d'utilisation
             </button>
           </p>
-        )}
-
-        <div className="relative flex items-center my-4">
-          <span className="w-full border-t border-gray-300"></span>
-          <span className="px-2 text-sm text-gray-500">OU</span>
-          <span className="w-full border-t border-gray-300"></span>
         </div>
-        <div className="w-full flex justify-center">
-          <button
-            onClick={googleLogin}
-            className="flex items-center gap-3 px-6 py-2 rounded-xl border border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 bg-white hover:bg-gray-50"
-          >
-            <FcGoogle size={20} />
-            <span className="text-sm font-medium text-gray-700">
-              Continuer avec Google
-            </span>
-          </button>
-        </div>
-
-        <p className="text-center mt-4 text-sm">
-          {type === "login" ? "Pas encore de compte ?" : "Déjà un compte ?"}{" "}
-          <button
-            className="text-black font-medium hover:underline"
-            onClick={() =>
-              useModalAuth
-                .getState()
-                .open(type === "login" ? "register" : "login")
-            }
-          >
-            {type === "login" ? "S'inscrire" : "Se connecter"}
-          </button>
-        </p>
       </div>
     </Modal>
   );
