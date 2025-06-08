@@ -1,13 +1,9 @@
-import React, { PropsWithChildren } from "react";
+import { PropsWithChildren } from "react";
 import FilterPanel from "./FilterPanel";
 import { DehydratedState, HydrationBoundary } from "@tanstack/react-query";
 import ListProductCard from "./ListProductCard";
 import FilterPopover from "../FilterPopover";
-import { usePageContext } from "../../renderer/usePageContext";
 import { useSelectedFiltersStore } from "../../store/filter";
-import { defaultOptions } from "../../pages/type";
-import PriceRangeFilter from "../PriceRangeFilter";
-import { useFiltersAndUrlSync } from "../../hook/useUrlFilterManager";
 
 interface LayoutProductProps {
   dehydratedState: DehydratedState;
@@ -18,10 +14,7 @@ export default function LayoutProduct({
   dehydratedState,
   queryKey,
 }: PropsWithChildren<LayoutProductProps>) {
-   const pageContext = usePageContext();
-  
-    const { urlPathname } = pageContext;
-  const { setSelectedFilters, selectedFilters , setFilter } = useSelectedFiltersStore();
+  const { selectedFilters, setFilter } = useSelectedFiltersStore();
 
   return (
     <main className="container font-primary mx-auto py-8">
@@ -38,7 +31,6 @@ export default function LayoutProduct({
               setFilter={setFilter}
               selectedFilters={selectedFilters}
             />
-           
           </div>
           <HydrationBoundary state={dehydratedState}>
             <ListProductCard queryKey={queryKey} />

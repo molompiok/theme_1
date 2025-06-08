@@ -34,7 +34,9 @@ export default function Page() {
   const launchSearch = useCallback(() => {
     setFilter(
       "s",
-      searchText ? [{ text: searchText, icon: [], key: null }] : []
+      searchText
+        ? [{ text: searchText, icon: [], key: null, product_count: 0 }]
+        : []
     );
   }, [searchText, setFilter]);
 
@@ -59,8 +61,8 @@ export default function Page() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       <div className="sticky top-0 z-50 backdrop-blur-xl bg-white/0 border-b border-white/20 shadow-sm">
         <div className="font-primary mx-4 sm:mx-6 lg:mx-12 xl:mx-auto max-w-[1440px] pt-6 pb-1">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-sm sm:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
               Découvrir nos produits
             </h1>
             <FilterPopover
@@ -81,7 +83,7 @@ export default function Page() {
                   : "border-transparent hover:shadow-xl"
               }`}
             >
-              <div className="flex items-center px-6 py-4">
+              <div className="flex items-center px-6 py-2">
                 <BsSearch
                   className={`w-5 h-5 transition-colors duration-200 ${
                     isSearchFocused ? "text-gray-500" : "text-gray-400"
@@ -89,7 +91,7 @@ export default function Page() {
                 />
               </div>
               <input
-                className="flex-1 py-4 pr-4 text-lg placeholder-gray-400 bg-transparent border-none outline-none"
+                className="flex-1 py-3 pr-4 text-sm placeholder-gray-400 bg-transparent border-none outline-none"
                 placeholder="Rechercher un produit..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}

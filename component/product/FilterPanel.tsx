@@ -6,8 +6,8 @@ import React, {
   useCallback,
 } from "react";
 import clsx from "clsx";
-import { Filter, FilterValue, VariantType } from "../../pages/type"; // Make sure these paths are correct
-import { ProductMedia } from "../ProductMedia"; // Make sure this path is correct
+import { Filter, FilterValue, VariantType } from "../../pages/type";
+import { ProductMedia } from "../ProductMedia";
 import {
   FiCheck,
   FiChevronDown,
@@ -52,61 +52,44 @@ interface FilterOptionProps {
   layout?: LayoutMode;
 }
 
-// 2. Optimisation des states visuels et interactions / État hover
-// 8. Micro-interactions et animations / Transitions / Hover effects
 const getBaseButtonClasses = (layout: LayoutMode = "row") => {
   const base =
-    "group transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 active:scale-95"; // Updated duration, ease, focus, active:scale
+    "group transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 active:scale-95";
   switch (layout) {
     case "grid":
-      // 3. Amélioration des layouts et espacements / Layout Grid / Padding (p-2.5 -> p-3)
-      // 9. Cohérence et polish final / Unification des espacements (p-2.5 -> p-3)
       return `${base} p-3 rounded-lg flex flex-col items-center justify-center text-center gap-2`;
     case "bento":
-      // 9. Cohérence et polish final / Unification des espacements (px-3.5 py-1.5 -> px-3 py-1 or px-4 py-2, let's use px-3 py-1 for now but it might be small)
-      // Let's stick to a more standard scale, e.g. px-3 py-1, or make them larger like px-4 py-2 if needed.
-      // Original was px-3.5 py-1.5. Let's keep something similar but rounded if possible: px-3 py-1 is small, px-4 py-2 is large.
-      // Let's use rounded values: px-3 py-1 or adjust as needed. For now, keeping original padding due to specific design.
-      return `${base} px-3 py-1.5 rounded-full inline-flex items-center gap-2 border`; // Kept px-3.5 py-1.5 as it seems specific
+      return `${base} px-3 py-1.5 rounded-full inline-flex items-center gap-2 border`;
     case "compact":
-      // 9. Cohérence et polish final / Unification des espacements (gap-1.5 -> gap-1)
       return `${base} w-full px-2 py-1 rounded-md flex items-center text-left gap-1`;
     case "horizontal-scroll":
-      // Similar to bento, keeping padding specific
       return `${base} px-3 py-1.5 rounded-full inline-flex items-center gap-2 whitespace-nowrap border`;
     case "card":
-      // 3. Amélioration des layouts et espacements / Layout Card
       return `${base} p-4 rounded-2xl flex flex-col items-start justify-start text-center gap-2 border bg-white shadow-md hover:shadow-lg focus-visible:ring-slate-500 w-full`; // Updated padding, radius, shadow
     case "stacked-list":
-      return `${base} w-full px-4 py-3 rounded-lg flex items-center text-left gap-3 hover:bg-gray-50`; // hover:bg-gray-50/70 -> hover:bg-gray-50
+      return `${base} w-full px-4 py-3 rounded-lg flex items-center text-left gap-3 hover:bg-gray-50`;
     case "row":
     default:
-      // 9. Cohérence et polish final / Unification des espacements (gap-2.5 -> gap-2)
       return `${base} w-full px-3 py-2 rounded-lg flex items-center text-left gap-2`;
   }
 };
 
-// 2. Optimisation des states visuels et interactions / États de sélection
 const selectedClasses =
-  "bg-slate-50 text-slate-900 font-semibold ring-2 ring-inset ring-slate-200"; // Updated selection colors and ring
-const unselectedClasses = "text-gray-700 hover:bg-gray-50 hover:text-gray-800"; // Standard unselected (text-gray-700, hover:text-gray-800)
+  "bg-slate-50 text-slate-900 font-semibold ring-2 ring-inset ring-slate-200";
+const unselectedClasses = "text-gray-700 hover:bg-gray-50 hover:text-gray-800";
 
-// Bento uses specific selection to override default border behavior for pills
 const bentoSelectedClasses =
-  "border-slate-500 bg-slate-100 text-slate-800 font-semibold"; // More prominent bento selection
+  "border-slate-500 bg-slate-100 text-slate-800 font-semibold";
 const bentoUnselectedClasses =
   "border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900";
 
-// Card selected classes might need specific ring color if slate-200 is too light on white card
-const cardSelectedClasses = "ring-2 ring-slate-500 border-slate-400 shadow-lg"; // Stronger ring for cards, shadow already hover:shadow-lg from getBaseButtonClasses
+const cardSelectedClasses = "ring-2 ring-slate-500 border-slate-400 shadow-lg";
 const cardUnselectedClasses = "border-gray-200 hover:border-gray-300";
 
-// Grid item selection (non-text based that uses its own styling for selected state)
 const gridItemSelectedClasses =
-  "bg-slate-50 border-slate-300 ring-2 ring-slate-200 shadow-sm"; // Consistent selection indication
+  "bg-slate-50 border-slate-300 ring-2 ring-slate-200 shadow-sm";
 const gridItemUnselectedClasses =
   "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm";
-
 
 const CheckboxIndicator: React.FC<{
   isSelected: boolean;
@@ -120,16 +103,17 @@ const CheckboxIndicator: React.FC<{
     return null;
   }
 
-  // 2. Optimisation des states visuels et interactions / CheckboxIndicator
-  const checkboxSize = layout === "grid" || layout === "compact" ? "size-4" : "size-5"; // size-3.5 -> size-4, size-4 -> size-5
-  const checkIconSize = layout === "grid" || layout === "compact" ? "size-3" : "size-3.5"; // size-2.5 -> size-3, size-3 -> size-3.5
+  const checkboxSize =
+    layout === "grid" || layout === "compact" ? "size-4" : "size-5";
+  const checkIconSize =
+    layout === "grid" || layout === "compact" ? "size-3" : "size-3.5";
 
   return (
     <div
       className={clsx(
-        "flex-shrink-0 flex items-center justify-center rounded border-2 transition-all duration-300 group-hover:scale-110", // Added duration-300, group-hover:scale-110
+        "flex-shrink-0 flex items-center justify-center rounded border-2 transition-all duration-300 group-hover:scale-110",
         isSelected
-          ? "bg-slate-600 border-slate-600" // Updated color
+          ? "bg-slate-600 border-slate-600"
           : "border-gray-300 group-hover:border-gray-400",
         checkboxSize
       )}
@@ -152,364 +136,7 @@ export const TextFilterOption: React.FC<FilterOptionProps> = ({
   setRef,
   layout = "row",
 }) => {
-  // filterSideTextColor applied via style prop, Tailwind classes provide base/fallback
-  // 4. Optimisation des couleurs et contrastes / Couleurs de texte (Standardize)
-  // 9. Typographie / Line heights
-  return (
-    <button
-    ref={setRef}
-    type="button"
-    role="checkbox"
-    aria-checked={isSelected}
-    className={clsx(
-      getBaseButtonClasses(layout),
-      isSelected
-        ? layout === "bento" || layout === "horizontal-scroll"
-          ? bentoSelectedClasses
-          : layout === "card"
-          ? cardSelectedClasses
-          : selectedClasses
-        : layout === "bento" || layout === "horizontal-scroll"
-        ? bentoUnselectedClasses
-        : layout === "card"
-        ? cardUnselectedClasses
-        : unselectedClasses,
-      // 4. Optimisation des couleurs et contrastes / Hover states
-      !isSelected && "hover:bg-gray-50" 
-    )}
-    onClick={(e) => {
-      e.stopPropagation();
-      onToggle(filterId, value);
-    }}
-  >
-    <CheckboxIndicator isSelected={isSelected} layout={layout} />
-    <span
-      className={clsx(
-        "capitalize leading-normal", // Added leading-normal
-        layout === "grid"
-          ? "text-xs" 
-          : layout === "bento" || layout === "horizontal-scroll"
-          ? "text-xs font-medium"
-          : layout === "compact"
-          ? "text-xs"
-          : layout === "card"
-          ? "text-sm mt-0.5 font-medium self-center" 
-          : "text-sm", 
-        (layout === "row" ||
-          layout === "compact" ||
-          layout === "stacked-list") &&
-          "flex-grow",
-        isSelected ? "text-slate-900" : "text-gray-700 group-hover:text-gray-800" // Fallback text colors
-      )}
-      // style={{ color: filterSideTextColor }} // This will override Tailwind color if filterSideTextColor is set
-    >
-      {value.text}
-    </span>
-  </button>
-) };
-
-export const ColorFilterOption: React.FC<FilterOptionProps> = ({
-  filterId,
-  value,
-  isSelected,
-  onToggle,
-  setRef,
-  layout = "row",
-}) => {
-  const getColorSwatchSize = () => {
-    switch (layout) {
-      case "grid":
-        return "size-8"; 
-      case "bento":
-        return "size-4";
-      case "compact":
-        return "size-3.5"; 
-      case "horizontal-scroll":
-        return "size-4";
-      case "card":
-        return "size-12 self-center"; 
-      case "stacked-list":
-        return "size-5";
-      case "row":
-      default:
-        return "size-5";
-    }
-  };
-  // 4. Optimisation des couleurs et contrastes / Couleurs de texte (Standardize)
-  // 9. Typographie / Line heights
-  return (
-    <button
-      ref={setRef}
-      type="button"
-      role="checkbox"
-      aria-checked={isSelected}
-      className={clsx(
-        getBaseButtonClasses(layout),
-        isSelected
-          ? layout === "bento" || layout === "horizontal-scroll"
-            ? bentoSelectedClasses
-            : layout === "card"
-            ? cardSelectedClasses
-            : selectedClasses
-          : layout === "bento" || layout === "horizontal-scroll"
-          ? bentoUnselectedClasses
-          : layout === "card"
-          ? cardUnselectedClasses
-          : unselectedClasses,
-        !isSelected && "hover:bg-gray-50"
-      )}
-      onClick={(e) => {
-        e.stopPropagation();
-        onToggle(filterId, value);
-      }}
-    >
-      <div
-        className={clsx(
-          "rounded-full border border-gray-300 group-hover:border-gray-400 transition-all duration-300 flex items-center justify-center", // Updated duration
-          // 8. Micro-interactions et animations / Hover effects / Scale effects
-          "group-hover:scale-105", 
-          getColorSwatchSize(),
-          isSelected &&
-            layout !== "card" &&
-            "ring-2 ring-offset-1 ring-slate-200" // Updated ring color (ring-slate-500 -> ring-slate-200)
-        )}
-        style={{ backgroundColor: value.key || "transparent" }}
-      >
-        {/* Logic for check mark on white/light colors might need review for contrast with slate rings/bgs */}
-        {isSelected && value.key?.toLowerCase() === "#ffffff" && (
-          <FiCheck className="size-3 text-gray-700" strokeWidth={3} />
-        )}
-        {isSelected &&
-          value.key?.toLowerCase() !== "#ffffff" &&
-          !value.key?.toLowerCase().includes("rgba(255,255,255") && (
-            <FiCheck
-              className="size-3 text-white mix-blend-difference"
-              strokeWidth={3}
-            />
-          )}
-      </div>
-      {layout === "grid" || layout === "card" ? (
-        <span
-          className={clsx(
-            "capitalize text-center leading-normal", // Added leading-normal
-            layout === "grid" ? "text-xs mt-1" : "text-sm mt-1.5 font-medium",
-            isSelected ? "text-slate-900" : "text-gray-700 group-hover:text-gray-800"
-          )}
-        >
-          {value.text}
-        </span>
-      ) : (
-        <span
-          className={clsx(
-            "capitalize leading-normal", // Added leading-normal
-            layout === "bento" || layout === "horizontal-scroll"
-              ? "text-xs font-medium"
-              : layout === "compact"
-              ? "text-xs"
-              : "text-sm",
-            (layout === "row" ||
-              layout === "compact" ||
-              layout === "stacked-list") &&
-              "flex-grow",
-            isSelected ? "text-slate-900" : "text-gray-700 group-hover:text-gray-800"
-          )}
-        >
-          {value.text}
-        </span>
-      )}
-    </button>
-  );
-};
-
-export const IconFilterOption: React.FC<FilterOptionProps> = ({
-  filterId,
-  value,
-  isSelected,
-  onToggle,
-  setRef,
-  layout = "row",
-}) => {
-  const getIconContainerSize = () => {
-    switch (layout) {
-      case "grid":
-        return "size-12 sm:size-14"; 
-      case "bento":
-        return "size-6";
-      case "compact":
-        return "size-5";
-      case "horizontal-scroll":
-        return "size-6";
-      case "card":
-        return "size-16 sm:size-20 self-center"; 
-      case "stacked-list":
-        return "size-9";
-      case "row":
-      default:
-        return "size-9";
-    }
-  };
-
-  const iconButtonClasses = () => {
-    if (layout === "grid") {
-      return clsx(
-        getBaseButtonClasses(layout),
-        // 3. Amélioration des layouts et espacements / Layout Grid / Aspect ratio
-        "w-full aspect-square p-1.5 sm:p-2", // aspect-[4/3] -> aspect-square
-        isSelected ? gridItemSelectedClasses : gridItemUnselectedClasses
-      );
-    }
-    if (layout === "card") {
-      return clsx(
-        getBaseButtonClasses(layout), 
-        isSelected ? cardSelectedClasses : cardUnselectedClasses
-      );
-    }
-    return clsx(
-      getBaseButtonClasses(layout),
-      isSelected
-        ? layout === "bento" || layout === "horizontal-scroll"
-          ? bentoSelectedClasses
-          : selectedClasses
-        : layout === "bento" || layout === "horizontal-scroll"
-        ? bentoUnselectedClasses
-        : unselectedClasses,
-      !isSelected && "hover:bg-gray-50"
-    );
-  };
-  // 4. Optimisation des couleurs et contrastes / Couleurs de texte (Standardize)
-  // 9. Typographie / Line heights
-  return (
-    <button
-      ref={setRef}
-      type="button"
-      role="checkbox"
-      aria-checked={isSelected}
-      className={iconButtonClasses()}
-      onClick={(e) => {
-        e.stopPropagation();
-        onToggle(filterId, value);
-      }}
-    >
-      <div
-        className={clsx(
-          "flex items-center justify-center rounded-md overflow-hidden transition-all duration-300", // Updated duration
-          getIconContainerSize(),
-          // 8. Micro-interactions et animations / Hover effects / Scale effects
-          "group-hover:scale-105", 
-          isSelected && layout !== "grid" && layout !== "card"
-            ? "ring-1 ring-offset-1 ring-slate-200" // Updated ring color (ring-slate-400 -> ring-slate-200)
-            : ""
-        )}
-      >
-        {Array.isArray(value.icon) && value.icon.length > 0 ? (
-          <ProductMedia
-            mediaList={value.icon}
-            productName={value.text}
-            className="size-full object-cover"
-          />
-        ) : (
-          <svg
-            className={clsx(
-              "text-gray-400 group-hover:text-gray-500",
-              layout === "grid"
-                ? "size-7"
-                : layout === "bento" || layout === "horizontal-scroll"
-                ? "w-3.5 h-3.5" 
-                : layout === "compact"
-                ? "w-3.5 h-3.5" 
-                : layout === "card"
-                ? "size-10"
-                : "size-7" 
-            )}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.5"
-              d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
-          </svg>
-        )}
-      </div>
-      <span
-        className={clsx(
-          "capitalize leading-normal", // Added leading-normal
-          layout === "grid" || layout === "card"
-            ? "text-xs text-center mt-1.5"
-            : layout === "bento" ||
-              layout === "horizontal-scroll" ||
-              layout === "compact"
-            ? "text-xs font-medium"
-            : "text-sm", 
-
-          // Text color logic based on selection and layout type
-          isSelected
-            ? (layout === "grid" || layout === "card" ? "text-slate-700 font-semibold" : "text-slate-900 font-medium")
-            : (layout === "grid" || layout === "card" ? "text-gray-600" : "text-gray-700 group-hover:text-gray-800"),
-          
-          (layout === "row" ||
-            layout === "compact" ||
-            layout === "stacked-list") &&
-            "flex-grow"
-        )}
-      >
-        {value.text}
-      </span>
-    </button>
-  );
-};
-
-export const IconTextFilterOption: React.FC<FilterOptionProps> = ({
-  filterId,
-  value,
-  isSelected,
-  onToggle,
-  setRef,
-  layout = "row",
-}) => {
-  // filterSideTextColor applied via style prop, Tailwind classes provide base/fallback
-  const getIconDisplaySize = () => {
-    switch (layout) {
-      case "grid":
-        return "size-8";
-      case "bento":
-        return "w-3.5 h-3.5"; 
-      case "compact":
-        return "size-4";
-      case "horizontal-scroll":
-        return "w-3.5 h-3.5"; 
-      case "card":
-        return "size-10 self-center mb-1.5"; 
-      case "stacked-list":
-        return "size-5";
-      case "row":
-      default:
-        return "size-5";
-    }
-  };
-
-  const placeholderSvgSize = () => {
-    switch (layout) {
-      case "grid":
-        return "size-5";
-      case "bento":
-        return "size-2.5"; 
-      case "compact":
-        return "size-3";
-      case "horizontal-scroll":
-        return "size-2.5"; 
-      case "card":
-        return "size-6";
-      default:
-        return "size-3.5"; 
-    }
-  };
-  // 4. Optimisation des couleurs et contrastes / Couleurs de texte (Standardize)
-  // 9. Typographie / Line heights
+  console.log("🚀 ~ value:", value);
   return (
     <button
       ref={setRef}
@@ -537,20 +164,395 @@ export const IconTextFilterOption: React.FC<FilterOptionProps> = ({
       }}
     >
       <CheckboxIndicator isSelected={isSelected} layout={layout} />
+      <span
+        className={clsx(
+          "leading-normal lowercase",
+          layout === "grid"
+            ? "text-xs"
+            : layout === "bento" || layout === "horizontal-scroll"
+            ? "text-xs font-medium"
+            : layout === "compact"
+            ? "text-xs"
+            : layout === "card"
+            ? "text-sm mt-0.5 font-medium self-center"
+            : "text-sm",
+          (layout === "row" ||
+            layout === "compact" ||
+            layout === "stacked-list") &&
+            "flex-grow",
+          isSelected
+            ? "text-slate-900"
+            : "text-gray-700 group-hover:text-gray-800" // Fallback text colors
+        )}
+        // style={{ color: filterSideTextColor }} // This will override Tailwind color if filterSideTextColor is set
+      >
+        {value.text}
+      </span>
+      {typeof value.product_count === "number" && (
+        <span className="ml-auto text-xs font-mono text-gray-400 group-hover:text-gray-500 pl-2">
+          ({value.product_count})
+        </span>
+      )}
+    </button>
+  );
+};
 
-      {/* Icon Rendering - separate logic for card for specific layout needs */}
+export const ColorFilterOption: React.FC<FilterOptionProps> = ({
+  filterId,
+  value,
+  isSelected,
+  onToggle,
+  setRef,
+  layout = "row",
+}) => {
+  const getColorSwatchSize = () => {
+    switch (layout) {
+      case "grid":
+        return "size-8";
+      case "bento":
+        return "size-4";
+      case "compact":
+        return "size-3.5";
+      case "horizontal-scroll":
+        return "size-4";
+      case "card":
+        return "size-12 self-center";
+      case "stacked-list":
+        return "size-5";
+      case "row":
+      default:
+        return "size-5";
+    }
+  };
+  return (
+    <button
+      ref={setRef}
+      type="button"
+      role="checkbox"
+      aria-checked={isSelected}
+      className={clsx(
+        getBaseButtonClasses(layout),
+        isSelected
+          ? layout === "bento" || layout === "horizontal-scroll"
+            ? bentoSelectedClasses
+            : layout === "card"
+            ? cardSelectedClasses
+            : selectedClasses
+          : layout === "bento" || layout === "horizontal-scroll"
+          ? bentoUnselectedClasses
+          : layout === "card"
+          ? cardUnselectedClasses
+          : unselectedClasses,
+        !isSelected && "hover:bg-gray-50"
+      )}
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle(filterId, value);
+      }}
+    >
+      <div
+        className={clsx(
+          "rounded-full border border-gray-300 group-hover:border-gray-400 transition-all duration-300 flex items-center justify-center",
+          "group-hover:scale-105",
+          getColorSwatchSize(),
+          isSelected &&
+            layout !== "card" &&
+            "ring-2 ring-offset-1 ring-slate-200"
+        )}
+        style={{ backgroundColor: value.key || "transparent" }}
+      >
+        {isSelected && value.key?.toLowerCase() === "#ffffff" && (
+          <FiCheck className="size-3 text-gray-700" strokeWidth={3} />
+        )}
+        {isSelected &&
+          value.key?.toLowerCase() !== "#ffffff" &&
+          !value.key?.toLowerCase().includes("rgba(255,255,255") && (
+            <FiCheck
+              className="size-3 text-white mix-blend-difference"
+              strokeWidth={3}
+            />
+          )}
+      </div>
+      {layout === "grid" || layout === "card" ? (
+        <>
+          <span
+            className={clsx(
+              "lowercase text-center leading-normal",
+              layout === "grid" ? "text-xs mt-1" : "text-sm mt-1.5 font-medium",
+              isSelected
+                ? "text-slate-900"
+                : "text-gray-700 group-hover:text-gray-800"
+            )}
+          >
+            {value.text}
+          </span>
+          {typeof value.product_count === "number" && (
+            <span className="ml-auto text-xs font-mono text-gray-400 group-hover:text-gray-500 pl-2">
+              ({value.product_count})
+            </span>
+          )}
+        </>
+      ) : (
+        <>
+          <span
+            className={clsx(
+              "lowercase leading-normal",
+              layout === "bento" || layout === "horizontal-scroll"
+                ? "text-xs font-medium"
+                : layout === "compact"
+                ? "text-xs"
+                : "text-sm",
+              (layout === "row" ||
+                layout === "compact" ||
+                layout === "stacked-list") &&
+                "flex-grow",
+              isSelected
+                ? "text-slate-900"
+                : "text-gray-700 group-hover:text-gray-800"
+            )}
+          >
+            {value.text}
+          </span>
+          {typeof value.product_count === "number" && (
+            <span className="ml-auto text-xs font-mono text-gray-400 group-hover:text-gray-500 pl-2">
+              ({value.product_count})
+            </span>
+          )}
+        </>
+      )}
+    </button>
+  );
+};
+
+export const IconFilterOption: React.FC<FilterOptionProps> = ({
+  filterId,
+  value,
+  isSelected,
+  onToggle,
+  setRef,
+  layout = "row",
+}) => {
+  const getIconContainerSize = () => {
+    switch (layout) {
+      case "grid":
+        return "size-12 sm:size-14";
+      case "bento":
+        return "size-6";
+      case "compact":
+        return "size-5";
+      case "horizontal-scroll":
+        return "size-6";
+      case "card":
+        return "size-16 sm:size-20 self-center";
+      case "stacked-list":
+        return "size-9";
+      case "row":
+      default:
+        return "size-9";
+    }
+  };
+
+  const iconButtonClasses = () => {
+    if (layout === "grid") {
+      return clsx(
+        getBaseButtonClasses(layout),
+        "w-full aspect-square p-1.5 sm:p-2",
+        isSelected ? gridItemSelectedClasses : gridItemUnselectedClasses
+      );
+    }
+    if (layout === "card") {
+      return clsx(
+        getBaseButtonClasses(layout),
+        isSelected ? cardSelectedClasses : cardUnselectedClasses
+      );
+    }
+    return clsx(
+      getBaseButtonClasses(layout),
+      isSelected
+        ? layout === "bento" || layout === "horizontal-scroll"
+          ? bentoSelectedClasses
+          : selectedClasses
+        : layout === "bento" || layout === "horizontal-scroll"
+        ? bentoUnselectedClasses
+        : unselectedClasses,
+      !isSelected && "hover:bg-gray-50"
+    );
+  };
+  return (
+    <button
+      ref={setRef}
+      type="button"
+      role="checkbox"
+      aria-checked={isSelected}
+      className={iconButtonClasses()}
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle(filterId, value);
+      }}
+    >
+      <div
+        className={clsx(
+          "flex items-center justify-center rounded-md overflow-hidden transition-all duration-300",
+          getIconContainerSize(),
+          "group-hover:scale-105",
+          isSelected && layout !== "grid" && layout !== "card"
+            ? "ring-1 ring-offset-1 ring-slate-200"
+            : ""
+        )}
+      >
+        {Array.isArray(value.icon) && value.icon.length > 0 ? (
+          <ProductMedia
+            mediaList={value.icon}
+            productName={value.text}
+            className="size-full object-cover"
+          />
+        ) : (
+          <svg
+            className={clsx(
+              "text-gray-400 group-hover:text-gray-500",
+              layout === "grid"
+                ? "size-7"
+                : layout === "bento" || layout === "horizontal-scroll"
+                ? "w-3.5 h-3.5"
+                : layout === "compact"
+                ? "w-3.5 h-3.5"
+                : layout === "card"
+                ? "size-10"
+                : "size-7"
+            )}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.5"
+              d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+        )}
+      </div>
+      <span
+        className={clsx(
+          "lowercase leading-normal",
+          layout === "grid" || layout === "card"
+            ? "text-xs text-center mt-1.5"
+            : layout === "bento" ||
+              layout === "horizontal-scroll" ||
+              layout === "compact"
+            ? "text-xs font-medium"
+            : "text-sm",
+
+          isSelected
+            ? layout === "grid" || layout === "card"
+              ? "text-slate-700 font-semibold"
+              : "text-slate-900 font-medium"
+            : layout === "grid" || layout === "card"
+            ? "text-gray-600"
+            : "text-gray-700 group-hover:text-gray-800",
+
+          (layout === "row" ||
+            layout === "compact" ||
+            layout === "stacked-list") &&
+            "flex-grow"
+        )}
+      >
+        {value.text}
+      </span>
+      {typeof value.product_count === "number" && (
+        <span className="ml-auto text-xs font-mono text-gray-400 group-hover:text-gray-500 pl-2">
+          ({value.product_count})
+        </span>
+      )}
+    </button>
+  );
+};
+
+export const IconTextFilterOption: React.FC<FilterOptionProps> = ({
+  filterId,
+  value,
+  isSelected,
+  onToggle,
+  setRef,
+  layout = "row",
+}) => {
+  const getIconDisplaySize = () => {
+    switch (layout) {
+      case "grid":
+        return "size-8";
+      case "bento":
+        return "w-3.5 h-3.5";
+      case "compact":
+        return "size-4";
+      case "horizontal-scroll":
+        return "w-3.5 h-3.5";
+      case "card":
+        return "size-10 self-center mb-1.5";
+      case "stacked-list":
+        return "size-5";
+      case "row":
+      default:
+        return "size-5";
+    }
+  };
+
+  const placeholderSvgSize = () => {
+    switch (layout) {
+      case "grid":
+        return "size-5";
+      case "bento":
+        return "size-2.5";
+      case "compact":
+        return "size-3";
+      case "horizontal-scroll":
+        return "size-2.5";
+      case "card":
+        return "size-6";
+      default:
+        return "size-3.5";
+    }
+  };
+  return (
+    <button
+      ref={setRef}
+      type="button"
+      role="checkbox"
+      aria-checked={isSelected}
+      className={clsx(
+        getBaseButtonClasses(layout),
+        isSelected
+          ? layout === "bento" || layout === "horizontal-scroll"
+            ? bentoSelectedClasses
+            : layout === "card"
+            ? cardSelectedClasses
+            : selectedClasses
+          : layout === "bento" || layout === "horizontal-scroll"
+          ? bentoUnselectedClasses
+          : layout === "card"
+          ? cardUnselectedClasses
+          : unselectedClasses,
+        !isSelected && "hover:bg-gray-50"
+      )}
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle(filterId, value);
+      }}
+    >
+      <CheckboxIndicator isSelected={isSelected} layout={layout} />
       {Array.isArray(value.icon) && value.icon.length > 0 ? (
         <ProductMedia
           mediaList={value.icon}
           productName={value.text}
           className={clsx(
             getIconDisplaySize(),
-            layout === "card" ? "rounded-md" : "rounded-sm", // Card icons can be more rounded
+            layout === "card" ? "rounded-md" : "rounded-sm",
             "object-contain"
           )}
         />
       ) : (
-        <div // Placeholder icon
+        <div
           className={clsx(
             getIconDisplaySize(),
             "bg-gray-100 flex items-center justify-center",
@@ -575,7 +577,7 @@ export const IconTextFilterOption: React.FC<FilterOptionProps> = ({
 
       <span
         className={clsx(
-          "capitalize leading-normal", // Added leading-normal
+          "lowercase leading-normal",
           layout === "grid"
             ? "text-xs text-center"
             : layout === "bento" || layout === "horizontal-scroll"
@@ -583,20 +585,26 @@ export const IconTextFilterOption: React.FC<FilterOptionProps> = ({
             : layout === "compact"
             ? "text-xs"
             : layout === "card"
-            ? "text-sm text-center font-medium" 
-            : "text-sm", 
+            ? "text-sm text-center font-medium"
+            : "text-sm",
           (layout === "row" ||
             layout === "compact" ||
             layout === "stacked-list" ||
             layout === "grid") &&
-            "flex-grow", 
+            "flex-grow",
           layout === "card" && "self-center w-full",
-          isSelected ? "text-slate-900" : "text-gray-700 group-hover:text-gray-800" // Fallback text colors
+          isSelected
+            ? "text-slate-900"
+            : "text-gray-700 group-hover:text-gray-800"
         )}
-        // style={{ color: filterSideTextColor }} // This will override Tailwind color
       >
         {value.text}
       </span>
+      {typeof value.product_count === "number" && (
+        <span className="ml-auto text-xs font-mono text-gray-400 group-hover:text-gray-500 pl-2">
+          ({value.product_count})
+        </span>
+      )}
     </button>
   );
 };
@@ -619,7 +627,7 @@ export default function FilterPanel() {
   const handleModalClose = () => {
     gsap.to(filterPanelRef.current, {
       x: "100%",
-      duration: 0.1, // Kept short as it's an exit animation. User requirement: ease-in for exits.
+      duration: 0.1,
       ease: "power2.in",
       onComplete: () => {
         setModalFilter(false);
@@ -631,31 +639,25 @@ export default function FilterPanel() {
   const handleModalOpen = () => {
     setModalFilter(true);
     document.body.style.overflow = "hidden";
-    gsap.fromTo( // User requirement: ease-out for entries.
+    gsap.fromTo(
       filterPanelRef.current,
       { x: "100%" },
-      { x: 0, duration: 0.1, ease: "power2.out" } // Kept short.
+      { x: 0, duration: 0.1, ease: "power2.out" }
     );
   };
 
   if (isLoading)
     return (
-      // 4. Optimisation des couleurs et contrastes / Couleurs de texte
-      <div className="text-gray-600 text-center py-4 h-[70dvh]"> 
+      <div className="text-gray-600 text-center py-4 h-[70dvh]">
         Chargement...
       </div>
     );
   if (!filters || isError || !Array.isArray(filters)) return null;
 
-  // 4. Optimisation des couleurs et contrastes / Couleurs de base (bg-gray-50 if no theme)
-  // The component itself should have a default background, here `bg-white` or potentially `bg-gray-50`.
-  // The FilterModal inside will handle its own theming.
   return (
     <div className="inline max-h-[70dvh]">
-      {/* 4. Optimisation des couleurs et contrastes / Couleurs de base */}
-      <div className="bg-transparent w-full"> {/* Changed bg-white to bg-transparent or bg-gray-50 as per context */}
+      <div className="bg-transparent w-full">
         <button
-          // 8. Micro-interactions et animations / Hover effects / active:scale
           className="w-full lg:hidden ml-auto px-3 py-2 flex items-center justify-center gap-2 border rounded-lg hover:bg-gray-100 hover:shadow-sm text-gray-800 border-gray-200 cursor-pointer transition-all duration-300 active:scale-95" // Unified border, text color, duration
           onClick={handleModalOpen}
           aria-haspopup="true"
@@ -663,11 +665,9 @@ export default function FilterPanel() {
           aria-controls="filter-modal-content"
         >
           <CiSliderHorizontal size={22} />
-          {/* 9. Typographie */}
           <h2 className="text-sm font-medium leading-normal">Filtres</h2>
         </button>
-        {/* 4. Optimisation des couleurs et contrastes / Bordures */}
-        <div className="hidden lg:block bg-transparent rounded-xl shadow-sm max-w-xs w-full"> {/* bg-white to bg-transparent or specific theme */}
+        <div className="hidden lg:block bg-transparent rounded-xl shadow-sm max-w-xs w-full">
           <FilterModal
             filters={filters}
             onModalClose={handleModalClose}
@@ -680,14 +680,13 @@ export default function FilterPanel() {
         styleContainer="flex items-center justify-end size-full"
         zIndex={100}
         setHide={handleModalClose}
-        animationName="translateRight" // GSAP handles this now
+        animationName="translateRight"
         isOpen={modalFilter}
       >
         <div
           ref={filterPanelRef}
           id="filter-modal-content"
-          // 4. Optimisation des couleurs et contrastes / Couleurs de base
-          className="font-primary bg-white h-dvh w-full max-w-[90vw] sm:max-w-[380px] shadow-2xl flex flex-col" // Default to bg-white, style prop will override
+          className="font-primary bg-white h-dvh w-full max-w-[90vw] sm:max-w-[380px] shadow-2xl flex flex-col"
           role="dialog"
           aria-modal="true"
           aria-labelledby="filter-modal-title"
@@ -727,10 +726,9 @@ function LayoutSelector({
       { key: "stacked-list", icon: FiLayers, label: "Liste Détaillée" },
     ];
 
-  // 6. Améliorations de la navigation et accessibilité / Boutons de layout
   return (
     <div
-      className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg border border-gray-200" // Updated bg, added border
+      className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg border border-gray-200"
       style={{ display: filtideLayout === "all" ? "flex" : "none" }}
     >
       {layouts.map(({ key, icon: Icon, label }) => (
@@ -738,10 +736,10 @@ function LayoutSelector({
           key={key}
           onClick={() => onLayoutChange(key)}
           className={clsx(
-            "p-2 rounded-md transition-all duration-300 active:scale-95", // Updated padding, duration, active:scale
+            "p-2 rounded-md transition-all duration-300 active:scale-95",
             currentLayout === key
-              ? "bg-slate-100 text-slate-700 border border-slate-200 shadow-sm" // Updated active state
-              : "text-gray-500 hover:text-gray-700 hover:bg-white" // Standard hover
+              ? "bg-slate-100 text-slate-700 border border-slate-200 shadow-sm"
+              : "text-gray-500 hover:text-gray-700 hover:bg-white"
           )}
           title={label}
           aria-label={`Layout ${label}`}
@@ -764,23 +762,18 @@ function FilterModal({
 }) {
   const pageContext = usePageContext();
   const { urlPathname } = pageContext;
-  const {
-    setSelectedFilters,
-    selectedFilters,
-    // setFilter, // Not used directly, toggleFilter and clearFilter are
-    clearFilter,
-    toggleFilter,
-  } = useSelectedFiltersStore();
+  const { setSelectedFilters, selectedFilters, clearFilter, toggleFilter } =
+    useSelectedFiltersStore();
 
   const filtideLayoutSetting =
     useThemeSettingsStore(
       (state) => state.filterSideLayout as LayoutMode | undefined
     ) ?? "row";
   const filterSideBackgroundColor = useThemeSettingsStore(
-    (state) => state.filterSideBackgroundColor // If undefined, bg-gray-50 should apply from class
+    (state) => state.filterSideBackgroundColor
   );
   const filterSideTextColor = useThemeSettingsStore(
-    (state) => state.filterSideTextColor // If undefined, text-gray-800/600 should apply
+    (state) => state.filterSideTextColor
   );
   const [filterSideLayout, setFilterSideLayout] =
     useState<LayoutMode>(filtideLayoutSetting);
@@ -829,33 +822,25 @@ function FilterModal({
     setOpenCategories((prev) => ({ ...prev, [filterId]: !prev[filterId] }));
   };
 
-  // 3. Amélioration des layouts et espacements / Layout Grid & Horizontal Scroll
-  // 7. Responsive et mobile / Grid responsive (md, lg from point 3 interpretation)
-  // 9. Cohérence et polish final / Unification des espacements
   const getLayoutClasses = (
     filterType: VariantType | undefined,
     layout: LayoutMode
   ) => {
-    const baseGap = "gap-2"; // Updated from gap-1.5
+    const baseGap = "gap-2";
 
     switch (layout) {
       case "grid":
-        // Point 3: grid-cols-3 sm:grid-cols-4 md:grid-cols-5 for all filter types
         return `${baseGap} grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5`;
       case "bento":
         return `flex flex-wrap ${baseGap}`;
       case "compact":
-        return `flex flex-col gap-1`; // Updated from gap-0.5
+        return `flex flex-col gap-1`;
       case "horizontal-scroll":
-        // Added scroll-smooth and px-4. Visual scroll indicators (gradients) would need custom CSS/JS.
-        // Placeholder for scroll indicators:
-        // On this div's parent: position: relative;
-        // On this div: ::before, ::after for gradient overlays
         return `flex overflow-x-auto py-2 scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 whitespace-nowrap ${baseGap} items-stretch scroll-smooth px-4`;
       case "card":
-        return `grid grid-cols-2 ${baseGap}`; // Updated from gap-2.5
+        return `grid grid-cols-2 ${baseGap}`;
       case "stacked-list":
-        return `flex flex-col gap-1`; // Updated from gap-0.5
+        return `flex flex-col gap-1`;
       case "row":
       default:
         return `flex flex-col ${baseGap}`;
@@ -903,13 +888,12 @@ function FilterModal({
     const activeTags = Array.from(
       document.querySelectorAll(".active-filter-tag")
     );
-    // 8. Micro-interactions et animations / Easing
     gsap.to([e.currentTarget, ...activeTags], {
       opacity: 0,
       x: -10,
       stagger: 0.03,
-      duration: 0.25, // Consider duration-300 if unifying, but this is for exit
-      ease: "circ.in", // Example of ease-in for exit
+      duration: 0.25,
+      ease: "circ.in",
       onComplete: clearFilter,
     });
   };
@@ -925,8 +909,8 @@ function FilterModal({
       gsap.to(element, {
         opacity: 0,
         scale: 0.7,
-        duration: 0.25, // Consider duration-300
-        ease: "circ.in", // Example of ease-in for exit
+        duration: 0.25,
+        ease: "circ.in",
         onComplete: () => toggleFilter(filterId, value),
       });
     } else {
@@ -947,7 +931,10 @@ function FilterModal({
           }}
         >
           {/* 9. Typographie / Line heights */}
-          <h2 id="filter-modal-title" className="text-lg font-semibold leading-normal">
+          <h2
+            id="filter-modal-title"
+            className="text-lg font-semibold leading-normal"
+          >
             Filtres
           </h2>
           <div className="flex items-center gap-3">
@@ -958,9 +945,7 @@ function FilterModal({
             />
             <button
               onClick={onModalClose}
-              // 7. Responsive et mobile / Modal mobile / Bouton de fermeture
-              // 8. Micro-interactions et animations / Hover effects / active:scale
-              className="text-gray-600 hover:text-gray-800 transition-colors p-2 rounded-full hover:bg-gray-100 active:scale-95" // p-1 -> p-2, text color standardized
+              className="text-gray-600 hover:text-gray-800 transition-colors p-2 rounded-full hover:bg-gray-100 active:scale-95"
               aria-label="Fermer le panneau des filtres"
             >
               <IoClose size={28} />
@@ -970,16 +955,15 @@ function FilterModal({
       )}
       {!isMobile && (
         <div
-          // 4. Optimisation des couleurs et contrastes / Bordures
-          className="flex items-center justify-between px-5 pt-6 pb-3 border-b border-gray-200" // Unified border
+          className="flex items-center justify-between px-5 pt-6 pb-3 border-b border-gray-200"
           style={{
-            backgroundColor: filterSideBackgroundColor || "white", // Fallback
-            color: filterSideTextColor || "#1f2937", // text-gray-800 fallback
+            backgroundColor: filterSideBackgroundColor || "white",
+            color: filterSideTextColor || "#1f2937",
           }}
         >
-          {/* 1. Amélioration de la hiérarchie visuelle et de la lisibilité / Headers et titres / Titre principal "FILTRES" */}
-          {/* 9. Typographie / Line heights */}
-          <div className="text-lg font-bold text-slate-800 leading-normal">FILTRES</div> {/* No uppercase */}
+          <div className="text-lg font-bold text-slate-800 leading-normal">
+            FILTRES
+          </div>
           <LayoutSelector
             filtideLayout={filtideLayoutSetting}
             currentLayout={filterSideLayout}
@@ -989,19 +973,13 @@ function FilterModal({
       )}
 
       <div
-        // 4. Optimisation des couleurs et contrastes / Couleurs de base (bg-gray-50, text-gray-800)
-        // 6. Améliorations de la navigation et accessibilité / Scroll des filtres
-        // Placeholder for vertical scroll fade effects:
-        // This div might need: position: relative;
-        // ::before, ::after for top/bottom gradient overlays or mask-image
-        className="flex-grow overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 bg-gray-50 text-gray-800" // Added scrollbar-track, bg-gray-50, text-gray-800
+        className="flex-grow overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 bg-gray-50 text-gray-800"
         style={{
-          backgroundColor: filterSideBackgroundColor, // Will override bg-gray-50 if set
-          color: filterSideTextColor, // Will override text-gray-800 if set
+          backgroundColor: filterSideBackgroundColor,
+          color: filterSideTextColor,
         }}
       >
-        {/* 9. Cohérence et polish final / Unification des espacements (p-4) */}
-        <div className="p-4 space-y-4"> {/* space-y-3 to space-y-4 for consistency */}
+        <div className="p-4 space-y-4">
           <PriceRangeFilter
             title="Fourchette de prix"
             minPlaceholder="0"
@@ -1015,28 +993,24 @@ function FilterModal({
               filterId !== "min_price" &&
               filterId !== "s"
           ).length > 0 && (
-            // 5. Amélioration des filtres actifs / Section "Filtres Actifs"
-            // 4. Optimisation des couleurs et contrastes / Bordures
-            <div className="p-4 border-b border-gray-200 bg-slate-50 border-l-4 border-l-slate-400 rounded-r-md"> {/* pb-4 to p-4, added bg and border-l */}
+            <div className="p-4 border-b border-gray-200 bg-slate-50 border-l-4 border-l-slate-400 rounded-r-md">
               <div className="flex justify-between items-center mb-3">
-                {/* 9. Typographie / Line heights */}
-                <h3 className="text-sm font-semibold text-slate-700 leading-normal"> {/* Updated color and weight */}
+                <h3 className="text-sm font-semibold text-slate-700 leading-normal">
                   Filtres Actifs
                 </h3>
-                {/* 5. Amélioration des filtres actifs / Bouton "Tout effacer" */}
-                {/* 8. Micro-interactions et animations / Hover effects / active:scale */}
+
                 <button
                   onClick={handleClearFilters}
-                  className="text-sm font-medium transition duration-300 ease-out flex items-center gap-1 group px-3 py-1.5 rounded-md bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 active:scale-95" // Added styles, padding, duration
+                  className="text-sm font-medium transition duration-300 ease-out flex items-center gap-1 group px-3 py-1.5 rounded-md bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 active:scale-95"
                 >
                   <TbTrashX
-                    size={20} // size 18 to 20
+                    size={20}
                     className="transition-transform group-hover:scale-110"
                   />
                   Tout effacer
                 </button>
               </div>
-              {/* 9. Cohérence et polish final / Unification des espacements (gap-2) */}
+
               <div className="flex flex-wrap gap-2">
                 {activeFilters
                   .filter(
@@ -1047,18 +1021,18 @@ function FilterModal({
                       filterId !== "s"
                   )
                   .map(({ filterId, value }) => (
-                    // 5. Amélioration des filtres actifs / Tags des filtres actifs
                     <div
                       key={`${filterId}-${value.text}`}
-                      className="active-filter-tag flex items-center gap-1.5 bg-slate-100 text-slate-800 text-xs font-medium px-3 py-1.5 rounded-lg shadow-sm" // Updated styles, padding, radius
+                      className="active-filter-tag flex items-center gap-1.5 bg-slate-100 text-slate-800 text-xs font-medium px-3 py-1.5 rounded-lg shadow-sm"
                     >
-                      {/* 9. Typographie / Line heights */}
-                      <span className="capitalize leading-normal">{value.text}</span>
+                      <span className="lowercase leading-normal">
+                        {value.text}
+                      </span>
                       <button
                         onClick={(e) =>
                           handleRemoveActiveFilter(e, filterId, value)
                         }
-                        className="text-slate-400 hover:text-slate-600 transition-colors group p-1 rounded-full hover:bg-slate-200" // p-0.5 to p-1, hover color consistent with tag
+                        className="text-slate-400 hover:text-slate-600 transition-colors group p-1 rounded-full hover:bg-slate-200"
                         aria-label={`Supprimer le filtre ${value.text}`}
                       >
                         <FiX size={16} strokeWidth={2.5} />
@@ -1068,44 +1042,41 @@ function FilterModal({
               </div>
             </div>
           )}
-          {/* 9. Cohérence et polish final / Unification des espacements (space-y-1 -> space-y-2 or more if categories need more space) */}
-          <div className="space-y-1"> {/* Kept space-y-1 for compact category list, adjust if needed */}
+
+          <div className="space-y-1">
             {filters
               .filter((filter) => filter.values && filter.values.length > 0)
               .map((filter) => (
-                // 4. Optimisation des couleurs et contrastes / Bordures
                 <div
                   key={filter.id}
-                  className="border-b border-gray-100 last:border-b-0" // Subtle separator
+                  className="border-b border-gray-100 last:border-b-0"
                 >
                   <button
                     onClick={() => toggleCategory(filter.id)}
-                    // 1. Amélioration de la hiérarchie visuelle et de la lisibilité / Espacement des titres
-                    // 4. Optimisation des couleurs et contrastes / Hover states
-                    // 8. Micro-interactions et animations / Hover effects / active:scale
-                    // 8. Micro-interactions et animations / Transitions
-                    className="w-full flex justify-between items-center py-4 px-1 text-left hover:bg-gray-100 rounded-md transition-colors duration-300 active:scale-95" // py-3 to py-4, hover:bg-gray-50/80 to hover:bg-gray-100, duration
+                    className="w-full flex justify-between items-center py-4 px-1 text-left hover:bg-gray-100 rounded-md transition-colors duration-300 active:scale-95"
                     aria-expanded={openCategories[filter.id] ?? true}
                     aria-controls={`filter-options-${filter.id}`}
                   >
-                    {/* 1. Amélioration de la hiérarchie visuelle et de la lisibilité / Titres des catégories de filtres */}
-                    {/* 9. Typographie / Line heights */}
                     <h3
-                      className="font-bold text-xs text-slate-600 leading-normal" // Updated size, weight, color. Removed uppercase and tracking.
-                      // style={{ color: filterSideTextColor }} // This overrides text-slate-600
+                      className="font-bold text-xs text-slate-600 leading-normal"
+                      style={{ color: filterSideTextColor }}
                     >
                       {filter.name}
-                      {/* 1. Amélioration de la hiérarchie visuelle et de la lisibilité / Compteurs d'éléments */}
+
                       <span
-                        className="font-normal ml-2 text-gray-400" // ml-1.5 to ml-2, updated color
-                        // style={{ color: filterSideTextColor ? filterSideTextColor + '99' : undefined }} // Example of making counter color slightly transparent version of main text color
+                        className="font-normal ml-2 text-gray-400"
+                        style={{
+                          color: filterSideTextColor
+                            ? filterSideTextColor + "99"
+                            : undefined,
+                        }}
                       >
                         ({filter.values.length})
                       </span>
                     </h3>
                     <FiChevronDown
                       className={clsx(
-                        "transform transition-transform duration-300 ease-out text-gray-500", // Updated ease
+                        "transform transition-transform duration-300 ease-out text-gray-500",
                         openCategories[filter.id] ?? true
                           ? "rotate-180"
                           : "rotate-0"
@@ -1115,25 +1086,23 @@ function FilterModal({
                   </button>
                   <div
                     id={`filter-options-${filter.id}`}
-                    // 8. Micro-interactions et animations / Collapsible sections
                     className={clsx(
-                      "transition-all duration-500 ease-in-out overflow-hidden", // duration-300 to duration-500
+                      "transition-all duration-500 ease-in-out overflow-hidden",
                       openCategories[filter.id] ?? true
-                        ? "max-h-[1500px] opacity-100 pb-3 pt-1" // Adjust max-h if content overflows
+                        ? "max-h-[1500px] opacity-100 pb-3 pt-1"
                         : "max-h-0 opacity-0"
                     )}
-                    style={{ backgroundColor: filterSideBackgroundColor }} // Keep style for theme override
+                    style={{ backgroundColor: filterSideBackgroundColor }}
                   >
                     <div
                       className={getLayoutClasses(
                         filter.type,
                         filterSideLayout
                       )}
-                      // Style prop not needed here if parent handles bg/text color via context or direct application
-                      // style={{
-                      //   backgroundColor: filterSideBackgroundColor,
-                      //   color: filterSideTextColor,
-                      // }}
+                      style={{
+                        backgroundColor: filterSideBackgroundColor,
+                        color: filterSideTextColor,
+                      }}
                     >
                       {filter.values.map((value, i) => (
                         <RenderFilterOption

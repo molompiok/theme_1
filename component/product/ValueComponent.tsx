@@ -137,7 +137,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
     if (totalStock > 5) return null;
 
     const stockBadgeStyles = clsx(
-      "absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5",
+      "absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5",
       "flex items-center justify-center",
       "text-xs font-medium rounded-full",
       "border bg-white",

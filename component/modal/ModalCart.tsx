@@ -1,4 +1,13 @@
-import { BsCartX, BsHandbag, BsTrash, BsX, BsArrowRight, BsHeart, BsPlus, BsDash } from "react-icons/bs";
+import {
+  BsCartX,
+  BsHandbag,
+  BsTrash,
+  BsX,
+  BsArrowRight,
+  BsHeart,
+  BsPlus,
+  BsDash,
+} from "react-icons/bs";
 import {
   CartItem,
   CartResponse,
@@ -37,9 +46,13 @@ function ItemCart({
   const removeMutation = useUpdateCart();
   const [isHovering, setIsHovering] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const filterSideTextColor = useThemeSettingsStore((state) => state.filterSideTextColor);
-  const filterSideBackgroundColor = useThemeSettingsStore((state) => state.filterSideBackgroundColor);
-  
+  const filterSideTextColor = useThemeSettingsStore(
+    (state) => state.filterSideTextColor
+  );
+  const filterSideBackgroundColor = useThemeSettingsStore(
+    (state) => state.filterSideBackgroundColor
+  );
+
   const { data: features, isPending } = useQuery({
     queryKey: ["get_features_with_values", product?.id],
     queryFn: () =>
@@ -54,7 +67,7 @@ function ItemCart({
       getOptions({ bind, features: features || [], product_id: product.id }),
     [bind, features, product.id]
   );
-  
+
   const { isPendingFeatures, mediaViews } = useMediaViews({
     bindNames: options.bindNames,
     product_id: product.id,
@@ -71,7 +84,7 @@ function ItemCart({
 
   if (isPending) {
     return (
-      <div className="flex justify-center py-8">
+      <div className="flex justify-center py-3">
         <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
       </div>
     );
@@ -90,7 +103,14 @@ function ItemCart({
       {product?.barred_price && product.price && (
         <div className="absolute top-2 left-5 z-10">
           <div className="bg-black/70 text-white text-xs px-2 py-1 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span>{(((product.barred_price - product.price) / product.barred_price) * 100).toFixed(0)}%</span>
+            <span>
+              {(
+                ((product.barred_price - product.price) /
+                  product.barred_price) *
+                100
+              ).toFixed(0)}
+              %
+            </span>
           </div>
         </div>
       )}
@@ -105,11 +125,15 @@ function ItemCart({
             className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
           />
           {/* Bouton favori */}
-          {/* <button className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110">
+          <button className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110">
             <BsHeart size={12} className="text-red-500" />
-          </button> */}
+          </button>
 
-          <FavoriteButton product_id={product.id} className="absolute top-2 right-2 p-1.5 text-gray-400" size={14} />
+          <FavoriteButton
+            product_id={product.id}
+            className="absolute top-2 right-2 p-1.5 text-gray-400"
+            size={14}
+          />
         </div>
 
         {/* Contenu principal */}
@@ -119,13 +143,13 @@ function ItemCart({
               <h1 className="text-base md:text-lg font-bold line-clamp-2 pr-2 group-hover:text-blue-600 transition-colors duration-300">
                 {product.name}
               </h1>
-              
+
               {/* Bouton de suppression amélioré */}
               <div className="relative">
                 <button
-                  className={`p-2 rounded-full transition-all duration-300 transform hover:scale-110 ${
-                    isHovering 
-                      ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg" 
+                  className={`p-1 rounded-full transition-all duration-300 transform hover:scale-110 ${
+                    isHovering
+                      ? "bg-gradient-to-r from-slate-300 to-slate-400 text-white shadow-lg"
                       : "bg-gray-100 text-gray-400 hover:bg-gray-200"
                   }`}
                   onClick={(e) => {
@@ -140,7 +164,9 @@ function ItemCart({
                 {/* Confirmation de suppression */}
                 {showConfirmDelete && (
                   <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl border p-3 z-50 w-48">
-                    <p className="text-sm text-gray-700 mb-3">Supprimer cet article ?</p>
+                    <p className="text-sm text-gray-700 mb-3">
+                      Supprimer cet article ?
+                    </p>
                     <div className="flex gap-2">
                       <button
                         onClick={handleDelete}
@@ -163,13 +189,16 @@ function ItemCart({
             {/* Tags avec design amélioré */}
             <div className="flex flex-wrap gap-1">
               <BindTags
-                tags={(options?.bindNames as Record<string, ProductFeature>) || {}}
+                tags={
+                  (options?.bindNames as Record<string, ProductFeature>) || {}
+                }
               />
             </div>
 
             {/* Description tronquée avec style moderne */}
             <div className="text-sm text-gray-600 leading-relaxed">
               <MarkdownViewer
+                showMoreButton={false}
                 markdown={
                   product.description
                     .substring(0, 80)
@@ -185,7 +214,7 @@ function ItemCart({
       </div>
 
       {/* Section prix et quantité avec design moderne */}
-      <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200/50">
+      <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-200/50">
         <div className="flex items-center">
           <AddRemoveItemCart
             product={product}
@@ -194,7 +223,7 @@ function ItemCart({
             inList={false}
           />
         </div>
-        
+
         <div className="text-right">
           <DisplayPriceItemCart
             product={product}
@@ -217,12 +246,14 @@ function ItemCart({
 
 function ListItemCart({ cart }: { cart: CartItem[] }) {
   const toggleCart = useModalCart((state) => state.toggleCart);
-  const filterSideTextColor = useThemeSettingsStore((state) => state.filterSideTextColor);
+  const filterSideTextColor = useThemeSettingsStore(
+    (state) => state.filterSideTextColor
+  );
 
   if (!cart || cart.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 px-6">
-        <div className="relative mb-6">
+      <div className="flex flex-col items-center justify-center py-5 px-6">
+        <div className="relative mb-3">
           <div className="w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
             <BsCartX size={60} className="text-gray-400" />
           </div>
@@ -230,14 +261,21 @@ function ListItemCart({ cart }: { cart: CartItem[] }) {
             <BsPlus size={24} className="text-white" />
           </div>
         </div>
-        
-        <h3 className="text-2xl font-bold text-gray-800 mb-3" style={{color: filterSideTextColor}}>
+
+        <h3
+          className="text-2xl font-bold text-gray-800 mb-3"
+          style={{ color: filterSideTextColor }}
+        >
           Votre panier est vide
         </h3>
-        <p className="text-gray-500 text-center mb-8 max-w-sm leading-relaxed" style={{color: filterSideTextColor}}>
-          Découvrez nos produits exceptionnels et ajoutez vos favoris à votre panier
+        <p
+          className="text-gray-500 text-center mb-8 max-w-sm leading-relaxed"
+          style={{ color: filterSideTextColor }}
+        >
+          Découvrez nos produits exceptionnels et ajoutez vos favoris à votre
+          panier
         </p>
-        
+
         <button
           onClick={() => toggleCart(false)}
           className="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:shadow-xl hover:scale-105 transform"
@@ -274,11 +312,17 @@ function ListItemCart({ cart }: { cart: CartItem[] }) {
 export default function ModalCart() {
   const showCart = useModalCart((state) => state.showCart);
   const toggleCart = useModalCart((state) => state.toggleCart);
-  const filterSideTextColor = useThemeSettingsStore((state) => state.filterSideTextColor);
-  const filterSideBackgroundColor = useThemeSettingsStore((state) => state.filterSideBackgroundColor);
+  const filterSideTextColor = useThemeSettingsStore(
+    (state) => state.filterSideTextColor
+  );
+  const filterSideBackgroundColor = useThemeSettingsStore(
+    (state) => state.filterSideBackgroundColor
+  );
   const { data: cart, isLoading, isPending } = useCart();
 
-  const totalItems = cart?.cart?.items?.reduce((acc: number, item) => acc + item.quantity, 0) || 0;
+  const totalItems =
+    cart?.cart?.items?.reduce((acc: number, item) => acc + item.quantity, 0) ||
+    0;
   const totalPrice = cart?.total || 0;
   const hasItems = (cart?.cart?.items?.length ?? 0) > 0;
 
@@ -301,7 +345,7 @@ export default function ModalCart() {
       isOpen={showCart}
       animationName="translateRight"
     >
-      <div 
+      <div
         className="font-primary relative flex flex-col h-dvh w-full sm:w-[420px] md:w-[480px] lg:w-[520px] backdrop-blur-xl"
         style={{
           background: `linear-gradient(145deg, ${filterSideBackgroundColor}f0, ${filterSideBackgroundColor}dd)`,
@@ -319,16 +363,20 @@ export default function ModalCart() {
                 </div>
                 {totalItems > 0 && (
                   <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center animate-pulse">
-                    <span className="text-white text-xs font-bold">{totalItems}</span>
+                    <span className="text-white text-xs font-bold">
+                      {totalItems}
+                    </span>
                   </div>
                 )}
               </div>
               <div>
                 <h2 className="text-xl font-bold">Mon Panier</h2>
-                <p className="text-sm opacity-70">{totalItems} article{totalItems > 1 ? 's' : ''}</p>
+                <p className="text-sm opacity-70">
+                  {totalItems} article{totalItems > 1 ? "s" : ""}
+                </p>
               </div>
             </div>
-            
+
             <button
               className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all duration-300 hover:scale-110 transform"
               onClick={handleModalCartClose}
@@ -348,76 +396,83 @@ export default function ModalCart() {
             </div>
           </div>
         ) : (
-          <div className="flex-1 overflow-auto py-4">
+          <div className="flex-1 overflow-auto py-2">
             <ListItemCart cart={cart?.cart?.items || []} />
           </div>
         )}
 
         {/* Footer avec résumé et actions */}
         {hasItems && (
-          <div 
-            className="border-t border-white/10 p-6 backdrop-blur-sm"
+          <div
+            className="border-t border-white/10 px-4 py-0.5 backdrop-blur-sm"
             style={{
               background: `linear-gradient(135deg, ${filterSideBackgroundColor}f0, ${filterSideBackgroundColor}dd)`,
             }}
           >
-            {/* Résumé des prix avec design moderne */}
-            <div className="space-y-4 mb-6">
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Sous-total</span>
-                  <span className="font-semibold">
-                    {formatPrice(totalPrice, cart?.cart?.items?.[0]?.product?.currency)}
+            {/* Résumé des prix compact */}
+            <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 py-2 mb-1">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-600">Sous-total</span>
+                <span className="font-semibold">
+                  {formatPrice(
+                    totalPrice,
+                    cart?.cart?.items?.[0]?.product?.currency
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-gray-500 mt-1">
+                <span>Livraison</span>
+                <span>calculé à l'étape suivante</span>
+              </div>
+              <div className="border-t border-white/10 pt-1 mt-1">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold">Total</span>
+                  <span className="text-lg font-bold text-green-600">
+                    {formatPrice(
+                      totalPrice,
+                      cart?.cart?.items?.[0]?.product?.currency
+                    )}
                   </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Livraison</span>
-                  <span className="text-gray-500 text-xs font-light">calculé à l'étape suivante</span>
-                </div>
-                <div className="border-t border-white/10 pt-3">
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Total</span>
-                    <span className="text-green-600">
-                      {formatPrice(totalPrice, cart?.cart?.items?.[0]?.product?.currency)}
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Boutons d'action avec design moderne */}
-            <div className="space-y-3">
+            {/* Boutons d'action compacts */}
+            <div className="space-y-0.5">
               <button
                 onClick={handleCheckout}
-                className="group relative w-full py-4 px-6 rounded-xl font-bold text-white overflow-hidden bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] transform"
+                className="group relative w-full py-2.5 px-4 rounded-lg font-semibold text-white overflow-hidden bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 transition-all duration-300 hover:shadow-lg hover:scale-[1.01] transform"
               >
-                <span className="relative z-10 flex items-center justify-center gap-3">
+                <span className="relative z-10 flex items-center justify-center gap-2">
                   Procéder au paiement
-                  <BsArrowRight className="group-hover:translate-x-1 transition-transform duration-300" size={18} />
+                  <BsArrowRight
+                    className="group-hover:translate-x-1 transition-transform duration-300"
+                    size={16}
+                  />
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </button>
-              
+
               <button
                 onClick={handleModalCartClose}
-                className="w-full py-3 px-6 rounded-xl font-medium transition-all duration-300 hover:bg-white/10 backdrop-blur-sm border border-white/20 hover:border-white/30"
-                style={{color: filterSideTextColor}}
+                className="w-full py-1 px-4 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-white/10 backdrop-blur-sm border border-white/20 hover:border-white/30"
+                style={{ color: filterSideTextColor }}
               >
                 Continuer mes achats
               </button>
             </div>
 
-            {/* Badges de confiance */}
-            <div className="flex justify-center gap-4 mt-4 pt-4 border-t border-white/10">
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs">✓</span>
+            {/* Badges de confiance compacts */}
+            <div className="flex justify-center gap-4 pb-1 mt-0.5 border-t border-white/10">
+              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                <div className="w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-[10px]">✓</span>
                 </div>
                 Paiement sécurisé
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs">✓</span>
+              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-[10px]">✓</span>
                 </div>
                 Livraison rapide
               </div>

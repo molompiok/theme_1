@@ -11,7 +11,6 @@ import { useUpdateCart } from "../hook/query/useUpdateCart";
 import useCart from "../hook/query/useCart";
 import {
   formatPrice,
-  getFeatureValuePairs,
   getMinimumStock,
   getOptions,
   hasContinueSelling,
@@ -57,12 +56,11 @@ export function CartButton({
     [features, hasContinue]
   );
 
-const { setSettings, resetSettings, ...settings } = useThemeSettingsStore();  
+  const { setSettings, resetSettings, ...settings } = useThemeSettingsStore();
   const itemInCart = useMemo(
     () => cart?.cart?.items?.find((item) => item?.product?.id === product_id),
     [cart, product_id]
   );
-  const [isHovered, setIsHovered] = useState(false);
   const handleOpenFeatureModal = (e: React.MouseEvent) => {
     e.stopPropagation();
     document.body.style.overflow = "hidden";
@@ -128,12 +126,12 @@ const { setSettings, resetSettings, ...settings } = useThemeSettingsStore();
           onClick={handleOpenFeatureModal}
           className={buttonClasses}
           style={{
-            backgroundColor : settings?.productAddToCartBackgroundColor,
-            color : settings?.productAddToCartTextColor,
-            borderColor : settings?.productAddToCartBorderColor
+            backgroundColor: settings?.productAddToCartBackgroundColor,
+            color: settings?.productAddToCartTextColor,
+            borderColor: settings?.productAddToCartBorderColor,
           }}
         >
-          <div className={textClasses} >
+          <div className={textClasses}>
             <span>{isOutOfStock ? "Indisponible" : "Choisir options"}</span>
           </div>
         </button>
@@ -151,12 +149,19 @@ const { setSettings, resetSettings, ...settings } = useThemeSettingsStore();
               disabled={isOutOfStock}
               onClick={handleDirectAddToCart}
               className={buttonClasses}
+              style={{
+                backgroundColor: settings?.productAddToCartBackgroundColor,
+                color: settings?.productAddToCartTextColor,
+                borderColor: settings?.productAddToCartBorderColor,
+              }}
             >
-              <div className={textClasses} style={{
-                backgroundColor : settings?.productAddToCartBackgroundColor,
-                color : settings?.productAddToCartTextColor,
-                borderColor : settings?.productAddToCartBorderColor
-              }}>
+              <div
+                className={textClasses}
+                style={{
+                  color: settings?.productAddToCartTextColor,
+                  borderColor: settings?.productAddToCartBorderColor,
+                }}
+              >
                 <span>{isOutOfStock ? "Indisponible" : text}</span>
               </div>
             </button>
@@ -278,12 +283,12 @@ function MultiValuedFeaturesButton({
   const getTotalPriceValue = useCallback(() => {
     const productSelections = selections.get(product_id);
     if (!productSelections) return 0;
-  
+
     let total = 0;
     for (const variant of productSelections.values()) {
       total += variant.priceValue;
     }
-  
+
     return total + price;
   }, [selections, product_id, price]);
 
@@ -311,7 +316,14 @@ function MultiValuedFeaturesButton({
         }
       )}
     >
-      {buttonText} <span className="text-sm">{getTotalPriceValue() ? " - " + formatPrice(getTotalPriceValue(), currency) : price ? " - " + formatPrice(price, currency) : ""}</span>
+      {buttonText}{" "}
+      <span className="text-sm">
+        {getTotalPriceValue()
+          ? " - " + formatPrice(getTotalPriceValue(), currency)
+          : price
+          ? " - " + formatPrice(price, currency)
+          : ""}
+      </span>
     </button>
   );
 }

@@ -74,7 +74,8 @@ export default function SideBarCategories() {
   } = useQuery({
     queryKey: ["get_categories"],
     queryFn: () =>
-      get_categories({ store_id: "d3d8dfcf-b84b-49ed-976d-9889e79e6306" }),
+      // get_categories({ store_id: "d3d8dfcf-b84b-49ed-976d-9889e79e6306" }),
+      get_categories({}),
     select: (data) => (data?.list ? data.list : []),
   });
 
@@ -546,14 +547,14 @@ export default function SideBarCategories() {
           </div>
 
           <div
-            className="mt-auto p-6 border-t border-neutral-200/30 dark:border-neutral-700/30 backdrop-blur-xl"
+            className="mt-auto sm:p-6 p-0 border-t border-neutral-200/30 dark:border-neutral-700/30 backdrop-blur-xl"
             style={{
               backgroundColor: filterSideBackgroundColor
                 ? `${filterSideBackgroundColor}f5`
                 : "rgba(255,255,255,0.95)",
             }} // Utilisation de la couleur du thème
           >
-            <div className="flex justify-around items-center text-sm">
+            <div className="flex justify-around items-center sm:text-sm text-xs">
               {[
                 { href: "/", label: "Boutique", icon: "🛍️" },
                 { href: "/profile/", label: "Mon compte", icon: "👤" },

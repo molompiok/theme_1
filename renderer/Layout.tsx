@@ -137,7 +137,7 @@ function Layout({
         <Header>
           <SideBarCategories />
           <Logo />
-          <nav className="flex items-center gap-6">
+          <nav className="flex items-center sm:gap-6">
             <div className="hidden font-medium uppercase lg:flex lg:gap-6 lg:justify-center">
               <LinkIcon
                 href="/"
@@ -294,8 +294,8 @@ function Header({ children }: { children: React.ReactNode }) {
             className={`w-full font-primary flex items-center justify-between transition-all duration-300 ease-out backdrop-blur-md border-b border-gray-100/20
               ${
                 isScrolled
-                  ? "fixed top-0 left-0 right-0 z-[100] px-4 sm:px-6 lg:px-8 py-1 shadow-lg bg-white/95"
-                  : "relative px-4 sm:px-6 lg:px-8 py-2 bg-white"
+                  ? "fixed top-0 left-0 right-0 z-[100] px-2 sm:px-6 lg:px-8 py-1 shadow-lg bg-white/95"
+                  : "relative px-2 sm:px-6 lg:px-8 py-2 bg-white"
               }`}
             style={{
               backgroundColor: isScrolled

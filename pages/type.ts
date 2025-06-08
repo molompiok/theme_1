@@ -1,7 +1,7 @@
 export type ProductType = {
   id: string;
   store_id: string;
-  comment_count:string,
+  comment_count: string,
   categories_id: string[];
   name: string;
   description: string;
@@ -22,7 +22,7 @@ export type ProductFavorite = {
   product_id: string;
   created_at: string; // ISO date string
   updated_at: string; // ISO date string
-  product : ProductType
+  product: ProductType
 };
 
 export type ProductFeature = {
@@ -42,11 +42,11 @@ export type ProductFeature = {
   regex: string;
   index: number;
   isDouble: boolean;
-  key?: string | null; 
-  stock?:number |null
-  additional_price?:number|null
-  decreases_stock?:boolean,
-  continue_selling?:boolean
+  key?: string | null;
+  stock?: number | null
+  additional_price?: number | null
+  decreases_stock?: boolean,
+  continue_selling?: boolean
   createdAt: string | Date;
   updatedAt: string | Date;
 };
@@ -142,11 +142,11 @@ export const filterOptions = [
 ] as const;
 
 export const rangePrice = [{
-  id : "min_price",
-  name : "prix bas",
-} , {
-  id : "max_price",
-  name : "prix eleve",
+  id: "min_price",
+  name: "prix bas",
+}, {
+  id: "max_price",
+  name: "prix eleve",
 }]
 
 export type OrderByType = typeof filterOptions[number]['id'];
@@ -176,8 +176,8 @@ export const filterOptionsOrder = [
   { id: "date_asc", name: "moins recent" },
   { id: "total_price_desc", name: "prix eleve" },
   { id: "total_price_asc", name: "prix bas" },
-  {id : "delivery_date_asc", name: "livraison recentes" },
-  {id : "delivery_date_desc", name: "livraison anciennes" },
+  { id: "delivery_date_asc", name: "livraison recentes" },
+  { id: "delivery_date_desc", name: "livraison anciennes" },
 ] as const;
 
 export type OrderByTypeOrder = typeof filterOptionsOrder[number]['id'];
@@ -193,26 +193,12 @@ export interface FilterValue {
   text: string;
   icon: string[] | Record<string, never>;
   key: string | null;
-}
-
-export enum FilterDisplayLayout {
-  LIST = "list",       // Affichage en colonne (par défaut pour la plupart)
-  GRID = "grid",       // Affichage en grille configurable
-  ICON_GRID = "icon_grid", // Affichage en grille flexible optimisé pour les icônes (wrap)
-  // Vous pourriez ajouter BENTO ou d'autres layouts ici plus tard
+  product_count: number;
 }
 
 export interface Filter {
   id: string;
   name: string;
-  displayLayout?: FilterDisplayLayout;
-  gridColumns?: {
-    default: number;         // Nombre de colonnes par défaut (mobile-first)
-    sm?: number;             // Nombre de colonnes pour breakpoint 'sm' et plus
-    md?: number;             // Nombre de colonnes pour breakpoint 'md' et plus
-    lg?: number;             // Nombre de colonnes pour breakpoint 'lg' et plus
-    xl?: number;             // Nombre de colonnes pour breakpoint 'xl' et plus
-  };
   values: FilterValue[];
   type?: VariantType;
 }
@@ -370,8 +356,8 @@ export type User = {
   email: string;
   full_name: string;
   photo: string[];
-  addresses : Adresse[];
-  phone_numbers : PhoneNumber[]
+  addresses: Adresse[];
+  phone_numbers: PhoneNumber[]
 } | null;
 
 export type CommentType = {
@@ -383,7 +369,7 @@ export type CommentType = {
   bind_name: Record<string, ProductFeature>;
   rating: number;
   views: string[];
-  created_at: string; 
+  created_at: string;
   updated_at: string;
   user?: User;
 };

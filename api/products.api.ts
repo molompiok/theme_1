@@ -57,6 +57,7 @@ export const get_products = async (params: {
   limit?: number;
   filters?: Record<string, FilterValue[]>;
 }) => {
+  console.log("🚀 ~ filters:", params.filters)
   const searchParams = build_search_params(params);
   try {
     const response = await api.api?.get<{

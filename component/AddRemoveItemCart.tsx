@@ -3,7 +3,12 @@ import clsx from "clsx";
 import { IoMdAdd, IoMdRemove } from "react-icons/io";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { update_cart, view_cart } from "../api/cart.api";
-import { CartResponse, Feature, GroupProductType, ProductClient } from "../pages/type";
+import {
+  CartResponse,
+  Feature,
+  GroupProductType,
+  ProductClient,
+} from "../pages/type";
 import { useAuthStore } from "../store/user";
 import { FaSpinner } from "react-icons/fa";
 import { deepEqual, getOptions, isEmpty } from "../utils";
@@ -14,59 +19,61 @@ export default function AddRemoveItemCart({
   product,
   inList,
   bind,
-  features
+  features,
 }: {
   product: ProductClient | undefined;
   inList: boolean;
   bind: Record<string, string>;
-  features : Feature[]
+  features: Feature[];
 }) {
-
-  const { data: serverCart, isLoading: isCartLoading } = useCart()
+  const { data: serverCart, isLoading: isCartLoading } = useCart();
 
   const itemInPanier = useMemo(
     () =>
-      serverCart?.cart?.items.find(
-        (item) => {
-          let bindT = item.realBind || item.bind;
-          
-          if (item.realBind || item.bind) {
-            //@ts-ignore
-            bindT = isEmpty(item.realBind) ? item.bind : item.realBind;
-          }
-  
-          bindT = typeof bindT === 'string' ? JSON.parse(bindT) : bindT;
-  
-          bindT = bindT || {};
-          const isEqual = deepEqual(bind, bindT);
-          return isEqual && product?.id == item?.product?.id
+      serverCart?.cart?.items.find((item) => {
+        let bindT = item.realBind || item.bind;
+
+        if (item.realBind || item.bind) {
+          //@ts-ignore
+          bindT = isEmpty(item.realBind) ? item.bind : item.realBind;
         }
-      ),
+
+        bindT = typeof bindT === "string" ? JSON.parse(bindT) : bindT;
+
+        bindT = bindT || {};
+        const isEqual = deepEqual(bind, bindT);
+        return isEqual && product?.id == item?.product?.id;
+      }),
     [serverCart?.cart?.items, bind]
   );
 
-  const group_product =  getOptions({ bind: itemInPanier?.realBind || {}, features, product_id: product?.id || '' });
+  const group_product = getOptions({
+    bind: itemInPanier?.realBind || {},
+    features,
+    product_id: product?.id || "",
+  });
 
   const isStockLimitReached = useMemo(
     () => itemInPanier?.quantity === 0,
     [itemInPanier?.quantity]
   );
 
-  const updateCartMutation = useUpdateCart()
+  const updateCartMutation = useUpdateCart();
 
   const handleClick = (type: "add" | "remove") => (e: React.MouseEvent) => {
     e.stopPropagation();
-  
+
     if (!product?.id || updateCartMutation.isPending) return;
-    const bindT = bind && Object.keys(bind).length > 0 
-    ? bind 
-    : itemInPanier?.realBind ?? {};
-  
+    const bindT =
+      bind && Object.keys(bind).length > 0
+        ? bind
+        : itemInPanier?.realBind ?? {};
+
     const mutationPayload = {
       product_id: product.id,
       bind: bindT,
     };
-  
+
     if (type === "remove") {
       const quantity = itemInPanier?.quantity ?? 0;
       updateCartMutation.mutate({
@@ -95,14 +102,17 @@ export default function AddRemoveItemCart({
         }
       )}
     >
-       <span  
-        className={clsx("text-[.7rem]/4 mt-0.5 italic font-light", {
-          hidden: inList,
-          block: !inList,
-        })}
-      >
-        disponible {(group_product.stock || 0) - (itemInPanier?.quantity || 0)}
-      </span>
+      {group_product.stock && (
+        <span
+          className={clsx("text-[.7rem]/4 mt-0.5 italic font-light", {
+            hidden: inList,
+            block: !inList,
+          })}
+        >
+          disponible{" "}
+          {Math.abs((group_product.stock || 0) - (itemInPanier?.quantity || 0))}
+        </span>
+      )}
       <div
         className={clsx("flex items-center", {
           "w-fit justify-start border border-gray-300": inList,
@@ -160,7 +170,6 @@ export default function AddRemoveItemCart({
           </button>
         </div>
       </div>
-     
     </div>
   );
 }

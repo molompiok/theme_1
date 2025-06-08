@@ -330,7 +330,7 @@ interface InfoProductProps {
   className?: string;
 }
 function InfoProduct({ product, className }: InfoProductProps) {
-  const { categories_id, name, description, currency, price } = product;
+  const { categories_id, name, description, rating } = product;
 
   return (
     <div className={clsx(className, "space-y-4")}>
@@ -338,10 +338,12 @@ function InfoProduct({ product, className }: InfoProductProps) {
       <div className="space-y-2">
         <h1 className="text-2xl md:text-3xl font-bold md:mb-1">{name}</h1>
         <div className="flex items-center gap-2">
-          <ReviewsStars note={4.6} size={20} style="text-orange-500" />
-          <span className="text-sm text-gray-600">(280 avis)</span>
+          <ReviewsStars note={rating} size={20} style="text-orange-500" />
+          <span className="text-sm text-gray-600">
+            ({product.comment_count} avis)
+          </span>
         </div>
-        <div className="max-h-[50dvh] my-4 overflow-y-auto scrollbar-thin">
+        <div className="max-h-[50dvh] py-4 px-2 overflow-y-auto scrollbar-thin">
           <MarkdownViewer markdown={description} />
         </div>
         <DisplayPriceDetail
@@ -664,20 +666,20 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
   };
 
   return (
-    <section className="py-16 bg-white px-5">
-      <div className="max-w-2xl mx-auto px-6">
+    <section className="w-full bg-white">
+      <div className="w-full">
         <h2 className="text-3xl md:text-4xl font-light text-center mb-12 text-black tracking-tight">
           Questions fréquentes
         </h2>
 
-        <div className="space-y-0 px-5">
+        <div className="w-full space-y-0">
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="border-b border-gray-200 last:border-b-0 px-5"
+              className="w-full border-b border-gray-200 last:border-b-0"
             >
               <button
-                className="w-full py-6 text-left flex justify-between items-center group focus:outline-none transition-colors duration-200 hover:bg-gray-50 px-5"
+                className="w-full py-6 px-4 text-left flex justify-between items-center group focus:outline-none transition-colors duration-200 hover:bg-gray-50"
                 onClick={() => handleToggle(index)}
                 aria-expanded={expandedFAQ === index}
               >
@@ -690,17 +692,16 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
                   }`}
                 />
               </button>
-
               <div
                 //@ts-ignore
                 ref={(el) => (faqRefs.current[index] = el!)}
-                className="overflow-hidden transition-all duration-300 ease-out"
+                className="w-full overflow-hidden transition-all duration-300 ease-out"
                 style={{
                   height: "0px",
                   opacity: "0",
                 }}
               >
-                <div className="pb-6 pr-9">
+                <div className="pb-6 px-4 pr-9">
                   <p className="text-base md:text-lg text-gray-600 leading-relaxed">
                     {faq.answer}
                   </p>
