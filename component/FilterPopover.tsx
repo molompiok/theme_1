@@ -18,7 +18,9 @@ const FilterDropdown = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleClick = (option: string) => {
-    setFilter?.("order_by", [{ text: option, key: option, icon: [] }]);
+    setFilter?.("order_by", [
+      { text: option, key: option, icon: [], product_count: 0 },
+    ]);
     setIsOpen(false);
   };
 

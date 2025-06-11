@@ -29,7 +29,7 @@ const onRenderHtml: OnRenderHtmlAsync = async (
   const apiUrlFromHeader =
     host +
     (headersOriginal["x-store-api-url"] ||
-      "api.sublymus-server.com/---id----local-store-api");
+      "api.sublymus-server.com/----error--apiId--messing---");
   const serverUrlFromHeader =
     host +
     (headersOriginal["x-server-api-url"] || isProd
