@@ -79,21 +79,9 @@ function ProductPageContent() {
   });
 
   // SEO Meta Data
-  const canonicalUrl = `${BASE_URL}/products/${slug}`;
   const mainImage = getFirstFeatureWithView(features || [])?.values[0]
     ?.views[0];
   const imageUrl = mainImage ? BASE_URL + mainImage : "";
-  const metaDescription =
-    product?.description ||
-    `Découvrez ${product?.name} - ${
-      product?.barred_price ? `Ancien prix ${product.barred_price}, ` : ""
-    }Maintenant à ${product?.price}`;
-  const discountPercentage = product?.barred_price
-    ? Math.round(
-        ((product.barred_price - product.price) / product.barred_price) * 100
-      )
-    : null;
-
   const handleImageClick = (index: number) => {
     swiperInstance?.slideTo(index);
     setImgIndex(index);
@@ -131,10 +119,7 @@ function ProductPageContent() {
   return (
     <>
       <Helmet>
-        {/* Titre optimisé */}
         <title>{`${product.name} | Boutique`}</title>
-
-        {/* Meta description */}
         <meta
           name="description"
           content={
@@ -147,14 +132,8 @@ function ProductPageContent() {
                 }Maintenant à ${product.price}.`
           }
         />
-
-        {/* Balise canonique */}
-        <link rel="canonical" href={`${BASE_URL}/products/${slug}`} />
-
-        {/* Meta robots */}
+        <link rel="canonical" href={`${BASE_URL}/${slug}`} />
         <meta name="robots" content="index, follow" />
-
-        {/* Open Graph */}
         <meta property="og:title" content={product.name} />
         <meta
           property="og:description"
@@ -169,27 +148,8 @@ function ProductPageContent() {
           }
         />
         <meta property="og:image" content={imageUrl} />
-        <meta property="og:url" content={`${BASE_URL}/products/${slug}`} />
+        <meta property="og:url" content={`${BASE_URL}/${slug}`} />
         <meta property="og:type" content="product" />
-
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={product.name} />
-        <meta
-          name="twitter:description"
-          content={
-            product.description
-              ? product.description.substring(0, 160)
-              : `Découvrez ${product.name} - ${
-                  product.barred_price
-                    ? `Ancien prix ${product.barred_price}, `
-                    : ""
-                }Maintenant à ${product.price}.`
-          }
-        />
-        <meta name="twitter:image" content={imageUrl} />
-
-        {/* Données structurées Schema.org */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -200,14 +160,14 @@ function ProductPageContent() {
             sku: product.id,
             brand: {
               "@type": "Brand",
-              name: "Votre Marque", // Remplacez par la marque réelle
+              name: "Rabanne",
             },
             offers: {
               "@type": "Offer",
               priceCurrency: product.currency,
               price: product.price,
-              availability: "https://schema.org/InStock", // À ajuster selon la disponibilité
-              url: `${BASE_URL}/products/${slug}`,
+              availability: "https://schema.org/InStock",
+              url: `${BASE_URL}/${slug}`,
             },
             aggregateRating: product.rating
               ? {

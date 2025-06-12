@@ -146,7 +146,7 @@ const onRenderHtml: OnRenderHtmlAsync = async (
   const desc =
     pageContext.data?.description ||
     pageContext.config?.description ||
-    "Demo of using Vike";
+    "Decouvrez nos produits";
 
   const documentHtml = escapeInject`<!DOCTYPE html>
     <html lang="fr">
