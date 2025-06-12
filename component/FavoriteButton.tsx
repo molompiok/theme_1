@@ -13,8 +13,17 @@ import { LuHeartOff } from "react-icons/lu";
 import Loading from "./Loading";
 import { createQueryClient } from "../renderer/ReactQueryProvider";
 
-export default function FavoriteButton({ product_id ,style , className , size }: { product_id: string ,style?: React.CSSProperties , className?: string , size?: number}) {
-
+export default function FavoriteButton({
+  product_id,
+  style,
+  className,
+  size,
+}: {
+  product_id: string;
+  style?: React.CSSProperties;
+  className?: string;
+  size?: number;
+}) {
   const open = useModalAuth((state) => state.open);
   const user = useAuthStore((state) => state.user);
 
@@ -27,7 +36,9 @@ export default function FavoriteButton({ product_id ,style , className , size }:
     queryFn: () => get_favorites({ product_id }),
     enabled: !!product_id && !!user,
     select: (data) =>
-      data?.list?.length ?? 0 > 0 ? { id: data?.list[0].id, name: data?.list[0].product.name } : null,  
+      data?.list?.length ?? 0 > 0
+        ? { id: data?.list[0].id, name: data?.list[0].product.name }
+        : null,
   });
 
   const addFavoriteMutation = useMutation({
@@ -42,16 +53,15 @@ export default function FavoriteButton({ product_id ,style , className , size }:
             className={`flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-md transition-all duration-300 ${
               t.visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
             }`}
-
           >
             <BsHeartFill className="w-5 h-5 text-orange-600" />
             {isLoading ? (
               <Loading />
             ) : (
               <p className="text-gray-800 text-md font-semibold">
-              <span className="font-normal">{data?.product_name}</span> ajouté aux
-              favoris
-            </p>
+                <span className="font-normal">{data?.product_name}</span> ajouté
+                aux favoris
+              </p>
             )}
           </div>
         ),
@@ -128,23 +138,23 @@ export default function FavoriteButton({ product_id ,style , className , size }:
 
   return (
     <div className={clsx("absolute z-10", className)} style={style}>
-    {isLoading ||
-    isFetching ||
-    addFavoriteMutation.isPending ||
-    removeFavoriteMutation.isPending ? (
-      <div className="w-5 h-5 rounded-full border-2 border-t-transparent border-r-black animate-spin"></div>
-    ) : (
-      <BsHeartFill
-        size={size}
-        className={clsx(
-          "cursor-pointer transition-all duration-300",
-          favorite?.id
-            ? "text-orange-600 font-extrabold"
-            : "text-gray-400 font-light"
-        )}
-        onClick={toggleFavorite}
-      />
-    )}
-  </div>
+      {isLoading ||
+      isFetching ||
+      addFavoriteMutation.isPending ||
+      removeFavoriteMutation.isPending ? (
+        <div className="w-5 h-5 rounded-full border-2 border-t-transparent border-r-black animate-spin"></div>
+      ) : (
+        <BsHeartFill
+          // size={size}
+          className={clsx(
+            "cursor-pointer transition-all duration-300 sm:text-2xl text-xl",
+            favorite?.id
+              ? "text-orange-600 font-extrabold"
+              : "text-gray-400 font-light"
+          )}
+          onClick={toggleFavorite}
+        />
+      )}
+    </div>
   );
 }

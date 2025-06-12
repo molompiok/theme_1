@@ -43,19 +43,17 @@ function getParentCategories(
 }
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({ categoryId }) => {
-  console.log("🚀 ~ categoryId:", categoryId);
-  const storeId = "d3d8dfcf-b84b-49ed-976d-9889e79e6306";
+  // const storeId = "d3d8dfcf-b84b-49ed-976d-9889e79e6306";
 
   const isMobile = useMediaQuery("(max-width: 767px)");
   const maxItems = isMobile ? 2 : 3;
 
   const { data: categories = [], isPending } = useQuery({
-    queryKey: ["get_categories", storeId],
-    queryFn: () => get_categories({ store_id: storeId }),
+    queryKey: ["get_categories"],
+    queryFn: () => get_categories({}),
     select: (data) => (data?.list ? data.list : []),
   });
 
-  console.log("🚀 ~ categories:", categories);
   if (isPending) {
     return <div className="text-gray-600 text-sm">Loading...</div>;
   }
@@ -78,7 +76,6 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ categoryId }) => {
   }
 
   const parentCategories = getParentCategories(categoryId, categories);
-  console.log("🚀 ~ parentCategories:", parentCategories);
   const reversedCategories = [...parentCategories].reverse();
   const shouldTruncate = reversedCategories.length > maxItems;
 

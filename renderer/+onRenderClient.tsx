@@ -33,10 +33,6 @@ const onRenderClient: OnRenderClientAsync = async (pageContext) => {
     // and server provided a token.
     // Persist middleware might overwrite this if localStorage has a different token.
     if (!currentStoreToken && initialAuth.token) {
-      console.log(
-        "🚀 ~ Client: Hydrating auth store from server state",
-        initialAuth
-      );
       useAuthStore.setState({
         user: initialAuth.user,
         token: initialAuth.token,
@@ -82,11 +78,6 @@ const onRenderClient: OnRenderClientAsync = async (pageContext) => {
   BASE_URL.serverUrl = serverUrl;
   globalApi.api = api;
   globalApi.server = server;
-
-  console.log({
-    apiUrl: apiUrl,
-    serverUrl: serverUrl,
-  });
 
   api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {

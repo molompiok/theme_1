@@ -17,6 +17,7 @@ interface ProductMediaProps {
   showNavigation?: boolean;
   showFullscreen?: boolean;
   shouldHoverVideo?: boolean;
+  isUrlServer?: boolean;
 }
 
 export function ProductMedia({
@@ -26,6 +27,7 @@ export function ProductMedia({
   fallbackImage = "/img/default_img.gif",
   showNavigation = false,
   shouldHoverVideo = true,
+  isUrlServer = false,
   showFullscreen = false,
 }: ProductMediaProps) {
   const normalizedMediaList = useMemo(
@@ -49,7 +51,11 @@ export function ProductMedia({
   );
 
   const getMediaSrc = useCallback((media: string) => {
-    return media.startsWith("http") ? media : `${BASE_URL.apiUrl}${media}`;
+    return media.startsWith("http")
+      ? media
+      : isUrlServer
+      ? `${BASE_URL.serverUrl}${media}`
+      : `${BASE_URL.apiUrl}${media}`;
   }, []);
 
   const currentSrc = useMemo(() => {

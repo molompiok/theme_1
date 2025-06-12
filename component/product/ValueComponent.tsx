@@ -84,73 +84,89 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
     ]
   );
 
-  // Classes de base modernes et épurées
+  // Classes de base améliorées pour mobile
   const baseStyles = clsx(
     "group relative inline-flex items-center justify-center",
-    "transition-all duration-200 ease-out",
-    "focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
+    "transition-all duration-300 ease-out",
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
     "disabled:cursor-not-allowed",
-    // Responsivité améliorée
-    "text-sm sm:text-base"
+    "active:scale-95", // Feedback tactile pour mobile
+    "touch-manipulation", // Optimisation mobile
+    // Typographie responsive
+    "text-xs xs:text-sm sm:text-base font-medium"
   );
 
-  // Styles spécifiques par type - design minimaliste
+  // Styles par type avec design moderne
   const typeStyles = clsx({
-    // Couleur - design circulaire moderne
-    "w-7 h-7 sm:w-9 sm:h-9 rounded-full border-2": isColor,
+    // Couleur - design circulaire avec shadow
+    "w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 rounded-full border-2 shadow-sm hover:shadow-md":
+      isColor,
 
-    // Icône seule - carré arrondi épuré
-    "w-8 h-8 sm:w-10 sm:h-10 rounded-xl border-2 overflow-hidden":
+    // Icône seule - carré moderne avec coins arrondis
+    "w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 rounded-2xl border-2 overflow-hidden shadow-sm hover:shadow-md":
       isIcon && !isIconText,
 
-    // Texte et icône+texte - pilules modernes
-    "px-2 py-1 sm:px-3 sm:py-2 rounded-full border min-h-[44px] gap-2":
+    // Texte et icône+texte - pilules modernes avec padding adaptatif
+    "px-3 py-2 xs:px-4 xs:py-2.5 sm:px-5 sm:py-3 rounded-full border-2 min-h-[44px] gap-2 shadow-sm hover:shadow-md":
       isIconText || (!isColor && !isIcon),
   });
 
-  // États visuels - noir et blanc épuré
+  // États visuels modernes avec gradients subtils
   const stateStyles = clsx({
-    // Couleur
-    "border-black ring-2 ring-black ring-offset-2 scale-110":
+    // Couleur sélectionnée
+    "border-gray-900 ring-2 ring-gray-900 ring-offset-2 scale-105 shadow-lg":
       isColor && isSelected && !isDisabled,
-    "border-gray-300 hover:border-gray-500 hover:scale-105":
+    // Couleur non sélectionnée
+    "border-gray-300 hover:border-gray-500 hover:scale-105 hover:shadow-md":
       isColor && !isSelected && !isDisabled,
-    "border-gray-200 opacity-40": isColor && isDisabled,
+    // Couleur désactivée
+    "border-gray-200 opacity-40 shadow-none": isColor && isDisabled,
 
-    // Icône
-    "border-black bg-black": isIcon && isSelected && !isDisabled,
-    "border-gray-300 hover:border-gray-500 hover:bg-gray-50":
+    // Icône sélectionnée
+    "border-gray-900 bg-gradient-to-br from-gray-800 to-gray-900 shadow-lg":
+      isIcon && isSelected && !isDisabled,
+    // Icône non sélectionnée
+    "border-gray-300 bg-white hover:border-gray-500 hover:bg-gray-50 hover:shadow-md":
       isIcon && !isSelected && !isDisabled,
-    "border-gray-200 bg-gray-50 opacity-40": isIcon && isDisabled,
+    // Icône désactivée
+    "border-gray-200 bg-gray-50 opacity-40 shadow-none": isIcon && isDisabled,
 
-    // Texte
-    "bg-black text-white border-black font-medium":
+    // Texte sélectionné
+    "bg-gradient-to-r from-gray-800 to-gray-900 text-white border-gray-900 shadow-lg":
       !isColor && !isIcon && isSelected && !isDisabled,
-    "bg-white text-gray-900 border-gray-300 hover:border-gray-900 hover:bg-gray-50 font-normal":
+    // Texte non sélectionné
+    "bg-white text-gray-700 border-gray-300 hover:border-gray-900 hover:bg-gray-50 hover:text-gray-900":
       !isColor && !isIcon && !isSelected && !isDisabled,
-    "bg-gray-50 text-gray-400 border-gray-200":
+    // Texte désactivé
+    "bg-gray-50 text-gray-400 border-gray-200 shadow-none":
       !isColor && !isIcon && isDisabled,
   });
 
-  // Indicateur de stock moderne et discret
+  // Indicateur de stock moderne et visible
   const StockIndicator = () => {
     if (totalStock > 5) return null;
 
     const stockBadgeStyles = clsx(
-      "absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5",
+      "absolute -top-1 -right-1 xs:-top-2 xs:-right-2",
+      "min-w-[18px] h-[18px] xs:min-w-[20px] xs:h-5 px-1",
       "flex items-center justify-center",
-      "text-xs font-medium rounded-full",
-      "border bg-white",
+      "text-[10px] xs:text-xs font-bold rounded-full",
+      "border-2 bg-white shadow-md",
+      "animate-pulse", // Animation pour attirer l'attention
       {
-        "text-orange-600 border-orange-200": isLowStock,
-        "text-red-600 border-red-200": isDisabled,
+        "text-orange-600 border-orange-300 bg-orange-50": isLowStock,
+        "text-red-600 border-red-300 bg-red-50": isDisabled,
       }
     );
 
-    const inlineStockStyles = clsx("text-xs font-normal ml-1 opacity-75", {
-      "text-orange-600": isLowStock,
-      "text-red-600": isDisabled,
-    });
+    const inlineStockStyles = clsx(
+      "text-[10px] xs:text-xs font-medium ml-1 opacity-80",
+      "px-1.5 py-0.5 rounded-full",
+      {
+        "text-orange-600 bg-orange-100": isLowStock,
+        "text-red-600 bg-red-100": isDisabled,
+      }
+    );
 
     if (isColor || isIcon) {
       return (
@@ -162,18 +178,31 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
 
     return (
       <span className={inlineStockStyles} aria-hidden="true">
-        ({totalStock})
+        {totalStock}
       </span>
     );
   };
 
-  // Effet de désactivation moderne
+  // Overlay de désactivation plus visible
   const DisabledOverlay = () => {
     if (!isDisabled) return null;
 
     return (
+      <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[1px] rounded-inherit">
+        <div className="w-full h-0.5 bg-red-400 rotate-12 opacity-80 shadow-sm" />
+      </div>
+    );
+  };
+
+  // Indicateur de sélection pour les couleurs
+  const ColorSelectionIndicator = () => {
+    if (!isColor || !isSelected || isDisabled) return null;
+
+    return (
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-full h-0.5 bg-gray-400 rotate-12 opacity-60" />
+        <div className="w-3 h-3 xs:w-4 xs:h-4 bg-white rounded-full shadow-md flex items-center justify-center">
+          <div className="w-1.5 h-1.5 xs:w-2 xs:h-2 bg-gray-900 rounded-full" />
+        </div>
       </div>
     );
   };
@@ -181,11 +210,11 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
   if (!group_products) {
     return (
       <div
-        className="inline-flex items-center justify-center w-12 h-12 text-gray-400 rounded-xl border border-gray-200 bg-gray-50"
+        className="inline-flex items-center justify-center w-12 h-12 xs:w-14 xs:h-14 text-gray-400 rounded-2xl border-2 border-gray-200 bg-gray-50 shadow-sm"
         role="alert"
         aria-label={`${text} indisponible`}
       >
-        <span className="text-lg">×</span>
+        <span className="text-lg xs:text-xl">×</span>
       </div>
     );
   }
@@ -203,7 +232,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       aria-disabled={isDisabled}
       style={{
         backgroundColor: isColor ? value.key || "#f3f4f6" : undefined,
-        color: isColor ? (isSelected ? "white" : "transparent") : undefined,
+        // Suppression de la couleur du texte pour permettre l'indicateur
       }}
       title={
         isDisabled
@@ -218,14 +247,17 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       {/* Overlay de désactivation */}
       <DisabledOverlay />
 
+      {/* Indicateur de sélection pour couleurs */}
+      <ColorSelectionIndicator />
+
       {/* Icône seule */}
       {isIcon && !isIconText && icon && (
         <ProductMedia
           mediaList={icon}
           productName={text}
           className={clsx(
-            "w-8 h-8 sm:w-10 sm:h-10 object-contain transition-colors",
-            isSelected && !isDisabled && "brightness-0 invert"
+            "size-8 xs:size-10 object-contain transition-all duration-300",
+            isSelected && !isDisabled && "brightness-0 invert scale-110"
           )}
         />
       )}
@@ -235,13 +267,15 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
         <ProductMedia
           mediaList={icon}
           productName={text}
-          className="w-5 h-5 object-contain flex-shrink-0"
+          className="size-6 xs:size-8 object-contain flex-shrink-0"
         />
       )}
 
-      {/* Texte */}
+      {/* Texte avec meilleur wrapping */}
       {!isColor && (!isIcon || isIconText) && (
-        <span className="truncate">{text}</span>
+        <span className="truncate max-w-[120px] xs:max-w-[140px] sm:max-w-none">
+          {text}
+        </span>
       )}
 
       {/* Indicateur de stock */}

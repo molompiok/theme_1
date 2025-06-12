@@ -34,6 +34,7 @@ import type { Data } from "./+data";
 import { getFirstFeatureWithView } from "../../../utils";
 import { Breadcrumb } from "../../../component/product/Breadcrumb";
 import { BiChevronDown } from "react-icons/bi";
+import { SimilarProductsSection } from "../../../component/SimilarProductsSection";
 
 export default function Page() {
   const { dehydratedState } = useData<Data>();
@@ -226,6 +227,7 @@ function ProductPageContent() {
           </div>
         </section>
         <DetailsSection product_id={product.id} />
+        <SimilarProductsSection productSlug={product.slug} />
         <FAQSection expandedFAQ={expandedFAQ} setExpandedFAQ={setExpandedFAQ} />
         <ReviewsSection product={product} />
       </main>

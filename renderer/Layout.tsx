@@ -18,7 +18,7 @@ import { BiArrowBack } from "react-icons/bi";
 import { Popover, PopoverContent, PopoverTrigger } from "../component/Popover";
 import { FaUserAlt } from "react-icons/fa";
 import { PiXThin } from "react-icons/pi";
-import { api } from "../api";
+import { api, BASE_URL } from "../api";
 import { useAuthStore, useModalAuth } from "../store/user";
 import ModalCart from "../component/modal/ModalCart";
 import ModalChooseFeature from "../component/modal/ModalChooseFeature";
@@ -34,11 +34,15 @@ import {
   ThemeSettings,
   useThemeSettingsStore,
 } from "../store/themeSettingsStore";
+import { useStore } from "zustand";
+import useStoreInfo from "../hook/query/store/useGetStore";
+import { useFavicon } from "../hook/useFavicon";
 
 const parseThemeSettingsFromQuery = (
   searchParams: URLSearchParams
 ): Partial<ThemeSettings> => {
   const settings: Partial<ThemeSettings> = {};
+
   const primaryColor = searchParams.get("setting_primaryColor");
   if (primaryColor) settings.primaryColor = `#${primaryColor}`;
 
@@ -70,7 +74,9 @@ function Layout({
   const openModalAuth = useModalAuth((state) => state.open);
   const [isClient, setIsClient] = useState(false);
   const { data: cart } = useCart();
+  const { data: info } = useStoreInfo();
 
+  useFavicon(BASE_URL.serverUrl + info?.favicon || "");
   const { setSettings, resetSettings, ...settings } = useThemeSettingsStore();
 
   const urlParsed = getQueryParams();
@@ -154,14 +160,14 @@ function Layout({
             </div>
             <button
               onClick={() => navigate("/search")}
-              className="p-2 hover:bg-gray-100 rounded-full transition-all duration-200 hover:scale-105"
+              className="sm:p-2 px-2 py-1 hover:bg-gray-100 rounded-full transition-all duration-200 hover:scale-105"
               aria-label="Rechercher"
             >
               <BsSearch size={20} />
             </button>
             <button
               onClick={() => toggleCart(true)}
-              className="relative p-2 hover:bg-gray-100 rounded-full transition-all duration-200 hover:scale-105"
+              className="relative sm:p-2 px-2 py-1 hover:bg-gray-100 rounded-full transition-all duration-200 hover:scale-105"
               aria-label={`Panier (${totalItems} articles)`}
             >
               <BsHandbag size={20} />
@@ -178,7 +184,7 @@ function Layout({
                   openModalAuth("login");
                 }
               }}
-              className="p-2 hover:bg-gray-100 rounded-full transition-all duration-200 hover:scale-105"
+              className="sm:p-2 py-1 px-2 hover:bg-gray-100 rounded-full transition-all duration-200 hover:scale-105"
               aria-label="Profil utilisateur"
             >
               <BsPerson size={24} />
@@ -294,14 +300,16 @@ function Header({ children }: { children: React.ReactNode }) {
             className={`w-full font-primary flex items-center justify-between transition-all duration-300 ease-out backdrop-blur-md border-b border-gray-100/20
               ${
                 isScrolled
-                  ? "fixed top-0 left-0 right-0 z-[100] px-2 sm:px-6 lg:px-8 py-1 shadow-lg bg-white/95"
-                  : "relative px-2 sm:px-6 lg:px-8 py-2 bg-white"
+                  ? "fixed top-0 left-0 right-0 z-[100] px-2 sm:px-4 lg:px-6 py-0 shadow-lg bg-white/95"
+                  : "relative px-2 sm:px-4 lg:px-6 py-2 bg-white"
               }`}
             style={{
               backgroundColor: isScrolled
                 ? `${headerBackgroundColor}f5`
                 : headerBackgroundColor,
               color: headerTextColor,
+              transition: "all 0.3s ease-in-out",
+              opacity: isScrolled && urlPathname.startsWith("/search") ? 0 : 1,
             }}
           >
             {children}
@@ -315,8 +323,8 @@ function Header({ children }: { children: React.ReactNode }) {
             className={`w-full font-primary flex items-center justify-between transition-all duration-300 ease-out backdrop-blur-md border-b border-gray-100/20
               ${
                 isScrolled
-                  ? "fixed top-0 left-0 right-0 z-[100] px-4 sm:px-6 lg:px-8 py-3 shadow-lg bg-white/95"
-                  : "relative px-4 sm:px-6 lg:px-8 py-4 bg-white"
+                  ? "fixed top-0 left-0 right-0 z-[100] px-4 sm:px-6 lg:px-6 py-2 shadow-lg bg-white/95"
+                  : "relative px-4 sm:px-6 lg:px-6 py-2 bg-white"
               }`}
             style={{
               backgroundColor: isScrolled
@@ -517,68 +525,82 @@ function Header({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
               </div>
-              <div className="p-4 space-y-2">
+              <div className="p-4 flex flex-col justify-center items-start space-y-2">
                 <LinkIcon
                   href="/profile"
+                  onClick={() => {
+                    handleModalClose();
+                  }}
                   className="flex items-center w-full p-4 text-base hover:bg-gray-50 rounded-xl transition-colors duration-200"
                 >
-                  <BsPerson className="mr-4 text-gray-400 text-lg" />
-                  Mon profil
+                  <div className="flex items-center">
+                    <BsPerson className="mr-2 text-gray-400 text-lg" />
+                    <span>Mon profil</span>
+                  </div>
                 </LinkIcon>
                 <LinkIcon
                   href="/profile/commandes"
+                  onClick={() => {
+                    handleModalClose();
+                  }}
                   className="flex items-center w-full p-4 text-base hover:bg-gray-50 rounded-xl transition-colors duration-200"
                 >
-                  <BsHandbag className="mr-4 text-gray-400 text-lg" />
-                  Mes commandes
+                  <div className="flex items-center">
+                    <BsHandbag className="mr-2 text-gray-400 text-lg" />
+                    <span>Mes commandes</span>
+                  </div>
                 </LinkIcon>
                 <LinkIcon
                   isSimple={true}
                   href="/profile/favoris"
+                  onClick={() => {
+                    handleModalClose();
+                  }}
                   className="flex items-center w-full p-4 text-base hover:bg-gray-50 rounded-xl transition-colors duration-200"
                 >
-                  <svg
-                    className="mr-4 text-gray-400 text-lg w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                    />
-                  </svg>
-                  Mes favoris
+                  <div className="flex items-center">
+                    <svg
+                      className="mr-2 text-gray-400 text-lg w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      />
+                    </svg>
+                    <span>Mes favoris</span>
+                  </div>
                 </LinkIcon>
               </div>
 
               <div className="absolute bottom-6 left-4 right-4 space-y-2 border-t border-gray-100 pt-4">
                 <LinkIcon
                   href="/profile/commandes"
+                  onClick={() => {
+                    handleModalClose();
+                  }}
                   className="flex items-center w-full p-3 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors duration-200"
                 >
-                  <svg
-                    className="mr-3 w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  Paramètres
+                  <div className="flex items-center">
+                    <svg
+                      className="mr-2 text-gray-400 text-lg size-8"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                    <span>Paramètres</span>
+                  </div>
                 </LinkIcon>
                 <button
                   className="flex items-center w-full p-3 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
@@ -616,7 +638,8 @@ interface LogoProps {
 }
 
 export function Logo({ size = "small", className }: LogoProps) {
-  const brandName = "Marque";
+  const { data: info } = useStoreInfo();
+  const brandName = info?.name;
   const href = "/";
   const sizeClasses = {
     image: {
@@ -625,9 +648,9 @@ export function Logo({ size = "small", className }: LogoProps) {
       large: "w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-18 lg:h-18",
     },
     text: {
-      small: "hidden sm:block text-lg sm:text-xl font-bold",
-      medium: "hidden xs:block text-xl sm:text-2xl md:text-3xl font-bold",
-      large: "hidden xs:block text-2xl sm:text-3xl md:text-4xl font-bold",
+      small: "text-sm sm:block text-lg sm:text-xl font-bold",
+      medium: "text-sm xs:block text-xl sm:text-2xl md:text-3xl font-bold",
+      large: "text-sm xs:block text-2xl sm:text-3xl md:text-4xl font-bold",
     },
     gap: {
       small: "gap-2 sm:gap-3",
@@ -647,14 +670,13 @@ export function Logo({ size = "small", className }: LogoProps) {
       )}
       aria-label={`Retour à l'accueil - ${brandName}`}
     >
-      <img
-        src={logoUrl}
-        className={clsx(
-          "object-contain flex-shrink-0 transition-transform duration-300 group-hover:rotate-3",
-          sizeClasses.image[size]
-        )}
-        alt={`${brandName} Logo`}
+      <ProductMedia
+        mediaList={info?.logo || []}
+        productName={brandName || ""}
+        isUrlServer={true}
+        className="object-contain size-8 sm:size-10 flex-shrink-0 transition-transform duration-300 group-hover:rotate-3"
       />
+
       <h1
         className={clsx(
           "font-primary text-gray-900 whitespace-nowrap tracking-tight",

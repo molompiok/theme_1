@@ -34,29 +34,29 @@ export const FeatureSelector: React.FC<FeatureSelectorProps> = ({
       role="group"
       aria-label={`Options pour ${feature_name}`}
     >
-      {features.map((feature) => {
+      {features.map((feature, index) => {
         const validFeatureValues = feature.values.filter((v) => !!v.text);
         if (!validFeatureValues.length) return null;
 
         return (
-          <>
+          <div key={feature.id + "_feature" + index}>
             <h3 className="text-sm uppercase mb-1 font-medium text-gray-700 flex items-center gap-1">
               {feature.name}
               {feature.required && <span className="text-red-500">*</span>}
             </h3>
-            <div key={feature.id}>
+            <div key={feature.id + "_values"}>
               <div
                 className="flex items-center justify-start flex-wrap gap-2 scrollbar-thin max-w-full"
                 role="listbox"
                 aria-labelledby={`feature-${feature.id}`}
               >
-                {validFeatureValues.map((value) => {
+                {validFeatureValues.map((value, index) => {
                   const isSelected =
                     selections.get(product_id)?.get(feature.id)
                       ?.valueFeature === value.id;
                   return (
                     <ValueComponent
-                      key={value.id}
+                      key={value.id + "_value" + index}
                       value={value}
                       features={features}
                       product_id={product_id}
@@ -71,7 +71,7 @@ export const FeatureSelector: React.FC<FeatureSelectorProps> = ({
                 })}
               </div>
             </div>
-          </>
+          </div>
         );
       })}
     </div>

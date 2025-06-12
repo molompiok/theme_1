@@ -8,7 +8,6 @@ import {
   MdLocalShipping,
   MdRateReview,
   MdStorefront,
-  MdFilterList,
 } from "react-icons/md";
 import { get_orders } from "../../../api/cart.api";
 import { get_comment } from "../../../api/comment.api";
@@ -66,9 +65,11 @@ export default function OrdersPage() {
             top: isScrolled ? "44px" : "0px",
           }}
         >
-          <div className="container mx-auto px-4 pb-2 pt-7">
+          {/* CHANGÉ: paddings ajustés pour mobile */}
+          <div className="container mx-auto px-4 pb-2 pt-5 sm:pt-7">
             <div className="max-w-6xl mx-auto">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2">
+              {/* AJOUTÉ: flex-col pour mobile, lg:flex-row pour desktop */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur opacity-20"></div>
@@ -77,7 +78,8 @@ export default function OrdersPage() {
                     </div>
                   </div>
                   <div>
-                    <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
+                    {/* CHANGÉ: taille de texte responsive */}
+                    <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
                       Mes Commandes
                     </h1>
                     <p className="text-gray-600 text-sm mt-1">
@@ -85,12 +87,15 @@ export default function OrdersPage() {
                     </p>
                   </div>
                 </div>
-                <div className="relative ml-auto">
-                  <FilterPopover
-                    setFilter={setFilter}
-                    selectedFilters={selectedFilters}
-                    defaultOptions={[...defaultOptionsOrder]}
-                  />
+                {/* CHANGÉ: gestion de la largeur du filtre pour mobile/desktop */}
+                <div className="w-full lg:w-auto flex justify-end lg:justify-start">
+                  <div className="relative">
+                    <FilterPopover
+                      setFilter={setFilter}
+                      selectedFilters={selectedFilters}
+                      defaultOptions={[...defaultOptionsOrder]}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -98,7 +103,7 @@ export default function OrdersPage() {
         </div>
 
         {/* Contenu principal */}
-        <div className="container mx-auto px-4 pb-12">
+        <div className="container mx-auto pb-12">
           <div className="max-w-6xl mx-auto">
             <WrapOrderList />
           </div>
@@ -111,15 +116,19 @@ export default function OrdersPage() {
 }
 
 const EmptyState = ({ message }: { message: string }) => (
-  <div className="text-center py-16 bg-white/60 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl shadow-gray-200/20">
+  // CHANGÉ: padding responsive
+  <div className="text-center py-12 px-4 sm:py-16 bg-white/60  rounded-3xl border border-gray-200/50 shadow-xl shadow-gray-200/20">
     <div className="relative inline-block mb-6">
       <div className="absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-400 rounded-full blur opacity-20"></div>
       <div className="relative bg-gradient-to-r from-gray-300 to-gray-400 p-4 rounded-full">
         <BsCartCheck className="text-2xl text-white" />
       </div>
     </div>
-    <p className="text-gray-600 text-xl font-medium">{message}</p>
-    <p className="text-gray-500 text-sm mt-2">Vos futures commandes apparaîtront ici</p>
+    {/* CHANGÉ: taille de texte responsive */}
+    <p className="text-lg sm:text-xl font-medium text-gray-600">{message}</p>
+    <p className="text-gray-500 text-sm mt-2">
+      Vos futures commandes apparaîtront ici
+    </p>
   </div>
 );
 
@@ -184,7 +193,11 @@ const WrapOrderList = () => {
       <div className="flex items-center justify-center min-h-96">
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur opacity-20 animate-pulse"></div>
-          <Loading size="large" color="bg-gradient-to-r from-blue-500 to-purple-600" className="relative" />
+          <Loading
+            size="large"
+            color="bg-gradient-to-r from-blue-500 to-purple-600"
+            className="relative"
+          />
         </div>
       </div>
     );
@@ -223,7 +236,7 @@ const WrapOrderList = () => {
             </div>
           ) : hasNextPage ? (
             <div className="text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm border border-gray-200/50 shadow-lg">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60  border border-gray-200/50 shadow-lg">
                 <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
                 <span className="text-gray-600 font-medium">
                   Faites défiler pour charger plus...
@@ -272,7 +285,9 @@ const OrderList = ({ order }: { order: UserOrder | undefined }) => {
       case "picked_up":
         return <MdCheck className="w-4 h-4" />;
       case "pending":
-        return <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>;
+        return (
+          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+        );
       default:
         return null;
     }
@@ -294,18 +309,18 @@ const OrderList = ({ order }: { order: UserOrder | undefined }) => {
     );
 
   return (
-    <div className="group relative bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-3xl overflow-hidden shadow-xl shadow-gray-200/20 hover:shadow-2xl hover:shadow-gray-300/25 transition-all duration-500 hover:-translate-y-1">
-      {/* Gradient de fond subtil */}
+    <div className="group relative bg-white/80  border border-gray-200/50 rounded-3xl overflow-hidden shadow-xl shadow-gray-200/20 hover:shadow-2xl hover:shadow-gray-300/25 transition-all duration-500 hover:-translate-y-1">
       <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      
+
       {/* Header de la commande */}
-      <div className="relative border-b border-gray-200/50 p-6 bg-gradient-to-r from-gray-50/50 to-transparent">
-        <div className="flex flex-col lg:flex-row justify-between gap-4">
-          <div className="space-y-3">
-            {/* Référence avec copie */}
+      {/* CHANGÉ: padding responsive et flex-col sur mobile */}
+      <div className="relative border-b border-gray-200/50 p-4 sm:p-6 bg-gradient-to-r from-gray-50/50 to-transparent">
+        <div className="flex flex-col sm:flex-row justify-between gap-4">
+          {/* SIMPLIFIÉ: utilisation de flex-wrap pour mieux gérer l'espace */}
+          <div className="flex flex-wrap items-center gap-3">
             <div
               onClick={() => copyToClipboard(order.reference)}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:border-gray-300/50 transition-all duration-300 cursor-pointer group/ref shadow-sm hover:shadow-md"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/80 border border-gray-200/50 hover:border-gray-300/50 transition-all duration-300 cursor-pointer group/ref shadow-sm hover:shadow-md"
               title="Cliquez pour copier la référence"
             >
               <span className="text-sm font-mono text-gray-700 font-medium">
@@ -321,19 +336,16 @@ const OrderList = ({ order }: { order: UserOrder | undefined }) => {
                 </span>
               )}
             </div>
-
-            {/* Date */}
-            <div className="inline-flex items-center gap-2 px-3 py-2 bg-gray-900/90 backdrop-blur-sm text-white text-sm rounded-xl shadow-lg">
+            <div className="inline-flex items-center gap-2 px-3 py-2 bg-gray-900/90 text-white text-sm rounded-xl shadow-lg">
               <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
               Commandé le {formatDate(order.created_at)}
             </div>
           </div>
 
-          {/* Statut modernisé */}
-          <div className="self-start">
+          <div className="self-start sm:self-center">
             <span
               className={clsx(
-                "inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold whitespace-nowrap shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105",
+                "inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold whitespace-nowrap shadow-lg transition-all duration-300 hover:scale-105",
                 statusStyles[order.status]
               )}
             >
@@ -345,8 +357,9 @@ const OrderList = ({ order }: { order: UserOrder | undefined }) => {
       </div>
 
       {/* Items de la commande */}
-      <div className="relative p-6">
-        <div className="space-y-6">
+      {/* CHANGÉ: padding responsive */}
+      <div className="relative p-2 sm:p-6">
+        <div className="space-y-4 sm:space-y-6">
           {order?.items?.map((item: any, index: number) => (
             <div
               key={item.id}
@@ -360,30 +373,32 @@ const OrderList = ({ order }: { order: UserOrder | undefined }) => {
       </div>
 
       {/* Footer avec informations de livraison et total */}
-      <div className="relative p-6 pt-0">
-        <div className="bg-gradient-to-r from-gray-50/80 to-blue-50/50 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50">
+      <div className="relative p-2 pt-0 sm:p-6 sm:pt-0">
+        <div className=" rounded-2xl p-4 sm:p-5 border border-gray-200/50">
+          {/* CHANGÉ: flex-col sur mobile */}
           <div className="flex flex-col lg:flex-row justify-between gap-4 lg:items-center">
-            {/* Informations de livraison */}
             <div className="text-sm text-gray-700">
               {order.with_delivery ? (
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-blue-100 rounded-xl">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="p-2 bg-blue-100 flex items-center gap-2 rounded-xl">
                     <MdLocalShipping className="text-blue-600" size={18} />
+                    <span className="font-medium text-gray-900">Livraison</span>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-900">Livraison</span>
                     <p className="text-gray-600 mt-0.5">
                       {order.delivery_address_name}
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <div className="p-2 bg-green-100 rounded-xl">
                     <MdStorefront className="text-green-600" size={18} />
                   </div>
                   <div>
-                    <span className="font-medium text-gray-900">Retrait en magasin</span>
+                    <span className="font-medium text-gray-900">
+                      Retrait en magasin
+                    </span>
                     <p className="text-gray-600 mt-0.5">
                       {order.pickup_address_name}
                       {order.pickup_date && (
@@ -397,13 +412,16 @@ const OrderList = ({ order }: { order: UserOrder | undefined }) => {
               )}
             </div>
 
-            {/* Total */}
-            <div className="text-right lg:text-left">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 shadow-sm">
+            {/* CHANGÉ: alignement et padding pour mobile */}
+            <div className="text-left pt-2 lg:pt-0 lg:text-left">
+              <div className="bg-white/80 rounded-2xl p-3 sm:p-4 border border-gray-200/50 shadow-sm">
                 <p className="text-sm text-gray-600 mb-1">
-                  Total <span className="text-gray-400 text-xs">(livraison incluse)</span>
+                  Total{" "}
+                  <span className="text-gray-400 text-xs">
+                    (livraison incluse)
+                  </span>
                 </p>
-                <p className="font-bold text-2xl bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                <p className="font-bold text-lg sm:text-xl bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                   {formatPrice(order.total_price + order.delivery_price)}
                 </p>
               </div>
@@ -415,6 +433,9 @@ const OrderList = ({ order }: { order: UserOrder | undefined }) => {
   );
 };
 
+// =================================================================
+// REFACOTRING MAJEUR de ce composant pour la responsivité
+// =================================================================
 const OrderItemProduct = ({
   item,
   order_id,
@@ -435,7 +456,7 @@ const OrderItemProduct = ({
     queryFn: () => get_comment({ order_item_id: item.id }),
   });
 
-  const canReview = !isLoading && true;
+  const canReview = !isLoading && true; // La logique `true` semble redondante mais on la garde
   const hasReviewed = !isLoading && !!comment;
 
   const handleOpenModal = () => {
@@ -448,89 +469,86 @@ const OrderItemProduct = ({
   };
 
   return (
-    <div className="group/item flex flex-col lg:flex-row justify-between items-start gap-6 p-4 rounded-2xl hover:bg-white/50 transition-all duration-300">
-      <div className="flex gap-4 flex-1 min-w-0">
-        {/* Image du produit avec effet hover */}
-        <div className="relative group/image">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-200 to-purple-200 rounded-2xl blur opacity-0 group-hover/image:opacity-20 transition-all duration-300"></div>
-          <ProductMedia
-            mediaList={mediaViews}
-            productName={item.product?.name}
-            showFullscreen={true}
-            className="relative size-[100px] sm:size-[120px] lg:size-[140px] object-cover rounded-2xl border-2 border-gray-200/50 flex-shrink-0 transition-all duration-300 group-hover/image:border-gray-300/70 group-hover/image:shadow-xl"
-          />
+    // SIMPLIFIÉ: Layout principal avec flex-col puis sm:flex-row
+    <div className="group/item flex flex-col sm:flex-row items-start gap-4 p-2 rounded-2xl hover:bg-white/50 transition-all duration-300">
+      {/* Image du produit */}
+      <div className="relative flex-shrink-0 group/image">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-200 to-purple-200 rounded-2xl blur opacity-0 group-hover/image:opacity-20 transition-all duration-300"></div>
+        <ProductMedia
+          mediaList={mediaViews}
+          productName={item.product?.name}
+          showFullscreen={true}
+          // CHANGÉ: Tailles d'image responsives plus claires
+          className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 object-cover rounded-2xl border-2 border-gray-200/50 transition-all duration-300 group-hover/image:border-gray-300/70 group-hover/image:shadow-xl"
+        />
+      </div>
+
+      {/* Informations et actions */}
+      <div className="flex-1 min-w-0">
+        {/* Titre et variants */}
+        <div>
+          <h3 className="font-semibold text-gray-900 text-base lg:text-lg mb-2 group-hover/item:text-blue-600 transition-colors duration-300 truncate">
+            {item.product?.name}
+          </h3>
+
+          {item.bind_name && Object.entries(item.bind_name).length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {Object.entries(item.bind_name).map(([_, value]) => (
+                <span
+                  key={value.id}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-gray-100 to-gray-50 text-gray-800 border border-gray-200/50 shadow-sm"
+                >
+                  {value.text}
+                  {value.key && (
+                    <span
+                      className="p-1.5 rounded-full border border-white shadow-sm"
+                      style={{ background: value.key }}
+                      aria-label={`Color: ${value.text}`}
+                    />
+                  )}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Informations du produit */}
-        <div className="flex flex-col justify-between min-w-0 flex-1">
-          <div>
-            <h3 className="font-semibold text-gray-900 text-base lg:text-lg mb-2 group-hover/item:text-blue-600 transition-colors duration-300">
-              {item.product?.name}
-            </h3>
-
-            {/* Variants/Options */}
-            {item.bind_name && Object.entries(item.bind_name).length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-3">
-                {Object.entries(item.bind_name).map(([_, value]) => (
-                  <span
-                    key={value.id}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r from-gray-100 to-gray-50 text-gray-800 border border-gray-200/50 shadow-sm"
-                  >
-                    {value.text}
-                    {value.key && (
-                      <span
-                        className="w-3 h-3 rounded-full border border-white shadow-sm"
-                        style={{ background: value.key }}
-                        aria-label={`Color: ${value.text}`}
-                      />
-                    )}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Quantité */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm">
-              <span className="text-sm text-gray-600">Quantité:</span>
-              <span className="font-semibold text-gray-900">{item.quantity}</span>
+        {/* Quantité, Prix et Bouton d'avis */}
+        {/* SIMPLIFIÉ: Un conteneur flex pour aligner les derniers éléments */}
+        <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/80 rounded-xl border border-gray-200/50">
+              <span className="text-xs text-gray-600">Qté:</span>
+              <span className="font-semibold text-xs text-gray-900">
+                {item.quantity}
+              </span>
             </div>
+            <p className="font-bold text-base text-gray-900">
+              {formatPrice(item.quantity * item.price_unit)}
+            </p>
           </div>
 
-          {/* Boutons d'action pour les avis */}
-          <div className="mt-4">
+          <div className="flex-shrink-0">
             {canReview && !hasReviewed && (
               <button
-                className="group/btn inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium text-sm transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95"
+                className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium text-sm transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95"
                 onClick={handleOpenModal}
                 aria-label="Laisser un avis"
               >
-                <MdRateReview className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
-                Laisser un avis
+                <MdRateReview className="min-w-4 min-h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
+                <span>Laisser un avis</span>
               </button>
             )}
 
             {canReview && hasReviewed && (
               <button
                 onClick={() => setReviewModalOpen(true, comment)}
-                className="group/btn inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-medium text-sm transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95"
+                className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-medium text-sm transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95"
               >
-                <MdCheck className="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-300" />
-                Avis publié
+                <MdCheck className="min-w-4 min-h-4 group-hover/btn:scale-110 transition-transform duration-300" />
+                <span>Avis publié</span>
               </button>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Prix */}
-      <div className="flex flex-col items-end lg:items-start mt-4 lg:mt-0 lg:ml-4">
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 shadow-sm text-right lg:text-left">
-          <p className="font-bold text-xl text-gray-900 mb-1">
-            {formatPrice(item.quantity * item.price_unit)}
-          </p>
-          <p className="text-sm text-gray-600">
-            {formatPrice(item.price_unit)} × {item.quantity}
-          </p>
         </div>
       </div>
     </div>

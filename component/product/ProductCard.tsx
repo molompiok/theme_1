@@ -63,25 +63,25 @@ export default function ProductCard({
             product_id={product.id}
             className={clsx(
               "absolute z-10",
-              settings.favoriteIconPosition === "top-right" && "top-2 right-2",
+              settings.favoriteIconPosition === "top-right" && "top-4 right-2",
               settings.favoriteIconPosition === "bottom-right" &&
-                "bottom-2 right-2",
+                "bottom-4 right-2",
               settings.favoriteIconPosition === "bottom-left" &&
-                "bottom-2 left-2",
-              settings.favoriteIconPosition === "top-left" && "top-2 left-2"
+                "bottom-4 left-2",
+              settings.favoriteIconPosition === "top-left" && "top-4 left-2"
             )}
           />
         )}
         {product?.barred_price && settings.showInfoPromotion && (
           <div
             className={clsx(
-              `absolute  z-10 py-1 px-2 rounded-full text-xs sm:p-2 sm:text-sm font-semibold shadow-lg`,
-              settings.promotionTextPosition === "top-left" && "top-2 left-2",
+              `absolute z-10 py-1 px-4 rounded-full text-xs sm:p-4 sm:text-sm font-semibold shadow-lg`,
+              settings.promotionTextPosition === "top-left" && "top-4 left-4",
               settings.promotionTextPosition === "bottom-left" &&
-                "bottom-2 left-2",
+                "bottom-4 left-4",
               settings.promotionTextPosition === "bottom-right" &&
-                "bottom-2 right-2",
-              settings.promotionTextPosition === "top-right" && "top-2 right-2"
+                "bottom-4 right-4",
+              settings.promotionTextPosition === "top-right" && "top-4 right-4"
             )}
             style={{
               backgroundColor: settings.promotionTextBackgroundColor,

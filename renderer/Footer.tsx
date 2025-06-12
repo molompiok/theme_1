@@ -1,14 +1,29 @@
 import React, { useState } from "react";
-import { FaFacebookF, FaInstagram, FaTwitter, FaPinterestP, FaEnvelope, FaCheck, FaMapMarkerAlt, FaPhone } from "react-icons/fa";
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaTwitter,
+  FaPinterestP,
+  FaEnvelope,
+  FaCheck,
+  FaMapMarkerAlt,
+  FaPhone,
+} from "react-icons/fa";
 import { useThemeSettingsStore } from "../store/themeSettingsStore";
+import useStoreInfo from "../hook/query/store/useGetStore";
 
 interface FooterProps {}
 
 export const Footer: React.FC<FooterProps> = () => {
   const [email, setEmail] = useState("");
+  const { data: info } = useStoreInfo();
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const footerBackgroundColor = useThemeSettingsStore(state => state.footerBackgroundColor);
-  const footerTextColor = useThemeSettingsStore(state => state.footerTextColor);
+  const footerBackgroundColor = useThemeSettingsStore(
+    (state) => state.footerBackgroundColor
+  );
+  const footerTextColor = useThemeSettingsStore(
+    (state) => state.footerTextColor
+  );
   const handleSubmit = () => {
     if (email) {
       setIsSubscribed(true);
@@ -20,13 +35,15 @@ export const Footer: React.FC<FooterProps> = () => {
   };
 
   return (
-    <footer className="bg-slate-900 text-white border-t border-slate-700" style={{
-      backgroundColor: footerBackgroundColor,
-      color: footerTextColor,
-    }}>
+    <footer
+      className="bg-slate-700 text-white border-t border-slate-700"
+      style={{
+        backgroundColor: footerBackgroundColor,
+        color: footerTextColor,
+      }}
+    >
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          
           {/* Section À propos */}
           <div className="space-y-6">
             <div>
@@ -36,8 +53,9 @@ export const Footer: React.FC<FooterProps> = () => {
               <div className="w-12 h-0.5 bg-blue-500 mb-4"></div>
             </div>
             <p className="text-slate-300 leading-relaxed">
-              Nous sommes une boutique passionnée par la qualité et la satisfaction client. 
-              Découvrez nos produits uniques et notre service exceptionnel.
+              Nous sommes une boutique passionnée par la qualité et la
+              satisfaction client. Découvrez nos produits uniques et notre
+              service exceptionnel.
             </p>
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-3 text-slate-400">
@@ -65,13 +83,13 @@ export const Footer: React.FC<FooterProps> = () => {
             </div>
             <ul className="space-y-3">
               {[
-                { href: "/shop", label: "Boutique" },
+                { href: "/", label: "Boutique" },
                 { href: "/about", label: "À propos" },
                 { href: "/contact", label: "Contact" },
                 { href: "/faq", label: "FAQ" },
-                { href: "/returns", label: "Retours & Échanges" },
-                { href: "/shipping", label: "Livraison" },
-                { href: "/support", label: "Support" }
+                { href: "/", label: "Retours & Échanges" },
+                { href: "/", label: "Livraison" },
+                { href: "/contact", label: "Support" },
               ].map((link, index) => (
                 <li key={index}>
                   <a
@@ -88,15 +106,14 @@ export const Footer: React.FC<FooterProps> = () => {
           {/* Section Newsletter */}
           <div className="space-y-6">
             <div>
-              <h3 className="text-xl font-bold mb-4 text-white">
-                Newsletter
-              </h3>
+              <h3 className="text-xl font-bold mb-4 text-white">Newsletter</h3>
               <div className="w-12 h-0.5 bg-purple-500 mb-4"></div>
             </div>
             <p className="text-slate-300 mb-6 leading-relaxed">
-              Inscrivez-vous pour recevoir nos offres exclusives et nos nouveautés en avant-première.
+              Inscrivez-vous pour recevoir nos offres exclusives et nos
+              nouveautés en avant-première.
             </p>
-            
+
             <div className="space-y-4">
               <div className="relative">
                 <input
@@ -108,14 +125,14 @@ export const Footer: React.FC<FooterProps> = () => {
                 />
                 <FaEnvelope className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
               </div>
-              
+
               <button
                 onClick={handleSubmit}
                 disabled={isSubscribed}
                 className={`w-full p-4 rounded-lg font-semibold transition-colors duration-200 ${
-                  isSubscribed 
-                    ? 'bg-green-600 text-white cursor-default' 
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                  isSubscribed
+                    ? "bg-green-600 text-white cursor-default"
+                    : "bg-slate-600 hover:bg-slate-700 text-white"
                 }`}
               >
                 {isSubscribed ? (
@@ -124,35 +141,54 @@ export const Footer: React.FC<FooterProps> = () => {
                     <span>Inscription confirmée !</span>
                   </div>
                 ) : (
-                  'S\'inscrire à la newsletter'
+                  "S'inscrire à la newsletter"
                 )}
               </button>
             </div>
-            
+
             <p className="text-xs text-slate-400">
-              Nous respectons votre vie privée. Désabonnement possible à tout moment.
+              Nous respectons votre vie privée. Désabonnement possible à tout
+              moment.
             </p>
           </div>
 
           {/* Section Réseaux sociaux */}
           <div className="space-y-6">
             <div>
-              <h3 className="text-xl font-bold mb-4 text-white">
-                Suivez-nous
-              </h3>
+              <h3 className="text-xl font-bold mb-4 text-white">Suivez-nous</h3>
               <div className="w-12 h-0.5 bg-pink-500 mb-4"></div>
             </div>
-            
+
             <p className="text-slate-300 mb-6">
               Rejoignez notre communauté et ne manquez aucune actualité !
             </p>
-            
+
             <div className="space-y-4">
               {[
-                { icon: FaFacebookF, href: "https://facebook.com", label: "Facebook", desc: "Suivez nos actualités" },
-                { icon: FaInstagram, href: "https://instagram.com", label: "Instagram", desc: "Photos et stories" },
-                { icon: FaTwitter, href: "https://twitter.com", label: "Twitter", desc: "Actualités en temps réel" },
-                { icon: FaPinterestP, href: "https://pinterest.com", label: "Pinterest", desc: "Inspirations et idées" }
+                {
+                  icon: FaFacebookF,
+                  href: "https://facebook.com",
+                  label: "Facebook",
+                  desc: "Suivez nos actualités",
+                },
+                {
+                  icon: FaInstagram,
+                  href: "https://instagram.com",
+                  label: "Instagram",
+                  desc: "Photos et stories",
+                },
+                {
+                  icon: FaTwitter,
+                  href: "https://twitter.com",
+                  label: "Twitter",
+                  desc: "Actualités en temps réel",
+                },
+                {
+                  icon: FaPinterestP,
+                  href: "https://pinterest.com",
+                  label: "Pinterest",
+                  desc: "Inspirations et idées",
+                },
               ].map((social, index) => (
                 <a
                   key={index}
@@ -166,7 +202,9 @@ export const Footer: React.FC<FooterProps> = () => {
                     <social.icon className="text-xl text-slate-400 group-hover:text-white transition-colors duration-200" />
                   </div>
                   <div className="flex-1">
-                    <div className="font-semibold text-white text-sm">{social.label}</div>
+                    <div className="font-semibold text-white text-sm">
+                      {social.label}
+                    </div>
                     <div className="text-xs text-slate-400">{social.desc}</div>
                   </div>
                 </a>
@@ -179,23 +217,25 @@ export const Footer: React.FC<FooterProps> = () => {
         <div className="border-t border-slate-700 mt-16 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-slate-400 text-sm">
-              © {new Date().getFullYear()} <span className="font-semibold text-white">Ma Boutique</span>. Tous droits réservés.
+              © {new Date().getFullYear()}{" "}
+              <span className="font-semibold text-white">{info?.name}</span>.
+              Tous droits réservés.
             </p>
             <div className="flex flex-wrap gap-6 text-sm">
-              <a 
-                href="/privacy" 
+              <a
+                href="/contact"
                 className="text-slate-400 hover:text-white hover:underline decoration-blue-500 underline-offset-4 transition-colors duration-200"
               >
                 Politique de confidentialité
               </a>
-              <a 
-                href="/terms" 
+              <a
+                href="/contact"
                 className="text-slate-400 hover:text-white hover:underline decoration-blue-500 underline-offset-4 transition-colors duration-200"
               >
                 Conditions d'utilisation
               </a>
-              <a 
-                href="/cookies" 
+              <a
+                href="/contact"
                 className="text-slate-400 hover:text-white hover:underline decoration-blue-500 underline-offset-4 transition-colors duration-200"
               >
                 Cookies

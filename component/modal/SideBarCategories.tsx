@@ -73,9 +73,7 @@ export default function SideBarCategories() {
     isPending,
   } = useQuery({
     queryKey: ["get_categories"],
-    queryFn: () =>
-      // get_categories({ store_id: "d3d8dfcf-b84b-49ed-976d-9889e79e6306" }),
-      get_categories({}),
+    queryFn: () => get_categories({}),
     select: (data) => (data?.list ? data.list : []),
   });
 
@@ -83,7 +81,7 @@ export default function SideBarCategories() {
     return (
       <div className="px-4">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-24 bg-gradient-to-r from-neutral-200 via-neutral-300 to-neutral-200 dark:from-neutral-700 dark:via-neutral-600 dark:to-neutral-700 rounded-lg animate-pulse bg-[length:200%_100%] animate-[shimmer_2s_infinite]"></div>
+          <div className="h-8 w-24 bg-gradient-to-r from-neutral-200 via-neutral-300 to-neutral-200 dark:from-neutral-700 dark:via-neutral-600 dark:to-neutral-700 rounded-lg bg-[length:200%_100%] animate-[shimmer_2s_infinite]"></div>
           <div className="h-6 w-6 bg-gradient-to-r from-neutral-200 via-neutral-300 to-neutral-200 dark:from-neutral-700 dark:via-neutral-600 dark:to-neutral-700 rounded-full animate-pulse"></div>
         </div>
       </div>
@@ -435,13 +433,13 @@ export default function SideBarCategories() {
             ) : (
               <div className="mb-6">
                 <h2
-                  className="text-2xl font-bold mb-2"
+                  className="sm:text-2xl text-lg font-bold mb-2"
                   style={{ color: filterSideTextColor }}
                 >
                   Explorez nos catégories
                 </h2>
                 <p
-                  className="text-sm opacity-70"
+                  className="sm:text-lg text-base opacity-70"
                   style={{
                     color: filterSideTextColor
                       ? `${filterSideTextColor}b3`
@@ -476,7 +474,7 @@ export default function SideBarCategories() {
                     <div className="relative flex items-center gap-4 flex-1">
                       {category.icon?.length > 0 && (
                         <div
-                          className={`p-2 rounded-xl transition-all duration-300 ${
+                          className={`rounded-xl transition-all duration-300 ${
                             hoveredCategory === category.id
                               ? "bg-neutral-200/70 dark:bg-neutral-700/70 scale-110"
                               : "bg-neutral-100 dark:bg-neutral-800/80"
@@ -485,7 +483,7 @@ export default function SideBarCategories() {
                           <ProductMedia
                             mediaList={category.icon}
                             productName={category.name}
-                            className={`size-5 transition-colors duration-300 ${
+                            className={`sm:size-14 size-11 transition-colors duration-300 ${
                               hoveredCategory === category.id
                                 ? "text-black dark:text-white" // Icône contrastée au survol
                                 : "text-neutral-600 dark:text-neutral-400"
@@ -496,7 +494,7 @@ export default function SideBarCategories() {
 
                       <div className="flex-1">
                         <span
-                          className="text-base font-medium transition-colors duration-300 relative group-hover:opacity-80"
+                          className="sm:text-base text-sm font-medium transition-colors duration-300 relative group-hover:opacity-80"
                           style={{ color: filterSideTextColor }}
                         >
                           {category.name}
@@ -510,11 +508,11 @@ export default function SideBarCategories() {
 
                         {hasSubCategories(category.id) && (
                           <div
-                            className="text-xs mt-1 opacity-60"
+                            className="sm:text-xs text-xs mt-1 opacity-60"
                             style={{
                               color: filterSideTextColor
-                                ? `${filterSideTextColor}99`
-                                : "rgba(0,0,0,0.6)",
+                                ? `${filterSideTextColor}`
+                                : "rgba(0,0,0,0.95)",
                             }}
                           >
                             {
@@ -570,7 +568,7 @@ export default function SideBarCategories() {
                     {item.icon}
                   </span>
                   <span
-                    className="font-medium transition-colors duration-300 group-hover:opacity-80"
+                    className="sm:text-base text-sm font-medium transition-colors duration-300 group-hover:opacity-80"
                     style={{ color: filterSideTextColor }}
                   >
                     {item.label}

@@ -79,29 +79,27 @@ export const reverseGeocode = async (
   lng: number
 ): Promise<Address | null> => {
   try {
-    const response = await api.api?.get('/api/reverse', {
+    const response = await api.api?.get("/api/reverse", {
       params: {
         lat,
         lon: lng, // attention à bien envoyer `lon` et non `lng`
       },
-    })
+    });
 
-    const result = response?.data
+    const result = response?.data;
 
     if (result && result.display_name) {
-      const text = result.display_name
-      const subtitle = result.address?.city || result.address?.suburb || ""
-      return { text, subtitle, lat, lng }
+      const text = result.display_name;
+      const subtitle = result.address?.city || result.address?.suburb || "";
+      return { text, subtitle, lat, lng };
     }
 
-    return null
+    return null;
   } catch (error) {
-    console.error('Erreur reverseGeocode côté client :', error)
-    return null
+    console.error("Erreur reverseGeocode côté client :", error);
+    return null;
   }
-}
-
-
+};
 
 const getSuggestions = async (query: string): Promise<SuggestionItem[]> => {
   try {
@@ -220,7 +218,6 @@ const MapComponent = React.lazy(async () => {
 
         marker.on("dragend", async (e: any) => {
           const { lat, lng } = e.target.getLatLng();
-          console.log("🚀 ~ marker.on ~ { lat, lng }:", { lat, lng })
           const newAddress = await reverseGeocode(lat, lng);
           if (newAddress) onAddressChange(newAddress);
         });
@@ -446,7 +443,7 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
         userPosition.lat,
         userPosition.lng
       );
-      console.log("🚀 ~ handleReturnToUserPosition ~ newAddress:", newAddress)
+      console.log("🚀 ~ handleReturnToUserPosition ~ newAddress:", newAddress);
       if (newAddress) {
         setAddress(newAddress);
         setMapCenter([userPosition.lat, userPosition.lng]);
@@ -464,13 +461,15 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
 
   return (
     <div className="w-full bg-transparent overflow-hidden">
-      <div className="bg-gradient-to-r from-slate-600 to-gray-600 p-6 rounded-2xl text-white">
+      <div className="bg-gradient-to-r from-slate-600 to-gray-600 sm:p-6 p-4 rounded-2xl text-white">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
-            <HiOutlineLocationMarker className="text-2xl" />
+            <HiOutlineLocationMarker className="sm:text-2xl text-lg" />
           </div>
           <div>
-            <h2 className="text-xl font-bold">Adresse de livraison</h2>
+            <h2 className="sm:text-xl text-base font-bold">
+              Adresse de livraison
+            </h2>
             <p className="text-blue-100 text-sm">
               Où souhaitez-vous être livré ?
             </p>
@@ -501,7 +500,7 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
                       ? "Modifier l'adresse de livraison"
                       : "Tapez votre adresse..."
                   }
-                  className={`w-full px-4 py-4 pl-12 text-gray-900 placeholder-gray-500 bg-white border-2 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 ${
+                  className={`w-full text-sm sm:text-base px-4 py-3 sm:py-4 pl-12 text-gray-900 placeholder-gray-500 bg-white border-2 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 ${
                     isGeocoding
                       ? "bg-gray-50 border-gray-200 cursor-not-allowed"
                       : "border-gray-200 hover:border-gray-300 group-hover:shadow-md"
@@ -524,7 +523,7 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
               <button
                 type="submit"
                 disabled={isLoading || isGeocoding}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-slate-600 to-slate-600 text-white font-semibold rounded-xl hover:from-slate-700 hover:to-slate-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3 bg-gradient-to-r sm:text-base text-sm from-slate-600 to-slate-600 text-white font-semibold rounded-xl hover:from-slate-700 hover:to-slate-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

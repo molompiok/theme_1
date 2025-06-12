@@ -10,7 +10,13 @@ import {
   get_favorites,
   get_features_with_values,
 } from "../../../api/products.api";
-import { ProductClient, ProductFavorite, OrderByType, filterOptions, defaultOptions } from "../../type";
+import {
+  ProductClient,
+  ProductFavorite,
+  OrderByType,
+  filterOptions,
+  defaultOptions,
+} from "../../type";
 import { usePageContext } from "../../../renderer/usePageContext";
 import { navigate } from "vike/client/router";
 import { DisplayPrice } from "../../../component/DisplayPrice";
@@ -22,10 +28,11 @@ import { useFiltersAndUrlSync } from "../../../hook/useUrlFilterManager";
 import FilterPopover from "../../../component/FilterPopover";
 import { useThemeSettingsStore } from "../../../store/themeSettingsStore";
 import clsx from "clsx";
+import ProductSearchCard from "../../../component/product/ProductSearchCard";
 // import Loading from "../../../component/Loading"; // Remplacé par le spinner de la recherche pour cohérence
 
 const GRID_CLASSES =
-  "grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6";
+  "grid grid-cols-1 gap-4 min-[280px]:grid-cols-2 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6";
 
 // interface Data { dehydratedState?: unknown; } // Optionnel
 
@@ -87,7 +94,7 @@ export default function Page() {
 
       <div className="font-primary mx-4 sm:mx-6 lg:mx-12 xl:mx-auto max-w-[1440px] py-8">
         {/* <HydrationBoundary state={dehydratedState}> */}
-          <ProductList />
+        <ProductList />
         {/* </HydrationBoundary> */}
       </div>
       <style>{styles}</style>
@@ -193,7 +200,7 @@ const ProductList = () => {
     );
   }
 
-  if (!allFavorites.length && status === 'success') {
+  if (!allFavorites.length && status === "success") {
     return (
       <div className="text-center py-16">
         <div className="p-8 rounded-3xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-100 max-w-md mx-auto">
@@ -213,33 +220,36 @@ const ProductList = () => {
 
   return (
     <div className="space-y-6">
-       {allFavorites.length > 0 && (
-         <div className="flex items-center justify-between">
-            <p className="text-slate-600">
+      {allFavorites.length > 0 && (
+        <div className="flex items-center justify-between">
+          <p className="text-slate-600">
             <span className="font-semibold text-slate-800">
-                {allFavorites.length}
+              {allFavorites.length}
             </span>{" "}
             favori{allFavorites.length > 1 ? "s" : ""} trouvé
             {allFavorites.length > 1 ? "s" : ""}
-            </p>
+          </p>
         </div>
-       )}
+      )}
 
       <div className={GRID_CLASSES}>
-        {allFavorites.map((favorite, index) => (
+        {allFavorites.map((favorite, index) =>
           favorite && favorite.product ? (
-            <ProductCard
+            <ProductSearchCard
               key={favorite.product.id}
               product={favorite.product}
               index={index}
             />
           ) : null
-        ))}
+        )}
       </div>
 
-      <div ref={observerTarget} className="py-8 flex justify-center min-h-[50px]">
+      <div
+        ref={observerTarget}
+        className="py-8 flex justify-center min-h-[50px]"
+      >
         {isFetchingNextPage ? (
-           <div className="inline-flex items-center space-x-2 text-gray-600">
+          <div className="inline-flex items-center space-x-2 text-gray-600">
             <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
             <div
               className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
@@ -278,96 +288,6 @@ function LoadingSkeleton() {
         </div>
       ))}
     </div>
-  );
-}
-
-function ProductCard({
-  product,
-  index,
-}: {
-  product: ProductClient;
-  index: number;
-}) {
-  const { data: feature, isLoading } = useQuery({
-    queryKey: ["get_features_with_values", product.default_feature_id],
-    queryFn: () =>
-      get_features_with_values({
-        feature_id: product.default_feature_id,
-      }),
-    enabled: !!product.default_feature_id,
-  });
-  const settings = useThemeSettingsStore((state) => state);
-
-  const mediaList = feature?.[0]?.values?.[0]?.views || [];
-  const handleNavigation = () => navigate(`/${formatSlug(product.slug)}`);
-
-  return (
-    <article
-      onClick={handleNavigation}
-      className="group relative bg-white rounded-3xl overflow-hidden shadow-lg border border-slate-100 hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 cursor-pointer transform hover:-translate-y-1 hover:scale-[1.01]"
-      style={{
-        animationDelay: `${index * 50}ms`,
-        animation: "fadeInUp 0.6s ease-out forwards",
-      }}
-    >
-      {product.barred_price && settings.showInfoPromotion && (
-        <div
-          className={clsx(
-            `absolute z-10 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg`,
-            settings.promotionTextPosition === "top-left" && "top-2 left-2",
-            settings.promotionTextPosition === "bottom-left" && "bottom-2 left-2",
-            settings.promotionTextPosition === "bottom-right" && "bottom-2 right-2",
-            settings.promotionTextPosition === "top-right" && "top-2 right-2"
-          )}
-          style={{
-            backgroundColor: settings.promotionTextBackgroundColor,
-            color: settings.promotionTextColor,
-          }}
-        >
-          {settings.promotionText}
-        </div>
-      )}
-
-      <div className="relative overflow-hidden">
-        {isLoading ? (
-          <div className="h-48 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-pulse flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        ) : (
-          <ProductMedia
-            mediaList={mediaList}
-            productName={product.name}
-            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700"
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      </div>
-
-      <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-        <FavoriteButton product_id={product.id} />
-      </div>
-      <div className="p-6 space-y-4">
-        <div>
-          <h2 className="font-bold text-slate-800 text-lg line-clamp-2 mb-2 group-hover:text-slate-600 transition-colors duration-300">
-            {product.name}
-          </h2>
-          <p className="text-slate-600 text-sm line-clamp-2 leading-relaxed">
-            {product.description || "Description non disponible"}
-          </p>
-        </div>
-
-        <div className="pt-2 border-t border-slate-100">
-          <DisplayPrice
-            currency={product.currency}
-            price={product.price ?? 0}
-            product_id={product.id}
-            barred_price={product.barred_price}
-          />
-        </div>
-      </div>
-
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-    </article>
   );
 }
 

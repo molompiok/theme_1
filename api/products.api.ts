@@ -79,6 +79,18 @@ export const get_products = async (params: {
   }
 };
 
+export const get_similar_products = async ({ slug }: { slug: string }): Promise<ProductType[]> => {
+  try {
+    // On appelle la nouvelle URL
+    const response = await api.api?.get<ProductType[]>(`/v1/products/similar/${slug}`);
+    console.log("🚀 ~ constget_similar_products= ~ response:", response?.data)
+    return response?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch similar products:", error);
+    throw error; // L'erreur sera gérée par React Query
+  }
+};
+
 export const get_features_with_values = async (params: {
   product_id?: string;
   feature_id?: string;

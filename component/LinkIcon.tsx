@@ -7,15 +7,19 @@ export { LinkIcon };
 function LinkIcon(props: {
   href: string;
   className?: string;
-  isSimple?: boolean ;
+  isSimple?: boolean;
+  onClick?: () => void;
   children: React.ReactNode;
 }) {
-  const { href, children ,isSimple  } = props;
+  const { href, children, isSimple, onClick } = props;
   const pageContext = usePageContext();
   const { urlPathname } = pageContext;
 
-  const isActive =  isSimple ?
-    href === "/" ? urlPathname === href : urlPathname.startsWith(href) : urlPathname === href
+  const isActive = isSimple
+    ? href === "/"
+      ? urlPathname === href
+      : urlPathname.startsWith(href)
+    : urlPathname === href;
 
   const className = [
     props.className,
@@ -29,10 +33,10 @@ function LinkIcon(props: {
     <button
       onClick={() => {
         navigate(href);
+        onClick?.();
       }}
-     
     >
-      <span  className={className}>{children}</span>
+      <span className={className}>{children}</span>
     </button>
   );
 }

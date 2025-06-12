@@ -22,7 +22,9 @@ const LivraisonStep = ({
     React.SetStateAction<"info" | "livraison" | "Finalisation">
   >;
 }) => {
-  const [selectedOption, setSelectedOption] = useState<"livraison" | "retrait" | null>(null);
+  const [selectedOption, setSelectedOption] = useState<
+    "livraison" | "retrait" | null
+  >(null);
   const user = useAuthStore((state) => state.user);
   const { setWithDelivery } = useOrderInCart();
 
@@ -31,13 +33,16 @@ const LivraisonStep = ({
     setSelectedOption(option);
   };
 
-  const isPermitToProceedForDelivery = user?.id && user.addresses?.length > 0 && selectedOption === "livraison";
+  const isPermitToProceedForDelivery =
+    user?.id && user.addresses?.length > 0 && selectedOption === "livraison";
   const isPermitToProceedForPickup = user?.id && selectedOption === "retrait";
-  const isPermitToProceed = isPermitToProceedForDelivery || isPermitToProceedForPickup;
+  const isPermitToProceed =
+    isPermitToProceedForDelivery || isPermitToProceedForPickup;
 
   const getErrorMessage = () => {
-    if (!selectedOption) return "Veuillez choisir une option de livraison ou de retrait.";
-    if (selectedOption === "livraison" && (!user?.addresses?.length)) {
+    if (!selectedOption)
+      return "Veuillez choisir une option de livraison ou de retrait.";
+    if (selectedOption === "livraison" && !user?.addresses?.length) {
       return "Veuillez ajouter une adresse pour la livraison.";
     }
     return null;
@@ -61,10 +66,12 @@ const LivraisonStep = ({
           {/* Sliding background */}
           <div
             className={`absolute top-1 bottom-1 w-1/2 bg-white rounded-xl shadow-sm transition-transform duration-300 ease-out ${
-              selectedOption === "retrait" ? "translate-x-full" : "translate-x-0"
+              selectedOption === "retrait"
+                ? "translate-x-full"
+                : "translate-x-0"
             } ${!selectedOption ? "opacity-0" : "opacity-100"}`}
           />
-          
+
           {/* Livraison Option */}
           <button
             onClick={() => handleSelect("livraison")}
@@ -76,7 +83,9 @@ const LivraisonStep = ({
           >
             <FaTruck
               className={`transition-all duration-300 ${
-                selectedOption === "livraison" ? "text-slate-600 scale-110" : "text-gray-500"
+                selectedOption === "livraison"
+                  ? "text-slate-600 scale-110"
+                  : "text-gray-500"
               }`}
               size={20}
             />
@@ -97,7 +106,9 @@ const LivraisonStep = ({
           >
             <FaStore
               className={`transition-all duration-300 ${
-                selectedOption === "retrait" ? "text-green-600 scale-110" : "text-gray-500"
+                selectedOption === "retrait"
+                  ? "text-green-600 scale-110"
+                  : "text-gray-500"
               }`}
               size={20}
             />
@@ -113,17 +124,21 @@ const LivraisonStep = ({
       <div className="min-h-[300px]">
         {selectedOption === "livraison" && (
           <div className="space-y-6 animate-fadeIn">
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-2 sm:p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-slate-100 rounded-full">
                   <FaTruck className="text-slate-600" size={20} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Livraison à domicile</h3>
-                  <p className="text-sm text-gray-600">Livraison estimée sous 2-3 jours ouvrables</p>
+                  <h3 className="font-semibold text-gray-900">
+                    Livraison à domicile
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Livraison estimée sous 2-3 jours ouvrables
+                  </p>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <AddressSelector mapHeight="350px" />
               </div>
@@ -139,8 +154,12 @@ const LivraisonStep = ({
                   <FaStore className="text-green-600" size={20} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Retrait gratuit</h3>
-                  <p className="text-sm text-gray-600">Récupérez votre commande à notre point de retrait</p>
+                  <h3 className="font-semibold text-gray-900">
+                    Retrait gratuit
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Récupérez votre commande à notre point de retrait
+                  </p>
                 </div>
               </div>
 
@@ -148,29 +167,48 @@ const LivraisonStep = ({
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-4">
                     <div className="flex items-start gap-3 p-3 bg-white rounded-xl">
-                      <FaMapMarkerAlt className="text-green-600 mt-1 flex-shrink-0" size={16} />
+                      <FaMapMarkerAlt
+                        className="text-green-600 mt-1 flex-shrink-0"
+                        size={16}
+                      />
                       <div>
-                        <div className="font-medium text-gray-900 text-sm">Adresse</div>
-                        <div className="text-gray-700 text-sm">{InfoOrderOwner.pickup_address}</div>
+                        <div className="font-medium text-gray-900 text-sm">
+                          Adresse
+                        </div>
+                        <div className="text-gray-700 text-sm">
+                          {InfoOrderOwner.pickup_address}
+                        </div>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3 p-3 bg-white rounded-xl">
-                      <FaCalendarAlt className="text-green-600 mt-1 flex-shrink-0" size={16} />
+                      <FaCalendarAlt
+                        className="text-green-600 mt-1 flex-shrink-0"
+                        size={16}
+                      />
                       <div>
-                        <div className="font-medium text-gray-900 text-sm">Date limite</div>
-                        <div className="text-gray-700 text-sm">{InfoOrderOwner.pickup_date}</div>
+                        <div className="font-medium text-gray-900 text-sm">
+                          Date limite
+                        </div>
+                        <div className="text-gray-700 text-sm">
+                          {InfoOrderOwner.pickup_date}
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div className="flex items-start gap-3 p-3 bg-white rounded-xl">
-                      <FaPhone className="text-green-600 mt-1 flex-shrink-0" size={16} />
+                      <FaPhone
+                        className="text-green-600 mt-1 flex-shrink-0"
+                        size={16}
+                      />
                       <div>
-                        <div className="font-medium text-gray-900 text-sm">Contact</div>
-                        <a 
-                          href={`tel:${InfoOrderOwner.pickup_phone}`} 
+                        <div className="font-medium text-gray-900 text-sm">
+                          Contact
+                        </div>
+                        <a
+                          href={`tel:${InfoOrderOwner.pickup_phone}`}
                           className="text-green-600 hover:text-green-700 text-sm font-medium transition-colors"
                         >
                           {InfoOrderOwner.pickup_phone}
@@ -184,9 +222,14 @@ const LivraisonStep = ({
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 p-3 bg-white rounded-xl hover:bg-gray-50 transition-colors group"
                     >
-                      <FaMapMarkerAlt className="text-green-600 group-hover:text-green-700 transition-colors" size={16} />
+                      <FaMapMarkerAlt
+                        className="text-green-600 group-hover:text-green-700 transition-colors"
+                        size={16}
+                      />
                       <div>
-                        <div className="font-medium text-gray-900 text-sm">Localisation</div>
+                        <div className="font-medium text-gray-900 text-sm">
+                          Localisation
+                        </div>
                         <div className="text-green-600 group-hover:text-green-700 text-sm font-medium transition-colors">
                           Voir sur Google Maps
                         </div>
@@ -204,7 +247,9 @@ const LivraisonStep = ({
             <div className="text-center space-y-3">
               <div className="text-4xl">📦</div>
               <p className="text-lg font-medium">Sélectionnez une option</p>
-              <p className="text-sm">Choisissez votre mode de récupération préféré</p>
+              <p className="text-sm">
+                Choisissez votre mode de récupération préféré
+              </p>
             </div>
           </div>
         )}
@@ -215,11 +260,21 @@ const LivraisonStep = ({
         <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
           <div className="flex items-center gap-3">
             <div className="p-1 bg-red-100 rounded-full">
-              <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              <svg
+                className="w-4 h-4 text-red-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
               </svg>
             </div>
-            <p className="text-red-700 font-medium text-sm">{getErrorMessage()}</p>
+            <p className="text-red-700 font-medium text-sm">
+              {getErrorMessage()}
+            </p>
           </div>
         </div>
       )}
@@ -233,7 +288,7 @@ const LivraisonStep = ({
         >
           Retour
         </button>
-        
+
         <button
           type="button"
           onClick={() => setStep("Finalisation")}

@@ -411,17 +411,17 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
     deleteUserPhoneMutation.isPending;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-2">
       {/* En-tête avec icône */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2.5 bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/30 dark:to-emerald-800/20 rounded-xl">
-          <FiPhone className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+        <div className="p-2.5 bg-gradient-to-br from-emerald-100 to-emerald-50 rounded-xl">
+          <FiPhone className="w-5 h-5 text-emerald-600 " />
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+          <h3 className="sm:text-lg text-base font-semibold text-slate-800 ">
             Numéros de téléphone
           </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="sm:text-sm text-xs text-slate-500 ">
             Gérez vos numéros de contact ({numbers.length}/{maxItems})
           </p>
         </div>
@@ -438,14 +438,14 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
               onMouseLeave={() => setHoveredPhone(null)}
             >
               {/* Effet de glow au hover */}
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/20 to-blue-50/10 dark:from-emerald-900/10 dark:to-blue-800/5 rounded-2xl blur-xl transition-all duration-500 opacity-0 group-hover:opacity-100"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/20 to-blue-50/10  rounded-2xl blur-xl transition-all duration-500 opacity-0 group-hover:opacity-100"></div>
 
               <div
                 className={clsx(
-                  "relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border rounded-2xl p-6 transition-all duration-300",
+                  "relative bg-white/80 backdrop-blur-xl border rounded-2xl sm:p-6 p-3 transition-all duration-300",
                   editState?.id === phone.id
-                    ? "border-slate-400 dark:border-slate-500 shadow-xl shadow-slate-200/20 dark:shadow-slate-900/20"
-                    : "border-slate-200/60 dark:border-slate-700/60 hover:border-slate-300/80 dark:hover:border-slate-600/80 hover:shadow-lg hover:shadow-slate-200/10 dark:hover:shadow-slate-900/10"
+                    ? "border-slate-400 shadow-xl shadow-slate-200/20"
+                    : "border-slate-200/60 hover:border-slate-300/80 hover:shadow-lg hover:shadow-slate-200/10"
                 )}
               >
                 {editState?.id === phone.id ? (
@@ -456,10 +456,10 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                     className="space-y-6"
                   >
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-lg">
-                        <FiEdit2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <div className="p-2 bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg">
+                        <FiEdit2 className="w-4 h-4 text-blue-600" />
                       </div>
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      <span className="text-sm font-medium text-slate-700">
                         Modification du numéro
                       </span>
                     </div>
@@ -468,7 +468,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                       <div className="md:col-span-2">
                         <label
                           htmlFor={`edit-country-${phone.id}`}
-                          className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                          className="block text-sm font-medium text-slate-700 mb-2"
                         >
                           Pays
                         </label>
@@ -478,7 +478,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                             value={editState.country.iso}
                             onChange={handleEditFormCountryChange}
                             disabled={updateUserPhoneMutation.isPending}
-                            className="w-full pl-4 pr-10 py-3 text-sm bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:border-slate-400 dark:focus:border-slate-500 focus:ring-0 outline-none transition-all duration-300 text-slate-900 dark:text-slate-100 appearance-none cursor-pointer"
+                            className="w-full pl-4 pr-10 py-3 text-sm bg-slate-50/50 border-2 border-slate-200 rounded-xl focus:border-slate-400 focus:ring-0 outline-none transition-all duration-300 text-slate-900 appearance-none cursor-pointer"
                           >
                             {countries.map((c) => (
                               <option key={c.iso} value={c.iso}>
@@ -496,7 +496,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                       <div className="md:col-span-3">
                         <label
                           htmlFor={`edit-phone-${phone.id}`}
-                          className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                          className="block text-sm font-medium text-slate-700 mb-2"
                         >
                           Numéro de téléphone
                         </label>
@@ -513,18 +513,16 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                             "0",
                             "#"
                           )}`}
-                          key={`${editState.id}-${editState.country.iso}`} // Clé pour forcer le re-rendu si le pays/masque change
-                          className="w-full px-4 py-3 text-sm bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:border-slate-400 dark:focus:border-slate-500 focus:ring-0 outline-none transition-all duration-300 text-slate-900 dark:text-slate-100"
+                          key={`${editState.id}-${editState.country.iso}`}
+                          className="w-full px-4 py-3 text-sm bg-slate-50/50 border-2 border-slate-200 rounded-xl focus:border-slate-400 focus:ring-0 outline-none transition-all duration-300 text-slate-900"
                         />
                       </div>
                     </div>
 
                     {editFormError && (
-                      <div className="flex items-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                      <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl">
                         <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                        <p className="text-sm text-red-700 dark:text-red-300">
-                          {editFormError}
-                        </p>
+                        <p className="text-sm text-red-700">{editFormError}</p>
                       </div>
                     )}
 
@@ -533,7 +531,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                         type="button"
                         onClick={handleCancelEdit}
                         disabled={updateUserPhoneMutation.isPending}
-                        className="px-6 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]"
+                        className="px-6 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]"
                       >
                         Annuler
                       </button>
@@ -542,7 +540,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                         disabled={
                           updateUserPhoneMutation.isPending || !!editFormError
                         }
-                        className="px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 dark:from-slate-500 dark:to-slate-600 dark:hover:from-slate-600 dark:hover:to-slate-700 rounded-xl transition-all duration-200 disabled:opacity-50 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+                        className="px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 rounded-xl transition-all duration-200 disabled:opacity-50 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
                       >
                         {updateUserPhoneMutation.isPending ? (
                           <>
@@ -562,18 +560,18 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-3 bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/30 dark:to-emerald-800/20 rounded-xl">
+                        <div className="p-3 bg-gradient-to-br from-emerald-100 to-emerald-50 rounded-xl">
                           <span className="text-lg">
                             {getFlagEmoji(phone.country_iso)}
                           </span>
                         </div>
                         <div>
-                          <p className="text-base font-semibold text-slate-800 dark:text-slate-200">
+                          <p className="sm:text-base whitespace-nowrap text-xs font-semibold text-slate-800">
                             {IMask.pipe(phone.phone_number, {
                               mask: phone.display_format,
                             } as any)}
                           </p>
-                          <p className="text-sm text-slate-500 dark:text-slate-400">
+                          <p className="sm:text-sm text-xs text-slate-500">
                             {
                               countries.find((c) => c.iso === phone.country_iso)
                                 ?.name
@@ -594,7 +592,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                       <button
                         onClick={() => handleEditStart(phone)}
                         disabled={isAnyMutationPending || !!editState} // Désactiver si une mutation est en cours OU si un autre formulaire d'édition est déjà ouvert
-                        className="p-2.5 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100/50 dark:bg-slate-700/50 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110 active:scale-95"
+                        className="p-2.5 text-slate-500 hover:text-blue-600 bg-slate-100/50 hover:bg-blue-100 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110 active:scale-95"
                         aria-label="Modifier ce numéro"
                       >
                         <FiEdit2 size={16} />
@@ -602,7 +600,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                       <button
                         onClick={() => handleDelete(phone.id)}
                         disabled={isAnyMutationPending || !!editState} // Désactiver si une mutation est en cours OU si un formulaire d'édition est ouvert
-                        className="p-2.5 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 bg-slate-100/50 dark:bg-slate-700/50 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110 active:scale-95"
+                        className="p-2.5 text-slate-500 hover:text-red-600 bg-slate-100/50 hover:bg-red-100 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110 active:scale-95"
                         aria-label="Supprimer ce numéro"
                       >
                         {deleteUserPhoneMutation.isPending &&
@@ -633,14 +631,14 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
               className="space-y-6"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2.5 bg-gradient-to-br from-emerald-100 to-emerald-50 rounded-xl">
+                <div className="p-2 bg-gradient-to-br from-emerald-100 to-emerald-50 rounded-xl">
                   <FiPlus className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-800 dark:text-slate-200">
+                  <h4 className="sm:text-lg text-sm font-semibold text-gray-800">
                     Ajouter un nouveau numéro
                   </h4>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <p className="text-xs sm:text-sm text-slate-500">
                     Renseignez les informations de votre numéro de téléphone
                   </p>
                 </div>
@@ -650,7 +648,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                 <div className="md:col-span-2">
                   <label
                     htmlFor="add-country"
-                    className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                    className="block text-sm font-medium text-slate-700 mb-2"
                   >
                     Sélectionner le pays
                   </label>
@@ -660,7 +658,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                       value={addFormCountry.iso}
                       onChange={handleAddFormCountryChange}
                       disabled={createUserPhoneMutation.isPending}
-                      className="w-full pl-4 pr-10 py-3 text-sm bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:border-emerald-400 dark:focus:border-emerald-500 focus:ring-0 outline-none transition-all duration-300 text-slate-900 dark:text-slate-100 appearance-none cursor-pointer"
+                      className="w-full pl-4 pr-10 py-3 text-sm bg-slate-50/50 border-2 border-slate-200 rounded-xl focus:border-emerald-400 focus:ring-0 outline-none transition-all duration-300 text-slate-900 appearance-none cursor-pointer"
                     >
                       {countries.map((c) => (
                         <option key={c.iso} value={c.iso}>
@@ -678,7 +676,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                 <div className="md:col-span-3">
                   <label
                     htmlFor="add-phone"
-                    className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                    className="block text-sm font-medium text-slate-700 mb-2"
                   >
                     Numéro de téléphone
                   </label>
@@ -693,22 +691,20 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                     }
                     disabled={createUserPhoneMutation.isPending}
                     placeholder={`Ex: ${addFormCountry.mask.replace("0", "#")}`}
-                    key={addFormCountry.iso} // Pour forcer le re-rendu du composant iMask si le pays (et donc le masque) change
-                    className="w-full px-4 py-3 text-sm bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:border-emerald-400 dark:focus:border-emerald-500 focus:ring-0 outline-none transition-all duration-300 text-slate-900 dark:text-slate-100"
+                    key={addFormCountry.iso}
+                    className="w-full px-4 py-3 text-sm bg-slate-50/50 border-2 border-slate-200 rounded-xl focus:border-emerald-400 focus:ring-0 outline-none transition-all duration-300 text-slate-900"
                   />
                 </div>
               </div>
 
               {addFormError && (
-                <div className="flex items-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl">
                   <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                  <p className="text-sm text-red-700 dark:text-red-300">
-                    {addFormError}
-                  </p>
+                  <p className="text-sm text-red-700">{addFormError}</p>
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="flex items-center  sm:flex-row flex-col-reverse  justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -717,18 +713,18 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                     setAddFormValue("");
                   }}
                   disabled={createUserPhoneMutation.isPending}
-                  className="px-6 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-6 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={createUserPhoneMutation.isPending || !!addFormError}
-                  className="px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 dark:from-emerald-500 dark:to-emerald-600 dark:hover:from-emerald-600 dark:hover:to-emerald-700 rounded-xl transition-all duration-200 disabled:opacity-50 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+                  className="px-6 py-2.5 text-sm whitespace-nowrap font-medium text-white bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 rounded-xl transition-all duration-200 disabled:opacity-50 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
                 >
                   {createUserPhoneMutation.isPending ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 whitespace-nowrap border-white/30 border-t-white rounded-full animate-spin"></div>
                       Ajout en cours...
                     </>
                   ) : (
@@ -759,7 +755,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
         >
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/20 to-blue-50/10rounded-2xl blur-xl transition-all duration-500 opacity-0 group-hover:opacity-100"></div>
 
-          <div className="w-full flex items-center justify-center gap-2 py-4 px-6 text-sm font-semibold text-emerald-600 bg-gradient-to-br from-emerald-50 to-emerald-100/60 border-2 border-dashed border-emerald-300 dark:border-emerald-700/80 rounded-2xl hover:border-solid hover:border-emerald-400 hover:bg-gradient-to-br hover:from-emerald-100 hover:to-emerald-200/60 dark:hover:from-emerald-800/40 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed group-hover:shadow-lg group-hover:shadow-emerald-500/10">
+          <div className="w-full flex items-center justify-center gap-2 sm:py-4 py-3 sm:px-6 px-4 text-sm font-semibold text-emerald-600 bg-gradient-to-br from-emerald-50 to-emerald-100/60 border-2 border-dashed border-emerald-300 rounded-2xl hover:border-solid hover:border-emerald-400 hover:bg-gradient-to-br hover:from-emerald-100 hover:to-emerald-200/60 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed group-hover:shadow-lg group-hover:shadow-emerald-500/10">
             <FiPlus
               size={18}
               className="transition-transform duration-300 group-hover:rotate-90"

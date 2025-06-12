@@ -25,24 +25,26 @@ const FinalInfo = ({ step, setStep }: RecapitulatifStepProps) => {
   const { with_delivery } = useOrderInCart();
   const { data: cart } = useCart();
   const totalPrice = cart?.total || 0;
-const {user} = useAuthStore();
-  const { mutate, isError, error, isSuccess , isPending} = useMutation({
+  const { user } = useAuthStore();
+  const { mutate, isError, error, isSuccess, isPending } = useMutation({
     mutationFn: create_user_order,
     onSuccess: (data) => {
       createQueryClient.cancelQueries({
-        queryKey: ['get_orders'],
+        queryKey: ["get_orders"],
       });
-      navigate('/profile/commandes');
+      navigate("/profile/commandes");
     },
     onError: (error: Error) => {
-      console.error('Erreur lors de la mutation:', error.message);
+      console.error("Erreur lors de la mutation:", error.message);
     },
   });
 
   if (with_delivery === null) {
     return (
       <div className="p-6 text-center">
-        <p className="text-gray-600">Aucune information de commande disponible.</p>
+        <p className="text-gray-600">
+          Aucune information de commande disponible.
+        </p>
         <button
           onClick={() => setStep("livraison")}
           className="mt-4 flex items-center justify-center w-full py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
@@ -56,7 +58,7 @@ const {user} = useAuthStore();
   const isDelivery = with_delivery === true;
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-8">
+    <div className="max-w-2xl mx-auto sm:p-6 p-2 space-y-8">
       <h1 className="text-2xl font-semibold text-gray-900">
         Récapitulatif de votre commande
       </h1>
@@ -81,19 +83,22 @@ const {user} = useAuthStore();
                   <span className="font-semibold">Adresse :</span>{" "}
                   {user?.addresses?.[0].name || "Non spécifiée"}
                 </p>
-                {user?.addresses?.[0].latitude && user?.addresses?.[0].longitude && (
-                  <p>
-                    <span className="font-semibold">Coordonnées :</span>{" "}
-                    {user?.addresses?.[0].latitude}, {user?.addresses?.[0].longitude}
-                  </p>
-                )}
+                {user?.addresses?.[0].latitude &&
+                  user?.addresses?.[0].longitude && (
+                    <p>
+                      <span className="font-semibold">Coordonnées :</span>{" "}
+                      {user?.addresses?.[0].latitude},{" "}
+                      {user?.addresses?.[0].longitude}
+                    </p>
+                  )}
                 <p>
                   <span className="font-semibold">Date estimée :</span>{" "}
                   {"2-3 jours ouvrables"}
                 </p>
                 <p>
                   <span className="font-semibold">Coût :</span>{" "}
-                  {isDelivery ? InfoOrderOwner.delivery_price : 0}{' CFA'}
+                  {isDelivery ? InfoOrderOwner.delivery_price : 0}
+                  {" CFA"}
                 </p>
               </>
             ) : (
@@ -102,12 +107,14 @@ const {user} = useAuthStore();
                   <span className="font-semibold">Lieu :</span>{" "}
                   {InfoOrderOwner.pickup_address || "Non spécifié"}
                 </p>
-                {InfoOrderOwner.pickup_latitude && InfoOrderOwner.pickup_longitude && (
-                  <p>
-                    <span className="font-semibold">Coordonnées :</span>{" "}
-                    {InfoOrderOwner.pickup_latitude}, {InfoOrderOwner.pickup_longitude}
-                  </p>
-                )}
+                {InfoOrderOwner.pickup_latitude &&
+                  InfoOrderOwner.pickup_longitude && (
+                    <p>
+                      <span className="font-semibold">Coordonnées :</span>{" "}
+                      {InfoOrderOwner.pickup_latitude},{" "}
+                      {InfoOrderOwner.pickup_longitude}
+                    </p>
+                  )}
                 <p>
                   <span className="font-semibold">Date limite :</span>{" "}
                   {InfoOrderOwner.pickup_date || "Non spécifiée"}
@@ -130,17 +137,17 @@ const {user} = useAuthStore();
               {InfoOrderOwner.pickup_phone || "Non spécifié"}
             </p>
             {InfoOrderOwner.country_code && (
-             <p className="flex items-center">
-             <a
-               href={InfoOrderOwner.pickup_maps_link}
-               target="_blank"
-               rel="noopener noreferrer"
-               className="text-blue-600 hover:underline flex items-center"
-             >
-               <FaMapMarkerAlt className="mr-2 text-blue-600" size={16} />
-               Voir sur Google Maps
-             </a>
-           </p>
+              <p className="flex items-center">
+                <a
+                  href={InfoOrderOwner.pickup_maps_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline flex items-center"
+                >
+                  <FaMapMarkerAlt className="mr-2 text-blue-600" size={16} />
+                  Voir sur Google Maps
+                </a>
+              </p>
             )}
           </div>
         </section>
@@ -159,26 +166,53 @@ const {user} = useAuthStore();
 
             mutate({
               with_delivery: isDelivery,
-              total_price: totalPrice + (isDelivery ? InfoOrderOwner.delivery_price : 0),
-              delivery_price: isDelivery ? InfoOrderOwner.delivery_price : undefined,
-              phone_number: user?.phone_numbers?.[0]?.phone_number || '',
-              formatted_phone_number: user?.phone_numbers?.[0]?.format || '',
+              total_price:
+                totalPrice + (isDelivery ? InfoOrderOwner.delivery_price : 0),
+              delivery_price: isDelivery
+                ? InfoOrderOwner.delivery_price
+                : undefined,
+              phone_number: user?.phone_numbers?.[0]?.phone_number || "",
+              formatted_phone_number: user?.phone_numbers?.[0]?.format || "",
               country_code: InfoOrderOwner.country_code,
-              delivery_address: isDelivery ? (user?.addresses?.[0]?.name || '') : undefined,
-              delivery_address_name: isDelivery ? (user?.addresses?.[0]?.name || '') : undefined,
-              delivery_date: isDelivery ? pickupDeadline.toISOString() : undefined,
-              delivery_latitude: isDelivery ? parseFloat(user?.addresses?.[0]?.latitude || '0') : undefined,
-              delivery_longitude: isDelivery ? parseFloat(user?.addresses?.[0]?.longitude || '0') : undefined,
-              pickup_address: isDelivery ? undefined : InfoOrderOwner.pickup_address,
-              pickup_address_name: isDelivery ? undefined : InfoOrderOwner.pickup_address,
-              pickup_date: isDelivery ? undefined : pickupDeadline.toISOString(),
-              pickup_latitude: isDelivery ? undefined : InfoOrderOwner.pickup_latitude,
-            
-              pickup_longitude: isDelivery ? undefined : InfoOrderOwner.pickup_longitude,
+              delivery_address: isDelivery
+                ? user?.addresses?.[0]?.name || ""
+                : undefined,
+              delivery_address_name: isDelivery
+                ? user?.addresses?.[0]?.name || ""
+                : undefined,
+              delivery_date: isDelivery
+                ? pickupDeadline.toISOString()
+                : undefined,
+              delivery_latitude: isDelivery
+                ? parseFloat(user?.addresses?.[0]?.latitude || "0")
+                : undefined,
+              delivery_longitude: isDelivery
+                ? parseFloat(user?.addresses?.[0]?.longitude || "0")
+                : undefined,
+              pickup_address: isDelivery
+                ? undefined
+                : InfoOrderOwner.pickup_address,
+              pickup_address_name: isDelivery
+                ? undefined
+                : InfoOrderOwner.pickup_address,
+              pickup_date: isDelivery
+                ? undefined
+                : pickupDeadline.toISOString(),
+              pickup_latitude: isDelivery
+                ? undefined
+                : InfoOrderOwner.pickup_latitude,
+
+              pickup_longitude: isDelivery
+                ? undefined
+                : InfoOrderOwner.pickup_longitude,
             });
           }}
           disabled={isPending}
-          className={`flex-1 py-3 px-4 rounded-md text-white transition-colors ${isPending ? 'bg-gray-400 cursor-not-allowed' : 'bg-black hover:bg-gray-800'}`}
+          className={`flex-1 py-3 px-4 rounded-md text-white transition-colors ${
+            isPending
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-black hover:bg-gray-800"
+          }`}
         >
           {isPending ? "En cours..." : "Confirmer la commande"}
         </button>

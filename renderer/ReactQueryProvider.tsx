@@ -6,12 +6,11 @@ import {
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-
 const createQueryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 5 * 60 * 1000,    // 5 minutes
+      gcTime: 5 * 60 * 1000, // 5 minutes
       refetchOnMount: true,
       refetchOnWindowFocus: false, // Désactivé pour éviter les rechargements inutiles
       refetchOnReconnect: true,
@@ -20,7 +19,7 @@ const createQueryClient = new QueryClient({
   },
 });
 
- function ReactQueryProvider({
+function ReactQueryProvider({
   children,
   dehydratedState,
 }: {
@@ -29,11 +28,13 @@ const createQueryClient = new QueryClient({
 }) {
   return (
     <QueryClientProvider client={createQueryClient}>
-      <HydrationBoundary state={dehydratedState ?? { queries: [], mutations: [] }}>
+      <HydrationBoundary
+        state={dehydratedState ?? { queries: [], mutations: [] }}
+      >
         {children}
       </HydrationBoundary>
-      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }
-export { createQueryClient ,ReactQueryProvider };
+export { createQueryClient, ReactQueryProvider };

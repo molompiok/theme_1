@@ -29,7 +29,7 @@ const onRenderHtml: OnRenderHtmlAsync = async (
   const apiUrlFromHeader =
     host +
     (headersOriginal["x-store-api-url"] ||
-      "api.sublymus-server.com/----error--apiId--messing---");
+      "api.sublymus-server.com/0ee68a0e-956b-48d9-96c9-0080878535e5");
   const serverUrlFromHeader =
     host +
     (headersOriginal["x-server-api-url"] || isProd
@@ -85,7 +85,6 @@ const onRenderHtml: OnRenderHtmlAsync = async (
     (config: InternalAxiosRequestConfig) => {
       // Get token directly from store. It should be populated by the cookie logic above for SSR.
       const token = useAuthStore.getState().token;
-      console.log("🚀 ~ SSR Interceptor - Token:", token);
       if (token && config.headers) {
         config.headers["Authorization"] = `Bearer ${token}`;
       } else {
@@ -153,7 +152,7 @@ const onRenderHtml: OnRenderHtmlAsync = async (
     <html lang="fr">
       <head>
         <meta charset="UTF-8" />
-        <link rel="icon" href="${logoUrl}" />
+        <link rel="icon" href="" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <meta name="description" content="${desc}" />
 
