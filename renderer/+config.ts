@@ -19,3 +19,4 @@ export default {
 
   hydrationCanBeAborted: true
 } satisfies Config
+

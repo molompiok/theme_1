@@ -130,77 +130,95 @@ function ProductPageContent() {
   }
   return (
     <>
-      {/* <Helmet>
-        <title>{`${product.name} | Acheter en ligne`}</title>
-        <meta name="description" content={metaDescription} />
-        <link rel="canonical" href={canonicalUrl} />
+      <Helmet>
+        {/* Titre optimisé */}
+        <title>{`${product.name} | Boutique`}</title>
+
+        {/* Meta description */}
+        <meta
+          name="description"
+          content={
+            product.description
+              ? product.description.substring(0, 160)
+              : `Découvrez ${product.name} - ${
+                  product.barred_price
+                    ? `Ancien prix ${product.barred_price}, `
+                    : ""
+                }Maintenant à ${product.price}.`
+          }
+        />
+
+        {/* Balise canonique */}
+        <link rel="canonical" href={`${BASE_URL}/products/${slug}`} />
+
+        {/* Meta robots */}
         <meta name="robots" content="index, follow" />
 
-        <meta property="og:type" content="product" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:title" content={`${product.name} | Acheter en ligne`} />
-        <meta property="og:description" content={metaDescription} />
-        <meta property="og:site_name" content="VotreSite.com" /> // TODO put true site
-        {imageUrl && (
-          <>
-            <meta property="og:image" content={imageUrl} />
-            <meta property="og:image:secure_url" content={imageUrl} />
-            <meta property="og:image:alt" content={`Image de ${product.name}`} />
-            <meta property="og:image:width" content="1200" />
-            <meta property="og:image:height" content="630" />
-          </>
-        )}
-
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content={canonicalUrl} />
-        <meta property="twitter:title" content={`${product.name} | Acheter en ligne`} />
-        <meta property="twitter:description" content={metaDescription} />
-        {imageUrl && <meta property="twitter:image" content={imageUrl} />}
-
-        <meta property="product:brand" content={product.name || "Boutique"} />
-        <meta property="product:availability" content="in stock" />
-        <meta property="product:condition" content="new" />
-        <meta property="product:price:amount" content={product.price.toString()} />
-        <meta property="product:price:currency" content={product.currency} />
-        {product.barred_price && (
-          <meta property="product:original_price:amount" content={product.barred_price.toString()} />
-        )}
-      </Helmet>
-
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Product",
-          "name": product.name,
-          "image": imageUrl,
-          "description": product.description,
-          "brand": {
-            "@type": "Brand",
-            "name": product.name || "Boutique"
-          },
-          "offers": {
-            "@type": "Offer",
-            "url": canonicalUrl,
-            "priceCurrency": product.currency,
-            "price": product.price,
-            "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            "itemCondition": "https://schema.org/NewCondition",
-            "availability": "https://schema.org/InStock",
-            ...(product.barred_price && {
-              "priceValidUntil": new Date().toISOString().split('T')[0],
-              "hasDiscount": true,
-              "discount": discountPercentage
-            })
-          },
-          ...(product.id && { "sku": product.id }),
-          // ...(product.id && { "mpn": product.id }),
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": product?.rating || 4.5,
-            "reviewCount": product?.comment_count || 10
+        {/* Open Graph */}
+        <meta property="og:title" content={product.name} />
+        <meta
+          property="og:description"
+          content={
+            product.description
+              ? product.description.substring(0, 160)
+              : `Découvrez ${product.name} - ${
+                  product.barred_price
+                    ? `Ancien prix ${product.barred_price}, `
+                    : ""
+                }Maintenant à ${product.price}.`
           }
-        })}
-      </script> */}
+        />
+        <meta property="og:image" content={imageUrl} />
+        <meta property="og:url" content={`${BASE_URL}/products/${slug}`} />
+        <meta property="og:type" content="product" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={product.name} />
+        <meta
+          name="twitter:description"
+          content={
+            product.description
+              ? product.description.substring(0, 160)
+              : `Découvrez ${product.name} - ${
+                  product.barred_price
+                    ? `Ancien prix ${product.barred_price}, `
+                    : ""
+                }Maintenant à ${product.price}.`
+          }
+        />
+        <meta name="twitter:image" content={imageUrl} />
+
+        {/* Données structurées Schema.org */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product.name,
+            image: imageUrl,
+            description: product.description || `Découvrez ${product.name}.`,
+            sku: product.id,
+            brand: {
+              "@type": "Brand",
+              name: "Votre Marque", // Remplacez par la marque réelle
+            },
+            offers: {
+              "@type": "Offer",
+              priceCurrency: product.currency,
+              price: product.price,
+              availability: "https://schema.org/InStock", // À ajuster selon la disponibilité
+              url: `${BASE_URL}/products/${slug}`,
+            },
+            aggregateRating: product.rating
+              ? {
+                  "@type": "AggregateRating",
+                  ratingValue: product.rating,
+                  reviewCount: product.comment_count,
+                }
+              : undefined,
+          })}
+        </script>
+      </Helmet>
       <main className="container font-primary mx-auto  sm:px-6 lg:px-8 flex flex-col min-h-screen">
         <section className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2 mb-12">
           <div className="md:sticky md:top-14 md:self-start pt-5 px-4">
