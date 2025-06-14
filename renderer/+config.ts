@@ -29,7 +29,7 @@ import { Wrapper } from './Wrapper'
 export default {
   Layout,
   Wrapper,
-  passToClient: ['pageProps', 'baseUrl', 'lang', 'apiUrl', 'baseUrl', 'serverUrl', 'dehydratedState', 'queryClient'],
+  passToClient: ['pageProps', 'baseUrl', 'lang', 'apiUrl', 'serverUrl', 'dehydratedState', 'queryClient'],
   onBeforeRender,
   title: 'Votre Titre par Défaut',
   description: 'Votre description par défaut',
