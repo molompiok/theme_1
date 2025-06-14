@@ -1,50 +1,46 @@
-// /pages/index/@slug/+Head.tsx
 import { Data } from "./+data";
 import { useData } from "vike-react/useData";
 
 export function Head() {
-    const { og, canonicalUrl, ldJson, is404, description } = useData<Data>();
+    // Vike gère déjà title, description, image, og:title, etc.
+    // On récupère juste ce qui reste à faire.
+    const { ldJson, canonicalUrl, og_extras, is404 } = useData<Data>();
 
     if (is404) {
-        return (
-            <>
-                <meta name="description" content={description} />
-                <meta name="robots" content="noindex, nofollow" />
-            </>
-        );
+        return <meta name="robots" content="noindex, nofollow" />;
     }
 
-    if (!og) return null;
+    if (!ldJson || !canonicalUrl || !og_extras) {
+        return null; // Sécurité si les données ne sont pas là
+    }
 
     return (
         <>
-            <meta name="description" content={description} />
+            {/* 
+              PLUS BESOIN DE METTRE :
+              - <title>
+              - <meta name="description">
+              - <meta property="og:title">
+              - <meta property="og:description">
+              - <meta property="og:image">
+              - <meta name="twitter:...">
+              VIKE S'EN OCCUPE !
+            */}
+
+            {/* Ce que Vike ne fait pas automatiquement : */}
             <link rel="canonical" href={canonicalUrl} />
 
-            {/* Open Graph (pour Facebook, etc.) */}
-            <meta property="og:title" content={og.title} />
-            <meta property="og:description" content={og.description} />
-            <meta property="og:image" content={og.image} />
-            <meta property="og:url" content={og.url} />
-            <meta property="og:type" content={og.type} />
-            <meta property="og:site_name" content="Le Nom De Votre Boutique" />
+            <meta property="og:url" content={og_extras.url} />
+            <meta property="og:type" content={og_extras.type} />
+            <meta property="og:site_name" content={og_extras.site_name} />
 
-            {/* Twitter Card */}
-            <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content={og.title} />
-            <meta name="twitter:description" content={og.description} />
-            <meta name="twitter:image" content={og.image} />
-
-            {/* Robots */}
             <meta name="robots" content="index, follow" />
 
-            {/* Données structurées JSON-LD pour le produit */}
-            {ldJson && (
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
-                ></script>
-            )}
+            {/* Données structurées JSON-LD */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
+            ></script>
         </>
     );
 }

@@ -1,6 +1,4 @@
 // /pages/categorie/@slug/+Head.tsx
-// Notez l'extension .tsx pour le JSX, et l'import de React
-import React from "react";
 import type { Data } from "./+data";
 import { useData } from "vike-react/useData";
 

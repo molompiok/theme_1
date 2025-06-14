@@ -10,69 +10,68 @@ import { createQueryClient } from "../../../renderer/ReactQueryProvider";
 import useStoreInfo from "../../../hook/query/store/useGetStore";
 import { createApiInstances } from "../../../renderer/createApiInstance";
 
+// ... (imports)
+
 const data = async (pageContext: PageContextServer) => {
-  const queryClient = createQueryClient() // Utilisez une nouvelle instance pour chaque requête serveur
+  const queryClient = createQueryClient();
   const slug = pageContext.routeParams!.slug;
-  const { api, apiUrl, serverUrl } = createApiInstances(pageContext);
-  // Pré-chargement de la requête produit
+  const { api, apiUrl, serverUrl } = createApiInstances(pageContext); // Je garde vos variables
+
   const productData = await queryClient.fetchQuery({
-    queryKey: ["get_product_by_slug", slug], // Clé plus spécifique
+    queryKey: ["get_product_by_slug", slug],
     queryFn: () => get_products({ slug_product: slug }, api),
   });
 
   const product = productData?.list?.[0];
 
-  // Si le produit n'existe pas, on peut gérer une page 404 ici
   if (!product) {
     return {
-      product: null,
-      dehydratedState: dehydrate(queryClient),
-      // Vike peut intercepter `is404` pour rendre une page d'erreur
       is404: true,
-      // Méta-données pour la page 404
-      title: "Produit non trouvé",
-      meta: {
-        description: "Le produit que vous cherchez n'existe pas ou plus.",
-        robots: "noindex, nofollow" // Important pour le SEO des pages d'erreur
-      }
+      title: "Produit non trouvé", // Vike utilisera ça pour la page 404
+      description: "Le produit que vous cherchez n'existe pas ou plus.",
     };
   }
 
-  // Pré-chargement des features pour obtenir l'image
   const features = await queryClient.fetchQuery({
     queryKey: ["get_features_with_values", product.id],
     queryFn: () => get_features_with_values({ product_id: product.id }, api),
   });
 
-  // const { data: infoStore } = useStoreInfo(api, serverUrl, apiUrl)
-
-  // Logique pour obtenir l'image principale
   const mainImage = getFirstFeatureWithView(features || [])?.values[0]?.views[0];
-  const imageUrl = mainImage ? `${apiUrl}${mainImage}` : `${apiUrl}/default-product-image.jpg`; // Ayez une image par défaut
 
-  // Création d'une description SEO concise
+  let imageUrl = `${apiUrl}/default-product-image.jpg`; // Image par défaut
+
+  if (mainImage) {
+    // Si l'URL de l'image est déjà absolue (commence par http), on l'utilise telle quelle.
+    // Sinon, on la préfixe avec serverUrl.
+    if (mainImage.startsWith('http')) {
+      imageUrl = mainImage;
+    } else {
+      imageUrl = `${apiUrl}${mainImage}`; // Pour les images relatives comme '/uploads/...'
+    }
+  }
+
   const seoDescription = product.description
-    ? product.description.substring(0, 160)
-    : `Découvrez ${product.name}. Achetez maintenant sur notre boutique et profitez de la meilleure qualité.`;
+    ? product.description.substring(0, 160).replace(/\s+/g, ' ').trim()
+    : `Découvrez ${product.name}. Achetez maintenant sur notre boutique.`;
 
-  // Préparation des données structurées (JSON-LD)
+  const pageUrl = `${apiUrl}/${slug}`; // L'URL publique de la page
+
   const ldJson = {
+    // ... (votre JSON-LD est bon, gardez-le)
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     image: imageUrl,
     description: seoDescription,
     sku: product.id,
-    brand: {
-      "@type": "Brand",
-      // name: infoStore?.name, // À remplacer par la vraie marque si disponible
-    },
+    brand: { "@type": "Brand", name: "Le Nom De Votre Boutique" },
     offers: {
       "@type": "Offer",
       priceCurrency: product.currency,
       price: product.price,
-      availability: "https://schema.org/InStock", // ou OutOfStock
-      url: `${apiUrl}/${slug}`,
+      availability: "https://schema.org/InStock",
+      url: pageUrl,
     },
     ...(product.rating && {
       aggregateRating: {
@@ -84,20 +83,23 @@ const data = async (pageContext: PageContextServer) => {
   };
 
   return {
-    product, // On passe directement le produit pour éviter un re-fetch
+    product,
     dehydratedState: dehydrate(queryClient),
-
-    title: `${product.name} | Votre Boutique`,
-    description: seoDescription,
+    ldJson,
     slug,
-    canonicalUrl: `${apiUrl}/${slug}`,
-    og: {
-      title: `${product.name} | Votre Boutique`,
-      description: seoDescription,
-      image: imageUrl,
+
+    // --- C'EST LA PARTIE LA PLUS IMPORTANTE ---
+    // On donne ces clés à Vike pour qu'il génère les balises automatiquement
+    // title: `${product.name} | Votre Boutique`,
+    description: seoDescription,
+    image: imageUrl, // Pour og:image et twitter:image
+
+    // On passe uniquement les informations que Vike ne peut pas deviner
+    canonicalUrl: pageUrl,
+    og_extras: { // J'ai renommé en og_extras pour éviter la confusion
       type: "product",
-      url: `${apiUrl}/${slug}`,
-    },
-    ldJson: ldJson,
+      site_name: "Le Nom De Votre Boutique",
+      url: pageUrl
+    }
   };
 };
