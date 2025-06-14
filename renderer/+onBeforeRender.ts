@@ -5,7 +5,7 @@ import { dehydrate } from '@tanstack/react-query';
 import { get_store } from '../api/user.api';
 
 export default async function onBeforeRender(pageContext: any) {
-    const { api, server, apiUrl, serverUrl } = createApiInstances(pageContext);
+    const { api, server, apiUrl, serverUrl, baseUrl } = createApiInstances(pageContext);
 
     const queryClient = createQueryClient();
     // --- PRÉ-CHARGEMENT DES DONNÉES (EXEMPLE) ---
@@ -20,6 +20,7 @@ export default async function onBeforeRender(pageContext: any) {
             server,
             apiUrl,
             serverUrl,
+            baseUrl,
             dehydratedState,
         },
     };

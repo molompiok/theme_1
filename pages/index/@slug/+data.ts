@@ -7,7 +7,6 @@ import { PageContextServer } from "vike/types";
 import { get_features_with_values, get_products } from "../../../api/products.api";
 import { getFirstFeatureWithView } from "../../../utils"; // Assurez-vous que le chemin est correct
 import { createQueryClient } from "../../../renderer/ReactQueryProvider";
-import useStoreInfo from "../../../hook/query/store/useGetStore";
 import { createApiInstances } from "../../../renderer/createApiInstance";
 
 // ... (imports)
@@ -15,7 +14,7 @@ import { createApiInstances } from "../../../renderer/createApiInstance";
 const data = async (pageContext: PageContextServer) => {
   const queryClient = createQueryClient();
   const slug = pageContext.routeParams!.slug;
-  const { api, apiUrl, serverUrl } = createApiInstances(pageContext); // Je garde vos variables
+  const { api, baseUrl } = createApiInstances(pageContext); // Je garde vos variables
 
   const productData = await queryClient.fetchQuery({
     queryKey: ["get_product_by_slug", slug],
@@ -39,7 +38,7 @@ const data = async (pageContext: PageContextServer) => {
 
   const mainImage = getFirstFeatureWithView(features || [])?.values[0]?.views[0];
 
-  let imageUrl = `${apiUrl}/default-product-image.jpg`; // Image par défaut
+  let imageUrl = `${baseUrl}/default-product-image.jpg`; // Image par défaut
 
   if (mainImage) {
     // Si l'URL de l'image est déjà absolue (commence par http), on l'utilise telle quelle.
@@ -47,7 +46,7 @@ const data = async (pageContext: PageContextServer) => {
     if (mainImage.startsWith('http') || mainImage.startsWith('https')) {
       imageUrl = mainImage;
     } else {
-      imageUrl = `${apiUrl}${mainImage}`; // Pour les images relatives comme '/uploads/...'
+      imageUrl = `${baseUrl}${mainImage}`; // Pour les images relatives comme '/uploads/...'
     }
   }
 
@@ -55,7 +54,7 @@ const data = async (pageContext: PageContextServer) => {
     ? product.description.substring(0, 160).replace(/\s+/g, ' ').trim()
     : `Découvrez ${product.name}. Achetez maintenant sur notre boutique.`;
 
-  const pageUrl = `${apiUrl}/${slug}`; // L'URL publique de la page
+  const pageUrl = `${baseUrl}/${slug}`; // L'URL publique de la page
 
   const ldJson = {
     // ... (votre JSON-LD est bon, gardez-le)
