@@ -38,6 +38,10 @@ import { usePageContext } from "vike-react/usePageContext";
 
 export default function Page() {
   const { dehydratedState, product, is404 } = useData<Data>();
+  const { api, baseUrl } = usePageContext()
+
+  console.log({ baseUrl });
+
 
   if (is404 || !product) {
     return (
