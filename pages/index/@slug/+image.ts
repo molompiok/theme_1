@@ -6,10 +6,10 @@ import { createApiInstances } from '../../../renderer/createApiInstance';
 // Cette fonction sera appelée par Vike pour définir l'image de la page
 export default function image(pageContext: PageContext<Data>) {
     // Si la page est en 404, on peut retourner une image par défaut ou null
-    const { apiUrl } = createApiInstances(pageContext);
+    const { baseUrl } = createApiInstances(pageContext);
     if (pageContext.data.is404) {
         // Retourne l'URL ABSOLUE d'une image générique pour les erreurs
-        return `${apiUrl}/default-image.jpg`;
+        return `${baseUrl}/default-image.jpg`;
     }
 
     // On retourne l'URL de l'image principale du produit

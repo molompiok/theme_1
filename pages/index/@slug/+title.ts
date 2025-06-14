@@ -11,5 +11,5 @@ export default function title(pageContext: PageContext<Data>) {
 
     // Sinon, on construit le titre à partir du nom du produit
     const productName = pageContext.data.product?.name || "Détails du produit";
-    return `${productName} | Votre Boutique`;
+    return `${productName} | ${pageContext.data.store_name}`;
 }

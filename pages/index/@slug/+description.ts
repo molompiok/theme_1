@@ -8,5 +8,5 @@ export default function description(pageContext: PageContext<Data>) {
     }
 
     // On utilise la description courte du produit
-    return pageContext.data.description || `Découvrez ${pageContext.data.product?.name} et bien plus sur notre boutique.`;
+    return pageContext.data.description || `Découvrez ${pageContext.data.product?.name} et bien plus sur ${pageContext.data.store_name}.`;
 }
