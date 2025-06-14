@@ -44,7 +44,7 @@ const data = async (pageContext: PageContextServer) => {
   if (mainImage) {
     // Si l'URL de l'image est déjà absolue (commence par http), on l'utilise telle quelle.
     // Sinon, on la préfixe avec serverUrl.
-    if (mainImage.startsWith('http')) {
+    if (mainImage.startsWith('http') || mainImage.startsWith('https')) {
       imageUrl = mainImage;
     } else {
       imageUrl = `${apiUrl}${mainImage}`; // Pour les images relatives comme '/uploads/...'
