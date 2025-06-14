@@ -4,13 +4,12 @@ export type Data = Awaited<ReturnType<typeof data>>;
 import { dehydrate } from "@tanstack/react-query";
 import { get_products } from "../../api/products.api";
 import { PageContextServer } from "vike/types";
-import { useQueryClient } from "@tanstack/react-query";
-
+import { createQueryClient } from "../../renderer/ReactQueryProvider";
 const data = async (pageContext: PageContextServer) => {
   const search = pageContext.urlParsed.search;
   const { api } = pageContext;
 
-  const queryClient = useQueryClient();
+  const queryClient = createQueryClient()
 
   await queryClient.prefetchQuery({
     queryKey: ["gets_products", { search: search["name"] }],

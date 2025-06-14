@@ -189,8 +189,9 @@ interface Store {
 }
 
 export const get_store = async (api: AxiosInstance, serverUrl: string, apiUrl: string): Promise<Store> => {
+
   try {
-    const response = await api.get(serverUrl + "/stores?store_id=" + apiUrl.split("/")[3]);
+    const response = await api.get(serverUrl + "/stores?store_id=" + apiUrl?.split("/")[3]);
     return response?.data.list?.[0];
   } catch (error) {
     console.error("Erreur lors de l'ajout de favoris :", error);

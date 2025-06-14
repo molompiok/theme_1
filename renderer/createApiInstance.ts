@@ -17,7 +17,7 @@ export function createApiInstances(pageContext: PageContextServer) {
     const isProd = process.env.NODE_ENV === "production";
     const host = isProd ? "https://" : "http://";
     const originalHeaders = pageContextHeaders || {};
-    console.log({ originalHeaders }, '***-*-*-*-*-*-*-*-*-*-*-*-*-*/*/*/**/**');
+    // console.log({ originalHeaders }, '***-*-*-*-*-*-*-*-*-*-*-*-*-*/*/*/**/**');
     const apiUrl = host + (originalHeaders["x-store-api-url"] || "api.sublymus-server.com/0ee68a0e-956b-48d9-96c9-0080878535e5");
     const serverUrl = host + (originalHeaders["x-server-api-url"] || (isProd ? "server.sublymus.com" : "server.sublymus-server.com"));
     const baseUrl = host + (originalHeaders["x-base-url"] || "localhost:3000");

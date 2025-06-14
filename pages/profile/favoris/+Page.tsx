@@ -1,29 +1,19 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { BsSearch, BsX, BsHeartFill } from "react-icons/bs";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { BsX, BsHeartFill } from "react-icons/bs";
 import {
-  HydrationBoundary,
-  useInfiniteQuery,
-  useQuery,
+  useInfiniteQuery
 } from "@tanstack/react-query";
 import {
-  get_favorites,
-  get_features_with_values,
+  get_favorites
 } from "../../../api/products.api";
 import {
-  ProductClient,
-  ProductFavorite,
   OrderByType,
   filterOptions,
-  defaultOptions,
+  defaultOptions
 } from "../../type";
-import { DisplayPrice } from "../../../component/DisplayPrice";
-import { ProductMedia } from "../../../component/ProductMedia";
-import FavoriteButton from "../../../component/FavoriteButton";
-import { formatSlug } from "../../../utils";
 import { useSelectedFiltersStore } from "../../../store/filter";
 import { useFiltersAndUrlSync } from "../../../hook/useUrlFilterManager";
 import FilterPopover from "../../../component/FilterPopover";
-import { useThemeSettingsStore } from "../../../store/themeSettingsStore";
 import clsx from "clsx";
 import ProductSearchCard from "../../../component/product/ProductSearchCard";
 import { usePageContext } from "vike-react/usePageContext";
@@ -57,26 +47,26 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      <div // Header sticky externe
+      <div
         className={clsx(
-          "sticky inset-x-0 z-40 transition-all duration-300 backdrop-blur-xl", // z-40 de votre original, backdrop-blur du design recherche
+          "sticky inset-x-0 z-40 transition-all duration-300 backdrop-blur-xl",
           isScrolled
-            ? "bg-white/80 border-b border-slate-200 shadow-lg mt-0 top-11 sm:top-[3.75rem]" // top-15 (15 * 0.25rem = 3.75rem)
+            ? "bg-white/80 border-b border-slate-200 shadow-lg mt-0 top-11 sm:top-[3.75rem]"
             : "bg-white/0 border-b border-transparent shadow-sm top-0 mt-7"
         )}
       >
-        <div // Conteneur interne max-width avec padding vertical de la recherche et padding horizontal dynamique
+        <div
           className={clsx(
             "font-primary mx-auto max-w-[1440px] transition-all duration-300 pt-6 pb-1",
             isScrolled
-              ? "px-4" // 1rem de padding horizontal quand scrollé
-              : "px-4 sm:px-6 lg:px-12 xl:px-0" // Gouttières de la recherche quand non scrollé (xl:px-0 car mx-auto)
+              ? "px-4"
+              : "px-4 sm:px-6 lg:px-12 xl:px-0"
           )}
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex text-lg sm:text-3xl items-center gap-2 sm:gap-3">
               <BsHeartFill className="text-2xl sm:text-3xl text-red-500" />
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              <h1 className="font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                 Mes Favoris
               </h1>
             </div>
@@ -90,9 +80,7 @@ export default function Page() {
       </div>
 
       <div className="font-primary mx-4 sm:mx-6 lg:mx-12 xl:mx-auto max-w-[1440px] py-8">
-        {/* <HydrationBoundary state={dehydratedState}> */}
         <ProductList />
-        {/* </HydrationBoundary> */}
       </div>
       <style>{styles}</style>
     </div>

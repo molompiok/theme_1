@@ -252,6 +252,7 @@ function Frame({
 
 function Header({ children }: { children: React.ReactNode }) {
   const { api, apiUrl, serverUrl, urlPathname } = usePageContext();
+  console.log(apiUrl, serverUrl, '22222222222222222222222222222222222222222222222222');
   const user = useAuthStore((state) => state.user);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -633,7 +634,10 @@ interface LogoProps {
 }
 
 export function Logo({ size = "small", className }: LogoProps) {
-  const { api, server, apiUrl, serverUrl } = usePageContext();
+  const { api, apiUrl, serverUrl } = usePageContext();
+
+  console.log(apiUrl, serverUrl, '****-*-*-*-*-*-*-*-*-*-*-*-*-*-*-');
+
   const { data: info } = useStoreInfo(api, serverUrl, apiUrl);
   const brandName = info?.name;
   const href = "/";

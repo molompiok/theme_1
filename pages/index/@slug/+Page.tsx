@@ -55,7 +55,7 @@ export default function Page() {
   }
 
   return (
-    <div className="bg-white min-h-dvh pt-10 max-w-[1500px] mx-auto font-sans antialiased">
+    <div className="bg-white min-h-dvh pt-10  mx-auto font-sans antialiased">
       <HydrationBoundary state={dehydratedState}>
         <ProductPageContent initialProduct={product} />
       </HydrationBoundary>
