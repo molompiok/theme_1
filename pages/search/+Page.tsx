@@ -1,9 +1,10 @@
 import { useEffect, useCallback, useState } from "react";
 import { BsSearch, BsX } from "react-icons/bs";
-import { useData } from "../../renderer/useData";
+// import { useData } from "../../renderer/useData";
+import { useData } from "vike-react/useData";
 import { HydrationBoundary, useQuery } from "@tanstack/react-query";
 import { get_products } from "../../api/products.api";
-import { usePageContext } from "../../renderer/usePageContext";
+import { usePageContext } from "vike-react/usePageContext";
 import { debounce } from "../../utils";
 import { Data } from "./+data";
 import { useSelectedFiltersStore } from "../../store/filter";
@@ -66,22 +67,19 @@ export default function Page() {
           </div>
 
           <div
-            className={`relative transition-all duration-300 ${
-              isSearchFocused ? "transform scale-[1.02]" : ""
-            }`}
+            className={`relative transition-all duration-300 ${isSearchFocused ? "transform scale-[1.02]" : ""
+              }`}
           >
             <div
-              className={`flex items-center bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 ${
-                isSearchFocused
+              className={`flex items-center bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 ${isSearchFocused
                   ? "border-gray-500 shadow-gray-500/20 shadow-2xl"
                   : "border-transparent hover:shadow-xl"
-              }`}
+                }`}
             >
               <div className="flex items-center px-6 py-2">
                 <BsSearch
-                  className={`w-5 h-5 transition-colors duration-200 ${
-                    isSearchFocused ? "text-gray-500" : "text-gray-400"
-                  }`}
+                  className={`w-5 h-5 transition-colors duration-200 ${isSearchFocused ? "text-gray-500" : "text-gray-400"
+                    }`}
                 />
               </div>
               <input
@@ -122,6 +120,7 @@ export default function Page() {
 
 function ListProductSearchCard({ searchText }: { searchText: string }) {
   const { selectedFilters } = useSelectedFiltersStore();
+  const { api } = usePageContext()
 
   const {
     data: products = [],
@@ -141,7 +140,7 @@ function ListProductSearchCard({ searchText }: { searchText: string }) {
           ? parseFloat(selectedFilters["min_price"]?.[0]?.text)
           : undefined,
         limit: 24,
-      });
+      }, api);
       return response.list;
     },
     staleTime: 5 * 60 * 1000,

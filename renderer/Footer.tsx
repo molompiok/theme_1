@@ -11,12 +11,15 @@ import {
 } from "react-icons/fa";
 import { useThemeSettingsStore } from "../store/themeSettingsStore";
 import useStoreInfo from "../hook/query/store/useGetStore";
+import { createApiInstances } from "./createApiInstance";
+import { usePageContext } from "vike-react/usePageContext";
 
-interface FooterProps {}
+interface FooterProps { }
 
 export const Footer: React.FC<FooterProps> = () => {
   const [email, setEmail] = useState("");
-  const { data: info } = useStoreInfo();
+  const { api, apiUrl, serverUrl } = usePageContext();
+  const { data: info } = useStoreInfo(api, serverUrl, apiUrl);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const footerBackgroundColor = useThemeSettingsStore(
     (state) => state.footerBackgroundColor
@@ -129,11 +132,10 @@ export const Footer: React.FC<FooterProps> = () => {
               <button
                 onClick={handleSubmit}
                 disabled={isSubscribed}
-                className={`w-full p-4 rounded-lg font-semibold transition-colors duration-200 ${
-                  isSubscribed
+                className={`w-full p-4 rounded-lg font-semibold transition-colors duration-200 ${isSubscribed
                     ? "bg-green-600 text-white cursor-default"
                     : "bg-slate-600 hover:bg-slate-700 text-white"
-                }`}
+                  }`}
               >
                 {isSubscribed ? (
                   <div className="flex items-center justify-center space-x-2">

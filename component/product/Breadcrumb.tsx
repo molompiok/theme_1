@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { get_categories } from "../../api/categories.api";
 import { Link } from "../Link";
 import { Category } from "../../pages/type";
+import { usePageContext } from "vike-react/usePageContext";
 
 const useMediaQuery = (query: string) => {
   const [matches, setMatches] = React.useState(false);
@@ -44,13 +45,14 @@ function getParentCategories(
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({ categoryId }) => {
   // const storeId = "d3d8dfcf-b84b-49ed-976d-9889e79e6306";
+  const { api } = usePageContext();
 
   const isMobile = useMediaQuery("(max-width: 767px)");
   const maxItems = isMobile ? 2 : 3;
 
   const { data: categories = [], isPending } = useQuery({
     queryKey: ["get_categories"],
-    queryFn: () => get_categories({}),
+    queryFn: () => get_categories({}, api),
     select: (data) => (data?.list ? data.list : []),
   });
 

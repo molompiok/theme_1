@@ -10,6 +10,7 @@ import FinalInfo from "../../component/confirmation/FinalInfo";
 import { navigate } from "vike/client/router";
 import { googleLogin } from "../../utils";
 import { FcGoogle } from "react-icons/fc";
+import { usePageContext } from "vike-react/usePageContext";
 
 interface DétailsCommande {
   adresse_livraison: string;
@@ -39,17 +40,21 @@ export default function PagePaiement() {
     "info"
   );
   const user = useAuthStore((state) => state.user);
+  const { apiUrl, serverUrl, api } = usePageContext();
 
   const isPermitToProceed =
     user?.id && user.phone_numbers?.length > 0 && user.email && user.full_name;
 
-  const { data: cart } = useCart();
+  const { data: cart } = useCart(api);
 
   useEffect(() => {
+    //@ts-ignore
     if ((cart?.cart?.items?.length ?? 0) <= 0) {
       // navigate("/");
       history.back();
     }
+    //@ts-ignore
+
   }, [cart?.cart?.items]);
 
   const getInfoErrorMessage = () => {
@@ -88,7 +93,7 @@ export default function PagePaiement() {
                   <>
                     <div className="space-y-4">
                       <PersonalInfo />
-                      <PhoneNumbers  />
+                      <PhoneNumbers />
                     </div>
                     {!isPermitToProceed && (
                       <p className="text-sm text-red-500 font-semibold bg-red-100 p-3 rounded-md">
@@ -117,7 +122,7 @@ export default function PagePaiement() {
                       Vous devez être connecté pour passer une commande.
                     </p>
                     <button
-                      onClick={googleLogin}
+                      onClick={() => googleLogin({ apiUrl, serverUrl })}
                       className="flex items-center gap-3 px-6 py-2 rounded-xl border border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 bg-white hover:bg-gray-50"
                     >
                       <FcGoogle size={20} />
@@ -157,20 +162,18 @@ const Step: React.FC<StepProps> = ({ title, active, completed }) => (
   <div className="flex-1">
     <div className="flex items-center">
       <div
-        className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
-          active
-            ? "border-black bg-black text-white"
-            : completed
+        className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${active
+          ? "border-black bg-black text-white"
+          : completed
             ? "border-gray- bg-green-500 text-white"
             : "border-gray-300 bg-white"
-        }`}
+          }`}
       >
         {completed ? "✓" : active ? "●" : "○"}
       </div>
       <p
-        className={`ml-2  ${
-          active ? "font-medium text-black" : "text-gray-500"
-        }`}
+        className={`ml-2  ${active ? "font-medium text-black" : "text-gray-500"
+          }`}
       >
         {title}
       </p>

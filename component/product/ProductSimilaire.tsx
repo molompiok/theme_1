@@ -10,6 +10,7 @@ import clsx from "clsx";
 import { ProductMedia } from "../ProductMedia";
 import FavoriteButton from "../FavoriteButton";
 import { DisplayPrice } from "../DisplayPrice";
+import { usePageContext } from "vike-react/usePageContext";
 
 export default function ProductSimilaire({
   product,
@@ -18,12 +19,13 @@ export default function ProductSimilaire({
   product: ProductClient;
   index: number;
 }) {
+  const { api } = usePageContext()
   const { data: feature, isLoading } = useQuery({
     queryKey: ["get_features_with_values", product.default_feature_id],
     queryFn: () =>
       get_features_with_values({
         feature_id: product.default_feature_id,
-      }),
+      }, api),
     enabled: !!product.default_feature_id,
   });
   const settings = useThemeSettingsStore((state) => state);
@@ -47,9 +49,9 @@ export default function ProductSimilaire({
             `absolute z-10 text-white px-2 py-0.5 rounded text-xs font-medium shadow-sm`,
             settings.promotionTextPosition === "top-left" && "top-1 left-1",
             settings.promotionTextPosition === "bottom-left" &&
-              "bottom-1 left-1",
+            "bottom-1 left-1",
             settings.promotionTextPosition === "bottom-right" &&
-              "bottom-1 right-1",
+            "bottom-1 right-1",
             settings.promotionTextPosition === "top-right" && "top-1 right-1"
           )}
           style={{

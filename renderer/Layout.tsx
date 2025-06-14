@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import logoUrl from "./logo.svg";
-import { PageContextProvider, usePageContext } from "./usePageContext";
-import type { PageContext } from "vike/types";
+import React, { useEffect, useRef, useState } from "react";
+// import { PageContextProvider, usePageContext } from "./usePageContext";
 import { Toaster } from "react-hot-toast";
+import './index.css';
 import { LinkIcon } from "../component/LinkIcon";
 import {
   BsChevronDown,
@@ -18,7 +17,6 @@ import { BiArrowBack } from "react-icons/bi";
 import { Popover, PopoverContent, PopoverTrigger } from "../component/Popover";
 import { FaUserAlt } from "react-icons/fa";
 import { PiXThin } from "react-icons/pi";
-import { api, BASE_URL } from "../api";
 import { useAuthStore, useModalAuth } from "../store/user";
 import ModalCart from "../component/modal/ModalCart";
 import ModalChooseFeature from "../component/modal/ModalChooseFeature";
@@ -34,9 +32,9 @@ import {
   ThemeSettings,
   useThemeSettingsStore,
 } from "../store/themeSettingsStore";
-import { useStore } from "zustand";
 import useStoreInfo from "../hook/query/store/useGetStore";
 import { useFavicon } from "../hook/useFavicon";
+import { usePageContext } from "vike-react/usePageContext";
 
 const parseThemeSettingsFromQuery = (
   searchParams: URLSearchParams
@@ -65,18 +63,18 @@ interface PostMessageData {
 
 function Layout({
   children,
-  pageContext,
 }: {
   children: React.ReactNode;
-  pageContext: PageContext;
 }) {
+  const { api, apiUrl, serverUrl } = usePageContext();
   const toggleCart = useModalCart((state) => state.toggleCart);
   const openModalAuth = useModalAuth((state) => state.open);
   const [isClient, setIsClient] = useState(false);
-  const { data: cart } = useCart();
-  const { data: info } = useStoreInfo();
+  const { data: cart } = useCart(api);
+  const { data: info } = useStoreInfo(api, serverUrl, apiUrl);
+  // const queryClient = createQueryClient;
 
-  useFavicon(BASE_URL.serverUrl + info?.favicon || "");
+  useFavicon(serverUrl + info?.favicon || "");
   const { setSettings, resetSettings, ...settings } = useThemeSettingsStore();
 
   const urlParsed = getQueryParams();
@@ -110,8 +108,9 @@ function Layout({
       window.removeEventListener("message", handleMessage);
     };
   }, [urlParsed.search]);
-
-  const totalItems = cart?.cart.items.reduce(
+  //@ts-ignore
+  const totalItems = cart?.cart?.items.reduce(
+    //@ts-ignore
     (acc, item) => acc + item.quantity,
     0
   );
@@ -131,7 +130,7 @@ function Layout({
   }
 
   return (
-    <PageContextProvider pageContext={pageContext}>
+    <>
       <div
         id="page-loader"
         className="flex flex-col justify-center items-center page-loader is-hidden"
@@ -197,7 +196,7 @@ function Layout({
         <ModalAuth />
         <Footer />
       </Frame>
-    </PageContextProvider>
+    </>
   );
 }
 
@@ -252,7 +251,7 @@ function Frame({
 }
 
 function Header({ children }: { children: React.ReactNode }) {
-  const { urlPathname } = usePageContext();
+  const { api, apiUrl, serverUrl, urlPathname } = usePageContext();
   const user = useAuthStore((state) => state.user);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -298,10 +297,9 @@ function Header({ children }: { children: React.ReactNode }) {
           <header
             ref={headerRef}
             className={`w-full font-primary flex items-center justify-between transition-all duration-300 ease-out backdrop-blur-md border-b border-gray-100/20
-              ${
-                isScrolled
-                  ? "fixed top-0 left-0 right-0 z-[100] px-2 sm:px-4 lg:px-6 py-0 shadow-lg bg-white/95"
-                  : "relative px-2 sm:px-4 lg:px-6 py-2 bg-white"
+              ${isScrolled
+                ? "fixed top-0 left-0 right-0 z-[100] px-2 sm:px-4 lg:px-6 py-0 shadow-lg bg-white/95"
+                : "relative px-2 sm:px-4 lg:px-6 py-2 bg-white"
               }`}
             style={{
               backgroundColor: isScrolled
@@ -321,10 +319,9 @@ function Header({ children }: { children: React.ReactNode }) {
           <header
             ref={headerRef}
             className={`w-full font-primary flex items-center justify-between transition-all duration-300 ease-out backdrop-blur-md border-b border-gray-100/20
-              ${
-                isScrolled
-                  ? "fixed top-0 left-0 right-0 z-[100] px-4 sm:px-6 lg:px-6 py-2 shadow-lg bg-white/95"
-                  : "relative px-4 sm:px-6 lg:px-6 py-2 bg-white"
+              ${isScrolled
+                ? "fixed top-0 left-0 right-0 z-[100] px-4 sm:px-6 lg:px-6 py-2 shadow-lg bg-white/95"
+                : "relative px-4 sm:px-6 lg:px-6 py-2 bg-white"
               }`}
             style={{
               backgroundColor: isScrolled
@@ -428,9 +425,8 @@ function Header({ children }: { children: React.ReactNode }) {
                         </p>
                         <p className="text-xs text-gray-500 truncate">
                           {user?.phone_numbers?.[0]?.phone_number
-                            ? `${user.phone_numbers[0].format.split(" ")[0]} ${
-                                user.phone_numbers[0].phone_number
-                              }`
+                            ? `${user.phone_numbers[0].format.split(" ")[0]} ${user.phone_numbers[0].phone_number
+                            }`
                             : "Aucun numéro"}
                         </p>
                       </div>
@@ -465,7 +461,7 @@ function Header({ children }: { children: React.ReactNode }) {
                   <div className="p-2 border-t border-gray-100">
                     <button
                       className="flex items-center w-full p-3 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                      onClick={() => useAuthStore.getState().logout()}
+                      onClick={() => useAuthStore.getState().logout(api)}
                     >
                       <svg
                         className="mr-3 w-4 h-4"
@@ -517,9 +513,8 @@ function Header({ children }: { children: React.ReactNode }) {
                     </p>
                     <p className="text-sm text-gray-500 truncate">
                       {user?.phone_numbers?.[0]?.phone_number
-                        ? `${user.phone_numbers[0].format.split(" ")[0]} ${
-                            user.phone_numbers[0].phone_number
-                          }`
+                        ? `${user.phone_numbers[0].format.split(" ")[0]} ${user.phone_numbers[0].phone_number
+                        }`
                         : "Aucun numéro"}
                     </p>
                   </div>
@@ -604,7 +599,7 @@ function Header({ children }: { children: React.ReactNode }) {
                 </LinkIcon>
                 <button
                   className="flex items-center w-full p-3 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                  onClick={() => useAuthStore.getState().logout()}
+                  onClick={() => useAuthStore.getState().logout(api)}
                 >
                   <svg
                     className="mr-3 w-4 h-4"
@@ -638,7 +633,8 @@ interface LogoProps {
 }
 
 export function Logo({ size = "small", className }: LogoProps) {
-  const { data: info } = useStoreInfo();
+  const { api, server, apiUrl, serverUrl } = usePageContext();
+  const { data: info } = useStoreInfo(api, serverUrl, apiUrl);
   const brandName = info?.name;
   const href = "/";
   const sizeClasses = {
@@ -660,7 +656,7 @@ export function Logo({ size = "small", className }: LogoProps) {
   };
 
   return (
-    <button
+    <div
       onClick={() => navigate(href)}
       className={clsx(
         "flex items-center group",
@@ -686,7 +682,7 @@ export function Logo({ size = "small", className }: LogoProps) {
       >
         {brandName}
       </h1>
-    </button>
+    </div>
   );
 }
 

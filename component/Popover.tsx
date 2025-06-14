@@ -84,11 +84,11 @@ export function usePopover({
 
 type ContextType =
   | (ReturnType<typeof usePopover> & {
-      setLabelId: React.Dispatch<React.SetStateAction<string | undefined>>;
-      setDescriptionId: React.Dispatch<
-        React.SetStateAction<string | undefined>
-      >;
-    })
+    setLabelId: React.Dispatch<React.SetStateAction<string | undefined>>;
+    setDescriptionId: React.Dispatch<
+      React.SetStateAction<string | undefined>
+    >;
+  })
   | null;
 
 const PopoverContext = React.createContext<ContextType>(null);
@@ -139,6 +139,7 @@ export const PopoverTrigger = React.forwardRef<
       children,
       context.getReferenceProps({
         ref,
+        //@ts-ignore
         ...props, ...children.props,
         "data-state": context.open ? "open" : "closed"
       })

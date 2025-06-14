@@ -23,7 +23,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { CiSliderHorizontal } from "react-icons/ci";
 import { get_filters } from "../../api/products.api";
-import { usePageContext } from "../../renderer/usePageContext";
+import { usePageContext } from "vike-react/usePageContext";
 import { useSelectedFiltersStore } from "../../store/filter";
 import Modal from "../modal/Modal";
 import gsap from "gsap";
@@ -149,13 +149,13 @@ export const TextFilterOption: React.FC<FilterOptionProps> = ({
           ? layout === "bento" || layout === "horizontal-scroll"
             ? bentoSelectedClasses
             : layout === "card"
-            ? cardSelectedClasses
-            : selectedClasses
+              ? cardSelectedClasses
+              : selectedClasses
           : layout === "bento" || layout === "horizontal-scroll"
-          ? bentoUnselectedClasses
-          : layout === "card"
-          ? cardUnselectedClasses
-          : unselectedClasses,
+            ? bentoUnselectedClasses
+            : layout === "card"
+              ? cardUnselectedClasses
+              : unselectedClasses,
         !isSelected && "hover:bg-gray-50"
       )}
       onClick={(e) => {
@@ -170,21 +170,21 @@ export const TextFilterOption: React.FC<FilterOptionProps> = ({
           layout === "grid"
             ? "text-xs"
             : layout === "bento" || layout === "horizontal-scroll"
-            ? "text-xs font-medium"
-            : layout === "compact"
-            ? "text-xs"
-            : layout === "card"
-            ? "text-sm mt-0.5 font-medium self-center"
-            : "text-sm",
+              ? "text-xs font-medium"
+              : layout === "compact"
+                ? "text-xs"
+                : layout === "card"
+                  ? "text-sm mt-0.5 font-medium self-center"
+                  : "text-sm",
           (layout === "row" ||
             layout === "compact" ||
             layout === "stacked-list") &&
-            "flex-grow",
+          "flex-grow",
           isSelected
             ? "text-slate-900"
             : "text-gray-700 group-hover:text-gray-800" // Fallback text colors
         )}
-        // style={{ color: filterSideTextColor }} // This will override Tailwind color if filterSideTextColor is set
+      // style={{ color: filterSideTextColor }} // This will override Tailwind color if filterSideTextColor is set
       >
         {value.text}
       </span>
@@ -236,13 +236,13 @@ export const ColorFilterOption: React.FC<FilterOptionProps> = ({
           ? layout === "bento" || layout === "horizontal-scroll"
             ? bentoSelectedClasses
             : layout === "card"
-            ? cardSelectedClasses
-            : selectedClasses
+              ? cardSelectedClasses
+              : selectedClasses
           : layout === "bento" || layout === "horizontal-scroll"
-          ? bentoUnselectedClasses
-          : layout === "card"
-          ? cardUnselectedClasses
-          : unselectedClasses,
+            ? bentoUnselectedClasses
+            : layout === "card"
+              ? cardUnselectedClasses
+              : unselectedClasses,
         !isSelected && "hover:bg-gray-50"
       )}
       onClick={(e) => {
@@ -256,8 +256,8 @@ export const ColorFilterOption: React.FC<FilterOptionProps> = ({
           "group-hover:scale-105",
           getColorSwatchSize(),
           isSelected &&
-            layout !== "card" &&
-            "ring-2 ring-offset-1 ring-slate-200"
+          layout !== "card" &&
+          "ring-2 ring-offset-1 ring-slate-200"
         )}
         style={{ backgroundColor: value.key || "transparent" }}
       >
@@ -300,12 +300,12 @@ export const ColorFilterOption: React.FC<FilterOptionProps> = ({
               layout === "bento" || layout === "horizontal-scroll"
                 ? "text-xs font-medium"
                 : layout === "compact"
-                ? "text-xs"
-                : "text-sm",
+                  ? "text-xs"
+                  : "text-sm",
               (layout === "row" ||
                 layout === "compact" ||
                 layout === "stacked-list") &&
-                "flex-grow",
+              "flex-grow",
               isSelected
                 ? "text-slate-900"
                 : "text-gray-700 group-hover:text-gray-800"
@@ -373,8 +373,8 @@ export const IconFilterOption: React.FC<FilterOptionProps> = ({
           ? bentoSelectedClasses
           : selectedClasses
         : layout === "bento" || layout === "horizontal-scroll"
-        ? bentoUnselectedClasses
-        : unselectedClasses,
+          ? bentoUnselectedClasses
+          : unselectedClasses,
       !isSelected && "hover:bg-gray-50"
     );
   };
@@ -413,12 +413,12 @@ export const IconFilterOption: React.FC<FilterOptionProps> = ({
               layout === "grid"
                 ? "size-7"
                 : layout === "bento" || layout === "horizontal-scroll"
-                ? "w-3.5 h-3.5"
-                : layout === "compact"
-                ? "w-3.5 h-3.5"
-                : layout === "card"
-                ? "size-10"
-                : "size-7"
+                  ? "w-3.5 h-3.5"
+                  : layout === "compact"
+                    ? "w-3.5 h-3.5"
+                    : layout === "card"
+                      ? "size-10"
+                      : "size-7"
             )}
             fill="none"
             stroke="currentColor"
@@ -442,21 +442,21 @@ export const IconFilterOption: React.FC<FilterOptionProps> = ({
             : layout === "bento" ||
               layout === "horizontal-scroll" ||
               layout === "compact"
-            ? "text-xs font-medium"
-            : "text-sm",
+              ? "text-xs font-medium"
+              : "text-sm",
 
           isSelected
             ? layout === "grid" || layout === "card"
               ? "text-slate-700 font-semibold"
               : "text-slate-900 font-medium"
             : layout === "grid" || layout === "card"
-            ? "text-gray-600"
-            : "text-gray-700 group-hover:text-gray-800",
+              ? "text-gray-600"
+              : "text-gray-700 group-hover:text-gray-800",
 
           (layout === "row" ||
             layout === "compact" ||
             layout === "stacked-list") &&
-            "flex-grow"
+          "flex-grow"
         )}
       >
         {value.text}
@@ -526,13 +526,13 @@ export const IconTextFilterOption: React.FC<FilterOptionProps> = ({
           ? layout === "bento" || layout === "horizontal-scroll"
             ? bentoSelectedClasses
             : layout === "card"
-            ? cardSelectedClasses
-            : selectedClasses
+              ? cardSelectedClasses
+              : selectedClasses
           : layout === "bento" || layout === "horizontal-scroll"
-          ? bentoUnselectedClasses
-          : layout === "card"
-          ? cardUnselectedClasses
-          : unselectedClasses,
+            ? bentoUnselectedClasses
+            : layout === "card"
+              ? cardUnselectedClasses
+              : unselectedClasses,
         !isSelected && "hover:bg-gray-50"
       )}
       onClick={(e) => {
@@ -581,17 +581,17 @@ export const IconTextFilterOption: React.FC<FilterOptionProps> = ({
           layout === "grid"
             ? "text-xs text-center"
             : layout === "bento" || layout === "horizontal-scroll"
-            ? "text-xs font-medium"
-            : layout === "compact"
-            ? "text-xs"
-            : layout === "card"
-            ? "text-sm text-center font-medium"
-            : "text-sm",
+              ? "text-xs font-medium"
+              : layout === "compact"
+                ? "text-xs"
+                : layout === "card"
+                  ? "text-sm text-center font-medium"
+                  : "text-sm",
           (layout === "row" ||
             layout === "compact" ||
             layout === "stacked-list" ||
             layout === "grid") &&
-            "flex-grow",
+          "flex-grow",
           layout === "card" && "self-center w-full",
           isSelected
             ? "text-slate-900"
@@ -613,6 +613,7 @@ export default function FilterPanel() {
   const [modalFilter, setModalFilter] = useState(false);
   const pageContext = usePageContext();
   const categorySlug = pageContext.routeParams?.slug;
+  const { api } = pageContext;
   const filterPanelRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -621,7 +622,7 @@ export default function FilterPanel() {
     isError,
   } = useQuery<Filter[] | undefined>({
     queryKey: ["get_filters", { slug: categorySlug }],
-    queryFn: () => get_filters({ slug: categorySlug }),
+    queryFn: () => get_filters({ slug: categorySlug }, api),
   });
 
   const handleModalClose = () => {
@@ -993,55 +994,55 @@ function FilterModal({
               filterId !== "min_price" &&
               filterId !== "s"
           ).length > 0 && (
-            <div className="p-4 border-b border-gray-200 bg-slate-50 border-l-4 border-l-slate-400 rounded-r-md">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="text-sm font-semibold text-slate-700 leading-normal">
-                  Filtres Actifs
-                </h3>
+              <div className="p-4 border-b border-gray-200 bg-slate-50 border-l-4 border-l-slate-400 rounded-r-md">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-sm font-semibold text-slate-700 leading-normal">
+                    Filtres Actifs
+                  </h3>
 
-                <button
-                  onClick={handleClearFilters}
-                  className="text-sm font-medium transition duration-300 ease-out flex items-center gap-1 group px-3 py-1.5 rounded-md bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 active:scale-95"
-                >
-                  <TbTrashX
-                    size={20}
-                    className="transition-transform group-hover:scale-110"
-                  />
-                  Tout effacer
-                </button>
-              </div>
+                  <button
+                    onClick={handleClearFilters}
+                    className="text-sm font-medium transition duration-300 ease-out flex items-center gap-1 group px-3 py-1.5 rounded-md bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 active:scale-95"
+                  >
+                    <TbTrashX
+                      size={20}
+                      className="transition-transform group-hover:scale-110"
+                    />
+                    Tout effacer
+                  </button>
+                </div>
 
-              <div className="flex flex-wrap gap-2">
-                {activeFilters
-                  .filter(
-                    ({ filterId }) =>
-                      filterId !== "order_by" &&
-                      filterId !== "max_price" &&
-                      filterId !== "min_price" &&
-                      filterId !== "s"
-                  )
-                  .map(({ filterId, value }) => (
-                    <div
-                      key={`${filterId}-${value.text}`}
-                      className="active-filter-tag flex items-center gap-1.5 bg-slate-100 text-slate-800 text-xs font-medium px-3 py-1.5 rounded-lg shadow-sm"
-                    >
-                      <span className="lowercase leading-normal">
-                        {value.text}
-                      </span>
-                      <button
-                        onClick={(e) =>
-                          handleRemoveActiveFilter(e, filterId, value)
-                        }
-                        className="text-slate-400 hover:text-slate-600 transition-colors group p-1 rounded-full hover:bg-slate-200"
-                        aria-label={`Supprimer le filtre ${value.text}`}
+                <div className="flex flex-wrap gap-2">
+                  {activeFilters
+                    .filter(
+                      ({ filterId }) =>
+                        filterId !== "order_by" &&
+                        filterId !== "max_price" &&
+                        filterId !== "min_price" &&
+                        filterId !== "s"
+                    )
+                    .map(({ filterId, value }) => (
+                      <div
+                        key={`${filterId}-${value.text}`}
+                        className="active-filter-tag flex items-center gap-1.5 bg-slate-100 text-slate-800 text-xs font-medium px-3 py-1.5 rounded-lg shadow-sm"
                       >
-                        <FiX size={16} strokeWidth={2.5} />
-                      </button>
-                    </div>
-                  ))}
+                        <span className="lowercase leading-normal">
+                          {value.text}
+                        </span>
+                        <button
+                          onClick={(e) =>
+                            handleRemoveActiveFilter(e, filterId, value)
+                          }
+                          className="text-slate-400 hover:text-slate-600 transition-colors group p-1 rounded-full hover:bg-slate-200"
+                          aria-label={`Supprimer le filtre ${value.text}`}
+                        >
+                          <FiX size={16} strokeWidth={2.5} />
+                        </button>
+                      </div>
+                    ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           <div className="space-y-1">
             {filters

@@ -1,17 +1,15 @@
+//pages/index/@slug/+Page.tsx
 import {
   HydrationBoundary,
   useInfiniteQuery,
   useQuery,
 } from "@tanstack/react-query";
 import clsx from "clsx";
-import gsap from "gsap";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Helmet } from "react-helmet";
 import "swiper/css";
 import "swiper/css/pagination";
 import { A11y, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { BASE_URL } from "../../../api";
 import { get_comments } from "../../../api/comment.api";
 import {
   get_details,
@@ -28,71 +26,82 @@ import BindTags from "../../../component/product/BindTags";
 import { RenderFeatureComponent } from "../../../component/product/RenderFeatureComponent";
 import { ProductMedia } from "../../../component/ProductMedia";
 import { useMedia } from "../../../hook/useMedia";
-import { useData } from "../../../renderer/useData";
 import { Feature, ProductClient } from "../../type";
 import type { Data } from "./+data";
 import { getFirstFeatureWithView } from "../../../utils";
 import { Breadcrumb } from "../../../component/product/Breadcrumb";
 import { BiChevronDown } from "react-icons/bi";
 import { SimilarProductsSection } from "../../../component/SimilarProductsSection";
+// import { useData } from "../../../renderer/useData";
+import { useData } from "vike-react/useData";
+import { usePageContext } from "vike-react/usePageContext";
 
 export default function Page() {
-  const { dehydratedState } = useData<Data>();
+  const { dehydratedState, product, is404 } = useData<Data>();
+
+  if (is404 || !product) {
+    return (
+      <div className="bg-white min-h-dvh flex items-center justify-center">
+        <div className="text-center py-20">
+          <h1 className="text-2xl font-bold mb-4">Produit non trouvé</h1>
+          <p>Désolé, le produit que vous recherchez n'est plus disponible.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white min-h-dvh pt-10 max-w-[1500px] mx-auto font-sans antialiased">
-      <Helmet>
-        <title>Page Produit</title>
-        <meta name="robots" content="index, follow" />
-      </Helmet>
       <HydrationBoundary state={dehydratedState}>
-        <ProductPageContent />
+        <ProductPageContent initialProduct={product} />
       </HydrationBoundary>
     </div>
   );
 }
 
-function ProductPageContent() {
+function ProductPageContent({
+  initialProduct,
+}: {
+  initialProduct: NonNullable<Data["product"]>;
+}) {
   const [imgIndex, setImgIndex] = useState<number>(0);
   const [swiperInstance, setSwiperInstance] = useState<any>(null);
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
-
+  const { api } = usePageContext()
   const { slug } = useData<Data>();
   const {
     data: products,
     isPending,
     error,
   } = useQuery({
-    queryKey: ["get_products", slug],
-    queryFn: () => get_products({ slug_product: slug }),
+    queryKey: ["get_product_by_slug", slug],
+    queryFn: () => get_products({ slug_product: slug }, api),
     select(data) {
-      return data.list;
+      return data;
+    },
+    initialData: {
+      list: [initialProduct],
+      // @ts-ignore
+      meta: { page: 1, limit: 10, total: 1, current_page: 1, last_page: 1 },
+      category: undefined,
     },
   });
 
-  const product = useMemo(() => products?.[0] ?? null, [products]);
-
+  const product = useMemo(() => products?.list?.[0] ?? null, [products]);
   const { data: features, isPending: isPendingFeatures } = useQuery({
     queryKey: ["get_features_with_values", product?.id],
-    queryFn: () => get_features_with_values({ product_id: product?.id }),
+    queryFn: () => get_features_with_values({ product_id: product?.id }, api),
     enabled: !!product?.id,
   });
 
-  // SEO Meta Data
-  const mainImage = getFirstFeatureWithView(features || [])?.values[0]
-    ?.views[0];
-  const imageUrl = mainImage ? BASE_URL + mainImage : "";
   const handleImageClick = (index: number) => {
     swiperInstance?.slideTo(index);
     setImgIndex(index);
   };
 
-  if (isPending || isPendingFeatures) {
+  if (!product) {
     return (
-      <div
-        className="flex items-center justify-center min-h-[50vh]"
-        aria-live="polite"
-      >
+      <div className="flex items-center justify-center min-h-[50vh]">
         <Loading />
       </div>
     );
@@ -105,80 +114,9 @@ function ProductPageContent() {
       </div>
     );
   }
-  if (!product) {
-    return (
-      <div className="text-center py-20">
-        <Helmet>
-          <title>Produit non trouvé | Boutique</title>
-          <meta name="robots" content="noindex" />
-        </Helmet>
-        Aucun produit trouvé
-      </div>
-    );
-  }
+
   return (
     <>
-      <Helmet>
-        <title>{`${product.name} | Boutique`}</title>
-        <meta
-          name="description"
-          content={
-            product.description
-              ? product.description.substring(0, 160)
-              : `Découvrez ${product.name} - ${
-                  product.barred_price
-                    ? `Ancien prix ${product.barred_price}, `
-                    : ""
-                }Maintenant à ${product.price}.`
-          }
-        />
-        <link rel="canonical" href={`${BASE_URL}/${slug}`} />
-        <meta name="robots" content="index, follow" />
-        <meta property="og:title" content={product.name} />
-        <meta
-          property="og:description"
-          content={
-            product.description
-              ? product.description.substring(0, 160)
-              : `Découvrez ${product.name} - ${
-                  product.barred_price
-                    ? `Ancien prix ${product.barred_price}, `
-                    : ""
-                }Maintenant à ${product.price}.`
-          }
-        />
-        <meta property="og:image" content={imageUrl} />
-        <meta property="og:url" content={`${BASE_URL}/${slug}`} />
-        <meta property="og:type" content="product" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Product",
-            name: product.name,
-            image: imageUrl,
-            description: product.description || `Découvrez ${product.name}.`,
-            sku: product.id,
-            brand: {
-              "@type": "Brand",
-              name: "Rabanne",
-            },
-            offers: {
-              "@type": "Offer",
-              priceCurrency: product.currency,
-              price: product.price,
-              availability: "https://schema.org/InStock",
-              url: `${BASE_URL}/${slug}`,
-            },
-            aggregateRating: product.rating
-              ? {
-                  "@type": "AggregateRating",
-                  ratingValue: product.rating,
-                  reviewCount: product.comment_count,
-                }
-              : undefined,
-          })}
-        </script>
-      </Helmet>
       <main className="container font-primary mx-auto  sm:px-6 lg:px-8 flex flex-col min-h-screen">
         <section className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2 mb-12">
           <div className="md:sticky md:top-14 md:self-start pt-5 px-4">
@@ -341,6 +279,7 @@ function InfoProduct({ product, className }: InfoProductProps) {
 function ReviewsSection({ product }: { product: ProductClient }) {
   const [filterMedia, setFilterMedia] = useState(false);
   const [expandedComment, setExpandedComment] = useState<number | null>(null);
+  const { api } = usePageContext()
 
   const {
     data,
@@ -358,7 +297,7 @@ function ReviewsSection({ product }: { product: ProductClient }) {
         page: pageParam,
         limit: 2,
         with_users: true,
-      }),
+      }, api),
     getNextPageParam: (lastPage) => {
       const currentPage = lastPage?.meta?.current_page;
       const lastPageNum = lastPage?.meta?.last_page;
@@ -450,21 +389,19 @@ function ReviewsSection({ product }: { product: ProductClient }) {
         <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mb-6">
           <div className="flex gap-2">
             <button
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                !filterMedia
-                  ? "bg-gray-700 text-white"
-                  : "bg-gray-100 text-gray-900 hover:bg-gray-200"
-              }`}
+              className={`px-3 py-1 text-sm rounded-full transition-colors ${!filterMedia
+                ? "bg-gray-700 text-white"
+                : "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                }`}
               onClick={() => setFilterMedia(false)}
             >
               Tous
             </button>
             <button
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                filterMedia
-                  ? "bg-gray-700 text-white"
-                  : "bg-gray-100 text-gray-900 hover:bg-gray-200"
-              }`}
+              className={`px-3 py-1 text-sm rounded-full transition-colors ${filterMedia
+                ? "bg-gray-700 text-white"
+                : "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                }`}
               onClick={() => setFilterMedia(true)}
             >
               Avec média
@@ -496,7 +433,7 @@ function ReviewsSection({ product }: { product: ProductClient }) {
                   <h3 className="font-semibold text-lg">{comment.title}</h3>
                   <div>
                     {comment?.description?.length > 150 &&
-                    expandedComment !== index ? (
+                      expandedComment !== index ? (
                       <>
                         <p className="text-gray-600">
                           {comment.description.substring(0, 150)}...
@@ -667,9 +604,8 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
                   {faq.question}
                 </span>
                 <BiChevronDown
-                  className={`w-5 h-5 text-black transition-transform duration-300 flex-shrink-0 ${
-                    expandedFAQ === index ? "rotate-180" : ""
-                  }`}
+                  className={`w-5 h-5 text-black transition-transform duration-300 flex-shrink-0 ${expandedFAQ === index ? "rotate-180" : ""
+                    }`}
                 />
               </button>
               <div
@@ -696,13 +632,14 @@ function FAQSection({ expandedFAQ, setExpandedFAQ }: FAQSectionProps) {
 }
 
 function DetailsSection({ product_id }: { product_id: string }) {
+  const { api } = usePageContext()
   const {
     data: details,
     isLoading,
     error,
   } = useQuery({
     queryKey: ["details", product_id],
-    queryFn: () => get_details({ product_id }),
+    queryFn: () => get_details({ product_id }, api),
     select: (data) => data?.list,
   });
 

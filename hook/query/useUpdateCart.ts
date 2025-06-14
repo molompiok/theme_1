@@ -1,40 +1,43 @@
-import { useMutation, QueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { update_cart } from "../../api/cart.api";
-import { CartResponse, Currency, Feature } from "../../pages/type";
+import { CartResponse } from "../../pages/type";
 import { useAuthStore } from "../../store/user";
-import { createQueryClient } from "../../renderer/ReactQueryProvider";
+import { AxiosInstance } from "axios";
 
 interface UpdateCartParams {
   product_id: string;
   mode: "increment" | "decrement" | "clear" | "set" | "max";
   value?: number;
   bind: Record<string, string>;
+  ignoreStock?: boolean;
 }
 
 interface MutationContext {
   previousCart?: CartResponse;
 }
 
-export const useUpdateCart = () => {
+export const useUpdateCart = (api: AxiosInstance) => {
+
+  const queryClient = useQueryClient();
   const authUser = useAuthStore((state) => state.user);
   const cartKeyUserIdentifier = authUser?.id || 'guest';
   return useMutation({
-    mutationFn: update_cart,
+    mutationFn: (params: UpdateCartParams) => update_cart(params, api),
     onMutate: async (params) => {
-      await createQueryClient.cancelQueries({ queryKey: ["cart", cartKeyUserIdentifier] });
+      await queryClient.cancelQueries({ queryKey: ["cart", cartKeyUserIdentifier] });
 
-      const previousCartData = createQueryClient.getQueryData<CartResponse>(["cart", cartKeyUserIdentifier]);
+      const previousCartData = queryClient.getQueryData<CartResponse>(["cart", cartKeyUserIdentifier]);
 
       return { previousCartData };
     },
     onError: (err, params, context) => {
       if (context?.previousCartData) {
-        createQueryClient.setQueryData(["cart", cartKeyUserIdentifier], context.previousCartData);
+        queryClient.setQueryData(["cart", cartKeyUserIdentifier], context.previousCartData);
       }
       console.error("Mutation error in useUpdateCart:", err);
     },
     onSettled: () => {
-      createQueryClient.invalidateQueries({ queryKey: ["cart", cartKeyUserIdentifier] });
+      queryClient.invalidateQueries({ queryKey: ["cart", cartKeyUserIdentifier] });
       console.log('Cart query invalidated after mutation settled for user/guest:', cartKeyUserIdentifier);
     },
   });

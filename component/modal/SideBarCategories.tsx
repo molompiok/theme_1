@@ -16,6 +16,7 @@ import gsap from "gsap";
 import { navigate } from "vike/client/router";
 import { ProductMedia } from "../ProductMedia";
 import { useThemeSettingsStore } from "../../store/themeSettingsStore"; // Réintégré
+import { usePageContext } from "vike-react/usePageContext";
 
 export default function SideBarCategories() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,6 +28,7 @@ export default function SideBarCategories() {
   const listRef = useRef<HTMLUListElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  const { api } = usePageContext();
 
   // Réintégration des couleurs du thème
   const filterSideBackgroundColor = useThemeSettingsStore(
@@ -73,7 +75,7 @@ export default function SideBarCategories() {
     isPending,
   } = useQuery({
     queryKey: ["get_categories"],
-    queryFn: () => get_categories({}),
+    queryFn: () => get_categories({}, api),
     select: (data) => (data?.list ? data.list : []),
   });
 
@@ -474,20 +476,18 @@ export default function SideBarCategories() {
                     <div className="relative flex items-center gap-4 flex-1">
                       {category.icon?.length > 0 && (
                         <div
-                          className={`rounded-xl transition-all duration-300 ${
-                            hoveredCategory === category.id
+                          className={`rounded-xl transition-all duration-300 ${hoveredCategory === category.id
                               ? "bg-neutral-200/70 dark:bg-neutral-700/70 scale-110"
                               : "bg-neutral-100 dark:bg-neutral-800/80"
-                          }`}
+                            }`}
                         >
                           <ProductMedia
                             mediaList={category.icon}
                             productName={category.name}
-                            className={`sm:size-14 size-11 transition-colors duration-300 ${
-                              hoveredCategory === category.id
+                            className={`sm:size-14 size-11 transition-colors duration-300 ${hoveredCategory === category.id
                                 ? "text-black dark:text-white" // Icône contrastée au survol
                                 : "text-neutral-600 dark:text-neutral-400"
-                            }`}
+                              }`}
                           />
                         </div>
                       )}
@@ -530,11 +530,10 @@ export default function SideBarCategories() {
                       <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 group-hover:bg-neutral-200/70 dark:group-hover:bg-neutral-700/70 transition-all duration-300">
                         <BsChevronRight
                           size={14}
-                          className={`transform transition-all duration-300 ${
-                            hoveredCategory === category.id
+                          className={`transform transition-all duration-300 ${hoveredCategory === category.id
                               ? "translate-x-0.5 text-black dark:text-white"
                               : "text-neutral-500 dark:text-neutral-400"
-                          }`}
+                            }`}
                         />
                       </div>
                     )}

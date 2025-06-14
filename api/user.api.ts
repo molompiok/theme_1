@@ -1,6 +1,7 @@
-import axios from "axios";
-import { api, BASE_URL, build_form_data } from ".";
+import axios, { AxiosInstance } from "axios";
+import { build_form_data } from "./";
 import { Adresse, User } from "../pages/type";
+import { useAuthStore } from "../store/user";
 
 type PhoneNumber = {
   id: string;
@@ -17,10 +18,17 @@ export const create_user_phone = async (params: {
   phone_number: string;
   format: string;
   country_code: string;
-}) => {
+}, api: AxiosInstance) => {
   const formData = build_form_data(params);
+  api.interceptors.request.use(config => {
+    const token = useAuthStore.getState().token;
+    if (token && config.headers) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  });
   try {
-    const response = await api.api?.post<PhoneNumber>(
+    const response = await api.post<PhoneNumber>(
       "/v1/user-phones",
       formData
     );
@@ -36,11 +44,17 @@ export const update_user_phone = async (params: {
   id: string;
   format: string;
   country_code: string;
-}) => {
-  console.log("🚀 ~ phone_number:", params.phone_number)
+}, api: AxiosInstance) => {
   const formData = build_form_data(params);
+  api.interceptors.request.use(config => {
+    const token = useAuthStore.getState().token;
+    if (token && config.headers) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  });
   try {
-    const response = await api.api?.put<PhoneNumber>(
+    const response = await api.put<PhoneNumber>(
       "/v1/user-phones/" + params.id,
       formData
     );
@@ -51,9 +65,9 @@ export const update_user_phone = async (params: {
   }
 };
 
-export const delete_user_phone = async (params: { id: string }) => {
+export const delete_user_phone = async (params: { id: string }, api: AxiosInstance) => {
   try {
-    const response = await api.api?.delete<PhoneNumber>(
+    const response = await api.delete<PhoneNumber>(
       "/v1/user-phones/" + params.id
     );
     return response?.data;
@@ -63,10 +77,17 @@ export const delete_user_phone = async (params: { id: string }) => {
   }
 };
 
-export const update_user = async (params: { full_name: string }) => {
+export const update_user = async (params: { full_name: string }, api: AxiosInstance) => {
   const formData = build_form_data(params);
+  api.interceptors.request.use(config => {
+    const token = useAuthStore.getState().token;
+    if (token && config.headers) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  });
   try {
-    const response = await api.api?.put<User>("/v1/auth/me", formData);
+    const response = await api.put<User>("/v1/auth/me", formData);
     // await delay(1000);
     return response?.data;
   } catch (error) {
@@ -79,10 +100,17 @@ export const create_user_address = async (params: {
   name: string;
   longitude: string;
   latitude: string;
-}) => {
+}, api: AxiosInstance) => {
   const formData = build_form_data(params);
+  api.interceptors.request.use(config => {
+    const token = useAuthStore.getState().token;
+    if (token && config.headers) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  });
   try {
-    const response = await api.api?.post<Adresse>(
+    const response = await api.post<Adresse>(
       "/v1/user-addresses",
       formData
     );
@@ -99,10 +127,17 @@ export const update_user_address = async (params: {
   longitude: string;
   latitude: string;
   id: string
-}) => {
+}, api: AxiosInstance) => {
   const formData = build_form_data(params);
+  api.interceptors.request.use(config => {
+    const token = useAuthStore.getState().token;
+    if (token && config.headers) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  });
   try {
-    const response = await api.api?.put<Adresse>(
+    const response = await api.put<Adresse>(
       "/v1/user-addresses/" + params.id,
       formData
     );
@@ -115,9 +150,16 @@ export const update_user_address = async (params: {
 };
 
 
-export const delete_user_address = async (params: { id: string }) => {
+export const delete_user_address = async (params: { id: string }, api: AxiosInstance) => {
+  api.interceptors.request.use(config => {
+    const token = useAuthStore.getState().token;
+    if (token && config.headers) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  });
   try {
-    const response = await api.api?.delete<Adresse>(
+    const response = await api.delete<Adresse>(
       "/v1/user-addresses/" + params.id
     );
     return response?.data;
@@ -146,13 +188,12 @@ interface Store {
   updated_at: string;
 }
 
-export const get_store: () => Promise<Store> = async () => {
+export const get_store = async (api: AxiosInstance, serverUrl: string, apiUrl: string): Promise<Store> => {
   try {
-    const response = await axios.get(BASE_URL.serverUrl + "/stores?store_id=" + BASE_URL.apiUrl.split("/")[3]);
-    console.log("🚀 ~ constget_store: ~ response?.data.list?.[0]:", response?.data.list?.[0])
+    const response = await api.get(serverUrl + "/stores?store_id=" + apiUrl.split("/")[3]);
     return response?.data.list?.[0];
   } catch (error) {
     console.error("Erreur lors de l'ajout de favoris :", error);
-    return null;
+    throw error;
   }
 };

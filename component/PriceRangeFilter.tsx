@@ -113,7 +113,7 @@ const PriceRangeFilter = ({
     // Appliquer les filtres
     if (minStr !== "") {
       setFilterInStore("min_price", [
-        { text: minStr, key: minStr, icon: [] },
+        { text: minStr, key: minStr, icon: [], product_count: 0 },
       ]);
     } else {
       setFilterInStore("min_price", []);
@@ -121,7 +121,7 @@ const PriceRangeFilter = ({
 
     if (maxStr !== "") {
       setFilterInStore("max_price", [
-        { text: maxStr, key: maxStr, icon: [] },
+        { text: maxStr, key: maxStr, icon: [], product_count: 0 },
       ]);
     } else {
       setFilterInStore("max_price", []);
@@ -153,8 +153,8 @@ const PriceRangeFilter = ({
       </div>
       <div className="space-y-1 mb-2">
         <div className="space-y-1" style={{ color: filterSideTextColor }}>
-          <label 
-            htmlFor="min_price_input" 
+          <label
+            htmlFor="min_price_input"
             className="block text-xs font-medium uppercase tracking-wide"
           >
             Prix minimum
@@ -168,11 +168,10 @@ const PriceRangeFilter = ({
               inputMode="decimal"
               name="min_price_input"
               id="min_price_input"
-              className={`w-full px-3 py-3 text-sm bg-white border text-black rounded-lg transition-all duration-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                hasError && touched.min
+              className={`w-full px-3 py-3 text-sm bg-white border text-black rounded-lg transition-all duration-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-1 ${hasError && touched.min
                   ? "border-red-300 focus:border-red-500 focus:ring-red-200"
                   : "border-gray-300 focus:border-black focus:ring-gray-200 hover:border-gray-400"
-              }`}
+                }`}
               placeholder={minPlaceholder}
               value={minPriceInput}
               onChange={handleMinPriceChange}
@@ -187,12 +186,12 @@ const PriceRangeFilter = ({
         </div>
         <div className="flex items-center justify-center py-2">
           <div className="flex-1 h-px bg-gray-200"></div>
-          <span className="px-3 text-xs text-gray-500 bg-white">à</span>  
+          <span className="px-3 text-xs text-gray-500 bg-white">à</span>
           <div className="flex-1 h-px bg-gray-200"></div>
         </div>
         <div className="space-y-2">
-          <label 
-            htmlFor="max_price_input" 
+          <label
+            htmlFor="max_price_input"
             className="block text-xs font-medium uppercase tracking-wide"
           >
             Prix maximum
@@ -206,11 +205,10 @@ const PriceRangeFilter = ({
               inputMode="decimal"
               name="max_price_input"
               id="max_price_input"
-              className={`w-full px-3 py-3 text-sm bg-white text-black border rounded-lg transition-all duration-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                hasError && touched.max
+              className={`w-full px-3 py-3 text-sm bg-white text-black border rounded-lg transition-all duration-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-1 ${hasError && touched.max
                   ? "border-red-300 focus:border-red-500 focus:ring-red-200"
                   : "border-gray-300 focus:border-black focus:ring-gray-200 hover:border-gray-400"
-              }`}
+                }`}
               placeholder={maxPlaceholder}
               value={maxPriceInput}
               onChange={handleMaxPriceChange}
@@ -253,15 +251,14 @@ const PriceRangeFilter = ({
         <button
           onClick={applyFilters}
           disabled={hasError}
-          className={`w-full py-3 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-            hasError
+          className={`w-full py-3 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${hasError
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-black text-white hover:bg-gray-800 focus:ring-gray-500 active:bg-gray-900"
-          }`}
+            }`}
         >
           {hasValues ? "Mettre à jour les prix" : "Appliquer les prix"}
         </button>
-        
+
         {hasValues && (
           <button
             onClick={clearFilters}

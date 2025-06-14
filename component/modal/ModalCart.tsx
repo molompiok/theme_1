@@ -5,22 +5,16 @@ import {
   BsX,
   BsArrowRight,
   BsHeart,
-  BsPlus,
-  BsDash,
+  BsPlus
 } from "react-icons/bs";
 import {
-  CartItem,
-  CartResponse,
-  GroupProductType,
-  ProductClient,
-  ProductFeature,
+  CartItem, ProductClient,
+  ProductFeature
 } from "../../pages/type";
 import AddRemoveItemCart from "./../AddRemoveItemCart";
-import { CommandButton } from "./../Button";
 import Modal from "./Modal";
 import { get_features_with_values } from "../../api/products.api";
 import { useQuery } from "@tanstack/react-query";
-import Loading from "./../Loading";
 import { DisplayPriceItemCart } from "./../DisplayPrice";
 import { ProductMedia } from "../ProductMedia";
 import { navigate } from "vike/client/router";
@@ -34,6 +28,7 @@ import BindTags from "../product/BindTags";
 import { MarkdownViewer } from "../MarkdownViewer";
 import { useThemeSettingsStore } from "../../store/themeSettingsStore";
 import FavoriteButton from "../FavoriteButton";
+import { usePageContext } from "vike-react/usePageContext";
 
 function ItemCart({
   product,
@@ -43,7 +38,8 @@ function ItemCart({
   bind: Record<string, string>;
 }) {
   const isOpen = useModalCart((state) => state.showCart);
-  const removeMutation = useUpdateCart();
+  const { api } = usePageContext();
+  const removeMutation = useUpdateCart(api);
   const [isHovering, setIsHovering] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const filterSideTextColor = useThemeSettingsStore(
@@ -57,7 +53,7 @@ function ItemCart({
     queryKey: ["get_features_with_values", product?.id],
     queryFn: () =>
       product?.id
-        ? get_features_with_values({ product_id: product?.id })
+        ? get_features_with_values({ product_id: product?.id }, api)
         : Promise.resolve(null),
     enabled: !!product?.id && isOpen,
   });
@@ -124,15 +120,10 @@ function ItemCart({
             productName={product.name}
             className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
           />
-          {/* Bouton favori */}
-          <button className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white hover:scale-110">
-            <BsHeart size={12} className="text-red-500" />
-          </button>
-
           <FavoriteButton
             product_id={product.id}
             className="absolute top-2 right-2 p-1.5 text-gray-400"
-            size={14}
+            size={10}
           />
         </div>
 
@@ -147,18 +138,17 @@ function ItemCart({
               {/* Bouton de suppression amélioré */}
               <div className="relative">
                 <button
-                  className={`p-1 rounded-full transition-all duration-300 transform hover:scale-110 ${
-                    isHovering
-                      ? "bg-gradient-to-r from-slate-300 to-slate-400 text-white shadow-lg"
-                      : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                  }`}
+                  className={`p-1 rounded-full transition-all duration-300 transform hover:scale-110 ${isHovering
+                    ? "bg-gradient-to-r from-slate-300 to-slate-400 text-white shadow-lg"
+                    : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                    }`}
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowConfirmDelete(true);
                   }}
                   aria-label="Supprimer du panier"
                 >
-                  <BsTrash size={14} />
+                  <BsTrash size={10} />
                 </button>
 
                 {/* Confirmation de suppression */}
@@ -312,13 +302,14 @@ function ListItemCart({ cart }: { cart: CartItem[] }) {
 export default function ModalCart() {
   const showCart = useModalCart((state) => state.showCart);
   const toggleCart = useModalCart((state) => state.toggleCart);
+  const { api } = usePageContext();
   const filterSideTextColor = useThemeSettingsStore(
     (state) => state.filterSideTextColor
   );
   const filterSideBackgroundColor = useThemeSettingsStore(
     (state) => state.filterSideBackgroundColor
   );
-  const { data: cart, isLoading, isPending } = useCart();
+  const { data: cart, isLoading, isPending } = useCart(api);
 
   const totalItems =
     cart?.cart?.items?.reduce((acc: number, item) => acc + item.quantity, 0) ||

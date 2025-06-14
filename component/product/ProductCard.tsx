@@ -12,6 +12,7 @@ import ReviewsStars from "../comment/ReviewsStars";
 import { DisplayPrice } from "../DisplayPrice";
 import { useThemeSettingsStore } from "../../store/themeSettingsStore";
 import clsx from "clsx";
+import { usePageContext } from "vike-react/usePageContext";
 
 export default function ProductCard({
   product,
@@ -22,11 +23,11 @@ export default function ProductCard({
     if (!product) return;
     navigate(`/${formatSlug(product.slug)}`, { keepScrollPosition: false });
   };
-
+  const { api } = usePageContext()
   const { data: feature, status } = useQuery({
     queryKey: ["get_features_with_values", product?.default_feature_id],
     queryFn: () =>
-      get_features_with_values({ feature_id: product?.default_feature_id }),
+      get_features_with_values({ feature_id: product?.default_feature_id }, api),
     enabled: !!product,
   });
 
@@ -65,9 +66,9 @@ export default function ProductCard({
               "absolute z-10",
               settings.favoriteIconPosition === "top-right" && "top-4 right-2",
               settings.favoriteIconPosition === "bottom-right" &&
-                "bottom-4 right-2",
+              "bottom-4 right-2",
               settings.favoriteIconPosition === "bottom-left" &&
-                "bottom-4 left-2",
+              "bottom-4 left-2",
               settings.favoriteIconPosition === "top-left" && "top-4 left-2"
             )}
           />
@@ -78,9 +79,9 @@ export default function ProductCard({
               `absolute z-10 py-1 px-4 rounded-full text-xs sm:p-4 sm:text-sm font-semibold shadow-lg`,
               settings.promotionTextPosition === "top-left" && "top-4 left-4",
               settings.promotionTextPosition === "bottom-left" &&
-                "bottom-4 left-4",
+              "bottom-4 left-4",
               settings.promotionTextPosition === "bottom-right" &&
-                "bottom-4 right-4",
+              "bottom-4 right-4",
               settings.promotionTextPosition === "top-right" && "top-4 right-4"
             )}
             style={{

@@ -1,4 +1,4 @@
-import { api, build_search_params } from "./";
+import { build_search_params } from "./";
 import {
   Detail,
   Feature,
@@ -12,7 +12,8 @@ import {
   ProductType,
 } from "../pages/type";
 import { delay } from "../utils";
-
+import { AxiosInstance } from "axios";
+import { useAuthStore } from "../store/user";
 
 function minimize_product(product: ProductType): ProductClient {
   const {
@@ -56,34 +57,32 @@ export const get_products = async (params: {
   page?: number;
   limit?: number;
   filters?: Record<string, FilterValue[]>;
-}) => {
-  console.log("🚀 ~ filters:", params.filters)
+}, api: AxiosInstance) => {
   const searchParams = build_search_params(params);
   try {
-    const response = await api.api?.get<{
+    const response = await api.get<{
       list: ProductType[];
       category?: { id: string; name: string; description: string, view: string[] };
       meta: MetaPagination;
     }>("/v1/products?" + searchParams.toString());
+
+
     return {
-      list: response?.data.list.map(minimize_product),
-      meta: response?.data.meta,
-      category: response?.data.category,
-    };
+      list: response?.data?.list?.map(minimize_product) ?? [],
+      meta: response?.data?.meta ?? { page: 1, limit: 10, total: 0 }, // ou type vide si besoin
+      category: response?.data?.category ?? undefined,
+    };;
   } catch (error: any) {
     console.error("Erreur lors de la récupération des produits :", error.message);
-    return {
-      list: [],
-      category: null,
-    };
+    // On relance l'erreur pour que React Query la gère.
+    throw error;
   }
 };
 
-export const get_similar_products = async ({ slug }: { slug: string }): Promise<ProductType[]> => {
+export const get_similar_products = async ({ slug, api }: { slug: string, api: AxiosInstance }): Promise<ProductType[]> => {
   try {
     // On appelle la nouvelle URL
-    const response = await api.api?.get<ProductType[]>(`/v1/products/similar/${slug}`);
-    console.log("🚀 ~ constget_similar_products= ~ response:", response?.data)
+    const response = await api.get<ProductType[]>(`/v1/products/similar/${slug}`);
     return response?.data || [];
   } catch (error) {
     console.error("Failed to fetch similar products:", error);
@@ -94,15 +93,15 @@ export const get_similar_products = async ({ slug }: { slug: string }): Promise<
 export const get_features_with_values = async (params: {
   product_id?: string;
   feature_id?: string;
-}) => {
+}, api: AxiosInstance) => {
 
   const searchParams = build_search_params(params);
 
   try {
-    const response = await api.api?.get<Feature[]>(
+    const response = await api.get<Feature[]>(
       "/v1/features/with-values?" + searchParams.toString()
     );
-    return response?.data;
+    return response?.data || [];
   } catch (error) {
     throw new Error("Erreur lors de la récupération des features :" + error);
   }
@@ -113,11 +112,11 @@ export const get_products_by_category = async (params: {
   slug: string;
   page?: number;
   limit?: number;
-}) => {
+}, api: AxiosInstance) => {
   const searchParams = build_search_params(params);
 
   try {
-    const response = await api.api?.get<{
+    const response = await api.get<{
       list: {
         products: ProductType[];
         category: { id: string; name: string; description: string };
@@ -146,12 +145,22 @@ export const get_products_by_category = async (params: {
 // };
 
 // Gestion des favoris
-export const create_favorite = async (data: { product_id: string }) => {
+export const create_favorite = async (data: { product_id: string }, api: AxiosInstance) => {
+
+  api.interceptors.request.use(config => {
+    const token = useAuthStore.getState().token;
+    if (token && config.headers) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  });
   const formData = new FormData();
   formData.append("product_id", data.product_id);
 
+
+
   try {
-    const response = await api.api?.post<{ favorite: { favorite_id: string; product_name: string }, message: string }>("/v1/favorites", formData);
+    const response = await api.post<{ favorite: { favorite_id: string; product_name: string }, message: string }>("/v1/favorites", formData);
     return response?.data.favorite;
   } catch (error) {
     console.error("Erreur lors de l'ajout de favoris :", error);
@@ -159,9 +168,16 @@ export const create_favorite = async (data: { product_id: string }) => {
   }
 };
 
-export const delete_favorite = async (id: string) => {
+export const delete_favorite = async (id: string, api: AxiosInstance) => {
+  api.interceptors.request.use(config => {
+    const token = useAuthStore.getState().token;
+    if (token && config.headers) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  });
   try {
-    const response = await api.api?.delete<{ isDeleted: boolean }>(
+    const response = await api.delete<{ isDeleted: boolean }>(
       "/v1/favorites/" + id
     );
     return response?.data.isDeleted;
@@ -180,11 +196,19 @@ export const get_favorites = async (params: {
   max_price?: number;
   page?: number;
   limit?: number;
-}) => {
+}, api: AxiosInstance) => {
   const searchParams = build_search_params(params);
+  api.interceptors.request.use(config => {
+    const token = useAuthStore.getState().token;
+    if (token && config.headers) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  });
+
 
   try {
-    const response = await api.api?.get<{ list: ProductFavorite[], meta: MetaPagination }>(
+    const response = await api.get<{ list: ProductFavorite[], meta: MetaPagination }>(
       `/v1/favorites?${searchParams.toString()}`);
     return response?.data;
   } catch (error) {
@@ -211,14 +235,14 @@ export const get_favorites = async (params: {
 //   }
 // };
 
-export const get_filters = async (params: { slug?: string }) => {
+export const get_filters = async (params: { slug?: string }, api: AxiosInstance) => {
   const searchParams = build_search_params(params);
 
   try {
-    const response = await api.api?.get<Filter[]>(
+    const response = await api.get<Filter[]>(
       "/v1/categories/filters?" + searchParams.toString()
     );
-    return response?.data;
+    return response?.data || [];
   } catch (error) {
     console.error("Error fetching feature details:", error);
     throw error;
@@ -227,13 +251,13 @@ export const get_filters = async (params: { slug?: string }) => {
 
 
 
-export const get_details = async (params: { product_id?: string }) => {
+export const get_details = async (params: { product_id?: string }, api: AxiosInstance) => {
   const searchParams = build_search_params(params);
   try {
-    const response = await api.api?.get<{ list: Detail[], meta: MetaPagination }>(
+    const response = await api.get<{ list: Detail[], meta: MetaPagination }>(
       "/v1/details?" + searchParams.toString()
     );
-    return response?.data;
+    return response?.data || { list: [], meta: {} };
   } catch (error) {
     console.error("Error fetching feature details:", error);
     throw error;

@@ -8,12 +8,9 @@ import React, {
 } from "react";
 import { BsSearch, BsGeoAlt, BsTrash } from "react-icons/bs";
 import { FiEdit2, FiMapPin } from "react-icons/fi";
-import { CiDeliveryTruck } from "react-icons/ci";
-import { FaMapMarkerAlt, FaCheckCircle } from "react-icons/fa";
-import { FaLocationDot } from "react-icons/fa6";
+import { FaCheckCircle } from "react-icons/fa";
 import { HiOutlineLocationMarker } from "react-icons/hi";
-import axios from "axios";
-import Loading from "../Loading";
+import axios, { AxiosInstance } from "axios";
 import { useGeolocationWithIP } from "../../hook/useGeolocationWithIP";
 import { useAuthStore } from "../../store/user";
 import {
@@ -23,8 +20,7 @@ import {
 } from "../../api/user.api";
 import { useMutation } from "@tanstack/react-query";
 import { debounce } from "../../utils";
-import { renderToString } from "react-dom/server";
-import { api } from "../../api";
+import { usePageContext } from "vike-react/usePageContext";
 
 export const nominatim_url = import.meta.env.VITE_NOMINATIM_URL;
 
@@ -76,10 +72,11 @@ const getCoordinates = async (
 
 export const reverseGeocode = async (
   lat: number,
-  lng: number
+  lng: number,
+  api: AxiosInstance
 ): Promise<Address | null> => {
   try {
-    const response = await api.api?.get("/api/reverse", {
+    const response = await api.get("/api/reverse", {
       params: {
         lat,
         lon: lng, // attention à bien envoyer `lon` et non `lng`
@@ -150,6 +147,7 @@ const MapComponent = React.lazy(async () => {
     default: ({ mapHeight, address, userPosition, onAddressChange }: any) => {
       const mapRef = useRef<any>(null);
       const markerRef = useRef<any>(null);
+      const { api } = usePageContext();
       const mapContainerRef = useRef<HTMLDivElement>(null);
 
       useEffect(() => {
@@ -162,8 +160,8 @@ const MapComponent = React.lazy(async () => {
           address.lat && address.lng
             ? [address.lat, address.lng]
             : userPosition
-            ? [userPosition.lat, userPosition.lng]
-            : [5.3167, -4.0305],
+              ? [userPosition.lat, userPosition.lng]
+              : [5.3167, -4.0305],
           17
         );
 
@@ -193,8 +191,8 @@ const MapComponent = React.lazy(async () => {
           address.lat && address.lng
             ? [address.lat, address.lng]
             : userPosition
-            ? [userPosition.lat, userPosition.lng]
-            : [5.3167, -4.0305],
+              ? [userPosition.lat, userPosition.lng]
+              : [5.3167, -4.0305],
           {
             draggable: true,
             icon: customIcon,
@@ -218,7 +216,7 @@ const MapComponent = React.lazy(async () => {
 
         marker.on("dragend", async (e: any) => {
           const { lat, lng } = e.target.getLatLng();
-          const newAddress = await reverseGeocode(lat, lng);
+          const newAddress = await reverseGeocode(lat, lng, api);
           if (newAddress) onAddressChange(newAddress);
         });
 
@@ -278,14 +276,15 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
     text: string;
   } | null>(null);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState<boolean>(false);
+  const { api } = usePageContext();
   const suggestionRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { userPosition, setMapCenter } = useGeolocationWithIP();
 
   const createUserAddressMutation = useMutation({
-    mutationFn: create_user_address,
+    mutationFn: (params: { name: string; longitude: string; latitude: string; }) => create_user_address(params, api),
     onSuccess: (newAddress) => {
-      fetchUser({ token: useAuthStore.getState().token || undefined });
+      fetchUser(api, { token: useAuthStore.getState().token || undefined });
       setAddress({ ...address, id: newAddress?.id });
       setMessage({
         type: "success",
@@ -300,9 +299,9 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
   });
 
   const updateUserAddressMutation = useMutation({
-    mutationFn: update_user_address,
+    mutationFn: (params: { name: string; longitude: string; latitude: string; id: string; }) => update_user_address(params, api),
     onSuccess: () => {
-      fetchUser({ token: useAuthStore.getState().token || undefined });
+      fetchUser(api, { token: useAuthStore.getState().token || undefined });
       setMessage({
         type: "success",
         text: "Adresse mise à jour avec succès !",
@@ -316,9 +315,9 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
   });
 
   const deleteUserAddressMutation = useMutation({
-    mutationFn: delete_user_address,
+    mutationFn: (params: { id: string; }) => delete_user_address(params, api),
     onSuccess: () => {
-      fetchUser({ token: useAuthStore.getState().token || undefined });
+      fetchUser(api, { token: useAuthStore.getState().token || undefined });
       setAddress({ text: "", subtitle: "", lat: null, lng: null });
       setSearchInput("");
       setMessage({ type: "success", text: "Adresse supprimée avec succès !" });
@@ -441,7 +440,8 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
       setIsGeocoding(true);
       const newAddress = await reverseGeocode(
         userPosition.lat,
-        userPosition.lng
+        userPosition.lng,
+        api
       );
       console.log("🚀 ~ handleReturnToUserPosition ~ newAddress:", newAddress);
       if (newAddress) {
@@ -500,11 +500,10 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
                       ? "Modifier l'adresse de livraison"
                       : "Tapez votre adresse..."
                   }
-                  className={`w-full text-sm sm:text-base px-4 py-3 sm:py-4 pl-12 text-gray-900 placeholder-gray-500 bg-white border-2 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 ${
-                    isGeocoding
-                      ? "bg-gray-50 border-gray-200 cursor-not-allowed"
-                      : "border-gray-200 hover:border-gray-300 group-hover:shadow-md"
-                  }`}
+                  className={`w-full text-sm sm:text-base px-4 py-3 sm:py-4 pl-12 text-gray-900 placeholder-gray-500 bg-white border-2 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 ${isGeocoding
+                    ? "bg-gray-50 border-gray-200 cursor-not-allowed"
+                    : "border-gray-200 hover:border-gray-300 group-hover:shadow-md"
+                    }`}
                   disabled={isGeocoding}
                 />
                 <BsSearch
@@ -677,11 +676,10 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
       </div>
       {message && (
         <div
-          className={`fixed top-20 right-6 p-4 rounded-2xl shadow-2xl transition-all duration-500 transform z-50 max-w-sm ${
-            message.type === "success"
-              ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
-              : "bg-gradient-to-r from-red-500 to-pink-500 text-white"
-          } animate-slideIn`}
+          className={`fixed top-20 right-6 p-4 rounded-2xl shadow-2xl transition-all duration-500 transform z-50 max-w-sm ${message.type === "success"
+            ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+            : "bg-gradient-to-r from-red-500 to-pink-500 text-white"
+            } animate-slideIn`}
         >
           <div className="flex items-center gap-3">
             <div className="p-1 bg-white/20 rounded-full">
@@ -710,13 +708,13 @@ export const AddressSelector: React.FC<{ mapHeight: string }> = ({
         createUserAddressMutation.isPending ||
         updateUserAddressMutation.isPending ||
         deleteUserAddressMutation.isPending) && (
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-30">
-          <div className="text-center">
-            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-700 font-medium">Traitement en cours...</p>
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-30">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-700 font-medium">Traitement en cours...</p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 };

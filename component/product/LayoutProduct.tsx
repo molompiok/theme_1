@@ -6,7 +6,7 @@ import FilterPopover from "../FilterPopover";
 import { useSelectedFiltersStore } from "../../store/filter";
 
 interface LayoutProductProps {
-  dehydratedState: DehydratedState;
+  dehydratedState: DehydratedState | undefined;
   queryKey: string;
 }
 

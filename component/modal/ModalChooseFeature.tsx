@@ -18,6 +18,7 @@ import { RenderFeatureComponent } from "../product/RenderFeatureComponent";
 import FavoriteButton from "../FavoriteButton";
 import { BiShareAlt } from "react-icons/bi";
 import { useMedia } from "../../hook/useMedia";
+import { usePageContext } from "vike-react/usePageContext";
 
 export default function ModalChooseFeature() {
   const {
@@ -28,6 +29,7 @@ export default function ModalChooseFeature() {
 
   const [imgIndex, setImgIndex] = useState(0);
   const [swiperInstance, setSwiperInstance] = useState<any>(null);
+  const { api } = usePageContext()
 
   const handleCloseModal = () => {
     setFeatureModal(false);
@@ -39,7 +41,7 @@ export default function ModalChooseFeature() {
     isError,
   } = useQuery<Feature[] | undefined, Error>({
     queryKey: ["get_features_with_values", product?.id],
-    queryFn: () => get_features_with_values({ product_id: product?.id || "" }),
+    queryFn: () => get_features_with_values({ product_id: product?.id || "" }, api),
     enabled: !!product?.id,
     placeholderData: (previousData) => previousData,
   });
@@ -59,7 +61,7 @@ export default function ModalChooseFeature() {
         .share({
           title: product.name,
           text: `Découvrez ${product.name}`,
-          url: window.location.href+product.slug,
+          url: window.location.href + product.slug,
         })
         .catch(console.error);
     } else {

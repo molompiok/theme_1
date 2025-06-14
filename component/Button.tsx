@@ -16,6 +16,7 @@ import {
   hasContinueSelling,
 } from "../utils";
 import { useThemeSettingsStore } from "../store/themeSettingsStore";
+import { usePageContext } from "vike-react/usePageContext";
 export function CartButton({
   text = "Ajouter au panier",
   product,
@@ -26,9 +27,10 @@ export function CartButton({
   const setFeatureModal = useProductSelectFeature(
     (state) => state.setFeatureModal
   );
-  const { data: cart } = useCart();
+  const { api } = usePageContext();
+  const { data: cart } = useCart(api);
   const toggleCart = useModalCart((state) => state.toggleCart);
-  const updateCartMutation = useUpdateCart();
+  const updateCartMutation = useUpdateCart(api);
   const product_id = product?.id;
   const {
     data: features,
@@ -37,7 +39,7 @@ export function CartButton({
   } = useQuery({
     queryKey: ["get_features_with_values", product_id],
     queryFn: () =>
-      product_id ? get_features_with_values({ product_id }) : null,
+      product_id ? get_features_with_values({ product_id }, api) : null,
     enabled: !!product_id,
   });
 
@@ -181,7 +183,8 @@ export function CommandButton({
   disabled?: boolean;
 }) {
   const toggleCart = useModalCart((state) => state.toggleCart);
-  const { data: cart } = useCart();
+  const { api } = usePageContext();
+  const { data: cart } = useCart(api);
   const totalItems =
     cart?.cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
   const isEmpty = totalItems === 0;
@@ -321,8 +324,8 @@ function MultiValuedFeaturesButton({
         {getTotalPriceValue()
           ? " - " + formatPrice(getTotalPriceValue(), currency)
           : price
-          ? " - " + formatPrice(price, currency)
-          : ""}
+            ? " - " + formatPrice(price, currency)
+            : ""}
       </span>
     </button>
   );
@@ -332,7 +335,8 @@ export function ButtonValidCart({
   product,
 }: ButtonValidCartProps) {
   if (!product) return null;
-  const updateCartMutation = useUpdateCart();
+  const { api } = usePageContext();
+  const updateCartMutation = useUpdateCart(api);
   const toggleCart = useModalCart((st) => st.toggleCart);
   const setFeatureModal = useProductSelectFeature(
     (state) => state.setFeatureModal

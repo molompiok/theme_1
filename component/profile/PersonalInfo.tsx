@@ -3,6 +3,8 @@ import { FiCheck, FiEdit2, FiMail, FiUser } from "react-icons/fi";
 import { useAuthStore } from "../../store/user";
 import { update_user } from "../../api/user.api";
 import { useMutation } from "@tanstack/react-query";
+import { AxiosInstance } from "axios";
+import { usePageContext } from "vike-react/usePageContext";
 
 export const PersonalInfo = () => {
   const user = useAuthStore((state) => state.user);
@@ -13,6 +15,7 @@ export const PersonalInfo = () => {
   const [editValue, setEditValue] = useState(fullName);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const { api } = usePageContext();
 
   useEffect(() => {
     if (user?.full_name && user.full_name !== fullName) {
@@ -24,16 +27,16 @@ export const PersonalInfo = () => {
   }, [user?.full_name, fullName, isEditing]);
 
   const updateUserMutation = useMutation({
-    mutationFn: update_user,
+    mutationFn: (params: Parameters<typeof update_user>[0]) => update_user(params, api),
     onSuccess: async () => {
-      await fetchUser({ token: useAuthStore.getState().token || undefined });
+      await fetchUser(api, { token: useAuthStore.getState().token || undefined });
       setIsEditing(false);
       setErrorMessage(null);
     },
     onError: (error: any) => {
       setErrorMessage(
         error?.response?.data?.message ||
-          "Erreur lors de la mise à jour. Veuillez réessayer."
+        "Erreur lors de la mise à jour. Veuillez réessayer."
       );
     },
   });
@@ -102,11 +105,10 @@ export const PersonalInfo = () => {
               <button
                 onClick={handleEditStart}
                 // CHANGEMENT: Padding du bouton d'édition ajusté
-                className={`p-2 rounded-lg transition-all duration-300 ${
-                  isHovered
+                className={`p-2 rounded-lg transition-all duration-300 ${isHovered
                     ? "bg-slate-100 text-slate-700 scale-105"
                     : "bg-transparent text-slate-400 hover:bg-slate-50"
-                }`}
+                  }`}
                 aria-label="Modifier le nom complet"
               >
                 <FiEdit2 size={18} />
@@ -128,11 +130,10 @@ export const PersonalInfo = () => {
                               text-slate-900 placeholder-slate-400
                               focus:ring-0 focus:border-slate-400 outline-none
                               transition-all duration-300 backdrop-blur-sm
-                              ${
-                                errorMessage
-                                  ? "border-red-400 bg-red-50/50"
-                                  : "border-slate-200 focus:bg-white"
-                              }`}
+                              ${errorMessage
+                      ? "border-red-400 bg-red-50/50"
+                      : "border-slate-200 focus:bg-white"
+                    }`}
                   aria-invalid={!!errorMessage}
                   aria-describedby={errorMessage ? "fullName-error" : undefined}
                   disabled={updateUserMutation.isPending}

@@ -7,6 +7,7 @@ import { BsX } from "react-icons/bs";
 import ProductCard from "./product/ProductCard";
 import { ProductClient } from "../pages/type";
 import ProductSimilaire from "./product/ProductSimilaire";
+import { usePageContext } from "vike-react/usePageContext";
 
 interface SimilarProductsSectionProps {
   productSlug: string;
@@ -15,6 +16,7 @@ interface SimilarProductsSectionProps {
 export function SimilarProductsSection({
   productSlug,
 }: SimilarProductsSectionProps) {
+  const { api } = usePageContext()
   const {
     data: similarProducts,
     isLoading,
@@ -22,7 +24,7 @@ export function SimilarProductsSection({
   } = useQuery<ProductClient[]>({
     // Clé de requête unique qui inclut le slug du produit principal
     queryKey: ["similar_products", productSlug],
-    queryFn: () => get_similar_products({ slug: productSlug }),
+    queryFn: () => get_similar_products({ slug: productSlug, api }),
     // Ne relance pas la requête si l'utilisateur quitte et revient sur la page rapidement
     staleTime: 5 * 60 * 1000,
     // La requête ne s'exécute que si le slug est valide

@@ -1,5 +1,5 @@
 import React from "react";
-import { usePageContext } from "../renderer/usePageContext";
+import { usePageContext } from "vike-react/usePageContext";
 import { navigate } from "vike/client/router";
 
 export { LinkIcon };

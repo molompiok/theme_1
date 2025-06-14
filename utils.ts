@@ -1,6 +1,5 @@
 import limax from "limax";
 import { Feature, OrderStatus, ProductFeature, ProductType, VariantType } from "./pages/type";
-import { BASE_URL } from "./api";
 
 export const formatSlug = (name: string) => limax(name, { maintainCase: true });
 
@@ -318,12 +317,12 @@ export function getOptions({ bind, features, product_id }: { bind: Record<string
 
 
 
-export const googleLogin = () => {
+export const googleLogin = ({ apiUrl, serverUrl }: { apiUrl: string, serverUrl: string }) => {
   // navigate("/auth/google");
-  const storeId = BASE_URL.apiUrl.split("/")[3];
+  const storeId = apiUrl.split("/")[3];
   const originalUrl = window.location.origin;
   const clientSuccess = originalUrl + "/auth/success";
   const clientError = originalUrl + "/auth/error";
-  const url = `${BASE_URL.serverUrl}/auth/store/google/redirect?store_id=${storeId}&client_success=${clientSuccess}&client_error=${clientError}`;
+  const url = `${serverUrl}/auth/store/google/redirect?store_id=${storeId}&client_success=${clientSuccess}&client_error=${clientError}`;
   window.open(url, "_self");
 };

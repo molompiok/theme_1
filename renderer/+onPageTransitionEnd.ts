@@ -1,6 +1,6 @@
 import { OnPageTransitionEndAsync } from "vike/types"
 
-export const onPageTransitionEnd: OnPageTransitionEndAsync = async (): ReturnType<OnPageTransitionEndAsync> => {
+export const onPageTransitionEnd: OnPageTransitionEndAsync = async () => {
   console.log('Page transition end: Hiding loader');
 
   const loader = document.getElementById('page-loader');

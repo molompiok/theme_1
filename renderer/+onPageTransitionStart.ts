@@ -1,6 +1,6 @@
 import { OnPageTransitionStartAsync } from "vike/types"
 
-export const onPageTransitionStart: OnPageTransitionStartAsync = async (): ReturnType<OnPageTransitionStartAsync> => {
+export const onPageTransitionStart: OnPageTransitionStartAsync = async () => {
   console.log('Page transition start: Showing loader');
 
   const loader = document.getElementById('page-loader'); // Utilise l'ID c'est plus sûr

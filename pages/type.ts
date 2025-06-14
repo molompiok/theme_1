@@ -266,6 +266,7 @@ export type CartUpdateResponse = {
   total: number;
   action: "added" | "removed" | "updated";
   new_guest_cart_id?: string;
+  ignoreStock?: boolean;
 };
 
 

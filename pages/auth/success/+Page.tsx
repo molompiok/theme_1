@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { navigate } from "vike/client/router";
-import { api } from "../../../api";
-import { response } from "express";
 import { useAuthStore } from "../../../store/user";
 import { useMergeCart } from "../../../hook/query/useMergeCart";
+import { usePageContext } from "vike-react/usePageContext";
 
 export default function Page() {
   const [status, setStatus] = useState<"loading" | "success" | "error">(
@@ -11,7 +10,8 @@ export default function Page() {
   );
   const [message, setMessage] = useState<string>("Processing your login...");
 
-  const { mutate } = useMergeCart()
+  const { apiUrl, serverUrl, api } = usePageContext()
+  const { mutate } = useMergeCart(api)
 
   useEffect(() => {
     const processToken = async () => {
@@ -32,7 +32,7 @@ export default function Page() {
       try {
         useAuthStore
           .getState()
-          .fetchUser({ token })
+          .fetchUser(api, { token })
           .then(() => {
             mutate()
             setStatus("success");

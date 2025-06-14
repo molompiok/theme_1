@@ -6,11 +6,11 @@ import { CommentType } from "../../pages/type";
 import { useModalReview } from "../../store/modal";
 import { ProductMedia } from "../ProductMedia";
 import ReviewsStars from "../comment/ReviewsStars";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { delete_comment } from "../../api/comment.api";
 import toast from "react-hot-toast";
-import { createQueryClient } from "../../renderer/ReactQueryProvider";
 import BindTags from "../product/BindTags";
+import { usePageContext } from "vike-react/usePageContext";
 
 const ReviewProduct = () => {
   const {
@@ -19,12 +19,13 @@ const ReviewProduct = () => {
     setModalOpen,
   } = useModalReview();
   const [isDeleting, setIsDeleting] = useState(false);
+  const { api } = usePageContext();
 
   const closeModal = () => setModalOpen(false);
-
+  const queryClient = useQueryClient();
   const removeCommentMutation = useMutation({
     mutationFn: () =>
-      comment?.id ? delete_comment(comment.id) : Promise.resolve(false),
+      comment?.id ? delete_comment(comment.id, api) : Promise.resolve(false),
     onMutate: () => {
       setIsDeleting(true);
     },
@@ -35,7 +36,7 @@ const ReviewProduct = () => {
     },
     onSuccess: () => {
       toast.success("Avis supprimé avec succès");
-      createQueryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["comment"],
       });
       setIsDeleting(false);
@@ -227,10 +228,10 @@ const CommentDisplay = ({ comment }: { comment: Partial<CommentType> }) => {
               {comment?.rating !== undefined && comment?.rating !== null && comment?.rating >= 4
                 ? "Excellent"
                 : comment?.rating !== undefined && comment?.rating !== null && comment?.rating >= 3
-                ? "Bien"
-                : comment?.rating !== undefined && comment?.rating !== null && comment?.rating >= 2
-                ? "Moyen"
-                : "À améliorer"}
+                  ? "Bien"
+                  : comment?.rating !== undefined && comment?.rating !== null && comment?.rating >= 2
+                    ? "Moyen"
+                    : "À améliorer"}
             </span>
           </div>
         </div>

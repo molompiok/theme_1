@@ -5,7 +5,7 @@ import {
   ProductClient,
   filterOptions as defaultSortOptions,
 } from "../../pages/type"; // Renamed filterOptions to avoid confusion
-import { usePageContext } from "../../renderer/usePageContext";
+import { usePageContext } from "vike-react/usePageContext";
 import { get_products } from "../../api/products.api";
 import Skeleton from "../Skeleton"; // Assuming this provides a good visual skeleton for ProductCard
 import { useSelectedFiltersStore } from "../../store/filter";
@@ -31,6 +31,7 @@ function ListProductCard({ slug, queryKey }: ListProductCardProps) {
   const pageContext = usePageContext();
   const categorySlug = slug || pageContext.routeParams?.slug;
   const { selectedFilters } = useSelectedFiltersStore();
+  const { api } = pageContext
 
   const { order, queryFilters } = useMemo(() => {
     const currentOrderText =
@@ -65,9 +66,11 @@ function ListProductCard({ slug, queryKey }: ListProductCardProps) {
         order_by: order,
         limit: 12, // Increased limit for a fuller initial view, adjust as needed
         page: pageParam,
-      }),
+      }, api),
     getNextPageParam: (lastPage) => {
+      // @ts-ignore
       const currentPage = lastPage?.meta?.current_page;
+      // @ts-ignore
       const lastPageNum = lastPage?.meta?.last_page;
       return currentPage && lastPageNum && currentPage < lastPageNum
         ? currentPage + 1

@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BsSearch, BsX, BsHeartFill } from "react-icons/bs";
-// import { useData } from "../../../renderer/useData"; // Optionnel pour cette page
 import {
   HydrationBoundary,
   useInfiniteQuery,
@@ -17,8 +16,6 @@ import {
   filterOptions,
   defaultOptions,
 } from "../../type";
-import { usePageContext } from "../../../renderer/usePageContext";
-import { navigate } from "vike/client/router";
 import { DisplayPrice } from "../../../component/DisplayPrice";
 import { ProductMedia } from "../../../component/ProductMedia";
 import FavoriteButton from "../../../component/FavoriteButton";
@@ -29,7 +26,7 @@ import FilterPopover from "../../../component/FilterPopover";
 import { useThemeSettingsStore } from "../../../store/themeSettingsStore";
 import clsx from "clsx";
 import ProductSearchCard from "../../../component/product/ProductSearchCard";
-// import Loading from "../../../component/Loading"; // Remplacé par le spinner de la recherche pour cohérence
+import { usePageContext } from "vike-react/usePageContext";
 
 const GRID_CLASSES =
   "grid grid-cols-1 gap-4 min-[280px]:grid-cols-2 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6";
@@ -114,6 +111,7 @@ const ProductList = () => {
   }, []);
 
   const orderText = selectedFilters?.order_by?.[0]?.text || "date_desc";
+  const { api } = usePageContext();
   const order =
     (filterNameToId[orderText.toLowerCase()] as OrderByType) || "date_desc";
 
@@ -127,7 +125,7 @@ const ProductList = () => {
   } = useInfiniteQuery({
     queryKey: ["get_favorites", order, selectedFilters],
     queryFn: ({ pageParam = 1 }) =>
-      get_favorites({ limit: 12, page: pageParam, order_by: order }),
+      get_favorites({ limit: 12, page: pageParam, order_by: order }, api),
     getNextPageParam: (lastPage) => {
       const currentPage = lastPage?.meta.current_page;
       const lastPageNum = lastPage?.meta.last_page;

@@ -20,7 +20,7 @@ import { useAuthRedirect } from "../../../hook/authRedirect";
 import { useMediaViews } from "../../../hook/query/useMediaViews";
 import { useClipboard } from "../../../hook/useClipboard";
 import { useFiltersAndUrlSync } from "../../../hook/useUrlFilterManager";
-import { usePageContext } from "../../../renderer/usePageContext";
+import { usePageContext } from "vike-react/usePageContext";
 import { useSelectedFiltersStore } from "../../../store/filter";
 import { useModalCommentStore, useModalReview } from "../../../store/modal";
 import { formatPrice, statusStyles } from "../../../utils";
@@ -56,11 +56,10 @@ export default function OrdersPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 font-primary">
         {/* Header moderne avec effet glassmorphism */}
         <div
-          className={`sticky inset-x-0 transition-all duration-500 ease-out z-50 ${
-            isScrolled
+          className={`sticky inset-x-0 transition-all duration-500 ease-out z-50 ${isScrolled
               ? "backdrop-blur-xl bg-white/80 border-b border-gray-200/50 shadow-lg shadow-gray-200/20"
               : "bg-transparent"
-          }`}
+            }`}
           style={{
             top: isScrolled ? "44px" : "0px",
           }}
@@ -134,6 +133,7 @@ const EmptyState = ({ message }: { message: string }) => (
 
 const WrapOrderList = () => {
   const { selectedFilters } = useSelectedFiltersStore();
+  const { api } = usePageContext();
   const observerTarget = useRef<HTMLDivElement>(null);
   const filterNameToId = useMemo(() => {
     return filterOptionsOrder.reduce((acc, filter) => {
@@ -151,7 +151,7 @@ const WrapOrderList = () => {
     useInfiniteQuery({
       queryKey: ["get_orders_infinite", order],
       queryFn: ({ pageParam = 1 }) =>
-        get_orders({ order_by: order, limit: 3, page: pageParam }),
+        get_orders({ order_by: order, limit: 3, page: pageParam }, api),
       getNextPageParam: (lastPage) => {
         const currentPage = lastPage?.meta?.current_page;
         const lastPageNum = lastPage?.meta?.last_page;
@@ -450,10 +450,11 @@ const OrderItemProduct = ({
 
   const setModalOpen = useModalCommentStore((state) => state.setModalOpen);
   const { setModalOpen: setReviewModalOpen } = useModalReview();
+  const { api } = usePageContext();
 
   const { data: comment, isLoading } = useQuery({
     queryKey: ["comment", { order_item_id: item.id }],
-    queryFn: () => get_comment({ order_item_id: item.id }),
+    queryFn: () => get_comment({ order_item_id: item.id }, api),
   });
 
   const canReview = !isLoading && true; // La logique `true` semble redondante mais on la garde

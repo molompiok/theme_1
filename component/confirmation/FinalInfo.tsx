@@ -6,13 +6,13 @@ import {
   FaArrowLeft,
 } from "react-icons/fa";
 import { useOrderInCart } from "../../store/cart";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { create_user_order } from "../../api/cart.api";
 import { navigate } from "vike/client/router";
 import { useAuthStore } from "../../store/user";
-import { createQueryClient } from "../../renderer/ReactQueryProvider";
 import useCart from "../../hook/query/useCart";
 import { InfoOrderOwner } from "../../utils";
+import { usePageContext } from "vike-react/usePageContext";
 
 type RecapitulatifStepProps = {
   step: "info" | "livraison" | "Finalisation";
@@ -23,13 +23,17 @@ type RecapitulatifStepProps = {
 
 const FinalInfo = ({ step, setStep }: RecapitulatifStepProps) => {
   const { with_delivery } = useOrderInCart();
-  const { data: cart } = useCart();
+  const { api } = usePageContext();
+  const { data: cart } = useCart(api);
+  //@ts-ignore
   const totalPrice = cart?.total || 0;
   const { user } = useAuthStore();
-  const { mutate, isError, error, isSuccess, isPending } = useMutation({
-    mutationFn: create_user_order,
+  const queryClient = useQueryClient();
+  const { mutate, isPending } = useMutation({
+    mutationFn: (params: Parameters<typeof create_user_order>[0]) =>
+      create_user_order(params, api),
     onSuccess: (data) => {
-      createQueryClient.cancelQueries({
+      queryClient.cancelQueries({
         queryKey: ["get_orders"],
       });
       navigate("/profile/commandes");
@@ -163,8 +167,7 @@ const FinalInfo = ({ step, setStep }: RecapitulatifStepProps) => {
           onClick={() => {
             const pickupDeadline = new Date();
             pickupDeadline.setDate(pickupDeadline.getDate() + 3);
-
-            mutate({
+            const params = {
               with_delivery: isDelivery,
               total_price:
                 totalPrice + (isDelivery ? InfoOrderOwner.delivery_price : 0),
@@ -205,14 +208,15 @@ const FinalInfo = ({ step, setStep }: RecapitulatifStepProps) => {
               pickup_longitude: isDelivery
                 ? undefined
                 : InfoOrderOwner.pickup_longitude,
-            });
+
+            }
+            mutate(params);
           }}
           disabled={isPending}
-          className={`flex-1 py-3 px-4 rounded-md text-white transition-colors ${
-            isPending
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-black hover:bg-gray-800"
-          }`}
+          className={`flex-1 py-3 px-4 rounded-md text-white transition-colors ${isPending
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-black hover:bg-gray-800"
+            }`}
         >
           {isPending ? "En cours..." : "Confirmer la commande"}
         </button>

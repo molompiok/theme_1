@@ -1,20 +1,14 @@
 import React, { useMemo } from "react";
 import clsx from "clsx";
 import { IoMdAdd, IoMdRemove } from "react-icons/io";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { update_cart, view_cart } from "../api/cart.api";
 import {
-  CartResponse,
-  Feature,
-  GroupProductType,
-  ProductClient,
+  Feature, ProductClient
 } from "../pages/type";
-import { useAuthStore } from "../store/user";
 import { FaSpinner } from "react-icons/fa";
 import { deepEqual, getOptions, isEmpty } from "../utils";
 import useCart from "../hook/query/useCart";
 import { useUpdateCart } from "../hook/query/useUpdateCart";
-
+import { usePageContext } from "vike-react/usePageContext";
 export default function AddRemoveItemCart({
   product,
   inList,
@@ -26,7 +20,8 @@ export default function AddRemoveItemCart({
   bind: Record<string, string>;
   features: Feature[];
 }) {
-  const { data: serverCart, isLoading: isCartLoading } = useCart();
+  const { api } = usePageContext();
+  const { data: serverCart, isLoading: isCartLoading } = useCart(api);
 
   const itemInPanier = useMemo(
     () =>
@@ -58,7 +53,7 @@ export default function AddRemoveItemCart({
     [itemInPanier?.quantity]
   );
 
-  const updateCartMutation = useUpdateCart();
+  const updateCartMutation = useUpdateCart(api);
 
   const handleClick = (type: "add" | "remove") => (e: React.MouseEvent) => {
     e.stopPropagation();

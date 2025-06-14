@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
-import { BASE_URL } from "../api";
+// import { BASE_URL } from "../api";
 import clsx from "clsx";
 import Modal from "./modal/Modal";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -8,6 +8,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/zoom";
+import { usePageContext } from "vike-react/usePageContext";
 
 interface ProductMediaProps {
   mediaList: string[] | string;
@@ -34,12 +35,15 @@ export function ProductMedia({
     () => (Array.isArray(mediaList) ? mediaList : [mediaList]),
     [mediaList]
   );
+  const { apiUrl, serverUrl } = usePageContext();
   const [currentMedia, setCurrentMedia] = useState(0);
   const [errorStates, setErrorStates] = useState<boolean[]>([]);
   const [isHovering, setIsHovering] = useState(false);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
   const [swiperInstance, setSwiperInstance] = useState<any>(null);
 
+
+  // console.log('*********BASE_URL**********', BASE_URL);
   const VIDEO_EXTENSIONS = useMemo(() => [".mp4", ".webm", ".ogg"], []);
 
   const validMediaList = useMemo(
@@ -54,8 +58,8 @@ export function ProductMedia({
     return media.startsWith("http")
       ? media
       : isUrlServer
-      ? `${BASE_URL.serverUrl}${media}`
-      : `${BASE_URL.apiUrl}${media}`;
+        ? `${serverUrl}${media}`
+        : `${apiUrl}${media}`;
   }, []);
 
   const currentSrc = useMemo(() => {
@@ -253,9 +257,8 @@ export function ProductMedia({
             {validMediaList.map((_, index) => (
               <button
                 key={index}
-                className={`w-2 h-2 rounded-full ${
-                  currentMedia === index ? "bg-white" : "bg-gray-300"
-                }`}
+                className={`w-2 h-2 rounded-full ${currentMedia === index ? "bg-white" : "bg-gray-300"
+                  }`}
                 onClick={(e) => {
                   e.stopPropagation();
                   setCurrentMedia(index);

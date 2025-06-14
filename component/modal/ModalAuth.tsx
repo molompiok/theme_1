@@ -5,9 +5,11 @@ import { twMerge } from "tailwind-merge";
 import { BsX } from "react-icons/bs";
 import { FcGoogle } from "react-icons/fc";
 import { googleLogin } from "../../utils";
+import { usePageContext } from "vike-react/usePageContext";
 
 export default function ModalAuth() {
   const { close, isOpen, message, type } = useModalAuth((state) => state);
+  const { apiUrl, serverUrl } = usePageContext();
 
   const handleModalClose = () => {
     close();
@@ -16,7 +18,7 @@ export default function ModalAuth() {
 
   const handleGoogleAuth = async () => {
     try {
-      await googleLogin();
+      googleLogin({ apiUrl, serverUrl });
       close();
     } catch (error) {
       console.error("Erreur d'authentification Google:", error);

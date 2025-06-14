@@ -1,6 +1,6 @@
 import React from 'react';
 import { ProductFeature } from '../../pages/type';
-import { BASE_URL } from '../../api';
+import { usePageContext } from 'vike-react/usePageContext';
 
 
 interface BindTagsProps {
@@ -8,15 +8,16 @@ interface BindTagsProps {
 }
 
 const BindTags: React.FC<BindTagsProps> = ({ tags }) => {
+  const { apiUrl } = usePageContext();
   if (!tags || Object.entries(tags).length === 0) {
     return null;
   }
 
   return (
     <div className="flex flex-wrap gap-2 mt-1">
-      {Object.entries(tags).map(([_, value]) => (
+      {Object.entries(tags).map(([_, value], index) => (
         <span
-          key={value?.id + value?.text}
+          key={index}
           className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition-all duration-200"
         >
           {value?.text}
@@ -30,7 +31,7 @@ const BindTags: React.FC<BindTagsProps> = ({ tags }) => {
           {value?.icon?.length > 0 && (
             <span
               className="size-2 ml-1 rounded-full inline-block ring-1 ring-white"
-              style={{ background: `url(${BASE_URL + value?.icon[0]})` }}
+              style={{ background: `url(${apiUrl + value?.icon[0]})` }}
               aria-label={`Icone : ${value?.text}`}
             />
           )}

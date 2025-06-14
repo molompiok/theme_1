@@ -1,6 +1,6 @@
-import { useData } from "../../renderer/useData";
-import { Data } from "./+data";
 import LayoutProduct from "../../component/product/LayoutProduct";
+import { useData } from "vike-react/useData";
+import type { Data } from "./+data";
 
 export { Page };
 

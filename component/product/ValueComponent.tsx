@@ -3,7 +3,6 @@ import { useproductFeatures } from "../../store/features";
 import clsx from "clsx";
 import { Feature, ProductFeature } from "../../pages/type";
 import { getAllOptions } from "../../utils";
-import { BASE_URL } from "../../api";
 import { ProductMedia } from "../ProductMedia";
 
 interface ValueComponentProps {
@@ -226,9 +225,8 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       onClick={handleClick}
       className={clsx(baseStyles, typeStyles, stateStyles)}
       aria-selected={isSelected}
-      aria-label={`${isSelected ? "Sélectionné" : "Sélectionner"} ${text}${
-        isDisabled ? " (indisponible)" : ""
-      }`}
+      aria-label={`${isSelected ? "Sélectionné" : "Sélectionner"} ${text}${isDisabled ? " (indisponible)" : ""
+        }`}
       aria-disabled={isDisabled}
       style={{
         backgroundColor: isColor ? value.key || "#f3f4f6" : undefined,
@@ -237,11 +235,10 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       title={
         isDisabled
           ? `${text} - Indisponible`
-          : `${feature_name}: ${text}${
-              totalStock <= 5
-                ? ` (${totalStock} restant${totalStock > 1 ? "s" : ""})`
-                : ""
-            }`
+          : `${feature_name}: ${text}${totalStock <= 5
+            ? ` (${totalStock} restant${totalStock > 1 ? "s" : ""})`
+            : ""
+          }`
       }
     >
       {/* Overlay de désactivation */}

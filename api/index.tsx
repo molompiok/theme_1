@@ -8,15 +8,15 @@ import { useAuthStore } from "../store/user";
 // export const BASE_URL = import.meta.env.VITE_BASE_URL;
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-export const BASE_URL = {
-  apiUrl: "",
-  serverUrl: "",
-};
+// export const BASE_URL = {
+//   apiUrl: "",
+//   serverUrl: "",
+// };
 
-export const api = {
-  api: null as AxiosInstance | null,
-  server: null as AxiosInstance | null,
-};
+// export const api = {
+//   api: null as AxiosInstance | null,
+//   server: null as AxiosInstance | null,
+// };
 
 interface FilterValue {
   text: string;
@@ -26,11 +26,11 @@ interface FilterValue {
 
 export function build_search_params(params: {
   [key: string]:
-    | string
-    | number
-    | string[]
-    | Record<string, FilterValue[]>
-    | undefined;
+  | string
+  | number
+  | string[]
+  | Record<string, FilterValue[]>
+  | undefined;
 }): URLSearchParams {
   const searchParams = new URLSearchParams();
 

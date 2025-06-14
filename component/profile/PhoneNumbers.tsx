@@ -26,6 +26,7 @@ import {
 } from "../../api/user.api"; // Assurez-vous que ce chemin est correct
 import { useAuthStore } from "../../store/user"; // Assurez-vous que ce chemin est correct
 import clsx from "clsx";
+import { usePageContext } from "vike-react/usePageContext";
 
 // Helper pour les drapeaux
 const getFlagEmoji = (isoCode: string): string => {
@@ -166,6 +167,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
 
   const addFormRef = useRef<HTMLFormElement>(null);
   const editFormRef = useRef<HTMLFormElement>(null); // Corrigé: HTMLFormElement
+  const { api } = usePageContext();
 
   useEffect(() => {
     setNumbers(derivedInitialNumbers);
@@ -184,14 +186,14 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
 
   const commonMutationOptions = {
     onSuccess: () => {
-      fetchUser({ token: useAuthStore.getState().token || undefined });
+      fetchUser(api, { token: useAuthStore.getState().token || undefined });
       // Invalider les requêtes liées aux numéros de téléphone pour rafraîchir les données
       queryClient.invalidateQueries({ queryKey: ["user_phones"] }); // ou une clé plus spécifique si utilisée ailleurs
     },
   };
 
   const createUserPhoneMutation = useMutation({
-    mutationFn: create_user_phone,
+    mutationFn: (params: Parameters<typeof create_user_phone>[0]) => create_user_phone(params, api),
     ...commonMutationOptions,
     onSuccess: (data) => {
       commonMutationOptions.onSuccess();
@@ -207,7 +209,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
   });
 
   const updateUserPhoneMutation = useMutation({
-    mutationFn: update_user_phone,
+    mutationFn: (params: Parameters<typeof update_user_phone>[0]) => update_user_phone(params, api),
     ...commonMutationOptions,
     onSuccess: (data) => {
       commonMutationOptions.onSuccess();
@@ -222,7 +224,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
   });
 
   const deleteUserPhoneMutation = useMutation({
-    mutationFn: delete_user_phone,
+    mutationFn: (params: Parameters<typeof delete_user_phone>[0]) => delete_user_phone(params, api),
     ...commonMutationOptions,
     onError: (error: any) => {
       console.error("Erreur suppression:", error);
@@ -279,8 +281,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
     setAddFormValue(value);
     if (value.trim() && !isValidPhoneNumber(value, addFormCountry)) {
       setAddFormError(
-        `Format invalide pour ${
-          addFormCountry.name
+        `Format invalide pour ${addFormCountry.name
         }. Attendu: ${addFormCountry.mask.replace("0", "#")}`
       );
     } else {
@@ -336,12 +337,12 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
     setEditState((prev) =>
       prev
         ? {
-            ...prev,
-            country: newCountry,
-            value: IMask.pipe(`+${newCountry.dialCode}`, {
-              mask: newCountry.mask,
-            } as any),
-          }
+          ...prev,
+          country: newCountry,
+          value: IMask.pipe(`+${newCountry.dialCode}`, {
+            mask: newCountry.mask,
+          } as any),
+        }
         : null
     );
     setEditFormError(null);
@@ -352,8 +353,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
     setEditState((prev) => (prev ? { ...prev, value } : null));
     if (value.trim() && !isValidPhoneNumber(value, editState.country)) {
       setEditFormError(
-        `Format invalide pour ${
-          editState.country.name
+        `Format invalide pour ${editState.country.name
         }. Attendu: ${editState.country.mask.replace("0", "#")}`
       );
     } else {
@@ -604,7 +604,7 @@ export const PhoneNumbers: React.FC<PhoneNumbersProps> = ({ maxItems = 3 }) => {
                         aria-label="Supprimer ce numéro"
                       >
                         {deleteUserPhoneMutation.isPending &&
-                        deleteUserPhoneMutation.variables?.id === phone.id ? (
+                          deleteUserPhoneMutation.variables?.id === phone.id ? (
                           <div className="w-4 h-4 border-2 border-red-400/50 border-t-red-600 rounded-full animate-spin"></div>
                         ) : (
                           <BsTrash size={16} />

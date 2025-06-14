@@ -1,5 +1,5 @@
 import { navigate } from "vike/client/router";
-import { usePageContext } from "../renderer/usePageContext";
+import { usePageContext } from "vike-react/usePageContext";
 
 export { Link, LinkSideBar };
 

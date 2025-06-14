@@ -7,6 +7,7 @@ import { get_features_with_values } from "../../api/products.api";
 import { group } from "console";
 import { ProductMedia } from "../ProductMedia";
 import { useOrderInCart } from "../../store/cart";
+import { usePageContext } from "vike-react/usePageContext";
 
 type ProductGroup = {
   name: string;
@@ -34,8 +35,11 @@ type Order = {
 
 export const OrderSummary = () => {
   const { with_delivery } = useOrderInCart();
-  const { data: cart } = useCart();
+  const { api } = usePageContext();
+  const { data: cart } = useCart(api);
+  //@ts-ignore
   const totalPrice = cart?.total || 0;
+  //@ts-ignore
   const totalItems = cart?.cart?.items?.reduce((acc: number, item) => acc + item.quantity, 0) || 0;
 
   return (
@@ -44,14 +48,15 @@ export const OrderSummary = () => {
         Resume de la commande
       </h2>
       <div className="max-h-[60vh] overflow-y-auto">
+        {/* @ts-ignore */}
         {cart?.cart?.items?.map((item, index) => (
-          <ItemOrder key={index} item={item}/>
+          <ItemOrder key={index} item={item} />
         ))}
       </div>
       <div className="mt-6 pt-4 border-t border-gray-200">
         <div className="space-y-3">
           <div className="flex justify-between text-sm text-gray-600">
-            <p>Sous-total <span className="text-gray-400 text-xs">({totalItems} articles)</span></p> 
+            <p>Sous-total <span className="text-gray-400 text-xs">({totalItems} articles)</span></p>
             <p>{formatPrice(totalPrice)}</p>
           </div>
           <div className="flex justify-between text-sm text-gray-600">
@@ -73,11 +78,12 @@ export const OrderSummary = () => {
 };
 
 function ItemOrder({ item }: { item: CartItem }) {
+  const { api } = usePageContext();
   const { data: features, isPending } = useQuery({
     queryKey: ["get_features_with_values", item.product.id],
     queryFn: () =>
       item.product.id
-        ? get_features_with_values({ product_id: item.product.id })
+        ? get_features_with_values({ product_id: item.product.id }, api)
         : Promise.resolve(null),
     enabled: !!item.product.id,
   });
