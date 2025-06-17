@@ -377,7 +377,7 @@ export default function SideBarCategories() {
 
             <button
               onClick={handleModalClose}
-              className="group p-3 text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-200/70 dark:hover:bg-neutral-700/70 rounded-xl transition-all duration-300"
+              className="group p-3 text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-200/20 dark:hover:bg-neutral-700/20 rounded-xl transition-all duration-300"
               aria-label="Fermer le menu"
               onMouseEnter={(e) =>
                 gsap.to(e.currentTarget, {
@@ -457,7 +457,7 @@ export default function SideBarCategories() {
               {getCurrentCategories().map((category, index) => (
                 <li key={category.id}>
                   <div
-                    className="group relative flex items-center justify-between p-4 rounded-2xl hover:bg-neutral-100/80 dark:hover:bg-black/20 transition-all duration-300 cursor-pointer border border-transparent hover:border-neutral-200/50 dark:hover:border-neutral-700/50 hover:shadow-lg hover:shadow-neutral-200/20 dark:hover:shadow-black/20"
+                    className="group relative flex items-center justify-between p-2 rounded-2xl  transition-all duration-300 cursor-pointer border border-transparent hover:border-neutral-200/50 dark:hover:border-neutral-700/50 hover:shadow-lg hover:shadow-neutral-200/20 dark:hover:shadow-black/20"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (hasSubCategories(category.id)) {
@@ -477,16 +477,16 @@ export default function SideBarCategories() {
                       {category.icon?.length > 0 && (
                         <div
                           className={`rounded-xl transition-all duration-300 ${hoveredCategory === category.id
-                              ? "bg-neutral-200/70 dark:bg-neutral-700/70 scale-110"
-                              : "bg-neutral-100 dark:bg-neutral-800/80"
+                            ? "bg-neutral-200/10 dark:bg-neutral-700/10 scale-110"
+                            : "bg-neutral-100 dark:bg-neutral-800/10"
                             }`}
                         >
                           <ProductMedia
                             mediaList={category.icon}
                             productName={category.name}
                             className={`sm:size-14 size-11 transition-colors duration-300 ${hoveredCategory === category.id
-                                ? "text-black dark:text-white" // Icône contrastée au survol
-                                : "text-neutral-600 dark:text-neutral-400"
+                              ? "text-black dark:text-white" // Icône contrastée au survol
+                              : "text-neutral-600 dark:text-neutral-400"
                               }`}
                           />
                         </div>
@@ -531,8 +531,8 @@ export default function SideBarCategories() {
                         <BsChevronRight
                           size={14}
                           className={`transform transition-all duration-300 ${hoveredCategory === category.id
-                              ? "translate-x-0.5 text-black dark:text-white"
-                              : "text-neutral-500 dark:text-neutral-400"
+                            ? "translate-x-0.5 text-black dark:text-white"
+                            : "text-neutral-500 dark:text-neutral-400"
                             }`}
                         />
                       </div>

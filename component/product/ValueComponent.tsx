@@ -106,7 +106,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       isIcon && !isIconText,
 
     // Texte et icône+texte - pilules modernes avec padding adaptatif
-    "px-3 py-2 xs:px-4 xs:py-2.5 sm:px-5 sm:py-3 rounded-full border-2 min-h-[44px] gap-2 shadow-sm hover:shadow-md":
+    "p-2  rounded-full border-2 min-h-[44px] gap-2 shadow-sm hover:shadow-md":
       isIconText || (!isColor && !isIcon),
   });
 
@@ -187,7 +187,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
     if (!isDisabled) return null;
 
     return (
-      <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[1px] rounded-inherit">
+      <div className="absolute z-10 inset-0 flex items-center justify-center bg-white/30 backdrop-blur-[0.5px] rounded-inherit">
         <div className="w-full h-0.5 bg-red-400 rotate-12 opacity-80 shadow-sm" />
       </div>
     );
@@ -264,7 +264,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
         <ProductMedia
           mediaList={icon}
           productName={text}
-          className="size-6 xs:size-8 object-contain flex-shrink-0"
+          className="size-8 xs:size-10 object-contain flex-shrink-0"
         />
       )}
 

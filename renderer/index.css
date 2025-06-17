@@ -6,6 +6,16 @@
   --swiper-navigation-size: '12px'
 }
 
+*{
+  font-size: 0.9rem!important;
+}
+
+@media (width<480px){
+  *{
+    font-size: 0.85rem!important;
+  }
+}
+
  @font-face {
     font-family: "SpaceGrotesk";
     src: url("/fonts/SpaceGrotesk-VariableFont_wght.ttf") format("truetype");
