@@ -38,6 +38,8 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
   const { totalStock, mainGroupProduct } = useMemo(() => {
     const currentSelections = selections.get(product_id);
     const validGroups = group_products.filter((gp) => {
+      const continue_selling = gp.continue_selling
+
       const matchesCurrent = gp.bind[feature_id] === value.id;
       const matchesOthers = Array.from(
         currentSelections?.entries() || []
@@ -57,7 +59,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
     return { totalStock: total, mainGroupProduct: main };
   }, [group_products, feature_id, value.id, product_id, selections]);
 
-  const isDisabled = totalStock === 0;
+  const isDisabled = totalStock === 0 && !mainGroupProduct?.continue_selling;
   const isLowStock = totalStock > 0 && totalStock <= 5;
 
   const handleClick = useCallback(
@@ -83,84 +85,94 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
     ]
   );
 
-  // Classes de base améliorées pour mobile
+  // Classes de base simplifiées et optimisées
   const baseStyles = clsx(
     "group relative inline-flex items-center justify-center",
-    "transition-all duration-300 ease-out",
-    "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+    "transition-all duration-200 ease-out",
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1",
     "disabled:cursor-not-allowed",
-    "active:scale-95", // Feedback tactile pour mobile
-    "touch-manipulation", // Optimisation mobile
-    // Typographie responsive
-    "text-xs xs:text-sm sm:text-base font-medium"
+    "active:scale-95",
+    "touch-manipulation",
+    "text-sm font-medium"
   );
 
-  // Styles par type avec design moderne
+  // Styles par type avec tailles réduites
   const typeStyles = clsx({
-    // Couleur - design circulaire avec shadow
-    "w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 rounded-full border-2 shadow-sm hover:shadow-md":
-      isColor,
+    // Couleur - plus compact
+    "w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2": isColor,
 
-    // Icône seule - carré moderne avec coins arrondis
-    "w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 rounded-2xl border-2 overflow-hidden shadow-sm hover:shadow-md":
+    // Icône seule - plus compact
+    "w-10 h-10 sm:w-12 sm:h-12 rounded-xl border-2 overflow-hidden":
       isIcon && !isIconText,
 
-    // Texte et icône+texte - pilules modernes avec padding adaptatif
-    "p-2  rounded-full border-2 min-h-[44px] gap-2 shadow-sm hover:shadow-md":
+    // Texte et icône+texte - padding réduit
+    "px-3 py-2 rounded-lg border-2 min-h-[36px] gap-1.5":
       isIconText || (!isColor && !isIcon),
   });
 
-  // États visuels modernes avec gradients subtils
+  // États visuels simplifiés
   const stateStyles = clsx({
     // Couleur sélectionnée
-    "border-gray-900 ring-2 ring-gray-900 ring-offset-2 scale-105 shadow-lg":
+    "border-gray-900 ring-2 ring-gray-900 ring-offset-1 scale-105":
       isColor && isSelected && !isDisabled,
     // Couleur non sélectionnée
-    "border-gray-300 hover:border-gray-500 hover:scale-105 hover:shadow-md":
+    "border-gray-300 hover:border-gray-500 hover:scale-105":
       isColor && !isSelected && !isDisabled,
     // Couleur désactivée
-    "border-gray-200 opacity-40 shadow-none": isColor && isDisabled,
+    "border-gray-200 opacity-40": isColor && isDisabled,
 
-    // Icône sélectionnée
-    "border-gray-900 bg-gradient-to-br from-gray-800 to-gray-900 shadow-lg":
+    // Icône sélectionnée - FIX: garde l'icône visible
+    "border-blue-500 bg-blue-50 shadow-md":
       isIcon && isSelected && !isDisabled,
     // Icône non sélectionnée
-    "border-gray-300 bg-white hover:border-gray-500 hover:bg-gray-50 hover:shadow-md":
+    "border-gray-300 bg-white hover:border-gray-500 hover:bg-gray-50":
       isIcon && !isSelected && !isDisabled,
     // Icône désactivée
-    "border-gray-200 bg-gray-50 opacity-40 shadow-none": isIcon && isDisabled,
+    "border-gray-200 bg-gray-50 opacity-40": isIcon && isDisabled,
 
     // Texte sélectionné
-    "bg-gradient-to-r from-gray-800 to-gray-900 text-white border-gray-900 shadow-lg":
+    "bg-gray-900 text-white border-gray-900":
       !isColor && !isIcon && isSelected && !isDisabled,
     // Texte non sélectionné
-    "bg-white text-gray-700 border-gray-300 hover:border-gray-900 hover:bg-gray-50 hover:text-gray-900":
+    "bg-white text-gray-700 border-gray-300 hover:border-gray-900 hover:bg-gray-50":
       !isColor && !isIcon && !isSelected && !isDisabled,
     // Texte désactivé
-    "bg-gray-50 text-gray-400 border-gray-200 shadow-none":
+    "bg-gray-50 text-gray-400 border-gray-200":
       !isColor && !isIcon && isDisabled,
   });
 
-  // Indicateur de stock moderne et visible
+  // Indicateur de stock compact
   const StockIndicator = () => {
-    if (totalStock > 5) return null;
+    if (mainGroupProduct?.continue_selling && totalStock === 0) {
+      return (
+        <span
+          className={clsx(
+            "text-[.5rem] font-semibold ml-1 px-1 rounded",
+            "text-blue-700 bg-blue-100"
+          )}
+          aria-hidden="true"
+        >
+          *
+        </span>
+      );
+    }
+    if (totalStock > 5 || mainGroupProduct?.continue_selling) return null;
 
     const stockBadgeStyles = clsx(
-      "absolute -top-1 -right-1 xs:-top-2 xs:-right-2",
-      "min-w-[18px] h-[18px] xs:min-w-[20px] xs:h-5 px-1",
+      "absolute -top-1 -right-1",
+      "min-w-[16px] h-4 px-1",
       "flex items-center justify-center",
-      "text-[10px] xs:text-xs font-bold rounded-full",
-      "border-2 bg-white shadow-md",
-      "animate-pulse", // Animation pour attirer l'attention
+      "text-[10px] font-bold rounded-full",
+      "border bg-white shadow-sm",
       {
-        "text-orange-600 border-orange-300 bg-orange-50": isLowStock,
-        "text-red-600 border-red-300 bg-red-50": isDisabled,
+        "text-orange-600 border-orange-300": isLowStock,
+        "text-red-600 border-red-300": isDisabled,
       }
     );
 
     const inlineStockStyles = clsx(
-      "text-[10px] xs:text-xs font-medium ml-1 opacity-80",
-      "px-1.5 py-0.5 rounded-full",
+      "text-xs font-medium ml-1 opacity-75",
+      "px-1 py-0.5 rounded",
       {
         "text-orange-600 bg-orange-100": isLowStock,
         "text-red-600 bg-red-100": isDisabled,
@@ -182,25 +194,22 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
     );
   };
 
-  // Overlay de désactivation plus visible
+  // Overlay de désactivation simplifié
   const DisabledOverlay = () => {
     if (!isDisabled) return null;
-
     return (
-      <div className="absolute z-10 inset-0 flex items-center justify-center bg-white/30 backdrop-blur-[0.5px] rounded-inherit">
-        <div className="w-full h-0.5 bg-red-400 rotate-12 opacity-80 shadow-sm" />
+      <div className="absolute inset-0 flex items-center justify-center bg-white/50 rounded-inherit">
+        <div className="w-full h-0.5 bg-red-400 rotate-12" />
       </div>
     );
   };
 
-  // Indicateur de sélection pour les couleurs
   const ColorSelectionIndicator = () => {
     if (!isColor || !isSelected || isDisabled) return null;
-
     return (
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-3 h-3 xs:w-4 xs:h-4 bg-white rounded-full shadow-md flex items-center justify-center">
-          <div className="w-1.5 h-1.5 xs:w-2 xs:h-2 bg-gray-900 rounded-full" />
+        <div className="w-2.5 h-2.5 bg-white rounded-full shadow-sm flex items-center justify-center">
+          <div className="w-1 h-1 bg-gray-900 rounded-full" />
         </div>
       </div>
     );
@@ -209,11 +218,11 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
   if (!group_products) {
     return (
       <div
-        className="inline-flex items-center justify-center w-12 h-12 xs:w-14 xs:h-14 text-gray-400 rounded-2xl border-2 border-gray-200 bg-gray-50 shadow-sm"
+        className="inline-flex items-center justify-center w-10 h-10 text-gray-400 rounded-xl border-2 border-gray-200 bg-gray-50"
         role="alert"
         aria-label={`${text} indisponible`}
       >
-        <span className="text-lg xs:text-xl">×</span>
+        <span className="text-lg">×</span>
       </div>
     );
   }
@@ -230,7 +239,6 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       aria-disabled={isDisabled}
       style={{
         backgroundColor: isColor ? value.key || "#f3f4f6" : undefined,
-        // Suppression de la couleur du texte pour permettre l'indicateur
       }}
       title={
         isDisabled
@@ -241,41 +249,32 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
           }`
       }
     >
-      {/* Overlay de désactivation */}
       <DisabledOverlay />
 
-      {/* Indicateur de sélection pour couleurs */}
       <ColorSelectionIndicator />
 
-      {/* Icône seule */}
       {isIcon && !isIconText && icon && (
         <ProductMedia
           mediaList={icon}
           productName={text}
-          className={clsx(
-            "size-8 xs:size-10 object-contain transition-all duration-300",
-            isSelected && !isDisabled && "brightness-0 invert scale-110"
-          )}
+          className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
         />
       )}
 
-      {/* Icône avec texte */}
       {isIconText && icon && (
         <ProductMedia
           mediaList={icon}
           productName={text}
-          className="size-8 xs:size-10 object-contain flex-shrink-0"
+          className="w-5 h-5 object-contain flex-shrink-0"
         />
       )}
 
-      {/* Texte avec meilleur wrapping */}
       {!isColor && (!isIcon || isIconText) && (
-        <span className="truncate max-w-[120px] xs:max-w-[140px] sm:max-w-none">
+        <span className="truncate max-w-[100px] sm:max-w-[120px]">
           {text}
         </span>
       )}
 
-      {/* Indicateur de stock */}
       <StockIndicator />
     </button>
   );

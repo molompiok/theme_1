@@ -26,10 +26,19 @@ export function delay(ms: number): Promise<void> {
 
 
 export const getFirstFeatureWithView = (features: Feature[]) => {
-  const feature = features.find((feature) =>
-    feature.values.some((value) => value.views.length > 0)
-  );
-  return feature;
+  let bestFeature = null;
+  let maxViews = 0;
+
+  for (const feature of features) {
+    for (const value of feature.values) {
+      if (value.views.length > maxViews) {
+        maxViews = value.views.length;
+        bestFeature = feature;
+      }
+    }
+  }
+
+  return bestFeature;
 };
 
 export function getAllOptions({ features, product_id }: { features: Feature[], product_id: string }) {

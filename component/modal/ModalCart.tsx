@@ -81,7 +81,7 @@ function ItemCart({
   if (isPending) {
     return (
       <div className="flex justify-center py-3">
-        <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-gray-300 border-t-slate-500 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -131,7 +131,7 @@ function ItemCart({
         <div className="flex flex-col justify-between flex-grow min-h-[96px]">
           <div className="space-y-2">
             <div className="flex justify-between items-start">
-              <h1 className="text-base md:text-lg font-bold line-clamp-2 pr-2 group-hover:text-blue-600 transition-colors duration-300">
+              <h1 className="text-base md:text-lg font-bold line-clamp-2 pr-2 group-hover:text-slate-600 transition-colors duration-300">
                 {product.name}
               </h1>
 
@@ -247,7 +247,7 @@ function ListItemCart({ cart }: { cart: CartItem[] }) {
           <div className="w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
             <BsCartX size={60} className="text-gray-400" />
           </div>
-          <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-bounce">
+          <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-gradient-to-r from-slate-500 to-gray-500 rounded-full flex items-center justify-center animate-bounce">
             <BsPlus size={24} className="text-white" />
           </div>
         </div>
@@ -268,13 +268,13 @@ function ListItemCart({ cart }: { cart: CartItem[] }) {
 
         <button
           onClick={() => toggleCart(false)}
-          className="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:shadow-xl hover:scale-105 transform"
+          className="group relative overflow-hidden bg-gradient-to-r from-slate-500 to-gray-600 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:shadow-xl hover:scale-105 transform"
         >
           <span className="relative z-10 flex items-center gap-3">
             Découvrir nos produits
             <BsArrowRight className="group-hover:translate-x-1 transition-transform duration-300" />
           </span>
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-600 to-slate-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </button>
       </div>
     );
@@ -349,7 +349,7 @@ export default function ModalCart() {
           <div className="relative flex justify-between items-center">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 bg-gradient-to-br from-slate-500 to-gray-600 rounded-xl flex items-center justify-center shadow-lg">
                   <BsHandbag size={20} className="text-white" />
                 </div>
                 {totalItems > 0 && (
@@ -382,7 +382,7 @@ export default function ModalCart() {
         {isPending || isLoading ? (
           <div className="flex-1 flex justify-center items-center">
             <div className="flex flex-col items-center gap-4">
-              <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+              <div className="w-12 h-12 border-4 border-gray-300 border-t-slate-500 rounded-full animate-spin"></div>
               <p className="text-gray-500">Chargement de votre panier...</p>
             </div>
           </div>
@@ -462,7 +462,7 @@ export default function ModalCart() {
                 Paiement sécurisé
               </div>
               <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
+                <div className="w-3 h-3 bg-slate-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-[10px]">✓</span>
                 </div>
                 Livraison rapide

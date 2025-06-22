@@ -27,6 +27,7 @@ export default function Modal({
   setHide,
   position = "center",
   zIndex = 50,
+  enableBackButton = true, // Nouvelle prop pour contrôler le comportement du bouton retour
 }: PropsWithChildren<{
   isOpen: boolean;
   styleContainer?: string;
@@ -35,37 +36,61 @@ export default function Modal({
   setHide: () => void;
   position?: "start" | "end" | "center";
   zIndex?: number;
+  enableBackButton?: boolean;
 }>) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const hasPushedState = useRef(false);
+  const hasAddedHistoryEntry = useRef(false);
+  const isHandlingBack = useRef(false);
 
-  // Gestion de la fermeture via popstate
   useEffect(() => {
-    if (!isOpen || typeof setHide !== "function") return;
+    if (!isOpen || !enableBackButton) {
+      hasAddedHistoryEntry.current = false;
+      isHandlingBack.current = false;
+      return;
+    }
+
+    if (!hasAddedHistoryEntry.current) {
+      hasAddedHistoryEntry.current = true;
+      const currentState = window.history.state;
+      const currentUrl = window.location.href;
+
+      window.history.replaceState({ ...currentState, hasModal: false }, "", currentUrl);
+      window.history.pushState({ ...currentState, hasModal: true }, "", currentUrl);
+    }
 
     const handlePopState = (event: PopStateEvent) => {
-      if (event.state?.modalOpen) {
-        document.body.style.overflow = "auto";
+      if (hasAddedHistoryEntry.current && !isHandlingBack.current) {
+        isHandlingBack.current = true;
+
+        event.preventDefault();
+        event.stopPropagation();
+
         setHide();
+
+        setTimeout(() => {
+          isHandlingBack.current = false;
+          hasAddedHistoryEntry.current = false;
+        }, 100);
       }
     };
 
-    if (!hasPushedState.current) {
-      window.history.pushState({ modalOpen: true }, "", window.location.href);
-      hasPushedState.current = true;
-    }
-    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("popstate", handlePopState, true);
 
     return () => {
-      window.removeEventListener("popstate", handlePopState);
-      if (hasPushedState.current && !isOpen) {
-        window.history.back();
-      }
-      hasPushedState.current = false;
+      window.removeEventListener("popstate", handlePopState, true);
     };
-  }, [isOpen, setHide]);
+  }, [isOpen, setHide, enableBackButton]);
 
-  // Piégeage du focus et gestion de la touche Escape
+  // Nettoyer l'historique quand la modal se ferme normalement (pas via bouton retour)
+  useEffect(() => {
+    if (!isOpen && hasAddedHistoryEntry.current && !isHandlingBack.current && enableBackButton) {
+      // Revenir en arrière pour nettoyer l'historique
+      window.history.back();
+      hasAddedHistoryEntry.current = false;
+    }
+  }, [isOpen, enableBackButton]);
+
+  // Gestion du focus et des raccourcis clavier
   useEffect(() => {
     if (!isOpen || !modalRef.current) return;
 
@@ -106,14 +131,15 @@ export default function Modal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
+      data-is-open={isOpen}
       ref={modalRef}
       className={twMerge(
         "fixed inset-0 flex bg-black/20 backdrop-blur-[.15rem] transition-all duration-500 ease-in-out",
         position === "start"
           ? "justify-start"
           : position === "end"
-          ? "justify-end"
-          : "items-center justify-center",
+            ? "justify-end"
+            : "items-center justify-center",
         isOpen
           ? animation[backdropAnimation][0]
           : animation[backdropAnimation][1],

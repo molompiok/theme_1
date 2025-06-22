@@ -12,18 +12,7 @@ import { googleLogin } from "../../utils";
 import { FcGoogle } from "react-icons/fc";
 import { usePageContext } from "vike-react/usePageContext";
 
-interface DétailsCommande {
-  adresse_livraison: string;
-  nom_adresse_livraison: string;
-  adresse_retrait: string;
-  nom_adresse_retrait: string;
-  prix_total: number;
-  price_delivery: number;
-  with_delivery: boolean;
-  méthode_paiement: "carte_crédit" | "paypal" | "mobile_money" | "espèces";
-  numéro_téléphone: string;
-  articles: ArticlePanier[];
-}
+
 
 interface ArticlePanier {
   id: string;

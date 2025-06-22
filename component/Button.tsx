@@ -310,7 +310,7 @@ function MultiValuedFeaturesButton({
       disabled={isDisabled || isOutOfStock}
       onClick={handleAddToCart}
       className={clsx(
-        "mx-auto text-center text-clamp-base uppercase w-full py-3 px-4  min-h-[48px] transition-colors duration-300 rounded",
+        "mx-auto text-center text-clamp-base uppercase max-w-[450px] w-full py-3 px-4  min-h-[48px] transition-colors duration-300 rounded",
         {
           "bg-black text-gray-50 cursor-pointer hover:bg-gray-900":
             !isDisabled && !isOutOfStock,

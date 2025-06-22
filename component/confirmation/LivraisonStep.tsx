@@ -65,28 +65,25 @@ const LivraisonStep = ({
         <div className="flex relative">
           {/* Sliding background */}
           <div
-            className={`absolute top-1 bottom-1 w-1/2 bg-white rounded-xl shadow-sm transition-transform duration-300 ease-out ${
-              selectedOption === "retrait"
+            className={`absolute top-1 bottom-1 w-1/2 bg-white rounded-xl shadow-sm transition-transform duration-300 ease-out ${selectedOption === "retrait"
                 ? "translate-x-full"
                 : "translate-x-0"
-            } ${!selectedOption ? "opacity-0" : "opacity-100"}`}
+              } ${!selectedOption ? "opacity-0" : "opacity-100"}`}
           />
 
           {/* Livraison Option */}
           <button
             onClick={() => handleSelect("livraison")}
-            className={`relative flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-xl transition-all duration-300 ${
-              selectedOption === "livraison"
+            className={`relative flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-xl transition-all duration-300 ${selectedOption === "livraison"
                 ? "text-gray-900 font-semibold"
                 : "text-gray-600 hover:text-gray-800"
-            }`}
+              }`}
           >
             <FaTruck
-              className={`transition-all duration-300 ${
-                selectedOption === "livraison"
+              className={`transition-all duration-300 ${selectedOption === "livraison"
                   ? "text-slate-600 scale-110"
                   : "text-gray-500"
-              }`}
+                }`}
               size={20}
             />
             <div className="text-left">
@@ -98,18 +95,16 @@ const LivraisonStep = ({
           {/* Retrait Option */}
           <button
             onClick={() => handleSelect("retrait")}
-            className={`relative flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-xl transition-all duration-300 ${
-              selectedOption === "retrait"
+            className={`relative flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-xl transition-all duration-300 ${selectedOption === "retrait"
                 ? "text-gray-900 font-semibold"
                 : "text-gray-600 hover:text-gray-800"
-            }`}
+              }`}
           >
             <FaStore
-              className={`transition-all duration-300 ${
-                selectedOption === "retrait"
+              className={`transition-all duration-300 ${selectedOption === "retrait"
                   ? "text-green-600 scale-110"
                   : "text-gray-500"
-              }`}
+                }`}
               size={20}
             />
             <div className="text-left">
@@ -293,32 +288,31 @@ const LivraisonStep = ({
           type="button"
           onClick={() => setStep("Finalisation")}
           disabled={!isPermitToProceed}
-          className={`flex-1 py-4 px-6 rounded-2xl font-medium transition-all duration-200 ${
-            isPermitToProceed
+          className={`flex-1 py-4 px-6 rounded-2xl font-medium transition-all duration-200 ${isPermitToProceed
               ? "bg-gray-900 text-white hover:bg-gray-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               : "bg-gray-200 text-gray-500 cursor-not-allowed"
-          }`}
+            }`}
         >
           {isPermitToProceed ? "Continuer" : "Sélectionnez une option"}
         </button>
       </div>
 
       <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
-          to {
-            opacity: 1;
-            transform: translateY(0);
+          
+          .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out;
           }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-      `}</style>
+        `}</style>
     </div>
   );
 };

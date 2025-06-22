@@ -22,18 +22,12 @@ export function SimilarProductsSection({
     isLoading,
     isError,
   } = useQuery<ProductClient[]>({
-    // Clé de requête unique qui inclut le slug du produit principal
     queryKey: ["similar_products", productSlug],
     queryFn: () => get_similar_products({ slug: productSlug, api }),
-    // Ne relance pas la requête si l'utilisateur quitte et revient sur la page rapidement
     staleTime: 5 * 60 * 1000,
-    // La requête ne s'exécute que si le slug est valide
     enabled: !!productSlug,
   });
 
-  // Ne rien afficher si on charge et qu'il n'y a pas encore de données
-  // ou si la requête a échoué, ou s'il n'y a aucun produit à afficher.
-  // Cela évite d'afficher un titre "Vous aimerez aussi" pour rien.
   if (
     isLoading ||
     isError ||
@@ -76,17 +70,14 @@ export function SimilarProductsSection({
   );
 }
 
-/**
- * Un squelette de chargement dédié à cette section, adapté pour le défilement horizontal.
- */
 function LoadingSkeletonForSection() {
   return (
     <div className="overflow-x-auto scrollbar-hide">
       <div className="flex gap-4 sm:gap-6 pb-4 min-w-max">
-        {[...Array(4)].map((_, i) => (
+        {[...Array(10)].map((_, i) => (
           <div
             key={i}
-            className="flex-shrink-0 w-64 sm:w-72 bg-white rounded-3xl overflow-hidden shadow-lg border border-slate-100"
+            className="flex-shrink-0 w-32 sm:w-40 max-h-40 bg-white rounded-3xl overflow-hidden shadow-lg border border-slate-100"
           >
             <div className="h-48 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-pulse"></div>
             <div className="p-6 space-y-3">
@@ -101,10 +92,6 @@ function LoadingSkeletonForSection() {
   );
 }
 
-/**
- * Vous pourriez aussi vouloir un composant d'erreur dédié si vous le souhaitez.
- * Mais pour cette section, ne rien afficher est souvent la meilleure expérience.
- */
 function ErrorState() {
   return (
     <div className="text-center py-16">

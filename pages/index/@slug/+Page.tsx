@@ -30,11 +30,12 @@ import { Feature, ProductClient } from "../../type";
 import type { Data } from "./+data";
 import { getFirstFeatureWithView } from "../../../utils";
 import { Breadcrumb } from "../../../component/product/Breadcrumb";
-import { BiChevronDown } from "react-icons/bi";
+import { BiChevronDown, BiShareAlt } from "react-icons/bi";
 import { SimilarProductsSection } from "../../../component/SimilarProductsSection";
 // import { useData } from "../../../renderer/useData";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
+import ProductGallery from "../../../component/product/ProductGallery";
 
 export default function Page() {
   const { dehydratedState, product, is404 } = useData<Data>();
@@ -121,9 +122,9 @@ function ProductPageContent({
 
   return (
     <>
-      <main className="container font-primary mx-auto  sm:px-6 lg:px-8 flex flex-col min-h-screen">
-        <section className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2 mb-12">
-          <div className="md:sticky md:top-14 md:self-start pt-5 px-4">
+      <main className=" font-primary mx-auto flex flex-col min-h-screen">
+        <section className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2 mb-6 ">
+          <div className="md:sticky md:top-14 md:self-center pt-5 md:ml-5 px-4">
             <InfoProduct product={product} className="md:hidden block" />
             <ProductGallery
               features={features}
@@ -131,6 +132,7 @@ function ProductPageContent({
               imgIndex={imgIndex}
               setImgIndex={setImgIndex}
               setSwiperInstance={setSwiperInstance}
+              isPendingFeatures={isPendingFeatures}
               handleImageClick={handleImageClick}
             />
             <div className="mt-4 md:hidden block">
@@ -142,7 +144,7 @@ function ProductPageContent({
               />
             </div>
           </div>
-          <div className="h-auto px-4">
+          <div className="h-auto md:pr-4 px-4">
             <ProductDetails product={product} features={features} />
           </div>
         </section>
@@ -155,73 +157,75 @@ function ProductPageContent({
   );
 }
 
-interface ProductGalleryProps {
-  features: Feature[] | undefined;
-  product: ProductClient;
-  imgIndex: number;
-  setSwiperInstance: (instance: any) => void;
-  handleImageClick: (index: number) => void;
-  setImgIndex: React.Dispatch<React.SetStateAction<number>>;
-}
+// interface ProductGalleryProps {
+//   features: Feature[] | undefined;
+//   product: ProductClient;
+//   imgIndex: number;
+//   setSwiperInstance: (instance: any) => void;
+//   handleImageClick: (index: number) => void;
+//   isPendingFeatures: boolean;
+//   setImgIndex: React.Dispatch<React.SetStateAction<number>>;
+// }
 
-function ProductGallery({
-  features,
-  product,
-  imgIndex,
-  setSwiperInstance,
-  handleImageClick,
-  setImgIndex,
-}: ProductGalleryProps) {
-  const mediaViews = useMedia(features);
+// function ProductGallery({
+//   features,
+//   product,
+//   imgIndex,
+//   setSwiperInstance,
+//   handleImageClick,
+//   setImgIndex,
+//   isPendingFeatures
+// }: ProductGalleryProps) {
+//   const mediaViews = useMedia(features);
 
-  return (
-    <div className="flex gap-2">
-      <div className=" min-[600px]:flex hidden flex-col gap-2 overflow-x-auto pb-2 scrollbar-thin">
-        {mediaViews?.map((view, index) => (
-          <button
-            key={index}
-            className={clsx("p-1 border-2 rounded-md flex-shrink-0", {
-              "border-gray-800": imgIndex === index,
-              "border-gray-200": imgIndex !== index,
-            })}
-            onClick={() => handleImageClick(index)}
-          >
-            <ProductMedia
-              mediaList={[view]}
-              productName={product.name}
-              shouldHoverVideo={false}
-              className="size-11 md:size-14 object-cover"
-            />
-          </button>
-        ))}
-      </div>
-      <div className="min-[600px]:size-[80%] size-full relative">
-        <FavoriteButton product_id={product.id} />
-        <Swiper
-          modules={[A11y, Pagination]}
-          spaceBetween={10}
-          slidesPerView={1}
-          pagination={{ clickable: true, dynamicBullets: true }}
-          onSwiper={setSwiperInstance}
-          onSlideChange={(swiper) => setImgIndex(swiper.realIndex)}
-          className="rounded-lg overflow-hidden"
-        >
-          {mediaViews.map((view, index) => (
-            <SwiperSlide key={index}>
-              <ProductMedia
-                mediaList={[...new Set([view, ...mediaViews])]}
-                showFullscreen={true}
-                shouldHoverVideo={false}
-                productName={product.name}
-                className="w-full aspect-square object-contain"
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
-    </div>
-  );
-}
+//   return (
+//     <div className="flex gap-2">
+//       <div className=" min-[600px]:flex hidden flex-col gap-2 overflow-x-auto pb-2 scrollbar-thin">
+//         {mediaViews?.map((view, index) => (
+//           <button
+//             key={index}
+//             className={clsx("p-1 border-2 rounded-md flex-shrink-0", {
+//               "border-gray-800": imgIndex === index,
+//               "border-gray-200": imgIndex !== index,
+//             })}
+//             onClick={() => handleImageClick(index)}
+//           >
+//             <ProductMedia
+//               mediaList={[view]}
+//               productName={product.name}
+//               shouldHoverVideo={false}
+//               className="size-11 md:size-14 object-cover"
+//             />
+//           </button>
+//         ))}
+//       </div>
+//       <div className="min-[600px]:size-[80%] size-full relative">
+//         <FavoriteButton product_id={product.id} className="absolute top-3 right-4" size={32} />
+//         <Swiper
+//           modules={[A11y, Pagination]}
+//           spaceBetween={10}
+//           slidesPerView={1}
+//           pagination={{ clickable: true, dynamicBullets: true }}
+//           onSwiper={setSwiperInstance}
+//           onSlideChange={(swiper) => setImgIndex(swiper.realIndex)}
+//           className="rounded-lg overflow-hidden"
+//         >
+//           {mediaViews.map((view, index) => (
+//             <SwiperSlide key={index}>
+//               <ProductMedia
+//                 mediaList={[...new Set([view, ...mediaViews])]}
+//                 showFullscreen={true}
+//                 shouldHoverVideo={false}
+//                 productName={product.name}
+//                 className="w-full aspect-square object-contain"
+//               />
+//             </SwiperSlide>
+//           ))}
+//         </Swiper>
+//       </div>
+//     </div>
+//   );
+// }
 
 interface ProductDetailsProps {
   product: ProductClient;
@@ -254,11 +258,34 @@ interface InfoProductProps {
 function InfoProduct({ product, className }: InfoProductProps) {
   const { categories_id, name, description, rating } = product;
 
+  const handleShare = () => {
+    if (navigator.share && product) {
+      navigator
+        .share({
+          title: product.name,
+          text: `Découvrez ${product.name}`,
+          url: window.location.href + product.slug,
+        })
+        .catch(console.error);
+    } else {
+      alert("Share functionality not available or product not loaded.");
+    }
+  };
+
   return (
     <div className={clsx(className, "space-y-4")}>
       <Breadcrumb categoryId={categories_id[0]} />
       <div className="space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold md:mb-1">{name}</h1>
+        <div className="flex items-center justify-start gap-7">
+          <h1 className="text-2xl md:text-3xl font-bold md:mb-1">{name}</h1>
+          <BiShareAlt
+            onClick={handleShare}
+            aria-label="Partager le produit"
+            role="button"
+            size={25}
+            className="text-gray-700 p-1 text-2xl  cursor-pointer rounded-full hover:bg-gray-200"
+          />
+        </div>
         <div className="flex items-center gap-2">
           <ReviewsStars note={rating} size={20} style="text-orange-500" />
           <span className="text-sm text-gray-600">

@@ -139,12 +139,13 @@ export default function FavoriteButton({
         isFetching ||
         addFavoriteMutation.isPending ||
         removeFavoriteMutation.isPending ? (
-        <div className="w-5 h-5 rounded-full border-2 border-t-transparent border-r-black animate-spin"></div>
+        <div className="rounded-full border-2 border-t-transparent border-r-black animate-spin w-8 h-8 sm:w-10 sm:h-10"></div>
       ) : (
         <BsHeartFill
-          // size={size}
           className={clsx(
-            "cursor-pointer transition-all duration-300 sm:text-2xl text-xl",
+            "cursor-pointer transition-all duration-300",
+            // JUSTE changer la taille - mobile plus grand, desktop encore plus grand
+            "text-3xl sm:text-4xl md:text-5xl",
             favorite?.id
               ? "text-orange-600 font-extrabold"
               : "text-gray-400 font-light"
