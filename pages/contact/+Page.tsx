@@ -95,8 +95,8 @@ export default function Page() {
           // Ajout de WhatsApp, très populaire et pratique en Côte d'Ivoire
           type: "phone", // On peut réutiliser l'icône du téléphone
           label: "WhatsApp",
-          value: "+225 07 12 34 56 78", // Numéro de mobile ivoirien (format Orange/MTN/Moov)
-          href: "https://wa.me/2250712345678", // Lien direct pour ouvrir une conversation WhatsApp
+          value: "+225 07 59 09 10 98", // Numéro de mobile ivoirien (format Orange/MTN/Moov)
+          href: "https://wa.me/2250759091098", // Lien direct pour ouvrir une conversation WhatsApp
         },
         {
           type: "email",
@@ -107,8 +107,8 @@ export default function Page() {
         {
           type: "phone",
           label: "Appel Direct",
-          value: "+225 ", // Numéro fixe ou mobile ivoirien
-          href: "tel:+2250187654321",
+          value: "+225 07 59 09 10 98", // Numéro fixe ou mobile ivoirien
+          href: "tel:+2250759091098",
         },
         {
           type: "address",
