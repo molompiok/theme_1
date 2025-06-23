@@ -1,6 +1,6 @@
 import React from "react";
-import { Link } from "../../component/Link";
 
+// Les interfaces (definitions de type) restent les mêmes
 interface HeroSection {
   title: string;
   subtitle: string;
@@ -14,7 +14,7 @@ interface StorySection {
 }
 
 interface ValueItem {
-  icon: string; // ou un type plus complexe si vous utilisez une lib d'icônes
+  icon: string;
   title: string;
   description: string;
 }
@@ -27,7 +27,7 @@ interface ValuesSection {
 interface TeamMember {
   name: string;
   role: string;
-  imageUrl: string;
+  initials: string;
 }
 
 interface TeamSection {
@@ -49,134 +49,189 @@ export interface AboutPageData {
   cta: CtaSection;
 }
 
+
+// Le composant Icon est modifié pour utiliser des symboles plus évocateurs
 const Icon = ({ name }: { name: string }) => {
-  // Remplacez ceci par votre logique d'icônes (ex: Heroicons, FontAwesome)
   const iconMap: { [key: string]: string } = {
-    leaf: "🌿",
-    sparkles: "✨",
-    users: "👥",
+    handshake: "🤝", // Engagement
+    diamond: "💎",   // Excellence / Qualité
+    heart: "❤️",      // Client / Famille
   };
-  return <span className="text-4xl mb-4">{iconMap[name] || "❓"}</span>;
+  return (
+    <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center text-3xl mb-6 shadow-lg">
+      {iconMap[name] || "❓"}
+    </div>
+  );
+};
+
+const TeamMemberCard = ({ member }: { member: TeamMember }) => {
+  return (
+    <div className="group text-center">
+      <div className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-full bg-gradient-to-br from-gray-900 to-gray-600 flex items-center justify-center shadow-2xl mb-6 transition-all duration-300 group-hover:scale-110 group-hover:shadow-3xl border-4 border-transparent group-hover:border-white">
+        <span className="text-white text-3xl md:text-4xl font-bold tracking-wider">
+          {member.initials}
+        </span>
+      </div>
+      <h3 className="text-xl md:text-2xl font-bold text-black mb-2 transition-colors duration-300 group-hover:text-gray-700">{member.name}</h3>
+      <p className="text-gray-600 font-medium">{member.role}</p>
+    </div>
+  );
 };
 
 export default function Page() {
+  // =======================================================================
+  // DÉBUT DE LA SECTION ADAPTÉE ET AMÉLIORÉE
+  // =======================================================================
   const data: AboutPageData = {
     hero: {
-      title: "Plus qu'une boutique, une passion.",
+      // Titre plus personnel et ancré localement
+      title: "Notre histoire, tissée à Abidjan.",
+      // Sous-titre qui évoque la notion de "famille"
       subtitle:
-        "Découvrez l'histoire et les valeurs qui animent notre marque chaque jour.",
-      imageUrl:
-        "https://images.unsplash.com/photo-1556742502-ec7c0e2f34b1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80",
+        "Découvrez ce qui nous anime, notre vision et la famille derrière la marque.",
+      imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c7da?auto=format&fit=crop&w=1920&q=80", // Image plus axée sur l'humain et la collaboration
     },
     story: {
-      title: "Notre Histoire",
+      // Titre plus narratif
+      title: "L'Aventure a Commencé Ici",
+      // Histoire relocalisée, plus authentique et inspirante pour le marché ivoirien
       content:
-        "Tout a commencé en 2021 dans un petit garage, avec une simple idée : rendre les produits de haute qualité accessibles à tous. Animés par la passion de l'artisanat et l'amour du design, nous avons lancé notre première collection. Aujourd'hui, nous sommes fiers de servir des milliers de clients satisfaits à travers le monde, tout en restant fidèles à nos racines et à notre mission initiale.",
-      imageUrl:
-        "https://images.unsplash.com/photo-1524758631624-e2822e304c36?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+        "Tout a démarré en 2021, non pas dans un garage, mais au cœur de l'effervescence de Treichville. Portés par un rêve simple : offrir à nos frères et sœurs des produits d'une qualité irréprochable, qui racontent une histoire. De quelques croquis partagés entre amis, nous avons bâti une marque qui fait la fierté de notre communauté. Aujourd'hui, nous servons tout Abidjan et la Côte d'Ivoire, en restant fidèles à notre esprit d'origine : l'authenticité, la passion et le partage.",
+      imageUrl: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=1920&q=80",
     },
     values: {
-      title: "Nos Valeurs Fondamentales",
+      // Titre plus chaleureux
+      title: "Ce qui nous guide au quotidien",
       items: [
         {
-          icon: "leaf",
-          title: "Durabilité",
+          // Valeur plus forte et mémorable
+          icon: "diamond",
+          title: "L'Excellence, notre Gri-Gri",
           description:
-            "Nous nous engageons à utiliser des matériaux éco-responsables et à minimiser notre empreinte carbone.",
+            "Chaque article est une promesse. Nous y mettons tout notre savoir-faire pour une qualité et une finition qui font la différence.",
         },
         {
-          icon: "sparkles",
-          title: "Qualité Exceptionnelle",
+          // Valeur qui met l'accent sur la communauté
+          icon: "heart",
+          title: "Le Client est Roi, la Famille d'abord",
           description:
-            "Chaque produit est conçu avec le plus grand soin pour garantir une qualité et une durabilité irréprochables.",
+            "Votre sourire est notre plus grande récompense. Chez nous, vous n'êtes pas un simple client, vous faites partie de la famille.",
         },
         {
-          icon: "users",
-          title: "Satisfaction Client",
+          // Valeur qui parle de responsabilité et d'impact local
+          icon: "handshake",
+          title: "Engagement Local & Responsable",
           description:
-            "Votre bonheur est notre priorité. Notre équipe est toujours là pour vous accompagner.",
+            "Nous sommes fiers de nos racines. Nous privilégions les talents d'ici et agissons pour avoir un impact positif sur notre environnement.",
         },
       ],
     },
     team: {
-      title: "Rencontrez l'Équipe",
+      // Titre plus valorisant
+      title: "Le Cœur de l'Entreprise",
       members: [
         {
-          name: "Alice Dubois",
-          role: "Fondatrice & CEO",
-          imageUrl:
-            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
+          name: "Kouassi Noga Wilfried", // Fondateur mis en avant
+          role: "Fondateur & Visionnaire",
+          initials: "KNW",
         },
         {
-          name: "Marc Petit",
+          name: "Messah Komlan Siméon",
           role: "Directeur des Opérations",
-          imageUrl:
-            "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=300&q=80",
+          initials: "MKS",
         },
         {
-          name: "Chloé Martin",
-          role: "Responsable Marketing",
-          imageUrl:
-            "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300&q=80",
+          name: "Kossonou Jean Eudes",
+          role: "Responsable Marketing & Communauté",
+          initials: "KJE",
         },
       ],
     },
     cta: {
-      title: "Prêt à nous rejoindre dans l'aventure ?",
-      buttonText: "Découvrir nos collections",
+      // Appel à l'action plus inclusif
+      title: "Prêt(e) à faire partie de notre histoire ?",
+      // Texte du bouton plus artisanal et premium
+      buttonText: "Explorer nos créations",
       buttonLink: "/produits",
     },
   };
+  // =======================================================================
+  // FIN DE LA SECTION ADAPTÉE
+  // =======================================================================
+
+
   return (
-    <div className="bg-white text-gray-800">
+    <div className="bg-white text-gray-900 font-sans">
       {/* Section Héros */}
-      <section className="relative h-[60vh] min-h-[400px] text-white">
-        <img
-          src={data.hero.imageUrl}
-          alt="Équipe travaillant ensemble"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-center p-4">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            {data.hero.title}
-          </h1>
-          <p className="text-lg md:text-2xl max-w-3xl">{data.hero.subtitle}</p>
+      <section className="relative h-screen min-h-[600px] text-white overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-gray-900 to-black">
+          <img
+            src={data.hero.imageUrl}
+            alt="Équipe créative en discussion"
+            className="w-full h-full object-cover opacity-30 mix-blend-overlay"
+          />
         </div>
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-6 z-10">
+          <div className="max-w-4xl">
+            <h1 className="text-5xl md:text-7xl font-black mb-8 leading-tight tracking-tight">
+              {data.hero.title}
+            </h1>
+            <p className="text-xl md:text-2xl font-light opacity-90 max-w-2xl mx-auto leading-relaxed">
+              {data.hero.subtitle}
+            </p>
+          </div>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent"></div>
       </section>
 
       {/* Section Notre Histoire */}
-      <section className="py-16 lg:py-24">
-        <div className="container mx-auto px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center">
-          <div className="order-2 md:order-1">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-6">
-              {data.story.title}
-            </h2>
-            <p className="text-gray-600 leading-relaxed">
-              {data.story.content}
-            </p>
-          </div>
-          <div className="order-1 md:order-2">
-            <img
-              src={data.story.imageUrl}
-              alt="Atelier de création"
-              className="rounded-lg shadow-xl w-full h-auto"
-            />
+      <section className="py-24 lg:py-32 relative bg-white">
+        <div className="container mx-auto px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+            <div className="space-y-8">
+              <div>
+                <div className="w-20 h-1 bg-black mb-8"></div>
+                <h2 className="text-4xl lg:text-5xl font-black mb-8 leading-tight">
+                  {data.story.title}
+                </h2>
+              </div>
+              <p className="text-gray-700 leading-relaxed text-lg font-light">
+                {data.story.content}
+              </p>
+            </div>
+            <div className="relative order-first lg:order-last">
+              <div className="absolute -inset-4 bg-gradient-to-r from-gray-900 to-black rounded-2xl transform rotate-3 transition-transform duration-500 group-hover:rotate-1"></div>
+              <img
+                src={data.story.imageUrl}
+                alt="Atelier de création"
+                className="relative rounded-2xl shadow-2xl w-full h-auto grayscale hover:grayscale-0 transition-all duration-500"
+              />
+            </div>
           </div>
         </div>
       </section>
 
       {/* Section Nos Valeurs */}
-      <section className="bg-gray-50 py-16 lg:py-24">
-        <div className="container mx-auto px-6 lg:px-8 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-12">
-            {data.values.title}
-          </h2>
-          <div className="grid md:grid-cols-3 gap-12">
-            {data.values.items.map((value) => (
-              <div key={value.title} className="flex flex-col items-center">
-                <Icon name={value.icon} />
-                <h3 className="text-xl font-semibold mb-2">{value.title}</h3>
-                <p className="text-gray-600 leading-relaxed">
+      <section className="bg-gray-50 py-24 lg:py-32">
+        <div className="container mx-auto px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <div className="w-20 h-1 bg-black mx-auto mb-8"></div>
+            <h2 className="text-4xl lg:text-5xl font-black mb-8">
+              {data.values.title}
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-12 lg:gap-16">
+            {data.values.items.map((value, index) => (
+              <div
+                key={value.title}
+                className="text-center group"
+                style={{ animationDelay: `${index * 0.2}s` }}
+              >
+                <div className="flex justify-center transition-transform duration-300 group-hover:scale-110">
+                  <Icon name={value.icon} />
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-black">{value.title}</h3>
+                <p className="text-gray-600 leading-relaxed font-light">
                   {value.description}
                 </p>
               </div>
@@ -186,37 +241,33 @@ export default function Page() {
       </section>
 
       {/* Section Équipe */}
-      <section className="py-16 lg:py-24">
-        <div className="container mx-auto px-6 lg:px-8 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-12">
-            {data.team.title}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 lg:gap-12">
+      <section className="py-24 lg:py-32 bg-white">
+        <div className="container mx-auto px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <div className="w-20 h-1 bg-black mx-auto mb-8"></div>
+            <h2 className="text-4xl lg:text-5xl font-black mb-8">
+              {data.team.title}
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-y-16 gap-x-8 lg:gap-16 max-w-5xl mx-auto">
             {data.team.members.map((member) => (
-              <div key={member.name}>
-                <img
-                  src={member.imageUrl}
-                  alt={member.name}
-                  className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-full object-cover shadow-lg mb-4"
-                />
-                <h3 className="text-lg font-semibold">{member.name}</h3>
-                <p className="text-gray-500">{member.role}</p>
-              </div>
+              <TeamMemberCard key={member.name} member={member} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Section Call to Action (CTA) */}
-      <section className="bg-slate-600 text-white py-16 lg:py-20">
-        <div className="container mx-auto px-6 lg:px-8 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-6">
+      {/* Section Call to Action */}
+      <section className="bg-black text-white py-24 lg:py-32 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-black to-gray-900 opacity-90"></div>
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/subtle-carbon.png')] opacity-10"></div>
+        <div className="container mx-auto px-6 lg:px-8 text-center relative z-10">
+          <h2 className="text-4xl lg:text-5xl font-black mb-8 leading-tight">
             {data.cta.title}
           </h2>
           <a
-            // to={data.cta.buttonLink}
             href={data.cta.buttonLink}
-            className="bg-white text-slate-600 font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition-colors duration-300 text-lg inline-block"
+            className="inline-block bg-white text-black font-bold py-4 px-12 text-lg rounded-md hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-gray-400"
           >
             {data.cta.buttonText}
           </a>

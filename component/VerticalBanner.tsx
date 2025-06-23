@@ -59,24 +59,23 @@ const VerticalBanner = () => {
       }}
     >
       <div
-        className={`relative w-full h-10 overflow-hidden cursor-pointer`}
+        className={`relative w-full h-12 overflow-hidden cursor-pointer`}
         style={{
           backgroundColor: settings?.announcementBackgroundColor,
         }}
-        // onMouseEnter={handleMouseEnter}
-        // onMouseLeave={handleMouseLeave}
+      // onMouseEnter={handleMouseEnter}
+      // onMouseLeave={handleMouseLeave}
       >
         <div className="relative w-full h-full">
           {settings?.announcementMessages?.map((message, index) => (
             <div
               key={index}
-              className={`absolute inset-0 flex items-center justify-center px-4 font-semibold text-sm md:text-base transition-all duration-700 ease-in-out ${
-                index === currentIndex
+              className={`absolute inset-0 flex items-center justify-center px-4 font-semibold text-sm md:text-base transition-all duration-700 ease-in-out ${index === currentIndex
                   ? "opacity-100 transform translate-y-0"
                   : index < currentIndex
-                  ? "opacity-0 transform -translate-y-full"
-                  : "opacity-0 transform translate-y-full"
-              }`}
+                    ? "opacity-0 transform -translate-y-full"
+                    : "opacity-0 transform translate-y-full"
+                }`}
               style={{
                 color: settings?.announcementTextColor,
               }}
@@ -92,13 +91,12 @@ const VerticalBanner = () => {
           {settings?.announcementMessages?.map((_, index) => (
             <button
               key={index}
-              className={`rounded-md transition-all duration-300 focus:outline-none ${
-                index === currentIndex
+              className={`rounded-md transition-all duration-300 focus:outline-none ${index === currentIndex
                   ? "scale-x-125 h-1 w-2.5"
                   : "h-1 w-2"
-              }`}
+                }`}
               style={{
-                backgroundColor: settings?.announcementTextColor +  (index === currentIndex ? "" : "50"),
+                backgroundColor: settings?.announcementTextColor + (index === currentIndex ? "" : "50"),
                 opacity: index === currentIndex ? 1 : 0.5,
               }}
               onClick={() => handleDotClick(index)}
@@ -106,7 +104,7 @@ const VerticalBanner = () => {
             />
           ))}
         </div>
-{/* 
+        {/* 
         <div className="absolute top-0 left-0 h-0.5 bg-white/30 w-full">
           <div
             className={`h-full bg-white transition-all duration-75 ease-linear ${

@@ -54,9 +54,9 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      <div className="sticky top-0 z-50 backdrop-blur-xl bg-white/0 border-b border-white/20 shadow-sm">
+      <div className="sticky top-0 z-[999] backdrop-blur-xl bg-white/0 border-b border-white/20 shadow-sm">
         <div className="font-primary mx-4 sm:mx-6 lg:mx-12 xl:mx-auto max-w-[1440px] sm:pt-6 pt-2 pb-1.5">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 ">
             <h1 className="text-sm sm:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
               Découvrir nos produits
             </h1>
@@ -72,8 +72,8 @@ export default function Page() {
           >
             <div
               className={`flex items-center bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 ${isSearchFocused
-                  ? "border-gray-500 shadow-gray-500/20 shadow-2xl"
-                  : "border-transparent hover:shadow-xl"
+                ? "border-gray-500 shadow-gray-500/20 shadow-2xl"
+                : "border-transparent hover:shadow-xl"
                 }`}
             >
               <div className="flex items-center px-6 py-2">

@@ -39,7 +39,7 @@ export interface ThemeSettings {
   showRatingInProduct?: boolean;
   reductionDisplay?: "barred-price" | "percent-reduction";
   favoriteIconPosition?: "top-right" | "bottom-right" | "bottom-left" | "top-left";
-  productListView?: "grid" | "row" | "bento" ;
+  productListView?: "grid" | "row" | "bento";
   baseFontSize?: string;
   productAddToCartBorderColor?: string;
   productAddToCartBackgroundColor?: string;
@@ -69,11 +69,15 @@ const DEFAULT_SETTINGS: ThemeSettings = {
   "showAnnouncementBar": true,
   "announcementText": "Livraison gratuite dès 50€ d'achat !",
   "announcementMessages": [
-    "Bienvenue !",
-    "Promotions en cours..."
-  ],
+    "Bienvenue sur votre boutique ivoirienne ! 🇨🇮",
+    "Dépêchez-vous, les stocks fondent comme du beurre ! 🧈",
+    "Livraison rapide partout en Côte d’Ivoire 🚚",
+    "Jusqu’à -50% sur vos produits préférés 🔥",
+    "Nouvelle collection disponible maintenant 👗🕶️"
+  ]
+  ,
   "announcementTextColor": "#FFFFFF",
-  "announcementBackgroundColor": "#2563EB",
+  "announcementBackgroundColor": "rgba(70, 111, 78, 1)",
   "announcementBackgroundGradient": [],
   "headerTextColor": "#1F2937",
   "headerBackgroundColor": "#FFFFFF",
@@ -112,7 +116,7 @@ export const useThemeSettingsStore = create(
         ...newSettings,
       }))
     },
-    setFilterSideLayout: (layout: "row" | "grid" | 'bento' | 'compact' | 'horizontal-scroll' | 'card' | 'stacked-list') => 
+    setFilterSideLayout: (layout: "row" | "grid" | 'bento' | 'compact' | 'horizontal-scroll' | 'card' | 'stacked-list') =>
       set({ filterSideLayout: layout as "row" | "grid" | 'bento' | 'compact' | 'horizontal-scroll' | 'card' | 'stacked-list' }),
     resetSettings: () => set(DEFAULT_SETTINGS),
   }))

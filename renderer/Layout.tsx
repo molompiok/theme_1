@@ -151,7 +151,7 @@ function Layout({
                 Boutique
               </LinkIcon>
               <LinkIcon
-                href="/About"
+                href="/about"
                 className="hover:text-primary transition-colors duration-200"
               >
                 About

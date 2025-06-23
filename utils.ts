@@ -5,7 +5,7 @@ export const formatSlug = (name: string) => limax(name, { maintainCase: true });
 
 export const formatPrice = (price?: string | number, currency?: string): string => {
   if (!price) return "0";
-  return price.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " " + (currency || "CFA");
+  return price.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " " + (currency?.toLowerCase() || "cfa");
 };
 
 export const filterIdToName = (filters: Array<{ id: string; name: string }>) =>
