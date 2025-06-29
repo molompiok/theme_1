@@ -326,12 +326,11 @@ export function getOptions({ bind, features, product_id }: { bind: Record<string
 
 
 
-export const googleLogin = ({ apiUrl, serverUrl }: { apiUrl: string, serverUrl: string }) => {
+export const googleLogin = ({ apiUrl, serverApiUrl, storeId }: { storeId: string, apiUrl: string, serverApiUrl: string }) => {
   // navigate("/auth/google");
-  const storeId = apiUrl.split("/")[3];
   const originalUrl = window.location.origin;
   const clientSuccess = originalUrl + "/auth/success";
   const clientError = originalUrl + "/auth/error";
-  const url = `${serverUrl}/auth/store/google/redirect?store_id=${storeId}&client_success=${clientSuccess}&client_error=${clientError}`;
+  const url = `${serverApiUrl}/auth/store/google/redirect?store_id=${storeId}&client_success=${clientSuccess}&client_error=${clientError}`;
   window.open(url, "_self");
 };

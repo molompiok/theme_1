@@ -39,7 +39,7 @@ import ProductGallery from "../../../component/product/ProductGallery";
 
 export default function Page() {
   const { dehydratedState, product, is404 } = useData<Data>();
-  const { api, baseUrl } = usePageContext()
+  const { baseUrl } = usePageContext()
 
   console.log({ baseUrl });
 

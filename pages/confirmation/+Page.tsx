@@ -27,7 +27,7 @@ export default function PagePaiement() {
     "info"
   );
   const user = useAuthStore((state) => state.user);
-  const { apiUrl, serverUrl, api } = usePageContext();
+  const { apiUrl, serverApiUrl, api, storeId } = usePageContext();
 
   const isPermitToProceed =
     user?.id && user.phone_numbers?.length > 0 && user.email && user.full_name;
@@ -186,7 +186,7 @@ export default function PagePaiement() {
                       </p>
                       <div className="space-y-3 sm:space-y-4">
                         <button
-                          onClick={() => googleLogin({ apiUrl, serverUrl })}
+                          onClick={() => googleLogin({ apiUrl, serverApiUrl, storeId })}
                           className="inline-flex items-center gap-3 px-6 sm:px-8 py-3 sm:py-4 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]"
                         >
                           <FcGoogle size={20} />

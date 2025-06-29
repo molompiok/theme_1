@@ -9,7 +9,7 @@ import { usePageContext } from "vike-react/usePageContext";
 
 export default function ModalAuth() {
   const { close, isOpen, message, type } = useModalAuth((state) => state);
-  const { apiUrl, serverUrl } = usePageContext();
+  const { apiUrl, serverApiUrl, storeId } = usePageContext();
 
   const handleModalClose = () => {
     close();
@@ -18,7 +18,7 @@ export default function ModalAuth() {
 
   const handleGoogleAuth = async () => {
     try {
-      googleLogin({ apiUrl, serverUrl });
+      googleLogin({ apiUrl, serverApiUrl, storeId });
       close();
     } catch (error) {
       console.error("Erreur d'authentification Google:", error);

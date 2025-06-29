@@ -168,33 +168,3 @@ export const delete_user_address = async (params: { id: string }, api: AxiosInst
     return null;
   }
 };
-
-interface Store {
-  id: string;
-  name: string;
-  title: string;
-  description: string;
-  favicon: string[];
-  logo: string[];
-  slug: string;
-  cover_image: string[];
-  phone: string;
-  email: string;
-  address: string;
-  latitude: string;
-  longitude: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export const get_store = async (api: AxiosInstance, serverUrl: string, apiUrl: string): Promise<Store> => {
-
-  try {
-    const response = await api.get(serverUrl + "/stores?store_id=" + apiUrl?.split("/")[3]);
-    return response?.data.list?.[0];
-  } catch (error) {
-    console.error("Erreur lors de l'ajout de favoris :", error);
-    throw error;
-  }
-};

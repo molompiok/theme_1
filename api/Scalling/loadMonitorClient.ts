@@ -72,16 +72,16 @@ export class LoadMonitorService {
 
     this.lagSampler = lag(1000); // Mesure le lag toutes les secondes (configurable ?)
 
-    // this.logger.info(`[LoadMonitorService ${this.serviceId}] Initialized for ${this.serviceType}`);
+    this.logger.info(`[LoadMonitorService ${this.serviceId}] Initialized for ${this.serviceType}`);
   }
 
   public startMonitoring(): void {
     if (this.intervalId) {
-      // this.logger.warn(`[LoadMonitorService ${this.serviceId}] Monitoring already started.`);
+      this.logger.warn(`[LoadMonitorService ${this.serviceId}] Monitoring already started.`);
       return;
     }
 
-    // this.logger.info(`[LoadMonitorService ${this.serviceId}] Starting monitoring loop (interval: ${this.checkIntervalMs}ms)`);
+    this.logger.info(`[LoadMonitorService ${this.serviceId}] Starting monitoring loop (interval: ${this.checkIntervalMs}ms)`);
     this.intervalId = setInterval(() => {
       this.checkLoadAndScale();
     }, this.checkIntervalMs);
@@ -91,7 +91,7 @@ export class LoadMonitorService {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
-      // this.logger.info(`[LoadMonitorService ${this.serviceId}] Monitoring stopped.`);
+      this.logger.info(`[LoadMonitorService ${this.serviceId}] Monitoring stopped.`);
     }
     // `event-loop-lag` n'a pas de méthode de "stop" explicite, l'intervalle suffit.
   }
@@ -100,7 +100,7 @@ export class LoadMonitorService {
     const currentLag = this.lagSampler();
     this.state.currentLagAvg = currentLag;
 
-    // this.logger.debug(`[LoadMonitorService ${this.serviceId}] Current Event Loop Lag (avg): ${currentLag.toFixed(2)}ms`);
+    this.logger.debug(`[LoadMonitorService ${this.serviceId}] Current Event Loop Lag (avg): ${currentLag.toFixed(2)}ms`);
 
     const now = Date.now();
     const timeSinceLastRequest = now - this.state.lastRequestTimestamp;
@@ -108,12 +108,12 @@ export class LoadMonitorService {
 
     // --- Logique Scale Up ---
     if (currentLag > this.scaleUpThresholdMs) {
-      // this.logger.warn(`[LoadMonitorService ${this.serviceId}] High Lag Detected: ${currentLag.toFixed(2)}ms (Threshold: ${this.scaleUpThresholdMs}ms)`);
+      this.logger.warn(`[LoadMonitorService ${this.serviceId}] High Lag Detected: ${currentLag.toFixed(2)}ms (Threshold: ${this.scaleUpThresholdMs}ms)`);
       if (timeSinceLastRequest > requestCooldownMillis) {
-        // this.logger.info(`[LoadMonitorService ${this.serviceId}] Cooldown passed, requesting SCALE UP.`);
+        this.logger.info(`[LoadMonitorService ${this.serviceId}] Cooldown passed, requesting SCALE UP.`);
         await this.requestScale('up');
       } else {
-        // this.logger.info(`[LoadMonitorService ${this.serviceId}] Scale UP request cooldown active.`);
+        this.logger.info(`[LoadMonitorService ${this.serviceId}] Scale UP request cooldown active.`);
       }
       this.state.lowLagStartTimestamp = null; // Réinitialiser le timer de faible lag
       return;
@@ -122,26 +122,26 @@ export class LoadMonitorService {
     // --- Logique Scale Down ---
     if (currentLag < this.scaleDownThresholdMs) {
       if (this.state.lowLagStartTimestamp === null) {
-        // this.logger.info(`[LoadMonitorService ${this.serviceId}] Low lag period started (${currentLag.toFixed(2)}ms < ${this.scaleDownThresholdMs}ms)`);
+        this.logger.info(`[LoadMonitorService ${this.serviceId}] Low lag period started (${currentLag.toFixed(2)}ms < ${this.scaleDownThresholdMs}ms)`);
         this.state.lowLagStartTimestamp = now;
       } else {
         const lowLagDurationMinutes = (now - this.state.lowLagStartTimestamp) / (60 * 1000);
-        // this.logger.debug(`[LoadMonitorService ${this.serviceId}] Low lag duration: ${lowLagDurationMinutes.toFixed(1)} minutes`);
+        this.logger.debug(`[LoadMonitorService ${this.serviceId}] Low lag duration: ${lowLagDurationMinutes.toFixed(1)} minutes`);
 
         if (lowLagDurationMinutes >= this.scaleDownCooldownMinutes) {
-          // this.logger.warn(`[LoadMonitorService ${this.serviceId}] Sustained low lag detected for ${lowLagDurationMinutes.toFixed(1)} minutes.`);
+          this.logger.warn(`[LoadMonitorService ${this.serviceId}] Sustained low lag detected for ${lowLagDurationMinutes.toFixed(1)} minutes.`);
           if (timeSinceLastRequest > requestCooldownMillis) {
-            // this.logger.info(`[LoadMonitorService ${this.serviceId}] Cooldown passed, requesting SCALE DOWN.`);
+            this.logger.info(`[LoadMonitorService ${this.serviceId}] Cooldown passed, requesting SCALE DOWN.`);
             await this.requestScale('down');
           } else {
-            // this.logger.info(`[LoadMonitorService ${this.serviceId}] Scale DOWN request cooldown active.`);
+            this.logger.info(`[LoadMonitorService ${this.serviceId}] Scale DOWN request cooldown active.`);
           }
           this.state.lowLagStartTimestamp = null; // Réinitialiser après demande
         }
       }
     } else {
       if (this.state.lowLagStartTimestamp !== null) {
-        // this.logger.info(`[LoadMonitorService ${this.serviceId}] Lag normalized, resetting low lag timer.`);
+        this.logger.info(`[LoadMonitorService ${this.serviceId}] Lag normalized, resetting low lag timer.`);
         this.state.lowLagStartTimestamp = null;
       }
     }
@@ -150,7 +150,7 @@ export class LoadMonitorService {
   private async requestScale(direction: 'up' | 'down'): Promise<void> {
     const event = direction === 'up' ? 'request_scale_up' : 'request_scale_down';
     const logCtx = { serviceId: this.serviceId, action: `auto-scale-${direction}`, serviceType: this.serviceType };
-    // this.logger.info(`[LoadMonitorService] Sending scale request to s_server`, logCtx);
+    this.logger.info(`[LoadMonitorService] Sending scale request to s_server`, logCtx);
 
     try {
       const scaleData = {
@@ -162,10 +162,10 @@ export class LoadMonitorService {
 
       await this.bullmqQueue.add(event, { event: event, data: scaleData }, { jobId });
 
-      // this.logger.info(`[LoadMonitorService] Scale request sent successfully.`, { ...logCtx, jobId });
+      this.logger.info(`[LoadMonitorService] Scale request sent successfully.`, { ...logCtx, jobId });
       this.state.lastRequestTimestamp = Date.now();
     } catch (error) {
-      // this.logger.error(`[LoadMonitorService] Failed to send scale request`, { ...logCtx, err: error });
+      this.logger.error(`[LoadMonitorService] Failed to send scale request`, { ...logCtx, err: error });
     }
   }
 }

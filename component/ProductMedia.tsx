@@ -35,7 +35,7 @@ export function ProductMedia({
     () => (Array.isArray(mediaList) ? mediaList : [mediaList]),
     [mediaList]
   );
-  const { apiUrl, serverUrl } = usePageContext();
+  const { apiUrl, serverApiUrl } = usePageContext();
   const [currentMedia, setCurrentMedia] = useState(0);
   const [errorStates, setErrorStates] = useState<boolean[]>([]);
   const [isHovering, setIsHovering] = useState(false);
@@ -58,7 +58,7 @@ export function ProductMedia({
     return media.startsWith("http")
       ? media
       : isUrlServer
-        ? `${serverUrl}${media}`
+        ? `${serverApiUrl}${media}`
         : `${apiUrl}${media}`;
   }, []);
 

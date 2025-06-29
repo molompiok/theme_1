@@ -10,7 +10,7 @@ export default function Page() {
   );
   const [message, setMessage] = useState<string>("Processing your login...");
 
-  const { apiUrl, serverUrl, api } = usePageContext()
+  const { apiUrl, serverApiUrl, api } = usePageContext()
   const { mutate } = useMergeCart(api)
 
   useEffect(() => {

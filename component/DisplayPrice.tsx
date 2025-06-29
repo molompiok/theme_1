@@ -11,6 +11,7 @@ import {
 import useCart from "../hook/query/useCart";
 import clsx from "clsx";
 import { useThemeSettingsStore } from "../store/themeSettingsStore";
+import { usePageContext } from "vike-react/usePageContext";
 
 interface DisplayPriceProps {
   price: string | number;
@@ -88,9 +89,9 @@ export const DisplayPrice: React.FC<DisplayPriceProps> = React.memo(
               style={{
                 color: settings?.productPriceColor,
                 fontWeight: "bold",
-                backgroundColor : settings?.productPriceColor + "44",
-                borderRadius : "5px",
-                padding : "1px 2px",
+                backgroundColor: settings?.productPriceColor + "44",
+                borderRadius: "5px",
+                padding: "1px 2px",
               }}
             >
               -
@@ -177,9 +178,9 @@ export const DisplayPriceDetail: React.FC<DisplayPriceProps> = React.memo(
               style={{
                 color: settings?.productPriceColor,
                 fontWeight: "bold",
-                backgroundColor : settings?.productPriceColor + "44",
-                borderRadius : "5px",
-                padding : "1px 2px",
+                backgroundColor: settings?.productPriceColor + "44",
+                borderRadius: "5px",
+                padding: "1px 2px",
               }}
             >
               -
@@ -208,7 +209,8 @@ interface DisplayPriceItemCartProps {
 export const DisplayPriceItemCart: React.FC<DisplayPriceItemCartProps> =
   React.memo(
     ({ product, bind, features }) => {
-      const { data: cart } = useCart();
+      const { api } = usePageContext();
+      const { data: cart } = useCart(api);
       const { setSettings, resetSettings, ...settings } =
         useThemeSettingsStore();
       const itemInPanier = useMemo(

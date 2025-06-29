@@ -2,7 +2,6 @@
 
 import { dehydrate } from "@tanstack/react-query";
 import type { PageContextServer } from "vike/types";
-import { get_store } from "../api/user.api"; // Assurez-vous que le chemin est correct
 import { createQueryClient } from "../renderer/ReactQueryProvider";
 import { createApiInstances } from "../renderer/createApiInstance";
 
@@ -16,15 +15,17 @@ const data = async (pageContext: PageContextServer) => {
     // `slug` est disponible si votre route est dynamique.
     // Si c'est la page d'accueil, vous n'en aurez peut-être pas besoin ici.
 
-    const { api, baseUrl, apiUrl, serverUrl } = createApiInstances(pageContext);
+    const { baseUrl, storeInfo } = await createApiInstances(pageContext);
 
     // 1. Récupérer les informations du magasin (Store)
-    const store = await queryClient.fetchQuery({
-        queryKey: ["store-info"],
-        queryFn: () => get_store(api, serverUrl, apiUrl), // Simplifié si les autres args ne sont pas nécessaires
-        staleTime: 24 * 60 * 60 * 1000, // 24 heures, car ces infos changent peu
-    });
+    // const store = await queryClient.fetchQuery({
+    //     queryKey: ["store-info"],
+    //     queryFn: () => get_store(api, serverApiUrl, storeId), // Simplifié si les autres args ne sont pas nécessaires
+    //     staleTime: 24 * 60 * 60 * 1000, // 24 heures, car ces infos changent peu
+    // });
 
+
+    const store = storeInfo.storeInfoInitial
     // 2. Gérer le cas où le magasin n'est pas trouvé
     if (!store) {
         return {
@@ -55,12 +56,12 @@ const data = async (pageContext: PageContextServer) => {
         "@type": "Store", // Plus précis que "Organization"
         "name": store.name,
         "url": pageUrl,
-        "logo": store.logo[0] || '',
+        "logo": store.logo?.[0] || '',
         "image": mainImage, // L'image principale de la boutique
         "description": seoDescription,
         "address": {
             "@type": "PostalAddress",
-            "streetAddress": store.address,
+            "streetAddress": '',
             // Ajoutez ces champs si vous les avez :
             "addressLocality": "Abidjan",
             "postalCode": "22300",
@@ -68,12 +69,12 @@ const data = async (pageContext: PageContextServer) => {
         },
         "geo": { // Google adore ça pour les recherches locales
             "@type": "GeoCoordinates",
-            "latitude": store.latitude,
-            "longitude": store.longitude
+            "latitude": '',
+            "longitude": ''
         },
         "contactPoint": {
             "@type": "ContactPoint",
-            "telephone": store.phone,
+            "telephone": '',
             "contactType": "customer service"
         },
         // Liens vers vos réseaux sociaux

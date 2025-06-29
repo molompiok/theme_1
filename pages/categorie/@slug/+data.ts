@@ -13,7 +13,7 @@ const data = async (pageContext: PageContextServer) => {
   const queryClient = createQueryClient();
   const slug = pageContext.routeParams!.slug;
   const queryParams = pageContext.urlParsed.search; // Pour la pagination, filtres, etc.
-  const { api, apiUrl } = createApiInstances(pageContext);
+  const { api, apiUrl } = await createApiInstances(pageContext);
 
   // Utiliser fetchQuery est souvent plus simple que prefetch + ensure
   const productData = await queryClient.fetchQuery({

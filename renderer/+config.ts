@@ -5,7 +5,7 @@
 //   // https://vike.dev/clientRouting
 //   clientRouting: true,
 //   // https://vike.dev/meta
-//   passToClient: ['pageProps', 'baseUrl', 'lang', 'apiUrl', 'serverUrl', 'dehydratedState', 'queryClient'],
+//   passToClient: ['pageProps', 'baseUrl', 'lang', 'apiUrl', 'serverApiUrl', 'dehydratedState', 'queryClient'],
 
 //   meta: {
 //     // Define new setting 'title'
@@ -29,7 +29,17 @@ import { Wrapper } from './Wrapper'
 export default {
   Layout,
   Wrapper,
-  passToClient: ['pageProps', 'baseUrl', 'lang', 'apiUrl', 'serverUrl', 'dehydratedState', 'queryClient'],
+  passToClient: [
+    'pageProps',
+    'baseUrl',
+    'lang',
+    'apiUrl',
+    'serverApiUrl',
+    'dehydratedState',
+    'queryClient',
+    'storeId',
+    'storeInfo'
+  ],
   onBeforeRender,
   title: 'Votre Titre par Défaut',
   description: 'Votre description par défaut',

@@ -8,18 +8,20 @@ import { get_features_with_values, get_products } from "../../../api/products.ap
 import { getFirstFeatureWithView } from "../../../utils"; // Assurez-vous que le chemin est correct
 import { createQueryClient } from "../../../renderer/ReactQueryProvider";
 import { createApiInstances } from "../../../renderer/createApiInstance";
-import { get_store } from "../../../api/user.api";
-// ... (imports)
+
 
 const data = async (pageContext: PageContextServer) => {
   const queryClient = createQueryClient();
   const slug = pageContext.routeParams!.slug;
-  const { api, baseUrl, serverUrl, apiUrl } = createApiInstances(pageContext); // Je garde vos variables
+  const { api, baseUrl, storeInfo } = await createApiInstances(pageContext); // Je garde vos variables
 
   const productData = await queryClient.fetchQuery({
     queryKey: ["get_product_by_slug", slug],
     queryFn: () => get_products({ slug_product: slug }, api),
+    staleTime: 1 * 60 * 60 * 1000, // 24 heures, car ces infos changent peu
   });
+
+  console.log({ productData });
 
   const product = productData?.list?.[0];
 
@@ -35,19 +37,14 @@ const data = async (pageContext: PageContextServer) => {
     queryFn: () => get_features_with_values({ product_id: product.id }, api),
   });
 
-  const store = await queryClient.fetchQuery({
-    queryKey: ["store-info"],
-    queryFn: () => get_store(api, serverUrl, apiUrl),
-    staleTime: 12 * 60 * 60 * 1000,
-  });
-
+  const store = storeInfo.storeInfoInitial;
   const mainImage = getFirstFeatureWithView(features || [])?.values[0]?.views[0];
 
   let imageUrl = `${baseUrl}/default-product-image.jpg`; // Image par défaut
 
   if (mainImage) {
     // Si l'URL de l'image est déjà absolue (commence par http), on l'utilise telle quelle.
-    // Sinon, on la préfixe avec serverUrl.
+    // Sinon, on la préfixe avec serverApiUrl.
     if (mainImage.startsWith('http') || mainImage.startsWith('https')) {
       imageUrl = mainImage;
     } else {

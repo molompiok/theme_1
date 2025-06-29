@@ -5,6 +5,7 @@ import { useModalCommentStore } from "../../store/modal";
 import { useCreateComment } from "../../hook/query/comment/useCreateComment";
 import toast from "react-hot-toast";
 import { useAuthStore } from "../../store/user";
+import { usePageContext } from "vike-react/usePageContext";
 
 interface ModalCommentStore {
   isModalOpen: boolean;
@@ -203,6 +204,7 @@ const ThankYouMessage = memo(() => (
 
 export const ReviewModal = () => {
   const { isModalOpen, product, setModalOpen } = useModalCommentStore();
+  const { api } = usePageContext();
   const [rating, setRating] = useState<number>(0);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [title, setTitle] = useState<string>("");
@@ -214,7 +216,7 @@ export const ReviewModal = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { mutate: createComment, isPending: isCreatingComment } = useCreateComment();
+  const { mutate: createComment, isPending: isCreatingComment } = useCreateComment(api);
   const MAX_IMAGES: number = 3;
   const MAX_IMAGE_SIZE_MB: number = 1;
 

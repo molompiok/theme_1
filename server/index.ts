@@ -17,19 +17,20 @@ import express from "express";
 import compression from "compression";
 import { renderPage, createDevMiddleware } from "vike/server";
 import { localDir, root } from "./root.js";
-
 import { closeQueue, getServerQueue } from "../api/Scalling/bullmqClient.js";
 import { LoadMonitorService } from "../api/Scalling/loadMonitorClient.js";
 import logger from "../api/Logger.js";
-
-
-const SERVICE_ID = process.env.SERVICE_ID||'s_theme1';
+import { getStoreInfo } from "../api/Store/StoreInfo.js";
+const SERVICE_ID = process.env.SERVICE_ID || 's_theme1';
 const isProduction = process.env.NODE_ENV === "production";
 
 startServer();
 
 async function startServer() {
   const app = express();
+
+  const queueBullmq = getServerQueue();
+
 
   app.use(compression());
 
@@ -45,7 +46,7 @@ async function startServer() {
   }
 
   app.get('/health', async (_req, res) => {
-    res.status(200).json({ok:true});
+    res.status(200).json({ ok: true });
     return
   });
 
@@ -62,6 +63,8 @@ async function startServer() {
   //   return res.sendFile(url);
   // });
 
+
+
   app.get("*", async (req, res) => {
     // const cookies = req.headers.cookie || "";
     // const authToken = getCookieValue(cookies, "adonis-session");
@@ -73,15 +76,20 @@ async function startServer() {
     //   // }
     // }
 
+    const storeId = req.headers["x-store-id"] || "0ee68a0e-956b-48d9-96c9-0080878535e5";
+    const storeInfo = await getStoreInfo(storeId as string);
+
     const pageContextInit = {
       urlOriginal: req.originalUrl,
       headersOriginal: req.headers,
+      storeInfo,
     };
     const pageContext = await renderPage(pageContextInit);
     if (pageContext.errorWhileRendering) {
       console.log("🚀 ~ app.get ~ (pageContext.errorWhileRendering:", (pageContext.errorWhileRendering))
       // Install error tracking here, see https://vike.dev/error-tracking
     }
+
     const { httpResponse } = pageContext;
     if (res.writeEarlyHints)
       res.writeEarlyHints({
@@ -98,9 +106,9 @@ async function startServer() {
   console.log(`Server running at http://localhost:${port}`)
 
   const loadMonitoring = new LoadMonitorService({
-    bullmqQueue: getServerQueue(),
+    bullmqQueue: queueBullmq,
     logger: logger,
-    serviceId: SERVICE_ID || 'SERVICE-xxxid',
+    serviceId: SERVICE_ID || 'theme_1',
     serviceType: 'theme',
   });
 
@@ -123,6 +131,7 @@ async function startServer() {
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
   console.warn(`Server running at http://localhost:${port}`);
+
 }
 
 function getCookieValue(cookieHeader: string, cookieName: string) {
@@ -138,3 +147,6 @@ export function verifyToken(token: string) {
     return null;
   }
 }
+
+
+

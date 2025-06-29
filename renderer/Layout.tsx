@@ -32,7 +32,6 @@ import {
   ThemeSettings,
   useThemeSettingsStore,
 } from "../store/themeSettingsStore";
-import useStoreInfo from "../hook/query/store/useGetStore";
 import { useFavicon } from "../hook/useFavicon";
 import { usePageContext } from "vike-react/usePageContext";
 
@@ -66,15 +65,13 @@ function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const { api, apiUrl, serverUrl } = usePageContext();
+  const { api, serverApiUrl, storeInfo: { storeInfoInitial: info } } = usePageContext();
   const toggleCart = useModalCart((state) => state.toggleCart);
   const openModalAuth = useModalAuth((state) => state.open);
   const [isClient, setIsClient] = useState(false);
   const { data: cart } = useCart(api);
-  const { data: info } = useStoreInfo(api, serverUrl, apiUrl);
-  // const queryClient = createQueryClient;
 
-  useFavicon(serverUrl + info?.favicon || "");
+  useFavicon(serverApiUrl + info?.favicon || "");
   const { setSettings, resetSettings, ...settings } = useThemeSettingsStore();
 
   const urlParsed = getQueryParams();
@@ -251,7 +248,7 @@ function Frame({
 }
 
 function Header({ children }: { children: React.ReactNode }) {
-  const { api, apiUrl, serverUrl, urlPathname } = usePageContext();
+  const { api, apiUrl, serverApiUrl, urlPathname } = usePageContext();
   const user = useAuthStore((state) => state.user);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -633,10 +630,8 @@ interface LogoProps {
 }
 
 export function Logo({ size = "small", className }: LogoProps) {
-  const { api, apiUrl, serverUrl } = usePageContext();
+  const { storeInfo: { storeInfoInitial: info } } = usePageContext();
 
-
-  const { data: info } = useStoreInfo(api, serverUrl, apiUrl);
   const brandName = info?.name;
   const href = "/";
   const sizeClasses = {
@@ -657,6 +652,8 @@ export function Logo({ size = "small", className }: LogoProps) {
     },
   };
 
+  // console.log(info);
+
   return (
     <div
       onClick={() => navigate(href)}
@@ -669,7 +666,7 @@ export function Logo({ size = "small", className }: LogoProps) {
       aria-label={`Retour à l'accueil - ${brandName}`}
     >
       <ProductMedia
-        mediaList={info?.logo || []}
+        mediaList={info?.logo as string[] || []}
         productName={brandName || ""}
         isUrlServer={true}
         className="object-contain size-8 sm:size-10 flex-shrink-0 transition-transform duration-300 group-hover:rotate-3"

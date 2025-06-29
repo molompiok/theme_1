@@ -12,8 +12,11 @@ const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10);
 const queueName = 'service-to-server+s_server'; // La queue cible
 
 let serverQueue: Queue | null = null;
-let redisConnection: IORedis | null = null;
+export let redisConnection: IORedis | null = null;
 
+export const redisClient = {
+    connection: null as IORedis | null
+}
 function initializeQueue() {
     if (serverQueue) return serverQueue;
 
@@ -22,33 +25,34 @@ function initializeQueue() {
     redisConnection = new IORedis(redisPort, redisHost, {
         // password: redisPassword,
         maxRetriesPerRequest: null,
-        lazyConnect: true, // Peut être lazy ici, on ne connecte que si on envoie
+        enableReadyCheck: true, // Peut être lazy ici, on ne connecte que si on envoie
     });
+    redisClient.connection = redisConnection
 
-    if(!redisConnection) throw new Error('Redis connection failed to initialize');
+    if (!redisConnection) throw new Error('Redis connection failed to initialize');
 
     redisConnection.on('error', (err) => {
         console.error('[Theme BullMQ Client] Redis connection error:', err);
         // Peut-être désactiver la fonctionnalité ou essayer de recréer ?
         serverQueue = null; // Marquer la queue comme indisponible
     });
-     redisConnection.on('connect', () => {
-         console.log('[Theme BullMQ Client] Redis connection established for queue.');
-     });
+    redisConnection.on('connect', () => {
+        console.log('[Theme BullMQ Client] Redis connection established for queue.');
+    });
 
 
     console.log(`[Theme BullMQ Client] Creating queue instance for: ${queueName}`);
     serverQueue = new Queue(queueName, {
         connection: redisConnection,
-         defaultJobOptions: { // Important d'avoir des options raisonnables
-             removeOnComplete: true,
-             removeOnFail: 1000,
-             attempts: 3, // Retenter si l'ajout échoue ?
-             backoff: { type: 'exponential', delay: 500 }
-         }
+        defaultJobOptions: { // Important d'avoir des options raisonnables
+            removeOnComplete: true,
+            removeOnFail: 1000,
+            attempts: 3, // Retenter si l'ajout échoue ?
+            backoff: { type: 'exponential', delay: 500 }
+        }
     });
     serverQueue.on('error', (error) => {
-         console.error(`[Theme BullMQ Client] Error on queue ${queueName}:`, error);
+        console.error(`[Theme BullMQ Client] Error on queue ${queueName}:`, error);
     });
 
     return serverQueue;

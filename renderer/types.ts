@@ -1,5 +1,6 @@
 import { DehydratedState, QueryClient } from "@tanstack/react-query"
 import { AxiosInstance } from "axios"
+import { StoreInterface } from "../api/Store/StoreInfo"
 
 // https://vike.dev/pageContext#typescript
 declare global {
@@ -27,10 +28,12 @@ declare global {
       api: AxiosInstance,
       server: AxiosInstance,
       apiUrl: string,
-      serverUrl: string,
+      serverApiUrl: string,
+      storeId: string,
       baseUrl: string,
       dehydratedState: DehydratedState,
-      queryClient: QueryClient
+      queryClient: QueryClient,
+      storeInfo: { storeInfoInitial: StoreInterface, themeSettingsInitial: Record<string, any> }
     }
   }
 }

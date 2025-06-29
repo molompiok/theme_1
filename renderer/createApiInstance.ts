@@ -2,6 +2,7 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/user'; // Si vous avez des intercepteurs
 import { PageContextServer } from 'vike/types';
+
 function parseCookies(cookieString: string | undefined): Record<string, string> {
     if (!cookieString) return {};
     return cookieString.split(';').reduce((acc, cookie) => {
@@ -12,15 +13,15 @@ function parseCookies(cookieString: string | undefined): Record<string, string> 
         return acc;
     }, {} as Record<string, string>);
 }
-export function createApiInstances(pageContext: PageContextServer) {
-    const { headers: pageContextHeaders } = pageContext;
+export async function createApiInstances(pageContext: PageContextServer) {
+    const { headers: pageContextHeaders, storeInfo } = pageContext;
     const isProd = process.env.NODE_ENV === "production";
-    const host = isProd ? "https://" : "http://";
     const originalHeaders = pageContextHeaders || {};
     // console.log({ originalHeaders }, '***-*-*-*-*-*-*-*-*-*-*-*-*-*/*/*/**/**');
-    const apiUrl = host + (originalHeaders["x-store-api-url"] || "api.sublymus-server.com/0ee68a0e-956b-48d9-96c9-0080878535e5");
-    const serverUrl = host + (originalHeaders["x-server-api-url"] || (isProd ? "server.sublymus.com" : "server.sublymus-server.com"));
-    const baseUrl = host + (originalHeaders["x-base-url"] || "localhost:3000");
+    let apiUrl = (originalHeaders["x-store-api-url"] || "http://api.sublymus-server.com/0ee68a0e-956b-48d9-96c9-0080878535e5");
+    const serverApiUrl = (originalHeaders["x-server-api-url"] || (isProd ? "http://server.sublymus.com" : "http://server.sublymus-server.com"));
+    const baseUrl = (originalHeaders["x-base-url"] || "/");
+    const storeId = originalHeaders["x-store-id"] || "0ee68a0e-956b-48d9-96c9-0080878535e5";
     const tokenFromCookie = parseCookies(pageContextHeaders?.cookie);
 
     if (tokenFromCookie) {
@@ -41,13 +42,17 @@ export function createApiInstances(pageContext: PageContextServer) {
     });
 
     // Création de l'instance `server`
-    const server = axios.create({ baseURL: serverUrl, timeout: 25000, withCredentials: true });
+    const server = axios.create({ baseURL: serverApiUrl, timeout: 25000, withCredentials: true });
 
     return {
         api,
         server,
         baseUrl,
         apiUrl,
-        serverUrl
+        storeId,
+        serverApiUrl,
+        storeInfo,
     };
 }
+
+

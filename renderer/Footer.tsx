@@ -14,16 +14,13 @@ import {
   FaHeart,
 } from "react-icons/fa";
 import { useThemeSettingsStore } from "../store/themeSettingsStore";
-import useStoreInfo from "../hook/query/store/useGetStore";
-import { createApiInstances } from "./createApiInstance";
 import { usePageContext } from "vike-react/usePageContext";
 
 interface FooterProps { }
 
 export const Footer: React.FC<FooterProps> = () => {
   const [email, setEmail] = useState("");
-  const { api, apiUrl, serverUrl } = usePageContext();
-  const { data: info } = useStoreInfo(api, serverUrl, apiUrl);
+  const { storeInfo: { storeInfoInitial: info } } = usePageContext();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const footerBackgroundColor = useThemeSettingsStore(
     (state) => state.footerBackgroundColor

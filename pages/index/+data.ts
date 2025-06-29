@@ -13,7 +13,7 @@ import { createApiInstances } from "../../renderer/createApiInstance";
 const data = async (pageContext: PageContextServer) => {
   // const search = pageContext.urlParsed.searchAll;
   const queryClient = createQueryClient()
-  const { api } = createApiInstances(pageContext);
+  const { api } = await createApiInstances(pageContext);
   await queryClient.prefetchQuery({
     queryKey: ["get_filters"],
     queryFn: () => get_filters({}, api),
