@@ -106,7 +106,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
       isIcon && !isIconText,
 
     // Texte et icône+texte - padding réduit
-    "px-3 py-2 rounded-lg border-2 min-h-[36px] gap-1.5":
+    "px-1 py-0.5 rounded-lg border-2 min-h-[36px] gap-1.5":
       isIconText || (!isColor && !isIcon),
   });
 
@@ -265,7 +265,7 @@ const ValueComponent: React.FC<ValueComponentProps> = ({
         <ProductMedia
           mediaList={icon}
           productName={text}
-          className="w-5 h-5 object-contain flex-shrink-0"
+          className="w-7 h-7 object-contain flex-shrink-0"
         />
       )}
 
