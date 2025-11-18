@@ -8,6 +8,7 @@ WORKDIR /app
 RUN npm install -g pnpm
 
 COPY package.json pnpm-lock.yaml ./
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN pnpm install
 
 COPY . .
