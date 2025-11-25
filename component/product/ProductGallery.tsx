@@ -1,11 +1,80 @@
-import { useState, useEffect } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { A11y, Pagination } from 'swiper/modules';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import clsx from 'clsx';
 import FavoriteButton from '../FavoriteButton';
 import { ProductMedia } from '../ProductMedia';
 import { useMedia } from '../../hook/useMedia';
 import { Feature, ProductClient } from '../../pages/type';
+
+// Composant de chargement pour Swiper
+const SwiperLoader = ({ className }: { className?: string }) => (
+  <div className={clsx("flex items-center justify-center bg-gray-100 animate-pulse", className)}>
+    <div className="flex flex-col items-center gap-2">
+      <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+      <span className="text-xs text-gray-500">Chargement...</span>
+    </div>
+  </div>
+);
+
+// Composant Swiper avec chargement dynamique
+const SwiperGallery = lazy(async () => {
+  const [{ Swiper, SwiperSlide }, { A11y, Pagination }] = await Promise.all([
+    import("swiper/react"),
+    import("swiper/modules"),
+  ]);
+  await Promise.all([
+    import("swiper/css"),
+    import("swiper/css/pagination"),
+  ]);
+  
+  return {
+    default: ({
+      mediaViews,
+      imgIndex,
+      setSwiperInstance,
+      setImgIndex,
+      handleImageLoad,
+      ImageWithLoader,
+      product
+    }: any) => (
+      <Swiper
+        modules={[A11y, Pagination]}
+        spaceBetween={10}
+        slidesPerView={1}
+        pagination={{
+          clickable: true,
+          dynamicBullets: true,
+          bulletClass: 'swiper-pagination-bullet',
+          bulletActiveClass: 'swiper-pagination-bullet-active'
+        }}
+        onSwiper={setSwiperInstance}
+        onSlideChange={(swiper: any) => setImgIndex(swiper.realIndex)}
+        className="rounded-lg overflow-hidden"
+        style={{
+          '--swiper-pagination-color': '#374151',
+          '--swiper-pagination-bullet-inactive-color': '#9CA3AF',
+          '--swiper-pagination-bullet-inactive-opacity': '0.5'
+        } as React.CSSProperties}
+      >
+        {mediaViews.map((view: any, index: number) => (
+          <SwiperSlide key={index}>
+            <ImageWithLoader
+              className="w-full aspect-square"
+              onLoad={() => handleImageLoad(index)}
+            >
+              <ProductMedia
+                mediaList={[...new Set([view, ...mediaViews])]}
+                showFullscreen={true}
+                shouldHoverVideo={false}
+                productName={product.name}
+                className="w-full aspect-square object-contain"
+              />
+            </ImageWithLoader>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    ),
+  };
+});
 
 interface ProductGalleryProps {
   features: Feature[] | undefined;
@@ -179,42 +248,17 @@ export default function ProductGallery({
             </div>
           )}
 
-          <Swiper
-            modules={[A11y, Pagination]}
-            spaceBetween={10}
-            slidesPerView={1}
-            pagination={{
-              clickable: true,
-              dynamicBullets: true,
-              bulletClass: 'swiper-pagination-bullet',
-              bulletActiveClass: 'swiper-pagination-bullet-active'
-            }}
-            onSwiper={setSwiperInstance}
-            onSlideChange={(swiper) => setImgIndex(swiper.realIndex)}
-            className="rounded-lg overflow-hidden"
-            style={{
-              '--swiper-pagination-color': '#374151',
-              '--swiper-pagination-bullet-inactive-color': '#9CA3AF',
-              '--swiper-pagination-bullet-inactive-opacity': '0.5'
-            } as React.CSSProperties}
-          >
-            {mediaViews.map((view, index) => (
-              <SwiperSlide key={index}>
-                <ImageWithLoader
-                  className="w-full aspect-square"
-                  onLoad={() => handleImageLoad(index)}
-                >
-                  <ProductMedia
-                    mediaList={[...new Set([view, ...mediaViews])]}
-                    showFullscreen={true}
-                    shouldHoverVideo={false}
-                    productName={product.name}
-                    className="w-full aspect-square object-contain"
-                  />
-                </ImageWithLoader>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          <Suspense fallback={<SwiperLoader className="w-full h-full" />}>
+            <SwiperGallery
+              mediaViews={mediaViews}
+              imgIndex={imgIndex}
+              setSwiperInstance={setSwiperInstance}
+              setImgIndex={setImgIndex}
+              handleImageLoad={handleImageLoad}
+              ImageWithLoader={ImageWithLoader}
+              product={product}
+            />
+          </Suspense>
         </div>
         <div className="min-[600px]:flex hidden mx-auto flex-col">
           <ThumbnailGallery

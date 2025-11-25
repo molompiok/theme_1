@@ -386,3 +386,25 @@ export interface Detail {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface FaqSource {
+  label: string;
+  url: string;
+}
+
+export interface ProductFaq {
+  id: string;
+  product_id: string;
+  title: string;
+  content: string;
+  sources: FaqSource[] | null;
+  group: string | null;
+  index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProductFaqListResponse {
+  list: ProductFaq[];
+  meta: MetaPagination;
+}

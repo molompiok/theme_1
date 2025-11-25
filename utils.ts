@@ -326,11 +326,118 @@ export function getOptions({ bind, features, product_id }: { bind: Record<string
 
 
 
+const POST_AUTH_REDIRECT_KEY = "theme1:postAuthRedirect";
+
+export const rememberPostAuthRedirect = () => {
+  if (typeof window === "undefined") {
+    console.warn("rememberPostAuthRedirect: window is undefined");
+    return null;
+  }
+
+  const forbiddenPaths = ["/auth/success", "/auth/error"];
+  const { pathname, search, hash } = window.location;
+
+  console.log("🔐 rememberPostAuthRedirect called from:", {
+    pathname,
+    search,
+    hash,
+    fullUrl: window.location.href
+  });
+
+  if (forbiddenPaths.includes(pathname)) {
+    console.warn("🔐 rememberPostAuthRedirect: forbidden path, skipping");
+    return null;
+  }
+
+  // Construire l'URL complète avec pathname, search et hash
+  const target = pathname + search + hash;
+  
+  // Ne jamais sauvegarder "/" sauf si on est vraiment à la racine
+  // Si on est sur /confirmation, on doit sauvegarder "/confirmation"
+  if (!target || target === "/") {
+    console.warn("🔐 rememberPostAuthRedirect: target is empty or root:", target);
+    // Ne pas sauvegarder "/" car ça redirigera vers la home au lieu de la page d'origine
+    return null;
+  }
+  
+  try {
+    localStorage.setItem(POST_AUTH_REDIRECT_KEY, target);
+    console.log("🔐 ✅ Saved post-auth redirect to localStorage:", target);
+    
+    // Vérifier immédiatement que c'est bien sauvegardé
+    const verify = localStorage.getItem(POST_AUTH_REDIRECT_KEY);
+    if (verify !== target) {
+      console.error("🔐 ❌ localStorage verification failed! Saved:", target, "Got:", verify);
+    } else {
+      console.log("🔐 ✅ localStorage verification OK");
+    }
+  } catch (error) {
+    console.error("🔐 ❌ Failed to save to localStorage:", error);
+  }
+  
+  return target;
+};
+
+export const consumePostAuthRedirect = () => {
+  if (typeof window === "undefined") {
+    console.warn("consumePostAuthRedirect: window is undefined");
+    return null;
+  }
+  
+  try {
+    const target = localStorage.getItem(POST_AUTH_REDIRECT_KEY);
+    console.log("🔐 consumePostAuthRedirect: retrieved from localStorage:", target);
+    
+    if (target) {
+      localStorage.removeItem(POST_AUTH_REDIRECT_KEY);
+      console.log("🔐 ✅ Using saved redirect:", target);
+      return target;
+    } else {
+      console.warn("🔐 ⚠️ No saved redirect found in localStorage");
+    }
+  } catch (error) {
+    console.error("🔐 ❌ Failed to read from localStorage:", error);
+  }
+  
+  return null;
+};
+
 export const googleLogin = ({ apiUrl, serverApiUrl, storeId }: { storeId: string, apiUrl: string, serverApiUrl: string }) => {
-  // navigate("/auth/google");
+  // Capturer le pathname AVANT toute autre opération pour être sûr de l'avoir
+  const currentPath = window.location.pathname + window.location.search + window.location.hash;
+  console.log("🔐 googleLogin called from:", {
+    currentPath,
+    fullUrl: window.location.href,
+    pathname: window.location.pathname
+  });
+  
+  // Sauvegarder l'URL de redirection dans localStorage
+  // On ne l'ajoute pas dans l'URL clientSuccess car s_server ajoute déjà token et expires_at
+  // ce qui créerait une double ? dans l'URL
+  const savedPath = rememberPostAuthRedirect();
+  
+  if (!savedPath) {
+    console.error("🔐 ❌ Failed to save redirect path! Current path was:", currentPath);
+    // En dernier recours, sauvegarder manuellement
+    if (currentPath && currentPath !== "/" && !currentPath.includes("/auth/")) {
+      try {
+        localStorage.setItem(POST_AUTH_REDIRECT_KEY, currentPath);
+        console.log("🔐 ✅ Manually saved path as fallback:", currentPath);
+      } catch (e) {
+        console.error("🔐 ❌ Failed to manually save path:", e);
+      }
+    }
+  }
+  
   const originalUrl = window.location.origin;
-  const clientSuccess = originalUrl + "/auth/success";
-  const clientError = originalUrl + "/auth/error";
-  const url = `${serverApiUrl}/auth/store/google/redirect?store_id=${storeId}&client_success=${clientSuccess}&client_error=${clientError}`;
-  window.open(url, "_self");
+  const clientSuccess = `${originalUrl}/auth/success`;
+  const clientError = `${originalUrl}/auth/error`;
+
+  const redirectUrl = new URL(`${serverApiUrl}/auth/store/google/redirect`);
+  redirectUrl.searchParams.set("store_id", storeId);
+  redirectUrl.searchParams.set("client_success", clientSuccess);
+  redirectUrl.searchParams.set("client_error", clientError);
+
+  console.log("🔐 Redirecting to Google OAuth, will return to:", savedPath || currentPath);
+  window.open(redirectUrl.toString(), "_self");
 };

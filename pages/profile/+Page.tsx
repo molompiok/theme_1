@@ -83,31 +83,6 @@ export default function ProfilePage(): JSX.Element {
 
   return (
     <div className="bg-neutral-100 min-h-screen font-primary text-neutral-700">
-      <header
-        className={`sticky top-0 inset-x-0 z-40 transition-all duration-300 ease-in-out
-          ${
-            isScrolled
-              ? "bg-white/80 backdrop-blur-lg shadow-lg py-4 mt-0 top-8 sm:top-15 z-40"
-              : "bg-transparent py-6 top-0 mt-7 z-40"
-          }`}
-      >
-        <div className="container mx-auto px-4 pt-4">
-          <div className="max-w-5xl mx-auto flex items-center gap-3 sm:gap-4">
-            <div
-              className={`p-2 sm:p-3 rounded-full transition-colors duration-300
-              ${isScrolled ? "bg-slate-100" : "bg-white shadow-md"}`}
-            >
-              <BsPersonFill
-                className={`text-2xl sm:text-3xl transition-colors duration-300
-                ${isScrolled ? "text-slate-600" : "text-neutral-700"}`}
-              />
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-800">
-              Mon Profil
-            </h1>
-          </div>
-        </div>
-      </header>
 
       <main className="container mx-auto px-1 py-8 sm:py-12">
         <div className="max-w-5xl mx-auto flex flex-col gap-8 sm:gap-10">

@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import { marked } from "marked";
 
 export { markdownToPlainText, MarkdownViewer };
 
@@ -19,13 +18,16 @@ function MarkdownViewer({
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Configurer marked (optionnel)
-    marked.setOptions({
-      gfm: true,
-      breaks: true,
-    });
-
     const convertMarkdown = async () => {
+      // Charger marked dynamiquement
+      const { marked } = await import("marked");
+      
+      // Configurer marked (optionnel)
+      marked.setOptions({
+        gfm: true,
+        breaks: true,
+      });
+
       const html = await marked.parse(markdown || "Aucun contenu", {
         async: true,
       });

@@ -12,11 +12,25 @@ import { CiMenuFries } from "react-icons/ci";
 import { HiArrowRight } from "react-icons/hi2";
 import Modal from "./Modal";
 import { Logo } from "../../renderer/Layout";
-import gsap from "gsap";
 import { navigate } from "vike/client/router";
 import { ProductMedia } from "../ProductMedia";
 import { useThemeSettingsStore } from "../../store/themeSettingsStore"; // Réintégré
 import { usePageContext } from "vike-react/usePageContext";
+
+// Hook pour charger GSAP dynamiquement
+const useGSAP = () => {
+  const [gsap, setGsap] = useState<any>(null);
+
+  useEffect(() => {
+    if (!gsap && typeof window !== "undefined") {
+      import("gsap").then((module) => {
+        setGsap(module.default);
+      });
+    }
+  }, [gsap]);
+
+  return { gsap };
+};
 
 export default function SideBarCategories() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,9 +51,10 @@ export default function SideBarCategories() {
   const filterSideTextColor = useThemeSettingsStore(
     (state) => state.filterSideTextColor
   );
+  const { gsap } = useGSAP();
 
   useEffect(() => {
-    if (listRef.current && isModalOpen) {
+    if (listRef.current && isModalOpen && gsap) {
       gsap.set(listRef.current.children, {
         opacity: 0,
         y: 20,
@@ -57,17 +72,17 @@ export default function SideBarCategories() {
         ease: "back.out(1.2)",
       });
     }
-  }, [currentCategoryId, isModalOpen]);
+  }, [currentCategoryId, isModalOpen, gsap]);
 
   useEffect(() => {
-    if (headerRef.current && isModalOpen) {
+    if (headerRef.current && isModalOpen && gsap) {
       gsap.fromTo(
         headerRef.current,
         { opacity: 0, y: -20 },
         { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", delay: 0.2 }
       );
     }
-  }, [isModalOpen, history.length]);
+  }, [isModalOpen, history.length, gsap]);
 
   const {
     data: categories,
@@ -132,7 +147,7 @@ export default function SideBarCategories() {
     newCategoryId: string | null,
     direction: "forward" | "back"
   ) => {
-    if (listRef.current) {
+    if (listRef.current && gsap) {
       const children = Array.from(listRef.current.children);
       gsap.to(children, {
         opacity: 0,
@@ -217,20 +232,24 @@ export default function SideBarCategories() {
                 color: filterSideTextColor,
               }}
               onMouseEnter={(e) => {
-                gsap.to(e.currentTarget, {
-                  y: -3,
-                  scale: 1.05,
-                  duration: 0.3,
-                  ease: "back.out(1.2)",
-                });
+                if (gsap) {
+                  gsap.to(e.currentTarget, {
+                    y: -3,
+                    scale: 1.05,
+                    duration: 0.3,
+                    ease: "back.out(1.2)",
+                  });
+                }
               }}
               onMouseLeave={(e) => {
-                gsap.to(e.currentTarget, {
-                  y: 0,
-                  scale: 1,
-                  duration: 0.3,
-                  ease: "power2.out",
-                });
+                if (gsap) {
+                  gsap.to(e.currentTarget, {
+                    y: 0,
+                    scale: 1,
+                    duration: 0.3,
+                    ease: "power2.out",
+                  });
+                }
               }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-black/10 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out"></div>
@@ -260,22 +279,26 @@ export default function SideBarCategories() {
             className="group relative px-4 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white rounded-xl transition-all duration-300 ease-out hover:shadow-lg overflow-hidden"
             aria-label="Plus de catégories"
             style={{ color: filterSideTextColor }}
-            onMouseEnter={(e) =>
-              gsap.to(e.currentTarget, {
-                y: -3,
-                scale: 1.05,
-                duration: 0.3,
-                ease: "back.out(1.2)",
-              })
-            }
-            onMouseLeave={(e) =>
-              gsap.to(e.currentTarget, {
-                y: 0,
-                scale: 1,
-                duration: 0.3,
-                ease: "power2.out",
-              })
-            }
+            onMouseEnter={(e) => {
+              if (gsap) {
+                gsap.to(e.currentTarget, {
+                  y: -3,
+                  scale: 1.05,
+                  duration: 0.3,
+                  ease: "back.out(1.2)",
+                });
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (gsap) {
+                gsap.to(e.currentTarget, {
+                  y: 0,
+                  scale: 1,
+                  duration: 0.3,
+                  ease: "power2.out",
+                });
+              }
+            }}
           >
             <div className="absolute inset-0 bg-neutral-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
             <div className="relative flex items-center gap-2">
@@ -335,18 +358,22 @@ export default function SideBarCategories() {
               <button
                 onClick={handleBack}
                 className="group flex items-center gap-3 text-sm font-medium transition-all duration-300 p-3 -ml-1 rounded-xl hover:bg-neutral-100/50 dark:hover:bg-black/10"
-                onMouseEnter={(e) =>
-                  gsap.to(e.currentTarget.querySelector(".back-icon"), {
-                    x: -3,
-                    duration: 0.3,
-                  })
-                }
-                onMouseLeave={(e) =>
-                  gsap.to(e.currentTarget.querySelector(".back-icon"), {
-                    x: 0,
-                    duration: 0.3,
-                  })
-                }
+                onMouseEnter={(e) => {
+                  if (gsap) {
+                    gsap.to(e.currentTarget.querySelector(".back-icon"), {
+                      x: -3,
+                      duration: 0.3,
+                    });
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (gsap) {
+                    gsap.to(e.currentTarget.querySelector(".back-icon"), {
+                      x: 0,
+                      duration: 0.3,
+                    });
+                  }
+                }}
               >
                 <BsChevronLeft
                   size={20}
@@ -379,17 +406,21 @@ export default function SideBarCategories() {
               onClick={handleModalClose}
               className="group p-3 text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-200/20 dark:hover:bg-neutral-700/20 rounded-xl transition-all duration-300"
               aria-label="Fermer le menu"
-              onMouseEnter={(e) =>
-                gsap.to(e.currentTarget, {
-                  rotate: 90,
-                  scale: 1.1,
-                  duration: 0.3,
-                  ease: "back.out(1.2)",
-                })
-              }
-              onMouseLeave={(e) =>
-                gsap.to(e.currentTarget, { rotate: 0, scale: 1, duration: 0.3 })
-              }
+              onMouseEnter={(e) => {
+                if (gsap) {
+                  gsap.to(e.currentTarget, {
+                    rotate: 90,
+                    scale: 1.1,
+                    duration: 0.3,
+                    ease: "back.out(1.2)",
+                  });
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (gsap) {
+                  gsap.to(e.currentTarget, { rotate: 0, scale: 1, duration: 0.3 });
+                }
+              }}
             >
               <BsX size={24} />
             </button>

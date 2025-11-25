@@ -13,7 +13,7 @@ const data = async (pageContext: PageContextServer) => {
   const queryClient = createQueryClient();
   const slug = pageContext.routeParams!.slug;
   const queryParams = pageContext.urlParsed.search; // Pour la pagination, filtres, etc.
-  const { api, apiUrl } = await createApiInstances(pageContext);
+  const { api, apiUrl, serverApiUrl, storeInfo } = await createApiInstances(pageContext);
 
   // Utiliser fetchQuery est souvent plus simple que prefetch + ensure
   const productData = await queryClient.fetchQuery({
@@ -45,8 +45,44 @@ const data = async (pageContext: PageContextServer) => {
     ? category.description.substring(0, 160)
     : `Découvrez notre sélection de produits dans la catégorie ${category.name}. Les meilleurs articles au meilleur prix.`;
 
-  const imageUrl = category.view?.[0] ? `${apiUrl}${category.view[0]}` : `${apiUrl}/default-category-image.jpg`;
-  const canonicalUrl = `${apiUrl}/categories/${slug}`; // Adaptez le chemin si nécessaire
+  // Construire l'URL absolue de l'image pour les réseaux sociaux
+  let imageUrl = '';
+  if (category.view?.[0]) {
+    const categoryImage = category.view[0];
+    if (categoryImage.startsWith('http://') || categoryImage.startsWith('https://')) {
+      imageUrl = categoryImage;
+    } else {
+      // Utiliser serverApiUrl (s_server) pour servir les fichiers
+      imageUrl = `${serverApiUrl}${categoryImage.startsWith('/') ? '' : '/'}${categoryImage}`;
+    }
+  } else {
+    // Image par défaut : utiliser le logo du store
+    const store = storeInfo.storeInfoInitial;
+    const coverImage = store.cover_image && store.cover_image[0] && typeof store.cover_image[0] === 'string' ? store.cover_image[0] : null;
+    const logoImage = store.logo && store.logo[0] && typeof store.logo[0] === 'string' ? store.logo[0] : null;
+    const storeImage = coverImage || logoImage;
+    if (storeImage && typeof storeImage === 'string') {
+      if (storeImage.startsWith('http://') || storeImage.startsWith('https://')) {
+        imageUrl = storeImage;
+      } else {
+        // Utiliser serverApiUrl (s_server) pour servir les fichiers
+        imageUrl = `${serverApiUrl}${storeImage.startsWith('/') ? '' : '/'}${storeImage}`;
+      }
+    } else {
+      imageUrl = `${serverApiUrl}/default-category-image.jpg`;
+    }
+  }
+  
+  // Construire l'URL canonique absolue
+  let canonicalUrl = `${apiUrl}/categories/${slug}`;
+  const headers = pageContext.headers || {};
+  const serverUrl = headers['x-server-url'] || '';
+  if (serverUrl && !canonicalUrl.startsWith('http://') && !canonicalUrl.startsWith('https://')) {
+    canonicalUrl = `${serverUrl}/categories/${slug}`;
+  } else if (!canonicalUrl.startsWith('http://') && !canonicalUrl.startsWith('https://')) {
+    const store = storeInfo.storeInfoInitial;
+    canonicalUrl = store.default_domain ? `https://${store.default_domain}/categories/${slug}` : canonicalUrl;
+  }
 
   // Données structurées pour les "fils d'Ariane" (Breadcrumbs), très bon pour le SEO des catégories
   const ldJson = {

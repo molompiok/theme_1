@@ -1,14 +1,67 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useEffect, Suspense, lazy } from "react";
 // import { BASE_URL } from "../api";
 import clsx from "clsx";
 import Modal from "./modal/Modal";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Zoom } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import "swiper/css/zoom";
 import { usePageContext } from "vike-react/usePageContext";
+
+// Composant de chargement pour Swiper
+const SwiperLoader = ({ className }: { className?: string }) => (
+  <div className={clsx("flex items-center justify-center bg-gray-100 animate-pulse", className)}>
+    <div className="flex flex-col items-center gap-2">
+      <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+      <span className="text-xs text-gray-500">Chargement...</span>
+    </div>
+  </div>
+);
+
+// Composant Swiper avec chargement dynamique
+const SwiperFullscreen = lazy(async () => {
+  const [{ Swiper, SwiperSlide }, { Navigation, Pagination, Zoom }] = await Promise.all([
+    import("swiper/react"),
+    import("swiper/modules"),
+  ]);
+  await Promise.all([
+    import("swiper/css"),
+    import("swiper/css/navigation"),
+    import("swiper/css/pagination"),
+    import("swiper/css/zoom"),
+  ]);
+  
+  return {
+    default: ({ 
+      validMediaList, 
+      currentMedia, 
+      setSwiperInstance, 
+      setCurrentMedia, 
+      renderMediaContent 
+    }: any) => (
+      <Swiper
+        modules={[Navigation, Pagination, Zoom]}
+        spaceBetween={0}
+        slidesPerView={1}
+        initialSlide={currentMedia}
+        navigation
+        onSwiper={setSwiperInstance}
+        pagination={{ clickable: true }}
+        zoom={{ maxRatio: 3 }}
+        loop={true}
+        onSlideChange={(swiper: any) => setCurrentMedia(swiper.realIndex)}
+        className="w-full h-full"
+      >
+        {validMediaList.map((_: any, index: number) => (
+          <SwiperSlide
+            key={index}
+            className="flex items-center justify-center"
+          >
+            <div className="swiper-zoom-container max-h-[80vh]">
+              {renderMediaContent(index, true)}
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    ),
+  };
+});
 
 interface ProductMediaProps {
   mediaList: string[] | string;
@@ -355,30 +408,15 @@ export function ProductMedia({
           </button>
         </div>
         <div className="flex-1 flex items-center justify-center bg-black/20">
-          <Swiper
-            modules={[Navigation, Pagination, Zoom]}
-            spaceBetween={0}
-            slidesPerView={1}
-            initialSlide={currentMedia}
-            navigation
-            onSwiper={setSwiperInstance}
-            pagination={{ clickable: true }}
-            zoom={{ maxRatio: 3 }}
-            loop={true}
-            onSlideChange={(swiper) => setCurrentMedia(swiper.realIndex)}
-            className="w-full h-full"
-          >
-            {validMediaList.map((_, index) => (
-              <SwiperSlide
-                key={index}
-                className="flex items-center justify-center"
-              >
-                <div className="swiper-zoom-container max-h-[80vh]">
-                  {renderMediaContent(index, true)}
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          <Suspense fallback={<SwiperLoader className="w-full h-full" />}>
+            <SwiperFullscreen
+              validMediaList={validMediaList}
+              currentMedia={currentMedia}
+              setSwiperInstance={setSwiperInstance}
+              setCurrentMedia={setCurrentMedia}
+              renderMediaContent={renderMediaContent}
+            />
+          </Suspense>
         </div>
         {validMediaList.length > 1 && (
           <div className="flex justify-center gap-2 p-4 bg-black/50 overflow-x-auto">

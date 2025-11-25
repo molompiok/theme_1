@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, Suspense, lazy } from 'react';
 import {
   DehydratedState,
   HydrationBoundary,
@@ -6,10 +6,14 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import { PageContextProvider, usePageContext } from 'vike-react/usePageContext';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createQueryClient } from './ReactQueryProvider';
 import axios from 'axios';
 import { useAuthStore } from '../store/user';
+
+// Charger ReactQueryDevtools uniquement en développement
+const ReactQueryDevtools = import.meta.env.DEV
+  ? lazy(() => import('@tanstack/react-query-devtools').then(m => ({ default: m.ReactQueryDevtools })))
+  : () => null;
 
 function App({ children }: { children: React.ReactNode }) {
   const pageContext = usePageContext();
@@ -68,7 +72,11 @@ export function Wrapper({ children }: { children: React.ReactNode }) {
         <HydrationBoundary state={dehydratedState}>
           <App>{children}</App>
         </HydrationBoundary>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {import.meta.env.DEV && (
+          <Suspense fallback={null}>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </Suspense>
+        )}
       </QueryClientProvider>
     </React.StrictMode>
   );

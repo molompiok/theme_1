@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, Suspense, lazy } from "react";
 import { ButtonValidCart } from "./../Button";
 import { DisplayPriceDetail } from "./../DisplayPrice";
 import Modal from "./Modal";
@@ -10,15 +10,74 @@ import { Feature } from "../../pages/type";
 import Loading from "../Loading";
 import clsx from "clsx";
 import { ProductMedia } from "../ProductMedia";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { A11y, Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
 import { RenderFeatureComponent } from "../product/RenderFeatureComponent";
 import FavoriteButton from "../FavoriteButton";
 import { BiShareAlt } from "react-icons/bi";
 import { useMedia } from "../../hook/useMedia";
 import { usePageContext } from "vike-react/usePageContext";
+
+// Composant de chargement pour Swiper
+const SwiperLoader = ({ className }: { className?: string }) => (
+  <div className={clsx("flex items-center justify-center bg-gray-100 animate-pulse", className)}>
+    <div className="flex flex-col items-center gap-2">
+      <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+      <span className="text-xs text-gray-500">Chargement...</span>
+    </div>
+  </div>
+);
+
+// Composant Swiper avec chargement dynamique
+const SwiperModal = lazy(async () => {
+  const [{ Swiper, SwiperSlide }, { A11y, Pagination }] = await Promise.all([
+    import("swiper/react"),
+    import("swiper/modules"),
+  ]);
+  await Promise.all([
+    import("swiper/css"),
+    import("swiper/css/pagination"),
+  ]);
+  
+  return {
+    default: ({
+      mediaViews,
+      imgIndex,
+      setSwiperInstance,
+      setImgIndex,
+      product
+    }: any) => (
+      <Swiper
+        modules={[A11y, Pagination]}
+        spaceBetween={5}
+        slidesPerView={1}
+        pagination={{ clickable: true, dynamicBullets: true }}
+        onSwiper={setSwiperInstance}
+        onSlideChange={(swiper: any) => setImgIndex(swiper.realIndex)}
+        className="rounded-md overflow-hidden w-full h-full"
+      >
+        {mediaViews.length > 0 ? (
+          mediaViews.map((view: any, index: number) => (
+            <SwiperSlide key={index} className="w-full bg-white">
+              <div className="w-full aspect-square flex items-center justify-center">
+                <ProductMedia
+                  mediaList={[...new Set([view, ...mediaViews])]}
+                  productName={product?.name || ""}
+                  showFullscreen={true}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </SwiperSlide>
+          ))
+        ) : (
+          <SwiperSlide className="w-full bg-white">
+            <div className="w-full aspect-square flex items-center justify-center text-gray-400">
+              Aucune image disponible
+            </div>
+          </SwiperSlide>
+        )}
+      </Swiper>
+    ),
+  };
+});
 
 export default function ModalChooseFeature() {
   const {
@@ -120,36 +179,15 @@ export default function ModalChooseFeature() {
             />
 
             <div className="w-full h-auto max-h-[20vh] min-[410px]:max-h-[25vh] overflow-hidden flex items-center justify-center">
-              <Swiper
-                modules={[A11y, Pagination]}
-                spaceBetween={5}
-                slidesPerView={1}
-                pagination={{ clickable: true, dynamicBullets: true }}
-                onSwiper={setSwiperInstance}
-                onSlideChange={(swiper) => setImgIndex(swiper.realIndex)}
-                className="rounded-md overflow-hidden w-full h-full"
-              >
-                {mediaViews.length > 0 ? (
-                  mediaViews.map((view, index) => (
-                    <SwiperSlide key={index} className="w-full bg-white">
-                      <div className="w-full aspect-square flex items-center justify-center">
-                        <ProductMedia
-                          mediaList={[...new Set([view, ...mediaViews])]}
-                          productName={product?.name || ""}
-                          showFullscreen={true}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    </SwiperSlide>
-                  ))
-                ) : (
-                  <SwiperSlide className="w-full bg-white">
-                    <div className="w-full aspect-square flex items-center justify-center text-gray-400">
-                      Aucune image disponible
-                    </div>
-                  </SwiperSlide>
-                )}
-              </Swiper>
+              <Suspense fallback={<SwiperLoader className="w-full h-full" />}>
+                <SwiperModal
+                  mediaViews={mediaViews}
+                  imgIndex={imgIndex}
+                  setSwiperInstance={setSwiperInstance}
+                  setImgIndex={setImgIndex}
+                  product={product}
+                />
+              </Suspense>
             </div>
             {mediaViews.length > 1 && (
               <div className="hidden min-[450px]:flex justify-center mt-2 gap-2 overflow-x-auto scrollbar-thin py-1">

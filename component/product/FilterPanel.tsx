@@ -26,12 +26,12 @@ import { get_filters } from "../../api/products.api";
 import { usePageContext } from "vike-react/usePageContext";
 import { useSelectedFiltersStore } from "../../store/filter";
 import Modal from "../modal/Modal";
-import gsap from "gsap";
 import { useFiltersAndUrlSync } from "../../hook/useUrlFilterManager";
 import { TbTrashX } from "react-icons/tb";
 import { IoClose } from "react-icons/io5";
 import { useThemeSettingsStore } from "../../store/themeSettingsStore";
 import PriceRangeFilter from "../PriceRangeFilter";
+import { Suspense, lazy } from "react";
 
 type LayoutMode =
   | "row"
@@ -609,12 +609,31 @@ export const IconTextFilterOption: React.FC<FilterOptionProps> = ({
   );
 };
 
+// Hook pour charger GSAP dynamiquement
+const useGSAP = () => {
+  const [gsap, setGsap] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!gsap && typeof window !== "undefined") {
+      setIsLoading(true);
+      import("gsap").then((module) => {
+        setGsap(module.default);
+        setIsLoading(false);
+      });
+    }
+  }, [gsap]);
+
+  return { gsap, isLoading };
+};
+
 export default function FilterPanel() {
   const [modalFilter, setModalFilter] = useState(false);
   const pageContext = usePageContext();
   const categorySlug = pageContext.routeParams?.slug;
   const { api } = pageContext;
   const filterPanelRef = useRef<HTMLDivElement>(null);
+  const { gsap, isLoading: gsapLoading } = useGSAP();
 
   const {
     data: filters,
@@ -626,6 +645,11 @@ export default function FilterPanel() {
   });
 
   const handleModalClose = () => {
+    if (!gsap || !filterPanelRef.current) {
+      setModalFilter(false);
+      document.body.style.overflow = "auto";
+      return;
+    }
     gsap.to(filterPanelRef.current, {
       x: "100%",
       duration: 0.1,
@@ -640,11 +664,13 @@ export default function FilterPanel() {
   const handleModalOpen = () => {
     setModalFilter(true);
     document.body.style.overflow = "hidden";
-    gsap.fromTo(
-      filterPanelRef.current,
-      { x: "100%" },
-      { x: 0, duration: 0.1, ease: "power2.out" }
-    );
+    if (gsap && filterPanelRef.current) {
+      gsap.fromTo(
+        filterPanelRef.current,
+        { x: "100%" },
+        { x: 0, duration: 0.1, ease: "power2.out" }
+      );
+    }
   };
 
   if (isLoading)
@@ -765,6 +791,7 @@ function FilterModal({
   const { urlPathname } = pageContext;
   const { setSelectedFilters, selectedFilters, clearFilter, toggleFilter } =
     useSelectedFiltersStore();
+  const { gsap } = useGSAP();
 
   const filtideLayoutSetting =
     useThemeSettingsStore(
@@ -889,14 +916,18 @@ function FilterModal({
     const activeTags = Array.from(
       document.querySelectorAll(".active-filter-tag")
     );
-    gsap.to([e.currentTarget, ...activeTags], {
-      opacity: 0,
-      x: -10,
-      stagger: 0.03,
-      duration: 0.25,
-      ease: "circ.in",
-      onComplete: clearFilter,
-    });
+    if (gsap) {
+      gsap.to([e.currentTarget, ...activeTags], {
+        opacity: 0,
+        x: -10,
+        stagger: 0.03,
+        duration: 0.25,
+        ease: "circ.in",
+        onComplete: clearFilter,
+      });
+    } else {
+      clearFilter();
+    }
   };
 
   const handleRemoveActiveFilter = (
@@ -906,7 +937,7 @@ function FilterModal({
   ) => {
     e.stopPropagation();
     const element = e.currentTarget.closest(".active-filter-tag");
-    if (element) {
+    if (element && gsap) {
       gsap.to(element, {
         opacity: 0,
         scale: 0.7,

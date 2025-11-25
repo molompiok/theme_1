@@ -32,16 +32,27 @@ export default function PagePaiement() {
   const isPermitToProceed =
     user?.id && user.phone_numbers?.length > 0 && user.email && user.full_name;
 
-  const { data: cart } = useCart(api);
+  const { data: cart, isLoading: isCartLoading } = useCart(api);
 
   useEffect(() => {
+    // Ne pas rediriger si le panier est en cours de chargement
+    // ou si on vient juste de revenir d'une authentification
+    if (isCartLoading) return;
+    
     //@ts-ignore
-    if ((cart?.cart?.items?.length ?? 0) <= 0) {
-      // navigate("/");
-      history.back();
+    const itemsCount = cart?.cart?.items?.length ?? 0;
+    if (itemsCount <= 0) {
+      // Si le panier est vide après chargement, rediriger vers la page d'accueil
+      // mais seulement si on n'est pas en train de revenir d'une auth
+      const isReturningFromAuth = window.location.search.includes('token') || 
+                                   document.referrer.includes('/auth/success');
+      
+      if (!isReturningFromAuth) {
+        navigate("/");
+      }
     }
     //@ts-ignore
-  }, [cart?.cart?.items]);
+  }, [cart?.cart?.items, isCartLoading]);
 
   const getInfoErrorMessage = () => {
     if (!user?.id) return "Veuillez vous connecter pour continuer.";

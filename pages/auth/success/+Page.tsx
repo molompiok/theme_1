@@ -3,6 +3,8 @@ import { navigate } from "vike/client/router";
 import { useAuthStore } from "../../../store/user";
 import { useMergeCart } from "../../../hook/query/useMergeCart";
 import { usePageContext } from "vike-react/usePageContext";
+import { consumePostAuthRedirect } from "../../../utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Page() {
   const [status, setStatus] = useState<"loading" | "success" | "error">(
@@ -12,13 +14,20 @@ export default function Page() {
 
   const { apiUrl, serverApiUrl, api } = usePageContext()
   const { mutate } = useMergeCart(api)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
-    const processToken = async () => {
-      setStatus("loading");
-      const searchParams = new URLSearchParams(window.location.search);
-      const token = searchParams.get("token");
-      console.log("🚀 ~ processToken ~ token:", token)
+      // Lire IMMÉDIATEMENT le localStorage au début pour vérifier qu'il est là
+      const POST_AUTH_REDIRECT_KEY = "theme1:postAuthRedirect";
+      const initialRedirect = localStorage.getItem(POST_AUTH_REDIRECT_KEY);
+      console.log("🔐 IMMEDIATE localStorage read at page load:", initialRedirect);
+      console.log("🔐 All localStorage at page load:", Object.keys(localStorage).map(key => ({ key, value: localStorage.getItem(key) })));
+      
+      const processToken = async () => {
+        setStatus("loading");
+        const searchParams = new URLSearchParams(window.location.search);
+        const token = searchParams.get("token");
+        console.log("🚀 ~ processToken ~ token:", token)
       // const expiresAt = searchParams.get('expires_at'); // Vous pouvez aussi récupérer expires_at si besoin
 
       if (!token) {
@@ -33,11 +42,32 @@ export default function Page() {
         useAuthStore
           .getState()
           .fetchUser(api, { token })
-          .then(() => {
-            mutate()
+          .then(async () => {
+            // Fusionner le panier guest avec le panier utilisateur
+            await mutate();
+            
+            // Invalider le cache du panier pour forcer le refetch
+            queryClient.invalidateQueries({ queryKey: ['cart'] });
+            
             setStatus("success");
             setMessage("Successfully logged in! Redirecting...");
-            setTimeout(() => navigate("/profile"), 1500);
+            
+            setTimeout(() => {
+              // Lire DIRECTEMENT depuis localStorage pour être sûr
+              const POST_AUTH_REDIRECT_KEY = "theme1:postAuthRedirect";
+              
+              let nextPath = localStorage.getItem(POST_AUTH_REDIRECT_KEY);
+             // Si on n'a toujours rien, utiliser /profile comme fallback
+              if (!nextPath) {
+                console.warn("🔐 ⚠️ No redirect path found, using /profile as fallback");
+                nextPath = "/profile";
+              }
+              
+              console.log("🔐 🚀 FINAL REDIRECT TO:", nextPath);
+              
+              // Naviguer vers la page sauvegardée
+              navigate(nextPath);
+            }, 1500);
           })
           .catch((error) => {
             console.error("Error processing token:", error);

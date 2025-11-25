@@ -13,15 +13,13 @@ import { createApiInstances } from "../../../renderer/createApiInstance";
 const data = async (pageContext: PageContextServer) => {
   const queryClient = createQueryClient();
   const slug = pageContext.routeParams!.slug;
-  const { api, baseUrl, storeInfo } = await createApiInstances(pageContext); // Je garde vos variables
+  const { api, baseUrl, storeInfo, apiUrl, serverApiUrl } = await createApiInstances(pageContext); // Je garde vos variables
 
   const productData = await queryClient.fetchQuery({
     queryKey: ["get_product_by_slug", slug],
     queryFn: () => get_products({ slug_product: slug }, api),
     staleTime: 1 * 60 * 60 * 1000, // 24 heures, car ces infos changent peu
   });
-
-  console.log({ productData });
 
   const product = productData?.list?.[0];
 
@@ -40,15 +38,28 @@ const data = async (pageContext: PageContextServer) => {
   const store = storeInfo.storeInfoInitial;
   const mainImage = getFirstFeatureWithView(features || [])?.values[0]?.views[0];
 
-  let imageUrl = `${baseUrl}/default-product-image.jpg`; // Image par défaut
-
+  // Construire l'URL absolue de l'image pour les réseaux sociaux
+  let imageUrl = '';
   if (mainImage) {
     // Si l'URL de l'image est déjà absolue (commence par http), on l'utilise telle quelle.
-    // Sinon, on la préfixe avec serverApiUrl.
-    if (mainImage.startsWith('http') || mainImage.startsWith('https')) {
+    if (mainImage.startsWith('http://') || mainImage.startsWith('https://')) {
       imageUrl = mainImage;
     } else {
-      imageUrl = `${baseUrl}${mainImage}`; // Pour les images relatives comme '/uploads/...'
+      // Pour les images relatives, utiliser l'URL de l'API du store
+      imageUrl = `${apiUrl}${mainImage.startsWith('/') ? '' : '/'}${mainImage}`;
+    }
+  } else {
+    // Image par défaut : utiliser le logo du store
+    const coverImage = store.cover_image && store.cover_image[0] && typeof store.cover_image[0] === 'string' ? store.cover_image[0] : null;
+    const logoImage = store.logo && store.logo[0] && typeof store.logo[0] === 'string' ? store.logo[0] : null;
+    const storeImage = coverImage || logoImage;
+    if (storeImage && typeof storeImage === 'string') {
+      if (storeImage.startsWith('http://') || storeImage.startsWith('https://')) {
+        imageUrl = storeImage;
+      } else {
+        // Utiliser serverApiUrl (s_server) pour servir les fichiers
+        imageUrl = `${serverApiUrl}${storeImage.startsWith('/') ? '' : '/'}${storeImage}`;
+      }
     }
   }
 
@@ -56,7 +67,18 @@ const data = async (pageContext: PageContextServer) => {
     ? product.description.substring(0, 160).replace(/\s+/g, ' ').trim()
     : `Découvrez ${product.name}. Achetez maintenant sur  ${store.name}.`;
 
-  const pageUrl = `${baseUrl}/${slug}`; // L'URL publique de la page
+  // Construire l'URL canonique absolue
+  let pageUrl = `${baseUrl}/${slug}`;
+  if (!pageUrl.startsWith('http://') && !pageUrl.startsWith('https://')) {
+    const headers = pageContext.headers || {};
+    const serverUrl = headers['x-server-url'] || '';
+    if (serverUrl) {
+      pageUrl = `${serverUrl}${baseUrl === '/' ? '' : baseUrl}/${slug}`;
+    } else {
+      // Fallback: utiliser l'URL par défaut du store
+      pageUrl = store.default_domain ? `https://${store.default_domain}/${slug}` : pageUrl;
+    }
+  }
 
   const ldJson = {
     // ... (votre JSON-LD est bon, gardez-le)

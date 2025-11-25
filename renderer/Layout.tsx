@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, Suspense, lazy } from "react";
 // import { PageContextProvider, usePageContext } from "./usePageContext";
 import { Toaster } from "react-hot-toast";
 import './index.css';
@@ -18,22 +18,26 @@ import { Popover, PopoverContent, PopoverTrigger } from "../component/Popover";
 import { FaUserAlt } from "react-icons/fa";
 import { PiXThin } from "react-icons/pi";
 import { useAuthStore, useModalAuth } from "../store/user";
-import ModalCart from "../component/modal/ModalCart";
-import ModalChooseFeature from "../component/modal/ModalChooseFeature";
-import ModalAuth from "../component/modal/ModalAuth";
-import SideBarCategories from "../component/modal/SideBarCategories";
-import Modal from "../component/modal/Modal";
 import clsx from "clsx";
-import { Footer } from "./Footer";
 import useCart from "../hook/query/useCart";
-import { ProductMedia } from "../component/ProductMedia";
-import VerticalBanner from "../component/VerticalBanner";
 import {
   ThemeSettings,
   useThemeSettingsStore,
 } from "../store/themeSettingsStore";
 import { useFavicon } from "../hook/useFavicon";
 import { usePageContext } from "vike-react/usePageContext";
+import { ProductMedia } from "../component/ProductMedia";
+
+// Composants chargés dynamiquement (lazy loading)
+const ModalCart = lazy(() => import("../component/modal/ModalCart").then(m => ({ default: m.default })));
+const ModalChooseFeature = lazy(() => import("../component/modal/ModalChooseFeature").then(m => ({ default: m.default })));
+const ModalAuth = lazy(() => import("../component/modal/ModalAuth").then(m => ({ default: m.default })));
+const SideBarCategories = lazy(() => import("../component/modal/SideBarCategories").then(m => ({ default: m.default })));
+const Footer = lazy(() => import("./Footer").then(m => ({ default: m.Footer })));
+const VerticalBanner = lazy(() => import("../component/VerticalBanner").then(m => ({ default: m.default })));
+
+// Composant de chargement minimal
+const ComponentLoader = () => null;
 
 const parseThemeSettingsFromQuery = (
   searchParams: URLSearchParams
@@ -137,7 +141,11 @@ function Layout({
       <Frame style={{ background: settings.siteBackgroundColor }}>
         <div className="flex justify-end items-center w-full"></div>
         <Header>
-          <SideBarCategories />
+          {isClient && (
+            <Suspense fallback={null}>
+              <SideBarCategories />
+            </Suspense>
+          )}
           <Logo />
           <nav className="flex items-center sm:gap-6">
             <div className="hidden font-medium uppercase lg:flex lg:gap-6 lg:justify-center">
@@ -188,10 +196,14 @@ function Layout({
           </nav>
         </Header>
         {children}
-        <ModalCart />
-        <ModalChooseFeature />
-        <ModalAuth />
-        <Footer />
+        {isClient && (
+          <Suspense fallback={null}>
+            <ModalCart />
+            <ModalChooseFeature />
+            <ModalAuth />
+            <Footer />
+          </Suspense>
+        )}
       </Frame>
     </>
   );
@@ -253,6 +265,11 @@ function Header({ children }: { children: React.ReactNode }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleModalOpen = () => {
     setIsModalOpen(true);
@@ -290,7 +307,11 @@ function Header({ children }: { children: React.ReactNode }) {
     <>
       {!urlPathname.startsWith("/profile") ? (
         <>
-          <VerticalBanner />
+          {isClient && (
+            <Suspense fallback={null}>
+              <VerticalBanner />
+            </Suspense>
+          )}
           <header
             ref={headerRef}
             className={`w-full font-primary flex items-center justify-between transition-all duration-300 ease-out backdrop-blur-md border-b border-gray-100/20

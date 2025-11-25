@@ -6,6 +6,7 @@ export { Page };
 
 function Page() {
   const { dehydratedState } = useData<Data>();
+
   return (
     <div className="min-h-dvh font-primary">
       <LayoutProduct

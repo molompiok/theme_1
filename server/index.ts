@@ -33,7 +33,7 @@ async function startServer() {
 
   const queueBullmq = getServerQueue();
 
-
+  
   app.use(compression());
 
   // Vite integration
