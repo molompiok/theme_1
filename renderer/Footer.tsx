@@ -15,12 +15,14 @@ import {
 } from "react-icons/fa";
 import { useThemeSettingsStore } from "../store/themeSettingsStore";
 import { usePageContext } from "vike-react/usePageContext";
+import { getStoreDescription } from "../store/store_description";
 
 interface FooterProps { }
 
 export const Footer: React.FC<FooterProps> = () => {
   const [email, setEmail] = useState("");
   const { storeInfo: { storeInfoInitial: info } } = usePageContext();
+  const storeDescription = getStoreDescription();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const footerBackgroundColor = useThemeSettingsStore(
     (state) => state.footerBackgroundColor
@@ -69,9 +71,7 @@ export const Footer: React.FC<FooterProps> = () => {
               </h3>
             </div>
             <p className="text-gray-600 leading-relaxed text-sm">
-              Une boutique passionnée par l'excellence, dédiée à vous offrir
-              des produits de qualité supérieure et une expérience client
-              exceptionnelle.
+              {storeDescription.description.short}
             </p>
             <div className="space-y-4">
               <div className="flex items-start space-x-3 group">
@@ -80,7 +80,7 @@ export const Footer: React.FC<FooterProps> = () => {
                 </div>
                 <div>
                   <p className="text-black font-medium text-sm">Localisation</p>
-                  <p className="text-gray-500 text-xs">Abidjan, Côte d'Ivoire</p>
+                  <p className="text-gray-500 text-xs">{storeDescription.contact.address}, {storeDescription.contact.city}, {storeDescription.contact.country}</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3 group">
@@ -89,7 +89,7 @@ export const Footer: React.FC<FooterProps> = () => {
                 </div>
                 <div>
                   <p className="text-black font-medium text-sm">Téléphone</p>
-                  <p className="text-gray-500 text-xs">+225 07 59 09 10 98</p>
+                  <p className="text-gray-500 text-xs">{storeDescription.contact.whatsapp}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3 bg-gray-50 p-3 rounded-lg">
@@ -199,25 +199,25 @@ export const Footer: React.FC<FooterProps> = () => {
               {[
                 {
                   icon: FaFacebookF,
-                  href: "https://facebook.com",
+                  href: storeDescription.social.facebook,
                   label: "Facebook",
                   color: "hover:bg-blue-50 hover:border-blue-200",
                 },
                 {
                   icon: FaInstagram,
-                  href: "https://instagram.com",
+                  href: storeDescription.social.instagram,
                   label: "Instagram",
                   color: "hover:bg-pink-50 hover:border-pink-200",
                 },
                 {
                   icon: FaTwitter,
-                  href: "https://twitter.com",
+                  href: storeDescription.social.twitter,
                   label: "Twitter",
                   color: "hover:bg-blue-50 hover:border-blue-200",
                 },
                 {
                   icon: FaPinterestP,
-                  href: "https://pinterest.com",
+                  href: storeDescription.social.pinterest || storeDescription.social.facebook,
                   label: "Pinterest",
                   color: "hover:bg-red-50 hover:border-red-200",
                 },
@@ -285,7 +285,7 @@ export const Footer: React.FC<FooterProps> = () => {
             <div className="text-center lg:text-left">
               <p className="text-gray-600 text-sm">
                 © {new Date().getFullYear()}{" "}
-                <span className="font-bold text-black">{info?.name}</span>
+                <span className="font-bold text-black">{storeDescription.name}</span>
               </p>
               <p className="text-gray-500 text-xs mt-1">
                 Tous droits réservés. Fait avec ❤️ en Côte d'Ivoire

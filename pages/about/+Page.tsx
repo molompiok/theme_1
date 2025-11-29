@@ -1,4 +1,5 @@
 import React from "react";
+import { getStoreDescription } from "../../store/store_description";
 
 // Les interfaces (definitions de type) restent les mêmes
 interface HeroSection {
@@ -28,6 +29,7 @@ interface TeamMember {
   name: string;
   role: string;
   initials: string;
+  photo?: string;
 }
 
 interface TeamSection {
@@ -67,10 +69,20 @@ const Icon = ({ name }: { name: string }) => {
 const TeamMemberCard = ({ member }: { member: TeamMember }) => {
   return (
     <div className="group text-center">
-      <div className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-full bg-gradient-to-br from-gray-900 to-gray-600 flex items-center justify-center shadow-2xl mb-6 transition-all duration-300 group-hover:scale-110 group-hover:shadow-3xl border-4 border-transparent group-hover:border-white">
-        <span className="text-white text-3xl md:text-4xl font-bold tracking-wider">
-          {member.initials}
-        </span>
+      <div className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-full overflow-hidden shadow-2xl mb-6 transition-all duration-300 group-hover:scale-110 group-hover:shadow-3xl border-4 border-transparent group-hover:border-gray-200">
+        {member.photo ? (
+          <img
+            src={member.photo}
+            alt={member.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-gray-900 to-gray-600 flex items-center justify-center">
+            <span className="text-white text-3xl md:text-4xl font-bold tracking-wider">
+              {member.initials}
+            </span>
+          </div>
+        )}
       </div>
       <h3 className="text-xl md:text-2xl font-bold text-black mb-2 transition-colors duration-300 group-hover:text-gray-700">{member.name}</h3>
       <p className="text-gray-600 font-medium">{member.role}</p>
@@ -80,83 +92,10 @@ const TeamMemberCard = ({ member }: { member: TeamMember }) => {
 
 export default function Page() {
   // =======================================================================
-  // DÉBUT DE LA SECTION ADAPTÉE ET AMÉLIORÉE
+  // Récupération des informations du store
   // =======================================================================
-  const data: AboutPageData = {
-    hero: {
-      // Titre plus personnel et ancré localement
-      title: "Notre histoire, tissée à Abidjan.",
-      // Sous-titre qui évoque la notion de "famille"
-      subtitle:
-        "Découvrez ce qui nous anime, notre vision et la famille derrière la marque.",
-      imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c7da?auto=format&fit=crop&w=1920&q=80", // Image plus axée sur l'humain et la collaboration
-    },
-    story: {
-      // Titre plus narratif
-      title: "L'Aventure a Commencé Ici",
-      // Histoire relocalisée, plus authentique et inspirante pour le marché ivoirien
-      content:
-        "Tout a démarré en 2021, non pas dans un garage, mais au cœur de l'effervescence de Treichville. Portés par un rêve simple : offrir à nos frères et sœurs des produits d'une qualité irréprochable, qui racontent une histoire. De quelques croquis partagés entre amis, nous avons bâti une marque qui fait la fierté de notre communauté. Aujourd'hui, nous servons tout Abidjan et la Côte d'Ivoire, en restant fidèles à notre esprit d'origine : l'authenticité, la passion et le partage.",
-      imageUrl: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=1920&q=80",
-    },
-    values: {
-      // Titre plus chaleureux
-      title: "Ce qui nous guide au quotidien",
-      items: [
-        {
-          // Valeur plus forte et mémorable
-          icon: "diamond",
-          title: "L'Excellence, notre Gri-Gri",
-          description:
-            "Chaque article est une promesse. Nous y mettons tout notre savoir-faire pour une qualité et une finition qui font la différence.",
-        },
-        {
-          // Valeur qui met l'accent sur la communauté
-          icon: "heart",
-          title: "Le Client est Roi, la Famille d'abord",
-          description:
-            "Votre sourire est notre plus grande récompense. Chez nous, vous n'êtes pas un simple client, vous faites partie de la famille.",
-        },
-        {
-          // Valeur qui parle de responsabilité et d'impact local
-          icon: "handshake",
-          title: "Engagement Local & Responsable",
-          description:
-            "Nous sommes fiers de nos racines. Nous privilégions les talents d'ici et agissons pour avoir un impact positif sur notre environnement.",
-        },
-      ],
-    },
-    team: {
-      // Titre plus valorisant
-      title: "Le Cœur de l'Entreprise",
-      members: [
-        {
-          name: "Kouassi Noga Wilfried", // Fondateur mis en avant
-          role: "Fondateur & Visionnaire",
-          initials: "KNW",
-        },
-        {
-          name: "Messah Komlan Siméon",
-          role: "Directeur des Opérations",
-          initials: "MKS",
-        },
-        {
-          name: "Kossonou Jean Eudes",
-          role: "Responsable Marketing & Communauté",
-          initials: "KJE",
-        },
-      ],
-    },
-    cta: {
-      // Appel à l'action plus inclusif
-      title: "Prêt(e) à faire partie de notre histoire ?",
-      // Texte du bouton plus artisanal et premium
-      buttonText: "Explorer nos créations",
-      buttonLink: "/produits",
-    },
-  };
-  // =======================================================================
-  // FIN DE LA SECTION ADAPTÉE
+  const storeDescription = getStoreDescription();
+  const data: AboutPageData = storeDescription.about;
   // =======================================================================
 
 
@@ -164,19 +103,19 @@ export default function Page() {
     <div className="bg-white text-gray-900 font-sans">
       {/* Section Héros */}
       <section className="relative h-screen min-h-[600px] text-white overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-gray-900 to-black">
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-gray-900/30 to-black/40">
           <img
             src={data.hero.imageUrl}
             alt="Équipe créative en discussion"
-            className="w-full h-full object-cover opacity-30 mix-blend-overlay"
+            className="w-full h-full object-cover"
           />
         </div>
         <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-6 z-10">
-          <div className="max-w-4xl">
-            <h1 className="text-5xl md:text-7xl font-black mb-8 leading-tight tracking-tight">
+          <div className="max-w-5xl">
+            <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-tight tracking-tight">
               {data.hero.title}
             </h1>
-            <p className="text-xl md:text-2xl font-light opacity-90 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-2xl md:text-3xl lg:text-4xl font-light opacity-90 max-w-3xl mx-auto leading-relaxed">
               {data.hero.subtitle}
             </p>
           </div>
@@ -258,16 +197,20 @@ export default function Page() {
       </section>
 
       {/* Section Call to Action */}
-      <section className="bg-black text-white py-24 lg:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-black to-gray-900 opacity-90"></div>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/subtle-carbon.png')] opacity-10"></div>
+      <section className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-24 lg:py-32 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-100/30 via-purple-100/20 to-pink-100/30"></div>
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-0 left-0 w-64 h-64 bg-blue-400 rounded-full -translate-x-32 -translate-y-32"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-400 rounded-full translate-x-48 translate-y-48"></div>
+          <div className="absolute top-1/2 left-1/3 w-32 h-32 bg-purple-400 rounded-full"></div>
+        </div>
         <div className="container mx-auto px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-4xl lg:text-5xl font-black mb-8 leading-tight">
+          <h2 className="text-4xl lg:text-5xl font-black mb-8 leading-tight text-gray-900">
             {data.cta.title}
           </h2>
           <a
             href={data.cta.buttonLink}
-            className="inline-block bg-white text-black font-bold py-4 px-12 text-lg rounded-md hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-gray-400"
+            className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 px-12 text-lg rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg"
           >
             {data.cta.buttonText}
           </a>
