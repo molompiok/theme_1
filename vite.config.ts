@@ -8,7 +8,10 @@ const isAnalyze = process.env.ANALYZE === 'true'
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'automatic',
+      jsxImportSource: 'react',
+    }),
     vike(),
     tailwindcss(),
     ...(isAnalyze
@@ -28,6 +31,19 @@ export default defineConfig({
       port: 24700,
     },
     allowedHosts: true, // ✅ autorise toutes les origines (hôtes)
+  },
+  resolve: {
+    alias: {
+      'react': 'react',
+      'react-dom': 'react-dom',
+    },
+    dedupe: ['react', 'react-dom'],
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react/jsx-runtime'],
+    esbuildOptions: {
+      jsx: 'automatic',
+    },
   },
   build: {
     chunkSizeWarningLimit: 1000,
